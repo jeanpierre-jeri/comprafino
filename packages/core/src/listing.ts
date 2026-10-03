@@ -15,6 +15,8 @@ export const listingSchema = z.object({
   currency: z.literal("PEN"),
   priceUnit: z.enum(["KG", "UN"]),
   available: z.boolean().optional(),
+  sourceBrand: z.string().trim().min(1).optional(),
+  sourceUnitMultiplier: z.number().positive().finite().optional(),
   packageText: z.string().trim().min(1).optional(),
   category: z.string().trim().min(1).optional(),
   observedAt: z.date(),

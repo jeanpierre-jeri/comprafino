@@ -1,6 +1,6 @@
 # Architecture
 
-CompraFino starts serverless first to reduce idle costs and operational work while validating data. This is the intended deployment; the developer has configured Neon, while the web application and scheduled ingestion are not deployed. Bounded Tottus and Plaza Vea ingestion is implemented:
+CompraFino starts serverless first to reduce idle costs and operational work while validating data. This is the intended deployment; the developer has configured Neon, while the web application and scheduled ingestion are not deployed. Bounded Tottus, Plaza Vea and Metro ingestion is implemented:
 
 ```mermaid
 flowchart LR
@@ -18,7 +18,7 @@ The homepage is static and requires no database. Initially there is no always-on
 - `packages/ui`: reusable shadcn components using Base UI, shared Tailwind 4 theme and explicit source scanning. Both shadcn configs use `base-nova`. No domain logic.
 - `packages/core`: pure framework-independent logic, without React, Next.js, browser or database dependencies.
 - `packages/db`: PostgreSQL schema home, reviewed migrations, URL validation and lazy Drizzle clients. Importing does not connect or require credentials. Neon HTTP suits stateless queries and batched transactions; interactive transactions would justify revisiting the driver.
-- `packages/scrapers`: retailer adapters and ingestion orchestration, currently native-fetch Tottus hydration JSON and Plaza Vea public VTEX JSON. Fetching/parsing is independent of persistence; dry-run never opens a database.
+- `packages/scrapers`: retailer adapters and ingestion orchestration, currently native-fetch Tottus hydration JSON and Plaza Vea/Metro public VTEX JSON. Fetching/parsing is independent of persistence; dry-run never opens a database.
 
 Current dependency graph: `web → ui, db`; `scrapers → core, db`; `db → core`. Core owns the shared validated listing boundary and exact money normalization. Dedicated workers can replace or supplement GitHub Actions without rewriting framework-independent domain logic. Retailer-specific behavior remains isolated.
 
@@ -32,7 +32,7 @@ TypeScript remains authoritative; type-aware Oxlint supplements it. Oxfmt is the
 
 The first generated migration creates `retailers`, `retailer_listings`, `price_history` and `ingestion_runs`, including retailer seeds. Add reviewed tables to `packages/db/src/schema.ts`, generate migrations, review and commit SQL/metadata, then apply explicitly with a validated URL. CLI-only dotenv loads root `.env`; deployed clients receive platform environment variables. Migrations never run during app build or startup.
 
-Vercel, Neon and scheduled GitHub Actions are intended deployment choices. The Tottus and Plaza Vea workflows are manual only and require a `DATABASE_URL` secret. No ingestion schedule exists. Validate free-tier quotas against measured workloads and provider terms when deploying.
+Vercel, Neon and scheduled GitHub Actions are intended deployment choices. The Tottus, Plaza Vea and Metro workflows are manual only and require a `DATABASE_URL` secret. No ingestion schedule exists. Validate free-tier quotas against measured workloads and provider terms when deploying.
 
 ## Deferred choices
 
@@ -45,3 +45,9 @@ A listing is identified by retailer plus source SKU, retaining the product ID se
 The Neon HTTP driver executes a bounded batch transaction: lock the retailer row, upsert fresh observations, close changed history states, then insert missing current states. All writers must use this lock convention. A partial unique index enforces one open price state per listing. Equal/older observations cannot overwrite newer state. Repeated unchanged observations update freshness without appending history. Bounded samples never deactivate unseen listings. Run start/finish records are separate from the atomic listing batch; interrupted processes can leave a `running` record. `listingsChanged` counts newly opened price states, including first observations.
 
 The `/dev/ingestion` Server Component reads at request time, shows helpful missing-DB/error messages and is blocked in production. The migration and live Neon schema have been verified. Repeated live Tottus and Plaza Vea persistence is idempotent without retailer-specific tables or persistence paths. Separate isolated-schema PostgreSQL integration tests exercise transitions, rollback and concurrent writers through the real batch transaction; they require explicit `TEST_DATABASE_URL` and never fall back to the application database configuration. Unit tests remain credential-free.
+
+## Catalog normalization
+
+Core owns deterministic title/brand/content normalization, independent of retailer APIs and PostgreSQL. Adapters retain validated source brands and sale-unit multipliers; raw source fields remain in listings. The additive second migration creates a one-to-one derived `listing_normalizations` table with explicit indexed dimensions, version, fingerprint and diagnostics. The standalone database-package CLI reads bounded samples and persists them in one atomic batch using ingestion's existing retailer locks and raw-input guards. It never writes price history or runs automatically during ingestion.
+
+`/dev/catalog` inspects up to twenty rows per retailer, marking missing/stale derived data and remaining blocked in production. Exact g/ml/unit content is separate from KG/UN pricing. Approximate/variable masses and mixed bundles remain unresolved. No canonical-product schema, matching, queues or public search is implemented. See [catalog normalization](catalog-normalization.md) for the model, observed metadata trust, real-data audit and validation status.

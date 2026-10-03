@@ -12,7 +12,7 @@ The roadmap aims to help people decide where to buy, when to buy, whether a pric
 
 ## Current status
 
-Milestones 1A/1B and Milestone 1C ingestion correctness: bounded public Tottus, Plaza Vea and Metro ingestion, validated listings, integer PEN cents, applied PostgreSQL migration, meaningful price-state history and ingestion runs. Two live Neon ingestions per retailer proved unchanged-run idempotency; Metro final local build/E2E verification is pending; controlled isolated-schema PostgreSQL tests verify price transitions, rollback and concurrent persistence. A development-only inspection page is available at `/dev/ingestion`. Consumer search/comparison, accounts and matching remain planned. The homepage requires no database.
+Milestone 1 is complete: bounded public Tottus, Plaza Vea and Metro ingestion, validated listings, integer PEN cents, meaningful PostgreSQL price history and ingestion runs. Milestone 2 implements deterministic catalog normalization, an applied additive migration, a standalone CLI and development-only `/dev/catalog` inspection. A 150-listing audit and all seven isolated PostgreSQL tests pass; final local default build/Chromium E2E confirmation is pending because the agent encounters its known worker-port restriction. Consumer search, comparison and cross-retailer matching remain planned. The homepage requires no database.
 
 ## Initial retailers
 
@@ -112,7 +112,20 @@ pnpm scrape:metro -- --dry-run --limit=20
 pnpm scrape:metro -- --limit=50
 ```
 
-Native fetch reads the public VTEX catalog for one dairy category in anonymous channel 1. Seller-1 ordinary prices exclude Metro-card promotion teasers; only higher reference prices are retained. Default 20 usable listings, maximum 500, at most 25 sequential pages / 500 source products. Dry-run needs no database; persisted mode requires `DATABASE_URL`. Two live runs verified 50 then 0 new price states. No dependencies or migrations were added. The manual `.github/workflows/ingest-metro.yml` reuses `DATABASE_URL` and has no schedule. See [Metro integration and three-retailer review](docs/retailers/metro.md) for live samples, price/package semantics and validation limitations. Final fresh local build/E2E confirmation is pending before commit.
+Native fetch reads the public VTEX catalog for one dairy category in anonymous channel 1. Seller-1 ordinary prices exclude Metro-card promotion teasers; only higher reference prices are retained. Default 20 usable listings, maximum 500, at most 25 sequential pages / 500 source products. Dry-run needs no database; persisted mode requires `DATABASE_URL`. Two live runs verified 50 then 0 new price states. No dependencies or migrations were added. The manual `.github/workflows/ingest-metro.yml` reuses `DATABASE_URL` and has no schedule. See [Metro integration and three-retailer review](docs/retailers/metro.md) for live samples, price/package semantics and validation limitations. Metro ingestion is committed in the Milestone 1 baseline; see current catalog validation below.
+
+## Catalog normalization
+
+After applying the reviewed migration, normalize existing listings independently of ingestion:
+
+```sh
+pnpm normalize:catalog -- --limit=100
+pnpm normalize:catalog -- --retailer=tottus --limit=50
+pnpm normalize:catalog -- --retailer=plaza-vea --limit=50
+pnpm normalize:catalog -- --retailer=metro --limit=50 --dry-run
+```
+
+This command requires root `.env`/`DATABASE_URL`, reads no retailer websites and leaves price history unchanged. Default 100, maximum 5000; repeated unchanged runs perform zero writes. Exact quantities use g/ml/unit; pricing basis remains separate. Source brands are retained during future ingestion; legacy title fallback and ambiguous/approximate values are conservative. `/dev/catalog` displays up to twenty rows per retailer during development and returns 404 in production. See [catalog normalization](docs/catalog-normalization.md) for model, precedence, migration, audit statistics and limitations.
 
 ## Scripts
 
@@ -127,13 +140,14 @@ Native fetch reads the public VTEX catalog for one dairy category in anonymous c
 | `pnpm test:integration`             | Isolated-schema PostgreSQL tests; explicit `TEST_DATABASE_URL` |
 | `pnpm test:e2e`                     | Chromium smoke test against a production server (build first)  |
 | `pnpm db:generate`                  | Generate reviewed migrations from the schema                   |
+| `pnpm normalize:catalog`            | Normalize bounded existing listings; requires `DATABASE_URL`   |
 | `pnpm db:migrate`                   | Apply migrations; requires `DATABASE_URL`                      |
 
 Turbo caches builds, type checks and unit tests. The root development command starts the single web server directly through pnpm, avoiding Turbo's child-process output interaction with pnpm 12's Node.js fallback launcher. Development is uncached. Repository lint/format run once from the root. Only workspaces with actual tasks declare them.
 
 ## Testing
 
-Unit tests cover source fixtures, money parsing, normalization, persistence SQL contracts, a deterministic price-state reference model and run outcomes without live network/database calls. `pnpm test:integration` separately exercises the real Neon HTTP persistence batch on PostgreSQL, without Turbo caching. It skips clearly when `TEST_DATABASE_URL` is absent and never loads `.env` or falls back to `DATABASE_URL`. Export the test URL explicitly, preferably for a dedicated Neon test database/branch. The suite applies the checked-in migration inside a fresh randomly named schema, sets transaction-local search paths without a public fallback, and drops only its own schema afterwards. Its only migration adjustment qualifies foreign keys with that test schema; live tables are untouched. The role needs schema-creation permission. An interrupted process may leave its isolated schema for manual review/cleanup. Browser smoke testing checks the homepage and production blocking of developer tooling against `next start` on port 3100.
+Unit tests cover source fixtures, money parsing, normalization, persistence SQL contracts, a deterministic price-state reference model and run outcomes without live network/database calls. `pnpm test:integration` separately exercises the real Neon HTTP persistence batch on PostgreSQL, without Turbo caching. It skips clearly when `TEST_DATABASE_URL` is absent and never loads `.env` or falls back to `DATABASE_URL`. Export the test URL explicitly, preferably for a dedicated Neon test database/branch. The suite applies the checked-in migration inside a fresh randomly named schema, sets transaction-local search paths without a public fallback, and drops only its own schema afterwards. It applies every journaled migration; its only migration adjustment qualifies foreign keys with that test schema; live tables are untouched. The role needs schema-creation permission. An interrupted process may leave its isolated schema for manual review/cleanup. Browser smoke testing checks the homepage and production blocking of ingestion and catalog developer tooling against `next start` on port 3100.
 
 ```sh
 pnpm test
@@ -158,6 +172,6 @@ For a future Vercel project, select this monorepo, set Root Directory to `apps/w
 
 ## Roadmap
 
-Next after final Milestone 1C local build/E2E verification: catalog normalization. All three retailer ingestions have live idempotency evidence; Metro changes remain staged because the fresh agent Turbopack build still hits its known worker-port restriction. The default build configuration is unchanged. Subsequent milestones cover normalization, deterministic cross-retailer matching, search, comparison, price history, promotions, buying guidance, shopping lists and basket optimization. Accounts and additional infrastructure arrive only when justified. See the [roadmap](docs/roadmap.md).
+Milestone 2 normalization is implemented and audited; local build/E2E confirmation remains required before its commit. The next separate milestone is deterministic cross-retailer matching, followed by search, comparison, price history, promotions, buying guidance, shopping lists and basket optimization. No matching or public search exists yet. See the [roadmap](docs/roadmap.md).
 
 TanStack Form, TanStack Query and shadcn Chart/Recharts are intended options for future complexity, not current dependencies. Redis, queues, external search, AI, dedicated workers and browser scraping are also deferred.

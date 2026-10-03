@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
   pgTable,
+  numeric,
   text,
   integer,
   boolean,
@@ -36,6 +37,8 @@ export const retailerListings = pgTable(
     currency: text("currency").notNull(),
     priceUnit: text("price_unit").notNull(),
     available: boolean("available"),
+    sourceBrand: text("source_brand"),
+    sourceUnitMultiplier: numeric("source_unit_multiplier"),
     packageText: text("package_text"),
     category: text("category"),
     firstSeenAt: time("first_seen_at").notNull(),
@@ -103,6 +106,57 @@ export const ingestionRuns = pgTable(
     check(
       "run_counts",
       sql`${t.listingsFetched} >= 0 and ${t.listingsPersisted} >= 0 and ${t.listingsChanged} >= 0`,
+    ),
+  ],
+);
+
+/** Recomputable derived data; source truth remains in retailer_listings. */
+export const listingNormalizations = pgTable(
+  "listing_normalizations",
+  {
+    listingId: uuid("listing_id")
+      .primaryKey()
+      .references(() => retailerListings.id, { onDelete: "cascade" }),
+    normalizationVersion: integer("normalization_version").notNull(),
+    inputFingerprint: text("input_fingerprint").notNull(),
+    normalizedTitle: text("normalized_title").notNull(),
+    brand: text("brand"),
+    brandKey: text("brand_key"),
+    brandSource: text("brand_source"),
+    quantityValue: integer("quantity_value"),
+    quantityUnit: text("quantity_unit"),
+    packageCount: integer("package_count"),
+    totalQuantityValue: integer("total_quantity_value"),
+    totalQuantityUnit: text("total_quantity_unit"),
+    pricingBasis: text("pricing_basis").notNull(),
+    soldByWeight: boolean("sold_by_weight").notNull(),
+    issues: text("issues").array().notNull(),
+    normalizedAt: time("normalized_at").notNull().defaultNow(),
+  },
+  (t) => [
+    index("normalization_dimensions").on(
+      t.brandKey,
+      t.quantityUnit,
+      t.quantityValue,
+      t.packageCount,
+    ),
+    check("normalization_version", sql`${t.normalizationVersion} > 0`),
+    check(
+      "normalization_brand",
+      sql`(${t.brand} is null and ${t.brandKey} is null and ${t.brandSource} is null) or (${t.brand} is not null and ${t.brandKey} is not null and ${t.brandSource} is not null and ${t.brandSource} in ('source', 'title'))`,
+    ),
+    check(
+      "normalization_quantity",
+      sql`(${t.quantityValue} is null and ${t.quantityUnit} is null) or (${t.quantityValue} is not null and ${t.quantityValue} > 0 and ${t.quantityUnit} is not null and ${t.quantityUnit} in ('g', 'ml', 'unit'))`,
+    ),
+    check("normalization_count", sql`${t.packageCount} is null or ${t.packageCount} > 0`),
+    check(
+      "normalization_total",
+      sql`(${t.totalQuantityValue} is null and ${t.totalQuantityUnit} is null) or (${t.totalQuantityValue} is not null and ${t.totalQuantityValue} > 0 and ${t.quantityValue} is not null and ${t.packageCount} is not null and ${t.totalQuantityUnit} is not null and ${t.totalQuantityUnit} = ${t.quantityUnit} and ${t.totalQuantityValue}::bigint = ${t.quantityValue}::bigint * ${t.packageCount}::bigint)`,
+    ),
+    check(
+      "normalization_basis",
+      sql`(${t.pricingBasis} = 'kg' and ${t.soldByWeight} and ${t.quantityValue} is null and ${t.packageCount} is null) or (${t.pricingBasis} = 'unit' and not ${t.soldByWeight})`,
     ),
   ],
 );

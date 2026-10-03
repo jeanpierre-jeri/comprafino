@@ -1,6 +1,6 @@
 # Metro Peru ingestion proof
 
-Investigated and verified on October 3, 2026 through legitimate anonymous public requests. Milestone 1C ingestion correctness is verified; final local fresh-build/E2E confirmation is pending because the agent's Turbopack worker cannot bind its port. Changes remain staged, without a commit or push.
+Investigated and verified on October 3, 2026 through legitimate anonymous public requests. Milestone 1C is complete in the current task baseline; its pipeline is committed at `20acec9`. The historical agent validation notes below record the worker-port restriction encountered during that milestone.
 
 ## Public source and access
 
@@ -96,4 +96,8 @@ Format check, type-aware lint, strict typecheck and all 77 unit tests pass. The 
 
 `pnpm build` restored the existing matching Turbo build cache. Both Chromium smoke tests then passed against that production artifact with local-server permission. A fresh `pnpm build --force` was also attempted using the unchanged default Next.js 16.3.8 Turbopack build and elevated execution; it failed at the known CSS-worker port binding restriction (`Operation not permitted`). No webpack fallback or build-config modification was introduced. Fresh local build and subsequent E2E confirmation remain required before commit. The failed fresh build can leave incomplete `.next` output; rebuild locally before starting the app/E2E.
 
-Remaining limitations: one bounded production category; anonymous channel/location context; incomplete/unstructured package metadata; no persisted promotion details; unavailable offers skipped; long-term source/ID stability unproven; strict source drift requires review; existing partial-progress/run-reconciliation limitations. Ingestion correctness is complete, but Milestone 1C remains pending final local build/E2E verification and the requested commit.
+Remaining limitations: one bounded production category; anonymous channel/location context; incomplete/unstructured package metadata; no persisted promotion details; unavailable offers skipped; long-term source/ID stability unproven; strict source drift requires review; existing partial-progress/run-reconciliation limitations. These validation notes describe the historical Milestone 1C agent run. Metro is now committed in the completed Milestone 1 baseline; current catalog validation is documented separately.
+
+## Milestone 2 source metadata follow-up
+
+Catalog normalization now preserves the validated source `brand` string separately from titles. VTEX adapters also retain the positive source sale-unit multiplier as structured metadata; Tottus retains its observed package description/pricing basis. Existing legacy rows remain null in the new columns until ordinary fresh ingestion supplies the values. No guessed brand backfill, retailer refetch or price-history rewrite was performed for the normalization audit. Quantity/count derivation remains a separate core-driven command, not an automatic ingestion hook. See [catalog normalization](../catalog-normalization.md) for trust rules, coverage and ambiguity handling.

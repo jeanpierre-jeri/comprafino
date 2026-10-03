@@ -4,3 +4,4 @@ export function unique<T>(values: readonly T[]): T[] {
 }
 
 export * from "./listing.ts";
+export * from "./catalog.ts";

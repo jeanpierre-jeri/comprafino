@@ -307,3 +307,11 @@ describe("bounded Metro adapter and shared lifecycle", () => {
     });
   });
 });
+
+it("preserves validated structured brand metadata for catalog normalization", () => {
+  const data = fixture.map((product) => ({ ...product, brand: "GLORIA" }));
+  expect(parseMetroPage(data, observed).listings[0]).toMatchObject({
+    sourceBrand: "GLORIA",
+    sourceUnitMultiplier: 1,
+  });
+});

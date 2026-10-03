@@ -29,6 +29,8 @@ export function persistenceStatements(
       currency: listing.currency,
       price_unit: listing.priceUnit,
       available: listing.available ?? null,
+      source_brand: listing.sourceBrand ?? null,
+      source_unit_multiplier: listing.sourceUnitMultiplier ?? null,
       package_text: listing.packageText ?? null,
       category: listing.category ?? null,
       observed_at: listing.observedAt.toISOString(),
@@ -40,16 +42,17 @@ export function persistenceStatements(
     sql`select id from retailers where id = ${retailer} for update`,
     sql`
       insert into retailer_listings (retailer_id, external_id, product_id, title, url, image_url,
-        current_price_cents, regular_price_cents, currency, price_unit, available, package_text, category, first_seen_at, last_seen_at)
+        current_price_cents, regular_price_cents, currency, price_unit, available, source_brand, source_unit_multiplier, package_text, category, first_seen_at, last_seen_at)
       select retailer_id, external_id, product_id, title, url, image_url, current_price_cents,
-        regular_price_cents, currency, price_unit, available, package_text, category, observed_at, observed_at
+        regular_price_cents, currency, price_unit, available, source_brand, source_unit_multiplier, package_text, category, observed_at, observed_at
       from jsonb_to_recordset(${payload}::jsonb) as x(retailer_id text, external_id text, product_id text,
         title text, url text, image_url text, current_price_cents integer, regular_price_cents integer,
-        currency text, price_unit text, available boolean, package_text text, category text, observed_at timestamptz)
+        currency text, price_unit text, available boolean, source_brand text, source_unit_multiplier numeric, package_text text, category text, observed_at timestamptz)
       on conflict (retailer_id, external_id) do update set
         product_id = excluded.product_id, title = excluded.title, url = excluded.url, image_url = excluded.image_url,
         current_price_cents = excluded.current_price_cents, regular_price_cents = excluded.regular_price_cents,
         currency = excluded.currency, price_unit = excluded.price_unit, available = excluded.available,
+        source_brand = excluded.source_brand, source_unit_multiplier = excluded.source_unit_multiplier,
         package_text = excluded.package_text, category = excluded.category, last_seen_at = excluded.last_seen_at, active = true
       where retailer_listings.last_seen_at < excluded.last_seen_at returning id`,
     sql`

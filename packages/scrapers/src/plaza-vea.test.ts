@@ -325,3 +325,11 @@ describe("bounded Plaza Vea adapter and generic ingestion", () => {
     });
   });
 });
+
+it("preserves validated structured brand metadata for catalog normalization", () => {
+  const data = fixture.map((product) => ({ ...product, brand: "GLORIA" }));
+  expect(parsePlazaVeaPage(data, observed).listings[0]).toMatchObject({
+    sourceBrand: "GLORIA",
+    sourceUnitMultiplier: 1,
+  });
+});

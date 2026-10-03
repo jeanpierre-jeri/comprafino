@@ -4,6 +4,7 @@ import type { NormalizedRetailerListing } from "@comprafino/core";
 
 import type { RetailerAdapter } from "./adapter.ts";
 const sourceProduct = z.object({
+  brand: z.string().trim().min(1).optional(),
   productId: z.string().regex(/^\d+$/u),
   skuId: z.string().regex(/^\d+$/u),
   displayName: z.string().min(1),
@@ -79,6 +80,7 @@ export function parseTottusPage(html: string, observedAt: Date) {
       packageText: product.measurements.format
         ? normalizeWhitespace(product.measurements.format) || undefined
         : undefined,
+      sourceBrand: product.brand,
       category: product.merchantCategoryId || undefined,
       observedAt,
     });

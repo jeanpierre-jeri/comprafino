@@ -5,6 +5,7 @@ import type { RetailerAdapter } from "./adapter.ts";
 
 const sourcePage = z.array(
   z.object({
+    brand: z.string().trim().min(1).optional(),
     productId: z.string().regex(/^\d+$/u),
     productName: z.string().trim().min(1),
     link: z.string().min(1),
@@ -79,6 +80,8 @@ export function parsePlazaVeaPage(raw: unknown, observedAt: Date) {
           priceUnit: item.measurementUnit === "kg" ? "KG" : "UN",
           available: true,
           packageText: packageParts.join("; ") || undefined,
+          sourceBrand: product.brand,
+          sourceUnitMultiplier: item.unitMultiplier,
           category: product.categoryId || undefined,
           observedAt,
         }),

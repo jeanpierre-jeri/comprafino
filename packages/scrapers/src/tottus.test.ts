@@ -93,3 +93,20 @@ describe("sanitized live Tottus hydration fixture", () => {
     expect(request).toHaveBeenCalledTimes(1);
   });
 });
+
+it("preserves validated structured brand metadata for catalog normalization", () => {
+  const data = {
+    ...fixture,
+    props: {
+      ...fixture.props,
+      pageProps: {
+        ...fixture.props.pageProps,
+        results: fixture.props.pageProps.results.map((product) => ({
+          ...product,
+          brand: "TOTTUS",
+        })),
+      },
+    },
+  };
+  expect(parseTottusPage(html(data), observed).listings[0]?.sourceBrand).toBe("TOTTUS");
+});
