@@ -1,5 +1,5 @@
 import type { NormalizedRetailerListing, RetailerId } from "@comprafino/core";
-import type { RetailerAdapter } from "./tottus.ts";
+import type { RetailerAdapter } from "./adapter.ts";
 export interface IngestionStore {
   start(retailer: RetailerId): Promise<string>;
   persist(

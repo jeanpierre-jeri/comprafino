@@ -1,13 +1,8 @@
 import { z } from "zod";
 import { listingSchema, normalizeWhitespace, parsePenCents } from "@comprafino/core";
-import type { NormalizedRetailerListing, RetailerId } from "@comprafino/core";
+import type { NormalizedRetailerListing } from "@comprafino/core";
 
-export interface RetailerAdapter {
-  readonly retailer: RetailerId;
-  fetchListings(
-    limit: number,
-  ): Promise<{ listings: NormalizedRetailerListing[]; discovered: number }>;
-}
+import type { RetailerAdapter } from "./adapter.ts";
 const sourceProduct = z.object({
   productId: z.string().regex(/^\d+$/u),
   skuId: z.string().regex(/^\d+$/u),

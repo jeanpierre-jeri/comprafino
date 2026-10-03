@@ -1,6 +1,6 @@
 # CompraFino
 
-A Peruvian grocery and household-products price intelligence platform with a verified bounded Tottus ingestion pipeline.
+A Peruvian grocery and household-products price intelligence platform with verified bounded Tottus and Plaza Vea ingestion pipelines.
 
 ## Problem
 
@@ -12,11 +12,11 @@ The roadmap aims to help people decide where to buy, when to buy, whether a pric
 
 ## Current status
 
-Milestone 1A: bounded public Tottus ingestion, validated listings, integer PEN cents, applied PostgreSQL migration, meaningful price-state history and ingestion runs. Two live Neon ingestions proved unchanged-run idempotency; controlled isolated-schema PostgreSQL tests verify price transitions, rollback and concurrent persistence. A development-only inspection page is available at `/dev/ingestion`. Consumer search/comparison, accounts and matching remain planned. The homepage requires no database.
+Milestones 1A/1B: bounded public Tottus and Plaza Vea ingestion, validated listings, integer PEN cents, applied PostgreSQL migration, meaningful price-state history and ingestion runs. Two live Neon ingestions per retailer proved unchanged-run idempotency; controlled isolated-schema PostgreSQL tests verify price transitions, rollback and concurrent persistence. A development-only inspection page is available at `/dev/ingestion`. Consumer search/comparison, accounts and matching remain planned. The homepage requires no database.
 
 ## Initial retailers
 
-**Tottus** has a bounded category adapter. **Plaza Vea** and **Metro** remain unimplemented.
+**Tottus** and **Plaza Vea** have bounded category adapters. **Metro** remains unimplemented.
 
 ## Architecture
 
@@ -40,9 +40,9 @@ Stable dependency versions were checked against npm registry metadata before ins
 apps/web/          Next.js App Router application and E2E tests
 packages/core/     Framework-independent pure logic and unit tests
 packages/db/       Lazy Drizzle/Neon client, schema home, environment validation, migration configs
-packages/scrapers/ Tottus public-data adapter, fixtures and bounded ingestion CLI
+packages/scrapers/ Retailer public-data adapters, fixtures and bounded ingestion CLI
 packages/ui/       Shared shadcn Base UI components, utilities and Tailwind theme
-.github/workflows/ Credential-free CI and manual bounded Tottus ingestion
+.github/workflows/ Credential-free CI and manual bounded retailer ingestion
 docs/             Architecture, roadmap and dependency inventory
 ```
 
@@ -96,6 +96,15 @@ pnpm scrape:tottus -- --limit=50
 
 Dry-run requires no database and prints five normalized samples. Default limit: 20; maximum: 500, restricted to one category. Persisted runs fail clearly without `DATABASE_URL`. `/dev/ingestion` reads current results during `pnpm dev`; set `DATABASE_URL` in `apps/web/.env.local`. The route returns 404 in production. The manual workflow `.github/workflows/ingest-tottus.yml` needs a repository secret named `DATABASE_URL`; it never applies migrations automatically. See [Tottus integration](docs/retailers/tottus.md) for observed fields, verification evidence and limitations.
 
+## Plaza Vea ingestion
+
+```sh
+pnpm scrape:plaza-vea -- --dry-run --limit=20
+pnpm scrape:plaza-vea -- --limit=50
+```
+
+Native fetch reads the public VTEX catalog for one dairy/eggs category in anonymous channel 1. Seller-1 ordinary prices exclude conditional card/quantity teaser discounts. Default 20 usable listings, maximum 500, at most 25 sequential pages / 500 source products. Dry-run needs no database; persisted mode requires `DATABASE_URL`. Two live runs verified 50 then 0 new price states. No dependencies or migrations were added. The manual `.github/workflows/ingest-plaza-vea.yml` reuses the same `DATABASE_URL` secret and has no schedule. See [Plaza Vea integration](docs/retailers/plaza-vea.md) for source fields, price/unit interpretation and location limitations.
+
 ## Scripts
 
 | Command                             | Purpose                                                        |
@@ -136,10 +145,10 @@ Use legitimate publicly accessible data only, with conservative requests. Prefer
 
 Intended free-tier starting point (not deployed): **Vercel** for web, **Neon** for PostgreSQL, **GitHub Actions** for scheduled ingestion. Free-tier quotas and provider terms must be assessed when deploying.
 
-For a future Vercel project, select this monorepo, set Root Directory to `apps/web`, enable inclusion of source outside that directory, and use the Next.js preset with the pinned pnpm lockfile. Use `pnpm exec turbo run build --filter=@comprafino/web` from the repository root if customizing the build command; the default app `pnpm build` also works. Set `DATABASE_URL` for server database features; the developer inspection route remains unavailable in production. Provision Neon separately and run reviewed migrations explicitly before dependent releases. The manual Tottus ingestion workflow requires the GitHub Actions secret `DATABASE_URL` and explicitly applied migrations. It has no schedule. Do not put credentials in build commands or client bundles.
+For a future Vercel project, select this monorepo, set Root Directory to `apps/web`, enable inclusion of source outside that directory, and use the Next.js preset with the pinned pnpm lockfile. Use `pnpm exec turbo run build --filter=@comprafino/web` from the repository root if customizing the build command; the default app `pnpm build` also works. Set `DATABASE_URL` for server database features; the developer inspection route remains unavailable in production. Provision Neon separately and run reviewed migrations explicitly before dependent releases. The manual Tottus and Plaza Vea ingestion workflows require the GitHub Actions secret `DATABASE_URL` and explicitly applied migrations. They have no schedule. Do not put credentials in build commands or client bundles.
 
 ## Roadmap
 
-Next: Plaza Vea ingestion proof, following the same public-source and persistence verification discipline. Tottus Milestone 1A ingestion correctness is verified; the normal Turbopack build remains blocked by this execution environment’s denied worker port, while webpack provides supplementary build evidence. Subsequent milestones cover normalization, deterministic cross-retailer matching, search, comparison, price history, promotions, buying guidance, shopping lists and basket optimization. Accounts and additional infrastructure arrive only when justified. See the [roadmap](docs/roadmap.md).
+Next: Metro ingestion proof, following the same public-source and persistence verification discipline. Tottus Milestone 1A and Plaza Vea Milestone 1B ingestion correctness are verified; the previous Turbopack environment/tooling issue is resolved locally after correcting pnpm, and the normal default `pnpm build` succeeds. Subsequent milestones cover normalization, deterministic cross-retailer matching, search, comparison, price history, promotions, buying guidance, shopping lists and basket optimization. Accounts and additional infrastructure arrive only when justified. See the [roadmap](docs/roadmap.md).
 
 TanStack Form, TanStack Query and shadcn Chart/Recharts are intended options for future complexity, not current dependencies. Redis, queues, external search, AI, dedicated workers and browser scraping are also deferred.

@@ -1,0 +1,409 @@
+[
+  {
+    "productId": "101001962",
+    "productName": "Leche UHT GLORIA Zero Lacto Caja 946ml",
+    "link": "https://www.plazavea.com.pe/leche-uht-gloria-zero-lacto-caja-946ml-20402656/p",
+    "categoryId": "853",
+    "Presentación unitarios vitrina": ["Caja 946ml"],
+    "items": [
+      {
+        "itemId": "11370895",
+        "name": "Leche UHT GLORIA Zero Lacto Caja 946ml",
+        "measurementUnit": "un",
+        "unitMultiplier": 1.0,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/35081607/20402656.jpg?v=639177613333400000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 6.2,
+              "ListPrice": 6.2,
+              "PriceWithoutDiscount": 6.2,
+              "IsAvailable": true,
+              "AvailableQuantity": 433,
+              "Tax": 0.0,
+              "PromotionTeasers": []
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "productId": "100990618",
+    "productName": "Leche Reconstituida Entera GLORIA Lata 390g Paquete 6un",
+    "link": "https://www.plazavea.com.pe/leche-reconstituida-entera-gloria-lata-390g-paquete-6un-20402655/p",
+    "categoryId": "853",
+    "Presentación unitarios vitrina": ["Paquete 6un"],
+    "items": [
+      {
+        "itemId": "11359692",
+        "name": "Leche Reconstituida Entera GLORIA Lata 390g Paquete 6un",
+        "measurementUnit": "un",
+        "unitMultiplier": 1.0,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/35081592/20402655.jpg?v=639177613125270000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 21.5,
+              "ListPrice": 24.6,
+              "PriceWithoutDiscount": 24.6,
+              "IsAvailable": true,
+              "AvailableQuantity": 917,
+              "Tax": 0.0,
+              "PromotionTeasers": [
+                {
+                  "Name": "Promo Oh-Pay",
+                  "GeneralValues": {},
+                  "Conditions": {
+                    "MinimumQuantity": 0,
+                    "Parameters": [
+                      {
+                        "Name": "PaymentMethodId",
+                        "Value": "208,202,210"
+                      }
+                    ]
+                  },
+                  "Effects": {
+                    "Parameters": [
+                      {
+                        "Name": "PromotionalPriceTableItemsIds",
+                        "Value": "11359692"
+                      },
+                      {
+                        "Name": "PromotionalPriceTableItemsDiscount",
+                        "Value": "4.10"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "Name": "Promo-Tarjeta-Oh-Pay-Lurin-Oculto",
+                  "GeneralValues": {},
+                  "Conditions": {
+                    "MinimumQuantity": 0,
+                    "Parameters": [
+                      {
+                        "Name": "PaymentMethodId",
+                        "Value": "4"
+                      }
+                    ]
+                  },
+                  "Effects": {
+                    "Parameters": [
+                      {
+                        "Name": "PromotionalPriceTableItemsIds",
+                        "Value": "11359692"
+                      },
+                      {
+                        "Name": "PromotionalPriceTableItemsDiscount",
+                        "Value": "4.10"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "Name": "Promo-Tarjeta-Oh-Lurin-Oculto",
+                  "GeneralValues": {},
+                  "Conditions": {
+                    "MinimumQuantity": 0,
+                    "Parameters": [
+                      {
+                        "Name": "PaymentMethodId",
+                        "Value": "4"
+                      }
+                    ]
+                  },
+                  "Effects": {
+                    "Parameters": [
+                      {
+                        "Name": "PromotionalPriceTableItemsIds",
+                        "Value": "11359692"
+                      },
+                      {
+                        "Name": "PromotionalPriceTableItemsDiscount",
+                        "Value": "4.10"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "Name": "TARJETA OH - PVEA",
+                  "GeneralValues": {},
+                  "Conditions": {
+                    "MinimumQuantity": 0,
+                    "Parameters": [
+                      {
+                        "Name": "PaymentMethodId",
+                        "Value": "210"
+                      }
+                    ]
+                  },
+                  "Effects": {
+                    "Parameters": [
+                      {
+                        "Name": "PromotionalPriceTableItemsIds",
+                        "Value": "11359692"
+                      },
+                      {
+                        "Name": "PromotionalPriceTableItemsDiscount",
+                        "Value": "4.10"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "productId": "100682930",
+    "productName": "Huevos Pardos BELL'S Bandeja 30un",
+    "link": "https://www.plazavea.com.pe/huevos-pardos-bells-bandeja-30un-20353008/p",
+    "categoryId": "839",
+    "Presentación unitarios vitrina": ["Bandeja 30un"],
+    "items": [
+      {
+        "itemId": "10936209",
+        "name": "Huevos Pardos BELL'S Bandeja 30un",
+        "measurementUnit": "un",
+        "unitMultiplier": 1.0,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/35642214/20353008.jpg?v=639219879539330000"
+          },
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/35642213/20353008-1.jpg?v=639219879537000000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 15.9,
+              "ListPrice": 17.9,
+              "PriceWithoutDiscount": 17.9,
+              "IsAvailable": true,
+              "AvailableQuantity": 1290,
+              "Tax": 0.0,
+              "PromotionTeasers": []
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "productId": "101021454",
+    "productName": "Leche UHT GLORIA Zero Lacto Caja 946ml Paquete 3un",
+    "link": "https://www.plazavea.com.pe/leche-uht-gloria-zero-lacto-caja-946ml-paquete-3un-20402671/p",
+    "categoryId": "854",
+    "Presentación unitarios vitrina": ["Paquete 3un"],
+    "items": [
+      {
+        "itemId": "11390026",
+        "name": "Leche UHT GLORIA Zero Lacto Caja 946ml Paquete 3un",
+        "measurementUnit": "un",
+        "unitMultiplier": 1.0,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/35081609/20402671.jpg?v=639177613370900000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 16.5,
+              "ListPrice": 16.5,
+              "PriceWithoutDiscount": 16.5,
+              "IsAvailable": true,
+              "AvailableQuantity": 670,
+              "Tax": 0.0,
+              "PromotionTeasers": []
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "productId": "42055",
+    "productName": "Huevos Pardos LA CALERA Paquete 30un",
+    "link": "https://www.plazavea.com.pe/huevos-pardos-la-calera-paquete-30un-20138032/p",
+    "categoryId": "839",
+    "items": [
+      {
+        "itemId": "42082",
+        "name": "Huevos Pardos LA CALERA Paquete 30un",
+        "measurementUnit": "un",
+        "unitMultiplier": 1.0,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/35462966/20138032.jpg?v=639207698534400000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 17.9,
+              "ListPrice": 19.5,
+              "PriceWithoutDiscount": 19.5,
+              "IsAvailable": true,
+              "AvailableQuantity": 1510,
+              "Tax": 0.0,
+              "PromotionTeasers": []
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "productId": "9253",
+    "productName": "Pollo Entero Fresco con Menudencia x kg",
+    "link": "https://www.plazavea.com.pe/pollo-entero-fresco-con-menudencia-x-kg-135484/p",
+    "categoryId": "841",
+    "items": [
+      {
+        "itemId": "9357",
+        "name": "Pollo Entero Fresco con Menudencia x kg",
+        "measurementUnit": "kg",
+        "unitMultiplier": 2.2,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/29694318/135484.jpg?v=638648726450730000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 6.7,
+              "ListPrice": 8.9,
+              "PriceWithoutDiscount": 8.9,
+              "IsAvailable": true,
+              "AvailableQuantity": 99555,
+              "Tax": 0.0,
+              "PromotionTeasers": [
+                {
+                  "Name": "Promo Oh-Pay",
+                  "GeneralValues": {},
+                  "Conditions": {
+                    "MinimumQuantity": 0,
+                    "Parameters": [
+                      {
+                        "Name": "PaymentMethodId",
+                        "Value": "208,202,210"
+                      }
+                    ]
+                  },
+                  "Effects": {
+                    "Parameters": [
+                      {
+                        "Name": "PromotionalPriceTableItemsIds",
+                        "Value": "9357"
+                      },
+                      {
+                        "Name": "PromotionalPriceTableItemsDiscount",
+                        "Value": "5.94000"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "Name": "Promo-Tarjeta-Oh-Pay-Lurin-Oculto",
+                  "GeneralValues": {},
+                  "Conditions": {
+                    "MinimumQuantity": 0,
+                    "Parameters": [
+                      {
+                        "Name": "PaymentMethodId",
+                        "Value": "4"
+                      }
+                    ]
+                  },
+                  "Effects": {
+                    "Parameters": [
+                      {
+                        "Name": "PromotionalPriceTableItemsIds",
+                        "Value": "9357"
+                      },
+                      {
+                        "Name": "PromotionalPriceTableItemsDiscount",
+                        "Value": "5.94000"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "Name": "Promo-Tarjeta-Oh-Lurin-Oculto",
+                  "GeneralValues": {},
+                  "Conditions": {
+                    "MinimumQuantity": 0,
+                    "Parameters": [
+                      {
+                        "Name": "PaymentMethodId",
+                        "Value": "4"
+                      }
+                    ]
+                  },
+                  "Effects": {
+                    "Parameters": [
+                      {
+                        "Name": "PromotionalPriceTableItemsIds",
+                        "Value": "9357"
+                      },
+                      {
+                        "Name": "PromotionalPriceTableItemsDiscount",
+                        "Value": "5.94000"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "Name": "TARJETA OH - PVEA",
+                  "GeneralValues": {},
+                  "Conditions": {
+                    "MinimumQuantity": 0,
+                    "Parameters": [
+                      {
+                        "Name": "PaymentMethodId",
+                        "Value": "210"
+                      }
+                    ]
+                  },
+                  "Effects": {
+                    "Parameters": [
+                      {
+                        "Name": "PromotionalPriceTableItemsIds",
+                        "Value": "9357"
+                      },
+                      {
+                        "Name": "PromotionalPriceTableItemsDiscount",
+                        "Value": "5.94000"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

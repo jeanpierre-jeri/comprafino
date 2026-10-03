@@ -9,7 +9,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "scrape:tottus": "node --env-file-if-exists=../../.env --experimental-strip-types src/cli.ts"
+    "scrape:tottus": "node --env-file-if-exists=../../.env --experimental-strip-types src/cli.ts",
+    "scrape:plaza-vea": "node --env-file-if-exists=../../.env --experimental-strip-types src/cli.ts --retailer=plaza-vea"
   },
   "dependencies": {
     "@comprafino/core": "workspace:*",

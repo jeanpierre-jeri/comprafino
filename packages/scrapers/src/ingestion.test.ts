@@ -1,7 +1,7 @@
 import { expect, it, vi } from "vitest";
 import { ingest } from "./ingestion.ts";
 import type { IngestionStore } from "./ingestion.ts";
-import type { RetailerAdapter } from "./tottus.ts";
+import type { RetailerAdapter } from "./adapter.ts";
 import fixture from "./fixtures/tottus.json";
 import { parseTottusPage } from "./tottus.ts";
 const sample = parseTottusPage(

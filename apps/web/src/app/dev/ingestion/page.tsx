@@ -56,6 +56,7 @@ export default async function IngestionPage() {
           <table className="w-full text-left">
             <thead>
               <tr>
+                <th>Retailer</th>
                 <th>Title</th>
                 <th>Current PEN</th>
                 <th>Regular PEN</th>
@@ -67,6 +68,7 @@ export default async function IngestionPage() {
             <tbody>
               {data.listings.map((listing) => (
                 <tr key={listing.id}>
+                  <td>{listing.retailerId}</td>
                   <td>{listing.title}</td>
                   <td>{(listing.currentPriceCents / 100).toFixed(2)}</td>
                   <td>

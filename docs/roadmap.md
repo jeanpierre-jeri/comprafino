@@ -1,6 +1,6 @@
 # Roadmap
 
-Milestone 0 is implemented. Milestone 1A ingestion correctness is verified with live Tottus/Neon idempotency and controlled PostgreSQL transition, rollback and concurrency tests. Default Turbopack build verification remains environment-blocked; webpack builds provide supplementary evidence. Later consumer milestones describe planned functionality.
+Milestone 0 is implemented. Milestones 1A and 1B ingestion correctness are verified with live Tottus/Plaza Vea/Neon idempotency and controlled PostgreSQL transition, rollback and concurrency tests. The previous Turbopack build failure was an environment/tooling issue resolved locally after correcting pnpm; the normal default build succeeds. Later consumer milestones describe planned functionality.
 
 ## Milestone 0 — Foundation
 
@@ -14,7 +14,15 @@ Implement adapters one at a time: **Tottus → Plaza Vea → Metro**. Inspect le
 
 Implemented: public hydration JSON investigation, bounded native-fetch adapter, SKU identity, Zod validation, integer PEN cents, source package/unit metadata, sanitized fixtures, generated schema/migration, atomic persistence SQL, price-state reference tests, run records, CLI, development inspection route and manual workflow. Live dry-run passed with 20 unique listings. No scraping libraries added.
 
-Verified: applied migration and actual Neon constraints/indexes; two live runs (96 fetched / 50 persisted each, 50 then 0 new states); controlled PostgreSQL price transitions, rollback and concurrent writers in isolated test schemas. Availability and location-sensitive coverage remain limitations. Normal Turbopack builds cannot bind their worker port in the Codex environment; the default configuration is preserved. Next retailer milestone: Plaza Vea public-source ingestion proof. Plaza Vea and Metro are unimplemented.
+Verified: applied migration and actual Neon constraints/indexes; two live runs (96 fetched / 50 persisted each, 50 then 0 new states); controlled PostgreSQL price transitions, rollback and concurrent writers in isolated test schemas. Availability and location-sensitive coverage remain limitations. The earlier build environment/tooling issue is resolved locally; the default Next.js configuration is preserved. Plaza Vea Milestone 1B is also verified below. Metro remains unimplemented.
+
+### Milestone 1B — Plaza Vea ingestion proof
+
+Implemented and verified: public VTEX catalog investigation, bounded native-fetch dairy/eggs adapter, seller-1 SKU identity, external validation, integer PEN cents, ordinary prices excluding conditional teasers and reference prices only when strictly above current prices, source package/weighted-unit metadata, sanitized fixtures and tests, shared CLI, manual workflow and a retailer column in the existing developer inspection table. No dependency, schema or migration change. The shared adapter interface moved out of Tottus; generic persistence was reused unchanged.
+
+Live dry-run: 20 unique listings. Consecutive persisted runs: 60 source products / 50 listings each, 50 then 0 new price states. Read-only PostgreSQL checks confirmed 50 unique listings and 50 open/total history states. Tottus live dry-run and all existing regression tests passed. The existing isolated-schema PostgreSQL suite passed three tests; Chromium smoke tests passed. The normal default Next.js 16.3.8 Turbopack build now succeeds locally after correcting pnpm. See [Plaza Vea integration](retailers/plaza-vea.md) for complete evidence and source comparison.
+
+Limitations: anonymous channel/location context, one bounded category, skipped unavailable/marketplace offers, inconsistent optional package specifications and no persisted promotion details. Next retailer milestone: investigate Metro under the same access constraints; do not start matching or consumer features yet.
 
 ## Milestone 2 — Catalog normalization
 

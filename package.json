@@ -15,7 +15,8 @@
     "test:integration": "pnpm --filter @comprafino/db test:integration",
     "db:generate": "pnpm --filter @comprafino/db db:generate",
     "db:migrate": "pnpm --filter @comprafino/db db:migrate",
-    "scrape:tottus": "pnpm --filter @comprafino/scrapers scrape:tottus"
+    "scrape:tottus": "pnpm --filter @comprafino/scrapers scrape:tottus",
+    "scrape:plaza-vea": "pnpm --filter @comprafino/scrapers scrape:plaza-vea"
   },
   "devDependencies": {
     "oxfmt": "0.71.0",
