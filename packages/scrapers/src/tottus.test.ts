@@ -21,6 +21,25 @@ describe("sanitized live Tottus hydration fixture", () => {
     expect(listings.every((listing) => listing.available === undefined)).toBe(true);
     expect(listings[4]?.packageText).toBe("Pack 3 Cajas 946 mL");
   });
+  it.each(["16.90", "14.50", "14.00", "0", undefined])(
+    "preserves only a normal price above the ordinary price: %s",
+    (normalPrice) => {
+      const data = structuredClone(fixture);
+      const product = data.props.pageProps.results[1]!;
+      product.prices = product.prices.filter((price) => price.type !== "normalPrice");
+      if (normalPrice !== undefined)
+        product.prices.push({
+          ...product.prices[0]!,
+          type: "normalPrice",
+          symbol: "S/",
+          crossed: true,
+          price: [normalPrice],
+        });
+      const listing = parseTottusPage(html(data), observed).listings[1];
+      expect(listing?.currentPriceCents).toBe(1450);
+      expect(listing?.regularPriceCents).toBe(normalPrice === "16.90" ? 1690 : undefined);
+    },
+  );
   it("handles missing optional metadata and trims source noise", () => {
     const data = structuredClone(fixture);
     const product = data.props.pageProps.results[0]!;

@@ -16,7 +16,8 @@
     "db:generate": "pnpm --filter @comprafino/db db:generate",
     "db:migrate": "pnpm --filter @comprafino/db db:migrate",
     "scrape:tottus": "pnpm --filter @comprafino/scrapers scrape:tottus",
-    "scrape:plaza-vea": "pnpm --filter @comprafino/scrapers scrape:plaza-vea"
+    "scrape:plaza-vea": "pnpm --filter @comprafino/scrapers scrape:plaza-vea",
+    "scrape:metro": "pnpm --filter @comprafino/scrapers scrape:metro"
   },
   "devDependencies": {
     "oxfmt": "0.71.0",

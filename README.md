@@ -1,6 +1,6 @@
 # CompraFino
 
-A Peruvian grocery and household-products price intelligence platform with verified bounded Tottus and Plaza Vea ingestion pipelines.
+A Peruvian grocery and household-products price intelligence platform with verified bounded Tottus, Plaza Vea and Metro ingestion pipelines.
 
 ## Problem
 
@@ -12,11 +12,11 @@ The roadmap aims to help people decide where to buy, when to buy, whether a pric
 
 ## Current status
 
-Milestones 1A/1B: bounded public Tottus and Plaza Vea ingestion, validated listings, integer PEN cents, applied PostgreSQL migration, meaningful price-state history and ingestion runs. Two live Neon ingestions per retailer proved unchanged-run idempotency; controlled isolated-schema PostgreSQL tests verify price transitions, rollback and concurrent persistence. A development-only inspection page is available at `/dev/ingestion`. Consumer search/comparison, accounts and matching remain planned. The homepage requires no database.
+Milestones 1A/1B and Milestone 1C ingestion correctness: bounded public Tottus, Plaza Vea and Metro ingestion, validated listings, integer PEN cents, applied PostgreSQL migration, meaningful price-state history and ingestion runs. Two live Neon ingestions per retailer proved unchanged-run idempotency; Metro final local build/E2E verification is pending; controlled isolated-schema PostgreSQL tests verify price transitions, rollback and concurrent persistence. A development-only inspection page is available at `/dev/ingestion`. Consumer search/comparison, accounts and matching remain planned. The homepage requires no database.
 
 ## Initial retailers
 
-**Tottus** and **Plaza Vea** have bounded category adapters. **Metro** remains unimplemented.
+**Tottus**, **Plaza Vea** and **Metro** have bounded category adapters.
 
 ## Architecture
 
@@ -105,6 +105,15 @@ pnpm scrape:plaza-vea -- --limit=50
 
 Native fetch reads the public VTEX catalog for one dairy/eggs category in anonymous channel 1. Seller-1 ordinary prices exclude conditional card/quantity teaser discounts. Default 20 usable listings, maximum 500, at most 25 sequential pages / 500 source products. Dry-run needs no database; persisted mode requires `DATABASE_URL`. Two live runs verified 50 then 0 new price states. No dependencies or migrations were added. The manual `.github/workflows/ingest-plaza-vea.yml` reuses the same `DATABASE_URL` secret and has no schedule. See [Plaza Vea integration](docs/retailers/plaza-vea.md) for source fields, price/unit interpretation and location limitations.
 
+## Metro ingestion
+
+```sh
+pnpm scrape:metro -- --dry-run --limit=20
+pnpm scrape:metro -- --limit=50
+```
+
+Native fetch reads the public VTEX catalog for one dairy category in anonymous channel 1. Seller-1 ordinary prices exclude Metro-card promotion teasers; only higher reference prices are retained. Default 20 usable listings, maximum 500, at most 25 sequential pages / 500 source products. Dry-run needs no database; persisted mode requires `DATABASE_URL`. Two live runs verified 50 then 0 new price states. No dependencies or migrations were added. The manual `.github/workflows/ingest-metro.yml` reuses `DATABASE_URL` and has no schedule. See [Metro integration and three-retailer review](docs/retailers/metro.md) for live samples, price/package semantics and validation limitations. Final fresh local build/E2E confirmation is pending before commit.
+
 ## Scripts
 
 | Command                             | Purpose                                                        |
@@ -145,10 +154,10 @@ Use legitimate publicly accessible data only, with conservative requests. Prefer
 
 Intended free-tier starting point (not deployed): **Vercel** for web, **Neon** for PostgreSQL, **GitHub Actions** for scheduled ingestion. Free-tier quotas and provider terms must be assessed when deploying.
 
-For a future Vercel project, select this monorepo, set Root Directory to `apps/web`, enable inclusion of source outside that directory, and use the Next.js preset with the pinned pnpm lockfile. Use `pnpm exec turbo run build --filter=@comprafino/web` from the repository root if customizing the build command; the default app `pnpm build` also works. Set `DATABASE_URL` for server database features; the developer inspection route remains unavailable in production. Provision Neon separately and run reviewed migrations explicitly before dependent releases. The manual Tottus and Plaza Vea ingestion workflows require the GitHub Actions secret `DATABASE_URL` and explicitly applied migrations. They have no schedule. Do not put credentials in build commands or client bundles.
+For a future Vercel project, select this monorepo, set Root Directory to `apps/web`, enable inclusion of source outside that directory, and use the Next.js preset with the pinned pnpm lockfile. Use `pnpm exec turbo run build --filter=@comprafino/web` from the repository root if customizing the build command; the default app `pnpm build` also works. Set `DATABASE_URL` for server database features; the developer inspection route remains unavailable in production. Provision Neon separately and run reviewed migrations explicitly before dependent releases. The manual Tottus, Plaza Vea and Metro ingestion workflows require the GitHub Actions secret `DATABASE_URL` and explicitly applied migrations. They have no schedule. Do not put credentials in build commands or client bundles.
 
 ## Roadmap
 
-Next: Metro ingestion proof, following the same public-source and persistence verification discipline. Tottus Milestone 1A and Plaza Vea Milestone 1B ingestion correctness are verified; the previous Turbopack environment/tooling issue is resolved locally after correcting pnpm, and the normal default `pnpm build` succeeds. Subsequent milestones cover normalization, deterministic cross-retailer matching, search, comparison, price history, promotions, buying guidance, shopping lists and basket optimization. Accounts and additional infrastructure arrive only when justified. See the [roadmap](docs/roadmap.md).
+Next after final Milestone 1C local build/E2E verification: catalog normalization. All three retailer ingestions have live idempotency evidence; Metro changes remain staged because the fresh agent Turbopack build still hits its known worker-port restriction. The default build configuration is unchanged. Subsequent milestones cover normalization, deterministic cross-retailer matching, search, comparison, price history, promotions, buying guidance, shopping lists and basket optimization. Accounts and additional infrastructure arrive only when justified. See the [roadmap](docs/roadmap.md).
 
 TanStack Form, TanStack Query and shadcn Chart/Recharts are intended options for future complexity, not current dependencies. Redis, queues, external search, AI, dedicated workers and browser scraping are also deferred.

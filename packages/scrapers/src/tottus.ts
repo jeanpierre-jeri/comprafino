@@ -60,6 +60,8 @@ export function parseTottusPage(html: string, observedAt: Date) {
     }
     url.search = "";
     url.hash = "";
+    const currentPriceCents = parsePenCents(current[0]!.price[0]!);
+    const normalPriceCents = regular[0] ? parsePenCents(regular[0].price[0]!) : undefined;
     return listingSchema.parse({
       retailer: "tottus",
       externalId: product.skuId,
@@ -67,8 +69,11 @@ export function parseTottusPage(html: string, observedAt: Date) {
       title: normalizeWhitespace(product.displayName),
       url: url.href,
       imageUrl: product.mediaUrls?.[0],
-      currentPriceCents: parsePenCents(current[0]!.price[0]!),
-      regularPriceCents: regular[0] ? parsePenCents(regular[0].price[0]!) : undefined,
+      currentPriceCents,
+      regularPriceCents:
+        normalPriceCents !== undefined && normalPriceCents > currentPriceCents
+          ? normalPriceCents
+          : undefined,
       currency: "PEN",
       priceUnit: product.measurements.unit,
       packageText: product.measurements.format

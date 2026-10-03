@@ -1,6 +1,6 @@
 # Roadmap
 
-Milestone 0 is implemented. Milestones 1A and 1B ingestion correctness are verified with live Tottus/Plaza Vea/Neon idempotency and controlled PostgreSQL transition, rollback and concurrency tests. The previous Turbopack build failure was an environment/tooling issue resolved locally after correcting pnpm; the normal default build succeeds. Later consumer milestones describe planned functionality.
+Milestone 0 is implemented. Milestones 1A and 1B ingestion correctness are verified with live Tottus/Plaza Vea/Neon idempotency and controlled PostgreSQL transition, rollback and concurrency tests. The previous Turbopack build failure was an environment/tooling issue resolved locally after correcting pnpm; the normal default build succeeds. Milestone 1C Metro ingestion correctness is verified with live idempotency; its fresh local build/E2E confirmation and commit remain pending. Later consumer milestones describe planned functionality.
 
 ## Milestone 0 — Foundation
 
@@ -14,7 +14,7 @@ Implement adapters one at a time: **Tottus → Plaza Vea → Metro**. Inspect le
 
 Implemented: public hydration JSON investigation, bounded native-fetch adapter, SKU identity, Zod validation, integer PEN cents, source package/unit metadata, sanitized fixtures, generated schema/migration, atomic persistence SQL, price-state reference tests, run records, CLI, development inspection route and manual workflow. Live dry-run passed with 20 unique listings. No scraping libraries added.
 
-Verified: applied migration and actual Neon constraints/indexes; two live runs (96 fetched / 50 persisted each, 50 then 0 new states); controlled PostgreSQL price transitions, rollback and concurrent writers in isolated test schemas. Availability and location-sensitive coverage remain limitations. The earlier build environment/tooling issue is resolved locally; the default Next.js configuration is preserved. Plaza Vea Milestone 1B is also verified below. Metro remains unimplemented.
+Verified: applied migration and actual Neon constraints/indexes; two live runs (96 fetched / 50 persisted each, 50 then 0 new states); controlled PostgreSQL price transitions, rollback and concurrent writers in isolated test schemas. Availability and location-sensitive coverage remain limitations. The earlier build environment/tooling issue is resolved locally; the default Next.js configuration is preserved. Plaza Vea Milestone 1B is also verified below. Metro ingestion correctness is now verified below.
 
 ### Milestone 1B — Plaza Vea ingestion proof
 
@@ -22,7 +22,15 @@ Implemented and verified: public VTEX catalog investigation, bounded native-fetc
 
 Live dry-run: 20 unique listings. Consecutive persisted runs: 60 source products / 50 listings each, 50 then 0 new price states. Read-only PostgreSQL checks confirmed 50 unique listings and 50 open/total history states. Tottus live dry-run and all existing regression tests passed. The existing isolated-schema PostgreSQL suite passed three tests; Chromium smoke tests passed. The normal default Next.js 16.3.8 Turbopack build now succeeds locally after correcting pnpm. See [Plaza Vea integration](retailers/plaza-vea.md) for complete evidence and source comparison.
 
-Limitations: anonymous channel/location context, one bounded category, skipped unavailable/marketplace offers, inconsistent optional package specifications and no persisted promotion details. Next retailer milestone: investigate Metro under the same access constraints; do not start matching or consumer features yet.
+Limitations: anonymous channel/location context, one bounded category, skipped unavailable/marketplace offers, inconsistent optional package specifications and no persisted promotion details. Metro was subsequently investigated and implemented below; matching and consumer features remain deferred.
+
+### Milestone 1C — Metro ingestion proof
+
+Implemented and ingestion-verified: public VTEX IO/catalog investigation; native-fetch anonymous channel-1 dairy adapter; seller-1 SKU identity; boundary validation; integer PEN cents; higher-only reference prices; separate Metro-card teaser exclusion; raw package labels with placeholder filtering; weighted-unit/multiplier fixtures; shared CLI; manual workflow. No new dependencies, schema, migration or adapter-contract changes. Generic persistence and the existing developer page are reused unchanged. The three-retailer review also closed Tottus's higher-reference invariant gap with five regression cases.
+
+Live dry-run: twenty unique listings. Consecutive persisted runs: sixty source products / fifty listings each, fifty then zero new price states. Read-only PostgreSQL verification confirmed fifty unique Metro listings and fifty total/open states, while Tottus/Plaza Vea retained fifty listings each. All 77 unit tests, formatting, lint, types and the three isolated-schema PostgreSQL tests pass. Both existing retailer live dry-runs pass. Chromium's two smoke tests passed against the matching cached production build with local-server permission; a fresh default Turbopack build remains blocked by the agent's known CSS-worker port restriction, even with elevated execution. Changes remain staged pending fresh local build/E2E confirmation before the requested commit. See [Metro integration](retailers/metro.md).
+
+Limitations: one bounded category, anonymous location/channel context, missing/inconsistent package metadata, skipped unavailable offers and no persisted promotion details. The existing adapter contract fits all three retailers; no rename or expansion is justified. After final local validation closes Milestone 1C, stop adding retailers and proceed to catalog normalization as a separate task. That task has not begun.
 
 ## Milestone 2 — Catalog normalization
 

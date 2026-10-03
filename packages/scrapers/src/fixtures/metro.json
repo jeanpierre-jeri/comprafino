@@ -1,0 +1,325 @@
+[
+  {
+    "productId": "994699",
+    "productName": "Sixpack Leche Reconstituida Gloria Lata 390g",
+    "link": "https://www.metro.pe/sixpack-leche-reconstituida-gloria-lata-390g-975289-2/p",
+    "categoryId": "1001438",
+    "Envase": ["Envase"],
+    "Formato": ["Líquido"],
+    "Tamaño": ["Tamaño"],
+    "Pack-Unitario": ["Pack"],
+    "items": [
+      {
+        "itemId": "39233309",
+        "name": "Sixpack Leche Reconstituida Gloria Lata 390g",
+        "measurementUnit": "un",
+        "unitMultiplier": 1.0,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/596133/975289-1.jpg?v=638880609454970000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 21.5,
+              "ListPrice": 24.6,
+              "PriceWithoutDiscount": 21.5,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0.0,
+              "PromotionTeasers": [
+                {
+                  "Name": "[TCENCO] Oct26 - Supermercado - Supermercado Con 5% Dscto Con TC Metro del 01al31 Octubre",
+                  "GeneralValues": {},
+                  "Conditions": {
+                    "MinimumQuantity": 0,
+                    "Parameters": [
+                      {
+                        "Name": "PaymentMethodId",
+                        "Value": "3,1,4,2"
+                      },
+                      {
+                        "Name": "RestrictionsBins",
+                        "Value": "905051,905050,477357,489068,475796,449577,529206,550218,512533"
+                      }
+                    ]
+                  },
+                  "Effects": {
+                    "Parameters": [
+                      {
+                        "Name": "PercentualDiscount",
+                        "Value": "5"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "productId": "8506",
+    "productName": "Fourpack Leche Semidescremada UHT Laive Sin Lactosa Caja 946ml",
+    "link": "https://www.metro.pe/fourpack-leche-semidescremada-uht-laive-sin-lactosa-caja-946ml-337344-2/p",
+    "categoryId": "1001439",
+    "items": [
+      {
+        "itemId": "8508",
+        "name": "Fourpack Leche Semidescremada UHT Laive Sin Lactosa Caja 946ml",
+        "measurementUnit": "un",
+        "unitMultiplier": 1.0,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/506917/337344-01-22421.jpg?v=638398245693670000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 21.5,
+              "ListPrice": 21.5,
+              "PriceWithoutDiscount": 21.5,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0.0,
+              "PromotionTeasers": [
+                {
+                  "Name": "[TCENCO] Oct26 - Supermercado - Supermercado Con 5% Dscto Con TC Metro del 01al31 Octubre",
+                  "GeneralValues": {},
+                  "Conditions": {
+                    "MinimumQuantity": 0,
+                    "Parameters": [
+                      {
+                        "Name": "PaymentMethodId",
+                        "Value": "3,1,4,2"
+                      },
+                      {
+                        "Name": "RestrictionsBins",
+                        "Value": "905051,905050,477357,489068,475796,449577,529206,550218,512533"
+                      }
+                    ]
+                  },
+                  "Effects": {
+                    "Parameters": [
+                      {
+                        "Name": "PercentualDiscount",
+                        "Value": "5"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "productId": "5421",
+    "productName": "Yogurt Bebible Gloria Fresa Galonera 1.6kg",
+    "link": "https://www.metro.pe/yogurt-bebible-gloria-fresa-galonera-1-6kg-110363002-2/p",
+    "categoryId": "1312",
+    "Tamaño": ["Familiar"],
+    "items": [
+      {
+        "itemId": "5423",
+        "name": "Yogurt Bebible Gloria Fresa Galonera 1.6kg",
+        "measurementUnit": "un",
+        "unitMultiplier": 1.0,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/598524/110363002-01-23359.jpg?v=638896665936170000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 9.9,
+              "ListPrice": 9.9,
+              "PriceWithoutDiscount": 9.9,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0.0,
+              "PromotionTeasers": [
+                {
+                  "Name": "[TCENCO] Oct26 - Supermercado - Supermercado Con 5% Dscto Con TC Metro del 01al31 Octubre",
+                  "GeneralValues": {},
+                  "Conditions": {
+                    "MinimumQuantity": 0,
+                    "Parameters": [
+                      {
+                        "Name": "PaymentMethodId",
+                        "Value": "3,1,4,2"
+                      },
+                      {
+                        "Name": "RestrictionsBins",
+                        "Value": "905051,905050,477357,489068,475796,449577,529206,550218,512533"
+                      }
+                    ]
+                  },
+                  "Effects": {
+                    "Parameters": [
+                      {
+                        "Name": "PercentualDiscount",
+                        "Value": "5"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "productId": "1032408",
+    "productName": "Pollo Fresco con Menudencia San Fernando x kg",
+    "link": "https://www.metro.pe/pollo-fresco-con-menudencia-san-fernando-x-kg-1013433/p",
+    "categoryId": "1001349",
+    "items": [
+      {
+        "itemId": "39271375",
+        "name": "Pollo Fresco con Menudencia San Fernando x kg",
+        "measurementUnit": "kg",
+        "unitMultiplier": 1.9,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/532328/Pollo-Fresco-con-Menudencia-San-Fernando-x-Kg-1-259529.jpg?v=638539510419000000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 7.7,
+              "ListPrice": 9.9,
+              "PriceWithoutDiscount": 7.7,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0.0,
+              "PromotionTeasers": []
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "productId": "995052",
+    "productName": "Pack x6 Leche Evaporada Gloria Entera",
+    "link": "https://www.metro.pe/pack-x6-leche-evaporada-gloria-entera-2-2/p",
+    "categoryId": "1001438",
+    "Envase": ["Lata"],
+    "Formato": ["Envasado"],
+    "Tamaño": ["Individual"],
+    "Pack-Unitario": ["Pack"],
+    "items": [
+      {
+        "itemId": "39233661",
+        "name": "Pack x6 Leche Evaporada Gloria Entera",
+        "measurementUnit": "un",
+        "unitMultiplier": 1.0,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/596134/975696-1.jpg?v=638880609891700000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 22.9,
+              "ListPrice": 24.2,
+              "PriceWithoutDiscount": 22.9,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0.0,
+              "PromotionTeasers": [
+                {
+                  "Name": "[TCENCO] Oct26 - Supermercado - Supermercado Con 5% Dscto Con TC Metro del 01al31 Octubre",
+                  "GeneralValues": {},
+                  "Conditions": {
+                    "MinimumQuantity": 0,
+                    "Parameters": [
+                      {
+                        "Name": "PaymentMethodId",
+                        "Value": "3,1,4,2"
+                      },
+                      {
+                        "Name": "RestrictionsBins",
+                        "Value": "905051,905050,477357,489068,475796,449577,529206,550218,512533"
+                      }
+                    ]
+                  },
+                  "Effects": {
+                    "Parameters": [
+                      {
+                        "Name": "PercentualDiscount",
+                        "Value": "5"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "productId": "1068916",
+    "productName": "Espumador de Leche Thomas",
+    "link": "https://www.metro.pe/espumador-de-leche-thomas-1034368/p",
+    "categoryId": "1001690",
+    "items": [
+      {
+        "itemId": "39307240",
+        "name": "Espumador de Leche Thomas",
+        "measurementUnit": "un",
+        "unitMultiplier": 1.0,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/568834/Espumador-de-Leche-Thomas-1-288107.jpg?v=638736718041700000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "wongiononfood",
+            "commertialOffer": {
+              "Price": 99.0,
+              "ListPrice": 199.0,
+              "PriceWithoutDiscount": 99.0,
+              "IsAvailable": true,
+              "AvailableQuantity": 10,
+              "Tax": 0.0,
+              "PromotionTeasers": []
+            }
+          },
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 99.0,
+              "ListPrice": 199.0,
+              "PriceWithoutDiscount": 99.0,
+              "IsAvailable": true,
+              "AvailableQuantity": 10,
+              "Tax": 0.0,
+              "PromotionTeasers": []
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

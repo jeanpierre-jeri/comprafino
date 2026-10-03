@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "scrape:tottus": "node --env-file-if-exists=../../.env --experimental-strip-types src/cli.ts",
-    "scrape:plaza-vea": "node --env-file-if-exists=../../.env --experimental-strip-types src/cli.ts --retailer=plaza-vea"
+    "scrape:plaza-vea": "node --env-file-if-exists=../../.env --experimental-strip-types src/cli.ts --retailer=plaza-vea",
+    "scrape:metro": "node --env-file-if-exists=../../.env --experimental-strip-types src/cli.ts --retailer=metro"
   },
   "dependencies": {
     "@comprafino/core": "workspace:*",
