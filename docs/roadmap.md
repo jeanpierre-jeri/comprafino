@@ -1,6 +1,6 @@
 # Roadmap
 
-Milestones 0–2 are complete in the committed task baseline (`3abd9f9`). Milestone 3's implementation, original local build/E2E and broader independent audit are verified. The expanded 351-listing dairy/meat dataset has 28 audited canonical groups; the unchanged matcher achieved 34/34 observed automatic precision in 105 new reviewed pairs. Final fresh local build/E2E confirmation is pending for the additional ingestion/category/audit code, before commit. Consumer milestones remain planned.
+Milestones 0–3 are complete in the committed baseline (`9d104b1`). The expanded 351-listing dataset has 28 audited canonical groups; the unchanged matcher achieved 34/34 observed automatic precision in the independent sample. Milestone 4 public search and ordinary-price comparison are implemented and data-tested, pending fresh local production build/browser confirmation. Automated freshness and broader consumer capabilities remain planned.
 
 ## Milestone 0 — Foundation
 
@@ -48,15 +48,23 @@ Initial verification on 151 listings: 744 candidates, 12 auto matches, 50 review
 
 Follow-up verified: the user confirmed local default Turbopack build and Chromium E2E passed for the earlier staged implementation. Authorized bounded dairy expansion added 100 Tottus, 50 Plaza Vea and 50 Metro listings, yielding 351 normalized listings. Matcher/normalizer hashes stayed unchanged. The frozen matcher produces 7278 candidates, 46 auto pairs, 355 reviews, 6703 incompatible and 174 no-match; saved groups are 19 two-retailer and nine three-retailer, with 65 associations. All 28 groups were inspected. A separate 105-pair independent audit includes 34 new automatic decisions, 30 reviews, 30 rejects and eleven targeted contrasts: TP 34 / FP 0 / TN 52 / FN 19, 100% observed automatic precision and 64.15% audit-sample recall. No thresholds/rules were changed. See [independent audit](catalog-matching-audit.md) for separate calibration metrics, suspicious cases and evidence limits.
 
-Pending: fresh local production build/E2E for the minimal allowlisted Tottus dairy/omitted-price-unit boundary and audit additions, then the intended commit. The independent-audit target is met; do not claim final completion before these updated-code checks pass. Stage and wait for confirmation; no push or public search.
+Complete in the user-provided Milestone 4 baseline, committed at `9d104b1`. Earlier build/E2E notes in matching documents describe historical agent runs, not an outstanding Milestone 3 gate.
 
-## Milestone 4 — Search MVP
+## Milestone 4 — Public product search and retailer price comparison
 
-Public product search and filtering over verified catalog data.
+Implemented: functional homepage GET form, `/search?q=...`, `/products/[id]`, PostgreSQL parameterized token search with pg_trgm ranking, verified automatic/current-version/high-confidence associations only, at least two usable distinct retailer offers, open ordinary history prices, integer PEN presentation, higher-only references, all cheapest ties, actual Peru observation timestamps, safe source links, allowlisted retailer images with fallback, Spanish empty/error/not-found states, responsive consumer UI and basic metadata. No matcher change, migration or dependency.
 
-## Milestone 5 — Product comparison
+Verified: five real search queries and five comparison query results against independent PostgreSQL reads; 28 public groups / 65 offers in the observed catalog, 299 unit tests and 15 isolated PostgreSQL tests passing. Format/lint/strict types pass. Added credential-free browser states and optional persisted-catalog mobile comparison flows; production developer-tool blocking tests remain.
 
-Compare current prices and price per unit across retailers; expose observation time and availability.
+Pending: default production build is blocked in the agent environment by the known Turbopack CSS-worker port restriction, including elevated execution. E2E cannot start without a build. Stage changes and request fresh local build/browser confirmation before committing; do not claim complete yet. Browser/manual rendered-page validation remains pending. See [public search](public-search.md).
+
+## Next milestone — Data freshness operations
+
+Recommended after Milestone 4 validation: conservative scheduled ingestion, observation/failure monitoring, and an explicit offline normalization/matching refresh policy. No automation is implemented by Milestone 4.
+
+## Milestone 5 — Validated unit-price comparison
+
+Ordinary prices for exact variants are implemented in Milestone 4. Generalized price-per-unit comparisons across packaged, counted and weighted products remain a separate validation task.
 
 ## Milestone 6 — Price history
 

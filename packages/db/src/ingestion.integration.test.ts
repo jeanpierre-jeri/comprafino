@@ -13,6 +13,7 @@ import { evaluateMatching } from "./matching-evaluate.ts";
 import { evaluatePairs, persistMatching } from "./matching.ts";
 import type { MatchingSnapshot } from "./matching.ts";
 import { persistListings } from "./ingestion.ts";
+import { getCanonicalProductComparison, searchCanonicalProducts } from "./public-products.ts";
 import * as schema from "./schema.ts";
 
 // Never load .env or fall back to DATABASE_URL. Every write is confined to a
@@ -577,5 +578,162 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
       falsePositives: 0,
       autoMatchPrecision: 1,
     });
+  }, 30_000);
+  async function seedPublicProduct(prefix: string, title: string) {
+    for (const retailer of ["metro", "plaza-vea"] as const) {
+      const value = {
+        ...observation(`${prefix}-${retailer}`, 0),
+        retailer,
+        title,
+        sourceBrand: "Gloria",
+        url:
+          retailer === "metro"
+            ? "https://www.metro.pe/milk/p"
+            : "https://www.plazavea.com.pe/milk/p",
+      };
+      await persistListings(db, retailer, [value]);
+      await persistCatalogNormalizations(db, await catalogRows(value.externalId));
+    }
+    const rows = await matchingRows([`${prefix}-metro`, `${prefix}-plaza-vea`]);
+    await persistMatching(db, rows, await evaluatePairs(db, [[rows[0]!, rows[1]!]]));
+    const links = z
+      .array(z.object({ id: z.uuid() }))
+      .parse(
+        await query(
+          "select canonical_product_id as id from canonical_product_listings where listing_id=$1::uuid",
+          [rows[0]!.id],
+        ),
+      );
+    return { id: links[0]!.id, rows };
+  }
+  it("searches trusted groups with normalized terms, deterministic ranking and variant preservation", async () => {
+    const whole = await seedPublicProduct("public-whole", "Leche UHT Gloria Entera Caja 946ml");
+    const light = await seedPublicProduct("public-light", "Leche UHT Gloria Light Caja 946ml");
+    expect((await searchCanonicalProducts(db, "  GLORIA; 946ml ")).map((p) => p.id)).toEqual(
+      expect.arrayContaining([whole.id, light.id]),
+    );
+    const exact = await searchCanonicalProducts(db, "Leche UHT Gloria Entera Caja 946ml");
+    expect(exact[0]!.id).toBe(whole.id);
+    const variants = await searchCanonicalProducts(db, "gloria light 946");
+    expect(variants.map((p) => p.id)).toContain(light.id);
+    expect(variants.map((p) => p.id)).not.toContain(whole.id);
+    expect(await searchCanonicalProducts(db, "gloria 94")).toEqual([]);
+    expect(await searchCanonicalProducts(db, "xylophone unmatched")).toEqual([]);
+    expect(await searchCanonicalProducts(db, "gloria' OR 1=1 --")).toEqual([]);
+    expect((await searchCanonicalProducts(db, "gloria")).map((p) => p.id)).toEqual(
+      (await searchCanonicalProducts(db, "gloria")).map((p) => p.id),
+    );
+    expect((await searchCanonicalProducts(db, "gloria")).length).toBeLessThanOrEqual(20);
+    await query("update canonical_products set display_name='Leche Entera UHT' where id=$1::uuid", [
+      whole.id,
+    ]);
+    // Brand and associated normalized title still provide 946 ml identity text.
+    expect((await searchCanonicalProducts(db, "gloria entera 946")).map((p) => p.id)).toContain(
+      whole.id,
+    );
+  }, 30_000);
+  it("reads only the current open state, credits ties, reference invariants and actual observation time", async () => {
+    const { id, rows } = await seedPublicProduct("public-price", "Mantequilla Gloria Con Sal 180g");
+    await persistListings(db, "metro", [
+      {
+        ...observation("public-price-metro", 2, 590),
+        retailer: "metro",
+        title: "Mantequilla Gloria Con Sal 180g",
+        sourceBrand: "Gloria",
+        regularPriceCents: 690,
+        url: "https://www.metro.pe/butter/p",
+      },
+    ]);
+    // The public query must read open history, not the listing's denormalized price.
+    await query("update retailer_listings set current_price_cents=1 where id=$1::uuid", [
+      rows.find((r) => r.retailer === "metro")!.id,
+    ]);
+    const product = await getCanonicalProductComparison(db, id);
+    expect(product).toMatchObject({
+      retailerCount: 2,
+      lowestPriceCents: 590,
+      cheapestRetailers: ["Metro"],
+    });
+    expect(product!.offers[0]).toMatchObject({
+      retailerId: "metro",
+      retailerName: "Metro",
+      currentPriceCents: 590,
+      regularPriceCents: 690,
+      observedAt: observation("unused", 2).observedAt,
+      url: "https://www.metro.pe/butter/p",
+    });
+    await query(
+      "update price_history set current_price_cents=590,regular_price_cents=590 where listing_id=$1::uuid and valid_until is null",
+      [rows.find((r) => r.retailer === "plaza-vea")!.id],
+    );
+    const tied = await getCanonicalProductComparison(db, id);
+    expect(tied!.cheapestRetailers).toEqual(["Metro", "Plaza Vea"]);
+    expect(tied!.offers[1]!.regularPriceCents).toBeNull();
+    await query(
+      "update price_history set regular_price_cents=580 where listing_id=$1::uuid and valid_until is null",
+      [rows.find((r) => r.retailer === "plaza-vea")!.id],
+    );
+    expect((await getCanonicalProductComparison(db, id))!.offers[1]!.regularPriceCents).toBeNull();
+  }, 30_000);
+  it("excludes unmatched, manual, obsolete and low-confidence links and requires two usable retailers", async () => {
+    const { id, rows } = await seedPublicProduct(
+      "public-filter",
+      "Yogurt Gloria Griego Con Miel 800g",
+    );
+    const listingId = rows[0]!.id;
+    for (const update of ["method='manual'", "matching_version=99", "confidence=0.89"]) {
+      await query(`update canonical_product_listings set ${update} where listing_id=$1::uuid`, [
+        listingId,
+      ]);
+      expect(await getCanonicalProductComparison(db, id)).toBeNull();
+      expect((await searchCanonicalProducts(db, "gloria miel 800")).map((p) => p.id)).not.toContain(
+        id,
+      );
+      await query(
+        "update canonical_product_listings set method='automatic',matching_version=1,confidence=1 where listing_id=$1::uuid",
+        [listingId],
+      );
+    }
+    for (const update of ["active=false", "available=false"]) {
+      await query(`update retailer_listings set ${update} where id=$1::uuid`, [listingId]);
+      expect(await getCanonicalProductComparison(db, id)).toBeNull();
+      await query("update retailer_listings set active=true,available=true where id=$1::uuid", [
+        listingId,
+      ]);
+    }
+    await query(
+      "update price_history set valid_until=valid_from+interval '1 minute' where listing_id=$1::uuid and valid_until is null",
+      [listingId],
+    );
+    expect(await getCanonicalProductComparison(db, id)).toBeNull();
+    await query("update price_history set valid_until=null where listing_id=$1::uuid", [listingId]);
+    await query("delete from canonical_product_listings where listing_id=$1::uuid", [listingId]);
+    expect(await getCanonicalProductComparison(db, id)).toBeNull();
+    expect(await searchCanonicalProducts(db, "gloria miel 800")).toEqual([]);
+    const beforeUnmatched = (await searchCanonicalProducts(db, "gloria 946")).map((p) => p.id);
+    await seedMatch("public-unmatched");
+    expect((await searchCanonicalProducts(db, "gloria 946")).map((p) => p.id)).toEqual(
+      beforeUnmatched,
+    );
+    // A realistic high-scoring review remains outside the public catalog.
+    for (const retailer of ["metro", "plaza-vea"] as const) {
+      const value = {
+        ...observation(`public-review-${retailer}`, 0),
+        retailer,
+        title:
+          retailer === "metro"
+            ? "Yogurt Griego Gloria Fresa 120g"
+            : "Yogurt Batido Gloria Fresa 120g",
+        sourceBrand: "Gloria",
+      };
+      await persistListings(db, retailer, [value]);
+      await persistCatalogNormalizations(db, await catalogRows(value.externalId));
+    }
+    const review = await matchingRows(["public-review-metro", "public-review-plaza-vea"]);
+    const decisions = await evaluatePairs(db, [[review[0]!, review[1]!]]);
+    expect(decisions[0]!.result.decision).toBe("review");
+    expect(await searchCanonicalProducts(db, "gloria fresa 120")).toEqual([]);
+    expect(await getCanonicalProductComparison(db, randomUUID())).toBeNull();
+    expect(await getCanonicalProductComparison(db, "invalid")).toBeNull();
   }, 30_000);
 });

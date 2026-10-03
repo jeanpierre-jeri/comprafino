@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Button } from "@comprafino/ui";
+import { SearchForm } from "../components/search-form";
 
 export default function Home() {
   return (
@@ -24,31 +24,13 @@ export default function Home() {
           <span className="text-primary">Paga menos.</span>
         </h1>
         <p className="mt-7 max-w-xl text-lg leading-relaxed text-muted-foreground">
-          Compara precios entre supermercados y descubre dónde y cuándo conviene comprar.
+          Compara precios observados de un mismo producto y encuentra dónde cuesta menos.
         </p>
         <div className="mt-10 max-w-xl">
-          <label htmlFor="product-search" className="mb-3 block text-sm font-medium">
-            ¿Qué necesitas comprar?
-          </label>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <input
-              id="product-search"
-              type="search"
-              disabled
-              placeholder="Arroz, detergente, café…"
-              aria-describedby="search-status"
-              className="h-12 min-w-0 flex-1 rounded-lg border bg-white px-4 text-base placeholder:text-muted-foreground disabled:cursor-not-allowed"
-            />
-            <Button disabled className="h-12 px-7">
-              Buscar
-            </Button>
-          </div>
-          <p id="search-status" className="mt-3 text-sm text-muted-foreground">
-            Próximamente. Estamos preparando el comparador; la búsqueda aún no está disponible.
-          </p>
+          <SearchForm />
         </div>
         <div className="mt-16 border-t pt-6">
-          <p className="text-sm text-muted-foreground">Supermercados que planeamos integrar</p>
+          <p className="text-sm text-muted-foreground">Comparamos productos de</p>
           <ul className="mt-3 flex flex-wrap gap-x-8 gap-y-2 text-lg font-semibold">
             <li>Tottus</li>
             <li>Plaza Vea</li>
@@ -57,7 +39,7 @@ export default function Home() {
         </div>
       </main>
       <footer className="border-t py-6 text-sm text-muted-foreground">
-        CompraFino · En construcción. Más claridad para tus compras.
+        CompraFino · Más claridad para tus compras.
       </footer>
     </div>
   );

@@ -12,7 +12,7 @@ The roadmap aims to help people decide where to buy, when to buy, whether a pric
 
 ## Current status
 
-Milestones 0–2 are complete in the committed baseline. Milestone 3 implements deterministic canonical matching and development-only inspection. The user confirmed the original staged local production build/E2E passed. A broader independent audit expanded to 351 listings: 28 reviewed canonical groups, 34/34 observed new automatic-pair precision and 34/53 independent audit-sample recall. The matcher stayed unchanged. Final fresh local build/E2E confirmation is pending for minimal ingestion/audit additions before commit. Public search/comparison remain planned; the homepage requires no database. See [catalog matching](docs/catalog-matching.md) and the separate [independent audit](docs/catalog-matching-audit.md).
+Milestones 0–3 are complete in the committed baseline (`9d104b1` matching). The independently audited bounded dataset has 351 normalized listings, 28 verified groups and 65 retailer associations. Milestone 4 implements public GET search and ordinary-price comparisons over these groups; database/unit validation passes, while fresh local production build/E2E confirmation is pending because of the agent's known Turbopack worker-port restriction. See [public search](docs/public-search.md), [catalog matching](docs/catalog-matching.md) and the [independent audit](docs/catalog-matching-audit.md). The homepage still requires no database.
 
 ## Initial retailers
 
@@ -57,7 +57,7 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Open <http://127.0.0.1:3000>. Stop with Ctrl+C. The app uses system fonts, so builds need no external font download. Only the shared Base UI button is a Client Component; the homepage and layout remain Server Components.
+Open <http://127.0.0.1:3000>. Stop with Ctrl+C. The app uses system fonts, so builds need no external font download. The shared Base UI button and product-image error fallback are Client Components; the homepage and layout remain Server Components.
 
 Codex repository instructions live in the root `AGENTS.md`. Next.js agent-file auto-generation is disabled so development does not create `CLAUDE.md` or duplicate app-level instructions.
 
@@ -72,7 +72,7 @@ That helper is local to the bootstrap environment and is not required in a fresh
 
 ## Environment variables
 
-The root `.env.example` contains `DATABASE_URL=` and the explicit integration-test opt-in `TEST_DATABASE_URL=`. No environment variable is needed for the homepage, unit tests or build.
+The root `.env.example` contains `DATABASE_URL=` and the explicit integration-test opt-in `TEST_DATABASE_URL=`. No environment variable is needed for the homepage, unit tests or build. Public search/comparison requests require the migrated database through `DATABASE_URL` in `apps/web/.env.local` or deployment settings.
 
 For actual migrations:
 
@@ -163,7 +163,7 @@ Turbo caches builds, type checks and unit tests. The root development command st
 
 ## Testing
 
-Unit tests cover source fixtures, money parsing, normalization, persistence SQL contracts, a deterministic price-state reference model and run outcomes without live network/database calls. `pnpm test:integration` separately exercises the real Neon HTTP persistence batch on PostgreSQL, without Turbo caching. It skips clearly when `TEST_DATABASE_URL` is absent and never loads `.env` or falls back to `DATABASE_URL`. Export the test URL explicitly, preferably for a dedicated Neon test database/branch. The suite applies the checked-in migration inside a fresh randomly named schema, sets transaction-local search paths without a public fallback, and drops only its own schema afterwards. It applies journaled table migrations, qualifying foreign keys with that test schema. The target test database must already have pg_trgm from the reviewed migration; the suite excludes extension creation to keep shared public objects untouched. Live tables are untouched. The role needs schema-creation permission. An interrupted process may leave its isolated schema for manual review/cleanup. Browser smoke testing checks the homepage and production blocking of ingestion, catalog and matching developer tooling against `next start` on port 3100.
+Unit tests cover source fixtures, money parsing, normalization, persistence SQL contracts, a deterministic price-state reference model and run outcomes without live network/database calls. `pnpm test:integration` separately exercises the real Neon HTTP persistence batch on PostgreSQL, without Turbo caching. It skips clearly when `TEST_DATABASE_URL` is absent and never loads `.env` or falls back to `DATABASE_URL`. Export the test URL explicitly, preferably for a dedicated Neon test database/branch. The suite applies the checked-in migration inside a fresh randomly named schema, sets transaction-local search paths without a public fallback, and drops only its own schema afterwards. It applies journaled table migrations, qualifying foreign keys with that test schema. The target test database must already have pg_trgm from the reviewed migration; the suite excludes extension creation to keep shared public objects untouched. Live tables are untouched. The role needs schema-creation permission. An interrupted process may leave its isolated schema for manual review/cleanup. Browser smoke testing checks functional homepage search, blank/short searches, malformed product IDs and production blocking of developer tooling against `next start` on port 3100. Explicit `DATABASE_URL` in the runner enables two additional persisted-catalog flows; see [public search validation](docs/public-search.md).
 
 ```sh
 pnpm test
@@ -188,6 +188,6 @@ For a future Vercel project, select this monorepo, set Root Directory to `apps/w
 
 ## Roadmap
 
-Milestone 3 matching and the wider independent audit are verified within the bounded dataset; fresh local build/E2E confirmation remains pending for the follow-up ingestion/audit code. Public search, comparison, price history, promotions, buying guidance, shopping lists and basket optimization remain separate future work. See the [roadmap](docs/roadmap.md).
+Milestone 4 public search and package-price comparison are implemented over verified groups, pending fresh local production build/E2E confirmation. Scheduled ingestion/freshness operations, generalized unit-price comparison, history, promotions, buying guidance, shopping lists and basket optimization remain future work. See the [roadmap](docs/roadmap.md).
 
 TanStack Form, TanStack Query and shadcn Chart/Recharts are intended options for future complexity, not current dependencies. Redis, queues, external search, AI, dedicated workers and browser scraping are also deferred.

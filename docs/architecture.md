@@ -10,7 +10,7 @@ flowchart LR
     Scrapers --> DB
 ```
 
-The homepage is static and requires no database. Initially there is no always-on API server, always-on worker, Redis or message queue.
+The homepage is static and requires no database. Public search and product comparison are request-rendered Server Components over verified canonical associations and open price-history states; queries live in `@comprafino/db`. See [public search](public-search.md) for filtering and request-time freshness boundaries. Initially there is no always-on API server, always-on worker, Redis or message queue.
 
 ## Boundaries
 
@@ -36,7 +36,7 @@ Vercel, Neon and scheduled GitHub Actions are intended deployment choices. The T
 
 ## Deferred choices
 
-Native fetch before HTTP client dependencies. TanStack Form only for complex forms, TanStack Query for justified client server-state needs, and shadcn Chart/Recharts for implemented price history. HTML parsers, browser automation, caching, queues, search services and workers require concrete needs. Authentication waits for user-specific features. Initial matching will be deterministic, without LLMs or embeddings.
+Native fetch before HTTP client dependencies. TanStack Form only for complex forms, TanStack Query for justified client server-state needs, and shadcn Chart/Recharts for implemented price history. HTML parsers, browser automation, caching, queues, search services and workers require concrete needs. Authentication waits for user-specific features. Matching is deterministic, without LLMs or embeddings.
 
 ### Ingestion state
 
@@ -50,7 +50,7 @@ The `/dev/ingestion` Server Component reads at request time, shows helpful missi
 
 Core owns deterministic title/brand/content normalization, independent of retailer APIs and PostgreSQL. Adapters retain validated source brands and sale-unit multipliers; raw source fields remain in listings. The additive second migration creates a one-to-one derived `listing_normalizations` table with explicit indexed dimensions, version, fingerprint and diagnostics. The standalone database-package CLI reads bounded samples and persists them in one atomic batch using ingestion's existing retailer locks and raw-input guards. It never writes price history or runs automatically during ingestion.
 
-`/dev/catalog` inspects up to twenty rows per retailer, marking missing/stale derived data and remaining blocked in production. Exact g/ml/unit content is separate from KG/UN pricing. Approximate/variable masses and mixed bundles remain unresolved. Canonical products and matching are now derived separately as described below; queues and public search remain unimplemented. See [catalog normalization](catalog-normalization.md) for the model, observed metadata trust, real-data audit and validation status.
+`/dev/catalog` inspects up to twenty rows per retailer, marking missing/stale derived data and remaining blocked in production. Exact g/ml/unit content is separate from KG/UN pricing. Approximate/variable masses and mixed bundles remain unresolved. Canonical products and matching are now derived separately as described below; queues remain deferred; public search reads these verified groups separately. See [catalog normalization](catalog-normalization.md) for the model, observed metadata trust, real-data audit and validation status.
 
 ## Canonical matching
 

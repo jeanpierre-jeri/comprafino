@@ -3,3 +3,4 @@ export * from "./schema.ts";
 export * from "./ingestion.ts";
 export * from "./catalog.ts";
 export * from "./matching.ts";
+export * from "./public-products.ts";
