@@ -29,9 +29,10 @@ Stable exact versions are pinned. Runtime ownership follows use; root owns repos
 
 ## @comprafino/core
 
-| Dependency | Version | Kind            | Purpose    |
-| ---------- | ------- | --------------- | ---------- |
-| `vitest`   | `5.0.3` | devDependencies | unit tests |
+| Dependency | Version | Kind            | Purpose                            |
+| ---------- | ------- | --------------- | ---------------------------------- |
+| `vitest`   | `5.0.3` | devDependencies | unit tests                         |
+| `zod`      | `4.6.5` | dependencies    | shared normalized listing boundary |
 
 ## @comprafino/db
 
@@ -47,9 +48,13 @@ Stable exact versions are pinned. Runtime ownership follows use; root owns repos
 
 ## @comprafino/scrapers
 
-| Dependency | Version | Kind | Purpose                |
-| ---------- | ------- | ---- | ---------------------- |
-| None       | —       | —    | No adapter implemented |
+| Dependency         | Version       | Kind            | Purpose                             |
+| ------------------ | ------------- | --------------- | ----------------------------------- |
+| `@comprafino/core` | `workspace:*` | dependencies    | listing schema and money helpers    |
+| `@comprafino/db`   | `workspace:*` | dependencies    | persistence and run records         |
+| `zod`              | `4.6.5`       | dependencies    | untrusted Tottus payload validation |
+| `@types/node`      | `24.19.1`     | devDependencies | native fetch and CLI types          |
+| `vitest`           | `5.0.3`       | devDependencies | fixture and ingestion tests         |
 
 ## @comprafino/ui
 
@@ -71,3 +76,5 @@ pnpm 12.8.1 is pinned in `packageManager`, not an application dependency. shadcn
 Verified sources: npm registry stable tags, engine and peer ranges; [Next.js installation](https://nextjs.org/docs/app/getting-started/installation), [shadcn monorepos](https://ui.shadcn.com/docs/monorepo), [Base UI button registry](https://ui.shadcn.com/r/styles/base-nova/button.json), [Oxlint type-aware linting](https://oxc.rs/docs/guide/usage/linter/type-aware.html), [Oxfmt configuration](https://oxc.rs/docs/guide/usage/formatter/config-file-reference), and official releases for [checkout](https://github.com/actions/checkout/releases), [setup-node](https://github.com/actions/setup-node/releases), [pnpm action](https://github.com/pnpm/action-setup/releases).
 
 The pnpm workspace explicitly permits esbuild installation scripts (required platform-binary setup for Drizzle Kit tooling). Exact stable Turbo 2.11.7 packages are excluded from pnpm’s default release-age delay because their current stable release was verified during bootstrap. No arbitrary dependency scripts are allowed.
+
+Milestone 1A also adds `@comprafino/db` (`workspace:*`) to web for developer inspection and `@comprafino/core` (`workspace:*`) to db for boundary validation and transition comparisons. All external additions reuse exact versions already installed in the workspace; no new external package/version or scraping library is introduced. The CLI uses Node 24 native TypeScript stripping and root `.env` loading. `allowImportingTsExtensions` supports explicit local `.ts` imports required by that runner with the existing no-emit TypeScript configuration.

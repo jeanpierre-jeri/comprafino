@@ -13,7 +13,8 @@
     "test": "turbo run test",
     "test:e2e": "pnpm --filter @comprafino/web test:e2e",
     "db:generate": "pnpm --filter @comprafino/db db:generate",
-    "db:migrate": "pnpm --filter @comprafino/db db:migrate"
+    "db:migrate": "pnpm --filter @comprafino/db db:migrate",
+    "scrape:tottus": "pnpm --filter @comprafino/scrapers scrape:tottus"
   },
   "devDependencies": {
     "oxfmt": "0.71.0",

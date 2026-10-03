@@ -13,6 +13,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@comprafino/core": "workspace:*",
     "@neondatabase/serverless": "1.2.0",
     "drizzle-orm": "0.45.3",
     "zod": "4.6.5"

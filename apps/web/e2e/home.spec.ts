@@ -11,3 +11,11 @@ test("homepage explains the product and honestly marks search as upcoming", asyn
   await expect(page.getByText("Próximamente.", { exact: false })).toBeVisible();
   await expect(page.getByRole("listitem")).toHaveText(["Tottus", "Plaza Vea", "Metro"]);
 });
+
+test("developer ingestion tooling is blocked in production", async ({ page }) => {
+  const response = await page.goto("/dev/ingestion");
+  expect(response?.status()).toBe(404);
+  await expect(page.getByRole("heading", { name: "Developer ingestion inspection" })).toHaveCount(
+    0,
+  );
+});

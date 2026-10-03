@@ -1,9 +1,3 @@
-# Retailer ingestion
+# Scrapers
 
-This workspace will own retailer adapters, external payload validation and ingestion orchestration. Tottus, Plaza Vea and Metro are planned, in that order; none is implemented.
-
-Prefer legitimate publicly accessible JSON/data endpoints, then native `fetch` with HTML parsing, and browser automation only when demonstrated necessary. Use conservative request rates, honor applicable access restrictions, and never bypass authentication, CAPTCHAs, bot protection or access controls. Stealth tooling is prohibited.
-
-Validate unknown external payloads at adapter boundaries with Zod when adapters exist. Keep retailer behavior isolated; share pure domain logic through `@comprafino/core` and persistence through `@comprafino/db` when actually needed. There are no dependencies yet because this bootstrap performs no ingestion.
-
-GitHub Actions is the intended initial scheduler. Do not add cron workflows until an adapter and its operational requirements are proven. Playwright Test in the web workspace is application E2E tooling, not a scraper dependency.
+Native-fetch Tottus adapter and ingestion orchestration. Source hydration JSON → Zod source validation → normalized listing boundary → optional db persistence. Parsing fixtures requires no network or database. Root commands: `pnpm scrape:tottus -- --dry-run --limit=20` and `pnpm scrape:tottus -- --limit=50`. Default 20, hard cap 500, sequential category requests. See [Tottus integration](../../docs/retailers/tottus.md). Plaza Vea and Metro are not implemented.

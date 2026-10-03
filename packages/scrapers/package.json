@@ -7,6 +7,17 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "scrape:tottus": "node --env-file-if-exists=../../.env --experimental-strip-types src/cli.ts"
+  },
+  "dependencies": {
+    "@comprafino/core": "workspace:*",
+    "@comprafino/db": "workspace:*",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.1",
+    "vitest": "5.0.3"
   }
 }

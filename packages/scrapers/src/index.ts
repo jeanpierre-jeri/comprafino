@@ -1,2 +1,2 @@
-// Reserved typed entry point for future retailer adapters. No integrations exist yet.
-export {};
+export * from "./tottus.ts";
+export * from "./ingestion.ts";

@@ -1,0 +1,160 @@
+{
+  "props": {
+    "pageProps": {
+      "results": [
+        {
+          "productId": "153822662",
+          "skuId": "153822664",
+          "displayName": "Chorizo San Fernando Cebolla Caramelizada Empaque 400 g",
+          "url": "https://www.tottus.com.pe/tottus-pe/articulo/153822662/chorizo-san-fernando-cebolla-caramelizada-empaque-400-g",
+          "sellerId": "TOTTUS_PERU",
+          "mediaUrls": ["https://media.tottus.com.pe/tottusPE/43683841_1/public"],
+          "measurements": {
+            "format": "Empaque 400 g",
+            "unit": "UN"
+          },
+          "merchantCategoryId": "J0501010806",
+          "prices": [
+            {
+              "label": "",
+              "icons": "",
+              "symbol": "S/ ",
+              "type": "internetPrice",
+              "crossed": false,
+              "price": ["18.90"]
+            }
+          ]
+        },
+        {
+          "productId": "115844221",
+          "skuId": "115844222",
+          "displayName": "Filete De Pechuga Importada",
+          "url": "https://www.tottus.com.pe/tottus-pe/articulo/115844221/filete-de-pechuga-importada",
+          "sellerId": "TOTTUS_PERU",
+          "mediaUrls": ["https://media.tottus.com.pe/tottusPE/41293932_1/public"],
+          "measurements": {
+            "format": "Empaque 1Kg Aprox",
+            "unit": "KG"
+          },
+          "merchantCategoryId": "J0301040601",
+          "prices": [
+            {
+              "label": "",
+              "icons": "cmr-icon",
+              "symbol": "S/ ",
+              "type": "cmrPrice",
+              "crossed": false,
+              "price": ["13.90"]
+            },
+            {
+              "label": "",
+              "icons": "",
+              "symbol": "S/ ",
+              "type": "internetPrice",
+              "crossed": false,
+              "price": ["14.50"]
+            },
+            {
+              "label": "",
+              "icons": "",
+              "symbol": "S/ ",
+              "type": "normalPrice",
+              "crossed": true,
+              "price": ["16.90"]
+            }
+          ]
+        },
+        {
+          "productId": "113787352",
+          "skuId": "113787354",
+          "displayName": "Carne Molida De Res x 500 g",
+          "url": "https://www.tottus.com.pe/tottus-pe/articulo/113787352/carne-molida-de-res-x-500-g",
+          "sellerId": "TOTTUS_PERU",
+          "mediaUrls": ["https://media.tottus.com.pe/tottusPE/42376798_1/public"],
+          "measurements": {
+            "format": "Empaque 500 g Aprox",
+            "unit": "UN"
+          },
+          "merchantCategoryId": "J0301010501",
+          "prices": [
+            {
+              "label": "",
+              "icons": "",
+              "symbol": "S/ ",
+              "type": "internetPrice",
+              "crossed": false,
+              "price": ["12.90"]
+            }
+          ]
+        },
+        {
+          "productId": "115807125",
+          "skuId": "115807127",
+          "displayName": "Pollo Fresco Con Menudencia Tottus",
+          "url": "https://www.tottus.com.pe/tottus-pe/articulo/115807125/pollo-fresco-con-menudencia-tottus",
+          "sellerId": "TOTTUS_PERU",
+          "mediaUrls": ["https://media.tottus.com.pe/tottusPE/40265033_1/public"],
+          "measurements": {
+            "format": "2.3 Kg Aprox",
+            "unit": "KG"
+          },
+          "merchantCategoryId": "J0301042102",
+          "prices": [
+            {
+              "label": "",
+              "icons": "",
+              "symbol": "S/ ",
+              "type": "internetPrice",
+              "crossed": false,
+              "price": ["8.90"]
+            },
+            {
+              "label": "",
+              "icons": "",
+              "symbol": "S/ ",
+              "type": "normalPrice",
+              "crossed": true,
+              "price": ["9.40"]
+            }
+          ]
+        },
+        {
+          "productId": "144942889",
+          "skuId": "144942890",
+          "displayName": "Leche UHT Entera Gloria Pack 3 Cajas 946 mL",
+          "url": "https://www.tottus.com.pe/tottus-pe/articulo/144942889/leche-uht-entera-gloria-pack-3-cajas-946-ml",
+          "sellerId": "TOTTUS_PERU",
+          "mediaUrls": ["https://media.tottus.com.pe/tottusPE/43548144_1/public"],
+          "measurements": {
+            "format": "Pack 3 Cajas 946 mL",
+            "unit": "UN"
+          },
+          "merchantCategoryId": "J0101070503",
+          "prices": [
+            {
+              "label": "",
+              "icons": "",
+              "symbol": "S/ ",
+              "crossed": false,
+              "type": "internetPrice",
+              "price": ["16.10"]
+            },
+            {
+              "label": "",
+              "icons": "",
+              "symbol": "S/ ",
+              "crossed": true,
+              "type": "normalPrice",
+              "price": ["17.90"]
+            }
+          ]
+        }
+      ],
+      "pagination": {
+        "count": 5,
+        "perPage": 48,
+        "currentPage": 1
+      }
+    }
+  }
+}

@@ -1,6 +1,6 @@
 # Roadmap
 
-Only Milestone 0 is implemented. Later milestones describe planned functionality.
+Milestone 0 is implemented. Milestone 1A has a working live Tottus dry-run and persistence implementation; live PostgreSQL verification remains pending. Later consumer milestones describe planned functionality.
 
 ## Milestone 0 — Foundation
 
@@ -9,6 +9,12 @@ Typed workspaces, Next.js placeholder, shared Base UI button, lazy database acce
 ## Milestone 1 — Data ingestion proof
 
 Implement adapters one at a time: **Tottus → Plaza Vea → Metro**. Inspect legitimate public sources, validate payloads and prove repeatable ingestion before consumer features. Establish the minimum real schema from observed requirements. Schedule conservative GitHub Actions jobs only after the adapter is proven.
+
+### Milestone 1A — Tottus ingestion proof
+
+Implemented: public hydration JSON investigation, bounded native-fetch adapter, SKU identity, Zod validation, integer PEN cents, source package/unit metadata, sanitized fixtures, generated schema/migration, atomic persistence SQL, price-state reference tests, run records, CLI, development inspection route and manual workflow. Live dry-run passed with 20 unique listings. No scraping libraries added.
+
+Pending: review/apply migration to the developer's PostgreSQL, run persisted ingestion twice, verify price transitions/rollback and concurrent writers on PostgreSQL. Availability and location-sensitive coverage remain unproven. Do not mark the full end-to-end proof complete until those checks pass. Plaza Vea and Metro are unimplemented.
 
 ## Milestone 2 — Catalog normalization
 

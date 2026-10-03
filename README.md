@@ -12,11 +12,11 @@ The roadmap aims to help people decide where to buy, when to buy, whether a pric
 
 ## Current status
 
-Foundation/bootstrap only: a Spanish placeholder homepage, shared Base UI button, strict typed workspaces, a small pure utility, unit and browser smoke tests, and lazy database access with migration tooling. No catalog, retailer ingestion, comparison, search, account system or live database schema exists yet. The homepage deliberately disables search and requires no database.
+Milestone 1A foundation: bounded public Tottus ingestion, validated listings, integer PEN cents, generated PostgreSQL schema/migration, meaningful price-state history and ingestion runs. Live dry-run ingestion has passed; migration application and live persistence still need a configured PostgreSQL database. A development-only inspection page is available at `/dev/ingestion`. Consumer search/comparison, accounts and matching remain planned. The homepage requires no database.
 
 ## Initial retailers
 
-Planned integrations: **Tottus**, **Plaza Vea**, and **Metro**, in that order. None is implemented.
+**Tottus** has a bounded category adapter. **Plaza Vea** and **Metro** remain unimplemented.
 
 ## Architecture
 
@@ -40,13 +40,13 @@ Stable dependency versions were checked against npm registry metadata before ins
 apps/web/          Next.js App Router application and E2E tests
 packages/core/     Framework-independent pure logic and unit tests
 packages/db/       Lazy Drizzle/Neon client, schema home, environment validation, migration configs
-packages/scrapers/ Future retailer ingestion boundary (no adapters/dependencies yet)
+packages/scrapers/ Tottus public-data adapter, fixtures and bounded ingestion CLI
 packages/ui/       Shared shadcn Base UI components, utilities and Tailwind theme
-.github/workflows/ Credential-free CI; future ingestion workflows belong here
+.github/workflows/ Credential-free CI and manual bounded Tottus ingestion
 docs/             Architecture, roadmap and dependency inventory
 ```
 
-Internal dependencies are intentionally minimal: `web → ui`. Core, database and scrapers are separate today; adapters will depend on core/database only when implemented. Library workspaces export typed source and are compiled by their consumer; they do not need artificial build scripts. The core package has no React, Next.js, database or browser dependency.
+Internal dependencies: `web → ui, db`; `scrapers → core, db`; `db → core`. Library workspaces export typed source and are compiled by their consumer; they do not need artificial build scripts. The core package has no React, Next.js, database or browser dependency.
 
 ## Local development
 
@@ -84,7 +84,17 @@ pnpm db:generate
 pnpm db:migrate
 ```
 
-Generation reads the schema locally and needs no database. The schema is intentionally empty, so no product tables or SQL changes are generated yet. Migration configuration loads root `.env`, respects existing process variables, and rejects a missing/invalid URL with a clear message. `createDatabase()` validates only when explicitly called. Future web database access should receive `DATABASE_URL` through Vercel environment settings or `apps/web/.env.local`. Never commit secret files. No live migration was performed during bootstrap.
+Generation reads the schema locally and needs no database. The first migration creates retailers, retailer listings, price history and ingestion runs, and seeds the three retailer identities. Migration configuration loads root `.env`, respects existing process variables, and rejects a missing/invalid URL with a clear message. `createDatabase()` validates only when explicitly called. Web database access should receive `DATABASE_URL` through Vercel environment settings or `apps/web/.env.local`. Never commit secret files. No live migration was performed during bootstrap.
+
+## Tottus ingestion
+
+```sh
+pnpm scrape:tottus -- --dry-run --limit=20
+# After reviewing and applying migrations, with DATABASE_URL in root .env:
+pnpm scrape:tottus -- --limit=50
+```
+
+Dry-run requires no database and prints five normalized samples. Default limit: 20; maximum: 500, restricted to one category. Persisted runs fail clearly without `DATABASE_URL`. `/dev/ingestion` reads current results during `pnpm dev`; set `DATABASE_URL` in `apps/web/.env.local`. The route returns 404 in production. The manual workflow `.github/workflows/ingest-tottus.yml` needs a repository secret named `DATABASE_URL`; it never applies migrations automatically. See [Tottus integration](docs/retailers/tottus.md) for observed fields and remaining verification.
 
 ## Scripts
 
@@ -95,7 +105,7 @@ Generation reads the schema locally and needs no database. The schema is intenti
 | `pnpm lint` / `pnpm lint:fix`       | Type-aware Oxlint checks / fixes                               |
 | `pnpm format` / `pnpm format:check` | Oxfmt formatting / verification                                |
 | `pnpm typecheck`                    | Generate Next types and run `tsc --noEmit` for every workspace |
-| `pnpm test`                         | Vitest tests in core and database packages                     |
+| `pnpm test`                         | Vitest tests in core, database and scraper packages            |
 | `pnpm test:e2e`                     | Chromium smoke test against a production server (build first)  |
 | `pnpm db:generate`                  | Generate reviewed migrations from the schema                   |
 | `pnpm db:migrate`                   | Apply migrations; requires `DATABASE_URL`                      |
@@ -104,7 +114,7 @@ Turbo caches builds, type checks and unit tests. The root development command st
 
 ## Testing
 
-Unit tests cover a generic pure utility and database configuration boundaries without database calls. Browser smoke testing checks the homepage, language, planned retailers and disabled upcoming search, against `next start` on port 3100.
+Unit tests cover source fixtures, money parsing, normalization, persistence SQL contracts, a deterministic price-state reference model and run outcomes without live network/database calls. They do not prove PostgreSQL execution or concurrency. Browser smoke testing checks the homepage and production blocking of developer tooling against `next start` on port 3100.
 
 ```sh
 pnpm test
@@ -125,10 +135,10 @@ Use legitimate publicly accessible data only, with conservative requests. Prefer
 
 Intended free-tier starting point (not deployed): **Vercel** for web, **Neon** for PostgreSQL, **GitHub Actions** for scheduled ingestion. Free-tier quotas and provider terms must be assessed when deploying.
 
-For a future Vercel project, select this monorepo, set Root Directory to `apps/web`, enable inclusion of source outside that directory, and use the Next.js preset with the pinned pnpm lockfile. Use `pnpm exec turbo run build --filter=@comprafino/web` from the repository root if customizing the build command; the default app `pnpm build` also works. Set `DATABASE_URL` only once server database features exist. Provision Neon separately and run reviewed migrations explicitly before dependent releases. Configure GitHub Actions database secrets only when a tested ingestion workflow needs them. Do not put credentials in build commands or client bundles.
+For a future Vercel project, select this monorepo, set Root Directory to `apps/web`, enable inclusion of source outside that directory, and use the Next.js preset with the pinned pnpm lockfile. Use `pnpm exec turbo run build --filter=@comprafino/web` from the repository root if customizing the build command; the default app `pnpm build` also works. Set `DATABASE_URL` only once server database features exist. Provision Neon separately and run reviewed migrations explicitly before dependent releases. The manual Tottus ingestion workflow requires the GitHub Actions secret `DATABASE_URL` and explicitly applied migrations. It has no schedule. Do not put credentials in build commands or client bundles.
 
 ## Roadmap
 
-Next: prove ingestion for one retailer before building consumer features. Subsequent milestones cover normalization, deterministic cross-retailer matching, search, comparison, price history, promotions, buying guidance, shopping lists and basket optimization. Accounts and additional infrastructure arrive only when justified. See the [roadmap](docs/roadmap.md).
+Next: verify Tottus migrations and repeated live persistence against PostgreSQL before adding another retailer. Subsequent milestones cover normalization, deterministic cross-retailer matching, search, comparison, price history, promotions, buying guidance, shopping lists and basket optimization. Accounts and additional infrastructure arrive only when justified. See the [roadmap](docs/roadmap.md).
 
 TanStack Form, TanStack Query and shadcn Chart/Recharts are intended options for future complexity, not current dependencies. Redis, queues, external search, AI, dedicated workers and browser scraping are also deferred.

@@ -11,6 +11,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@comprafino/db": "workspace:*",
     "@comprafino/ui": "workspace:*",
     "next": "16.3.8",
     "react": "19.3.0",
