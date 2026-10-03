@@ -12,7 +12,7 @@ The roadmap aims to help people decide where to buy, when to buy, whether a pric
 
 ## Current status
 
-Milestone 1 is complete: bounded public Tottus, Plaza Vea and Metro ingestion, validated listings, integer PEN cents, meaningful PostgreSQL price history and ingestion runs. Milestone 2 implements deterministic catalog normalization, an applied additive migration, a standalone CLI and development-only `/dev/catalog` inspection. A 150-listing audit and all seven isolated PostgreSQL tests pass; final local default build/Chromium E2E confirmation is pending because the agent encounters its known worker-port restriction. Consumer search, comparison and cross-retailer matching remain planned. The homepage requires no database.
+Milestones 0–2 are complete in the committed baseline. Milestone 3 implements deterministic canonical matching and development-only inspection. The user confirmed the original staged local production build/E2E passed. A broader independent audit expanded to 351 listings: 28 reviewed canonical groups, 34/34 observed new automatic-pair precision and 34/53 independent audit-sample recall. The matcher stayed unchanged. Final fresh local build/E2E confirmation is pending for minimal ingestion/audit additions before commit. Public search/comparison remain planned; the homepage requires no database. See [catalog matching](docs/catalog-matching.md) and the separate [independent audit](docs/catalog-matching-audit.md).
 
 ## Initial retailers
 
@@ -94,7 +94,7 @@ pnpm scrape:tottus -- --dry-run --limit=20
 pnpm scrape:tottus -- --limit=50
 ```
 
-Dry-run requires no database and prints five normalized samples. Default limit: 20; maximum: 500, restricted to one category. Persisted runs fail clearly without `DATABASE_URL`. `/dev/ingestion` reads current results during `pnpm dev`; set `DATABASE_URL` in `apps/web/.env.local`. The route returns 404 in production. The manual workflow `.github/workflows/ingest-tottus.yml` needs a repository secret named `DATABASE_URL`; it never applies migrations automatically. See [Tottus integration](docs/retailers/tottus.md) for observed fields, verification evidence and limitations.
+Dry-run requires no database and prints five normalized samples. Default limit: 20; maximum: 500, restricted to one allowlisted category per run. Default meats is unchanged; `pnpm scrape:tottus -- --category=dairy --limit=100` selects the observed dairy category. Rows missing a quote unit are skipped without inferring UN/KG. Persisted runs fail clearly without `DATABASE_URL`. `/dev/ingestion` reads current results during `pnpm dev`; set `DATABASE_URL` in `apps/web/.env.local`. The route returns 404 in production. The manual workflow `.github/workflows/ingest-tottus.yml` needs a repository secret named `DATABASE_URL`; it never applies migrations automatically. See [Tottus integration](docs/retailers/tottus.md) for observed fields, verification evidence and limitations.
 
 ## Plaza Vea ingestion
 
@@ -127,27 +127,43 @@ pnpm normalize:catalog -- --retailer=metro --limit=50 --dry-run
 
 This command requires root `.env`/`DATABASE_URL`, reads no retailer websites and leaves price history unchanged. Default 100, maximum 5000; repeated unchanged runs perform zero writes. Exact quantities use g/ml/unit; pricing basis remains separate. Source brands are retained during future ingestion; legacy title fallback and ambiguous/approximate values are conservative. `/dev/catalog` displays up to twenty rows per retailer during development and returns 404 in production. See [catalog normalization](docs/catalog-normalization.md) for model, precedence, migration, audit statistics and limitations.
 
+## Canonical product matching
+
+After applying the reviewed pg_trgm/canonical migration and refreshing normalization:
+
+```sh
+pnpm match:catalog -- --dry-run --limit=1000
+pnpm match:catalog -- --limit=1000
+pnpm match:evaluate
+pnpm match:audit
+```
+
+These commands use root `.env`/`DATABASE_URL`, without retailer requests. Matching uses exact brands/content, hard incompatibilities, PostgreSQL trigram similarity and conservative variant gates. Repeats with unchanged input perform zero canonical writes; dry-run writes nothing. A scope splitting an existing group, containing manual links or reading stale normalization refuses persistence. `/dev/matching` provides read-only development inspection and returns 404 in production. See [catalog matching](docs/catalog-matching.md) for scoring, schema, evaluation, audit gaps and limitations.
+
 ## Scripts
 
-| Command                             | Purpose                                                        |
-| ----------------------------------- | -------------------------------------------------------------- |
-| `pnpm dev`                          | Start the web development server directly through pnpm         |
-| `pnpm build`                        | Build production application through Turbo                     |
-| `pnpm lint` / `pnpm lint:fix`       | Type-aware Oxlint checks / fixes                               |
-| `pnpm format` / `pnpm format:check` | Oxfmt formatting / verification                                |
-| `pnpm typecheck`                    | Generate Next types and run `tsc --noEmit` for every workspace |
-| `pnpm test`                         | Vitest tests in core, database and scraper packages            |
-| `pnpm test:integration`             | Isolated-schema PostgreSQL tests; explicit `TEST_DATABASE_URL` |
-| `pnpm test:e2e`                     | Chromium smoke test against a production server (build first)  |
-| `pnpm db:generate`                  | Generate reviewed migrations from the schema                   |
-| `pnpm normalize:catalog`            | Normalize bounded existing listings; requires `DATABASE_URL`   |
-| `pnpm db:migrate`                   | Apply migrations; requires `DATABASE_URL`                      |
+| Command                             | Purpose                                                              |
+| ----------------------------------- | -------------------------------------------------------------------- |
+| `pnpm dev`                          | Start the web development server directly through pnpm               |
+| `pnpm build`                        | Build production application through Turbo                           |
+| `pnpm lint` / `pnpm lint:fix`       | Type-aware Oxlint checks / fixes                                     |
+| `pnpm format` / `pnpm format:check` | Oxfmt formatting / verification                                      |
+| `pnpm typecheck`                    | Generate Next types and run `tsc --noEmit` for every workspace       |
+| `pnpm test`                         | Vitest tests in core, database and scraper packages                  |
+| `pnpm test:integration`             | Isolated-schema PostgreSQL tests; explicit `TEST_DATABASE_URL`       |
+| `pnpm test:e2e`                     | Chromium smoke test against a production server (build first)        |
+| `pnpm db:generate`                  | Generate reviewed migrations from the schema                         |
+| `pnpm normalize:catalog`            | Normalize bounded existing listings; requires `DATABASE_URL`         |
+| `pnpm match:catalog`                | Match bounded fresh normalized listings; optional dry-run            |
+| `pnpm match:evaluate`               | Evaluate the 66 reviewed real pairs with PostgreSQL similarity       |
+| `pnpm match:audit`                  | Evaluate 105 independently reviewed pairs, separate from calibration |
+| `pnpm db:migrate`                   | Apply migrations; requires `DATABASE_URL`                            |
 
 Turbo caches builds, type checks and unit tests. The root development command starts the single web server directly through pnpm, avoiding Turbo's child-process output interaction with pnpm 12's Node.js fallback launcher. Development is uncached. Repository lint/format run once from the root. Only workspaces with actual tasks declare them.
 
 ## Testing
 
-Unit tests cover source fixtures, money parsing, normalization, persistence SQL contracts, a deterministic price-state reference model and run outcomes without live network/database calls. `pnpm test:integration` separately exercises the real Neon HTTP persistence batch on PostgreSQL, without Turbo caching. It skips clearly when `TEST_DATABASE_URL` is absent and never loads `.env` or falls back to `DATABASE_URL`. Export the test URL explicitly, preferably for a dedicated Neon test database/branch. The suite applies the checked-in migration inside a fresh randomly named schema, sets transaction-local search paths without a public fallback, and drops only its own schema afterwards. It applies every journaled migration; its only migration adjustment qualifies foreign keys with that test schema; live tables are untouched. The role needs schema-creation permission. An interrupted process may leave its isolated schema for manual review/cleanup. Browser smoke testing checks the homepage and production blocking of ingestion and catalog developer tooling against `next start` on port 3100.
+Unit tests cover source fixtures, money parsing, normalization, persistence SQL contracts, a deterministic price-state reference model and run outcomes without live network/database calls. `pnpm test:integration` separately exercises the real Neon HTTP persistence batch on PostgreSQL, without Turbo caching. It skips clearly when `TEST_DATABASE_URL` is absent and never loads `.env` or falls back to `DATABASE_URL`. Export the test URL explicitly, preferably for a dedicated Neon test database/branch. The suite applies the checked-in migration inside a fresh randomly named schema, sets transaction-local search paths without a public fallback, and drops only its own schema afterwards. It applies journaled table migrations, qualifying foreign keys with that test schema. The target test database must already have pg_trgm from the reviewed migration; the suite excludes extension creation to keep shared public objects untouched. Live tables are untouched. The role needs schema-creation permission. An interrupted process may leave its isolated schema for manual review/cleanup. Browser smoke testing checks the homepage and production blocking of ingestion, catalog and matching developer tooling against `next start` on port 3100.
 
 ```sh
 pnpm test
@@ -172,6 +188,6 @@ For a future Vercel project, select this monorepo, set Root Directory to `apps/w
 
 ## Roadmap
 
-Milestone 2 normalization is implemented and audited; local build/E2E confirmation remains required before its commit. The next separate milestone is deterministic cross-retailer matching, followed by search, comparison, price history, promotions, buying guidance, shopping lists and basket optimization. No matching or public search exists yet. See the [roadmap](docs/roadmap.md).
+Milestone 3 matching and the wider independent audit are verified within the bounded dataset; fresh local build/E2E confirmation remains pending for the follow-up ingestion/audit code. Public search, comparison, price history, promotions, buying guidance, shopping lists and basket optimization remain separate future work. See the [roadmap](docs/roadmap.md).
 
 TanStack Form, TanStack Query and shadcn Chart/Recharts are intended options for future complexity, not current dependencies. Redis, queues, external search, AI, dedicated workers and browser scraping are also deferred.

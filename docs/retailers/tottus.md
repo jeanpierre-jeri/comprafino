@@ -90,3 +90,9 @@ Tottus Milestone 1A ingestion correctness is complete with separate live-idempot
 ## Milestone 2 source metadata follow-up
 
 Catalog normalization now preserves the validated source `brand` string separately from titles. VTEX adapters also retain the positive source sale-unit multiplier as structured metadata; Tottus retains its observed package description/pricing basis. Existing legacy rows remain null in the new columns until ordinary fresh ingestion supplies the values. No guessed brand backfill, retailer refetch or price-history rewrite was performed for the normalization audit. Quantity/count derivation remains a separate core-driven command, not an automatic ingestion hook. See [catalog normalization](../catalog-normalization.md) for trust rules, coverage and ambiguity handling.
+
+## Milestone 3 independent-audit dairy expansion
+
+Public Peru navigation exposes `https://www.tottus.com.pe/tottus-pe/lista/CATG16061/Lacteos`. The existing adapter now accepts the single allowlisted `--category=dairy` option, preserving its default meat path and bounded sequential hydration requests. `pnpm scrape:tottus -- --category=dairy --dry-run --limit=20` verified the source; `--limit=100` persisted 100 new dairy listings from 147 source rows. Existing quote/card/reference/history semantics are unchanged.
+
+A captured Braedt cheese row omitted `measurements.unit` entirely. Such rows are validated as missing source evidence and skipped, with no guessed UN/KG price basis; explicit unknown unit values remain errors. Discovered counts still include every raw source row. A sanitized dairy fixture and regression tests verify this behavior. The expanded audit retains all prior meat listings without using weighted meat as the automatic benchmark. See [independent matching audit](../catalog-matching-audit.md) for counts, conservative precision and pending fresh local validation.

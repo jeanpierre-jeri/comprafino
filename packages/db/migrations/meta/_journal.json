@@ -15,6 +15,13 @@
       "when": 1791055396524,
       "tag": "0001_slow_marvel_zombies",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791064599903,
+      "tag": "0002_complete_malice",
+      "breakpoints": true
     }
   ]
 }

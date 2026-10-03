@@ -18,7 +18,10 @@
     "scrape:tottus": "pnpm --filter @comprafino/scrapers scrape:tottus",
     "scrape:plaza-vea": "pnpm --filter @comprafino/scrapers scrape:plaza-vea",
     "scrape:metro": "pnpm --filter @comprafino/scrapers scrape:metro",
-    "normalize:catalog": "pnpm --filter @comprafino/db normalize:catalog"
+    "normalize:catalog": "pnpm --filter @comprafino/db normalize:catalog",
+    "match:catalog": "pnpm --filter @comprafino/db match:catalog",
+    "match:evaluate": "pnpm --filter @comprafino/db match:evaluate",
+    "match:audit": "pnpm --filter @comprafino/db match:audit"
   },
   "devDependencies": {
     "oxfmt": "0.71.0",

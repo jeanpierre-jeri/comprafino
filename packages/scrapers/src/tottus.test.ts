@@ -110,3 +110,27 @@ it("preserves validated structured brand metadata for catalog normalization", ()
   };
   expect(parseTottusPage(html(data), observed).listings[0]?.sourceBrand).toBe("TOTTUS");
 });
+
+it("selects the observed dairy category while retaining the existing parser and request bounds", async () => {
+  const request = vi.fn<typeof fetch>().mockResolvedValue(new Response(html(fixture)));
+  await createTottusAdapter(request, "dairy").fetchListings(2);
+  expect(request.mock.calls[0]![0]).toEqual(
+    new URL("https://www.tottus.com.pe/tottus-pe/lista/CATG16061/Lacteos?page=1"),
+  );
+  expect(request).toHaveBeenCalledTimes(1);
+});
+
+it("skips observed dairy rows without a quote unit, preserving ordinary prices and source counts", async () => {
+  const dairy = (await import("./fixtures/tottus-dairy.json")).default;
+  const result = parseTottusPage(html(dairy), observed);
+  expect(result.discovered).toBe(6);
+  expect(result.skippedMissingPriceUnit).toBe(1);
+  expect(result.listings).toHaveLength(5);
+  expect(result.listings.every((row) => row.priceUnit === "UN")).toBe(true);
+  expect(result.listings.some((row) => row.title.includes("Edam"))).toBe(false);
+  expect(result.listings[0]!.currentPriceCents).toBe(2190);
+  expect(result.listings[0]!.regularPriceCents).toBe(2460);
+  const unsupported = structuredClone(dairy);
+  unsupported.props.pageProps.results[0]!.measurements.unit = "L";
+  expect(() => parseTottusPage(html(unsupported), observed)).toThrow(/KG|UN/u);
+});

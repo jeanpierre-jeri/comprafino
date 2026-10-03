@@ -25,3 +25,9 @@ test("developer catalog tooling is blocked in production", async ({ page }) => {
   expect(response?.status()).toBe(404);
   await expect(page.getByRole("heading", { name: "Developer catalog inspection" })).toHaveCount(0);
 });
+
+test("developer matching tooling is blocked in production", async ({ page }) => {
+  const response = await page.goto("/dev/matching");
+  expect(response?.status()).toBe(404);
+  await expect(page.getByRole("heading", { name: "Developer matching inspection" })).toHaveCount(0);
+});

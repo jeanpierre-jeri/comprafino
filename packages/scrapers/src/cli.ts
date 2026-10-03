@@ -4,36 +4,18 @@ import { createPlazaVeaAdapter } from "./plaza-vea.ts";
 import { createMetroAdapter } from "./metro.ts";
 import { ingest } from "./ingestion.ts";
 
-export function parseArguments(args: readonly string[]) {
-  let dryRun = false;
-  let limit = 20;
-  let retailer: "tottus" | "plaza-vea" | "metro" = "tottus";
-  for (const arg of args) {
-    if (arg === "--") continue;
-    if (arg === "--retailer=plaza-vea") {
-      retailer = "plaza-vea";
-      continue;
-    }
-    if (arg === "--retailer=metro") {
-      retailer = "metro";
-      continue;
-    }
-    if (arg === "--dry-run") dryRun = true;
-    else if (/^--limit=\d+$/u.test(arg)) limit = Number(arg.slice(8));
-    else throw new Error("Usage: pnpm scrape:<retailer> -- --dry-run --limit=20 (limit 1–500)");
-  }
-  if (!Number.isInteger(limit) || limit < 1 || limit > 500)
-    throw new Error("Limit must be from 1 to 500");
-  return { dryRun, limit, retailer };
-}
+import { parseArguments } from "./cli-options.ts";
 async function main() {
-  const { dryRun, limit, retailer } = parseArguments(process.argv.slice(2));
+  const { dryRun, limit, retailer, category } = parseArguments(process.argv.slice(2));
   const adapters = {
     tottus: createTottusAdapter,
     "plaza-vea": createPlazaVeaAdapter,
     metro: createMetroAdapter,
   };
-  const adapter = adapters[retailer]();
+  const adapter =
+    retailer === "tottus"
+      ? createTottusAdapter(undefined, category ?? "meat")
+      : adapters[retailer]();
   if (dryRun) {
     const result = await adapter.fetchListings(limit);
     console.log(

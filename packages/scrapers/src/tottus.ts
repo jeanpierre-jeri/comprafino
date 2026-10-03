@@ -11,7 +11,7 @@ const sourceProduct = z.object({
   url: z.url(),
   sellerId: z.literal("TOTTUS_PERU"),
   mediaUrls: z.array(z.url()).optional(),
-  measurements: z.object({ format: z.string().optional(), unit: z.enum(["KG", "UN"]) }),
+  measurements: z.object({ format: z.string().optional(), unit: z.enum(["KG", "UN"]).optional() }),
   merchantCategoryId: z.string().optional(),
   prices: z.array(
     z.object({
@@ -42,7 +42,10 @@ export function parseTottusPage(html: string, observedAt: Date) {
     throw new Error("Tottus public listing JSON is missing; stop and inspect the source");
   const raw: unknown = JSON.parse(script[1]!);
   const page = sourcePage.parse(raw).props.pageProps;
-  const listings = page.results.map((product) => {
+  // An omitted quote unit cannot safely become a package or per-KG price.
+  // Skip that source row; explicit unsupported units still fail schema validation.
+  const eligible = page.results.filter((product) => product.measurements.unit !== undefined);
+  const listings = eligible.map((product) => {
     const current = product.prices.filter(
       (price) => price.type === "internetPrice" && !price.crossed,
     );
@@ -85,10 +88,23 @@ export function parseTottusPage(html: string, observedAt: Date) {
       observedAt,
     });
   });
-  return { listings, pagination: page.pagination };
+  return {
+    listings,
+    pagination: page.pagination,
+    discovered: page.results.length,
+    skippedMissingPriceUnit: page.results.length - eligible.length,
+  };
 }
 export const tottusCategoryUrl = "https://www.tottus.com.pe/tottus-pe/lista/CATG16076/Carnes";
-export function createTottusAdapter(fetchPage: typeof fetch = fetch): RetailerAdapter {
+export const tottusCategoryUrls = {
+  meat: tottusCategoryUrl,
+  dairy: "https://www.tottus.com.pe/tottus-pe/lista/CATG16061/Lacteos",
+} as const;
+export function createTottusAdapter(
+  fetchPage: typeof fetch = fetch,
+  category: keyof typeof tottusCategoryUrls = "meat",
+): RetailerAdapter {
+  if (category !== "meat" && category !== "dairy") throw new Error("Unsupported Tottus category");
   return {
     retailer: "tottus",
     async fetchListings(limit) {
@@ -99,7 +115,7 @@ export function createTottusAdapter(fetchPage: typeof fetch = fetch): RetailerAd
       // Sequential requests, a one-second pause, no retries or unbounded crawling.
       for (let page = 1; page <= 12 && listings.size < limit; page++) {
         if (page > 1) await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-        const url = new URL(tottusCategoryUrl);
+        const url = new URL(tottusCategoryUrls[category]);
         url.searchParams.set("page", String(page));
         const response = await fetchPage(url, {
           headers: {
@@ -114,7 +130,7 @@ export function createTottusAdapter(fetchPage: typeof fetch = fetch): RetailerAd
         const parsed = parseTottusPage(await response.text(), new Date());
         if (parsed.pagination.currentPage !== page)
           throw new Error("Tottus pagination did not advance");
-        discovered += parsed.listings.length;
+        discovered += parsed.discovered;
         for (const listing of parsed.listings) {
           if (!listings.has(listing.externalId) && listings.size < limit)
             listings.set(listing.externalId, listing);

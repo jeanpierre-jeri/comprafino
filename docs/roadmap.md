@@ -1,6 +1,6 @@
 # Roadmap
 
-Milestone 0 and Milestone 1 are complete in the task baseline (Metro committed at `20acec9`). Milestone 2 normalization is implemented and audited; final local default build/Chromium E2E confirmation and commit remain pending because the agent's Turbopack worker cannot bind its port. Later consumer milestones describe planned functionality.
+Milestones 0–2 are complete in the committed task baseline (`3abd9f9`). Milestone 3's implementation, original local build/E2E and broader independent audit are verified. The expanded 351-listing dairy/meat dataset has 28 audited canonical groups; the unchanged matcher achieved 34/34 observed automatic precision in 105 new reviewed pairs. Final fresh local build/E2E confirmation is pending for the additional ingestion/category/audit code, before commit. Consumer milestones remain planned.
 
 ## Milestone 0 — Foundation
 
@@ -38,11 +38,17 @@ Implemented: framework/database-independent deterministic normalizer; explicit g
 
 Verified: 50 persisted listings per retailer, 150 total; 132 identified brands, 101 mass/volume quantities, five count quantities, 114 package counts, 35 weighted offerings, eight rows with issues and 21 unresolved rows. Twenty diverse results plus five diagnostic rows were reviewed; package-label/count parsing gaps were corrected. Final repeated runs made zero writes and left price history identical. All 152 unit tests and seven isolated-schema PostgreSQL tests pass. No new dependencies or automatic ingestion coupling.
 
-Pending: fresh local `pnpm build` and `pnpm test:e2e`, then the requested `feat: add catalog normalization` commit. Agent default/elevated Turbopack builds hit the known worker-port restriction; E2E cannot start without a fresh production artifact. Build architecture remains unchanged. [Catalog normalization](catalog-normalization.md) documents the full audit, limitations and future matching recommendation. Milestone 2 is not declared fully complete until those checks pass; Milestone 3 has not begun.
+Complete in the current user-provided task baseline, committed at `3abd9f9`. The build/E2E limitations in [catalog normalization](catalog-normalization.md) describe the historical agent run. Milestone 3 refreshed structured source metadata and normalization independently; current coverage is documented in [catalog matching](catalog-matching.md).
 
 ## Milestone 3 — Cross-retailer product matching
 
-Use identifiers, normalized attributes, deterministic rules and PostgreSQL similarity to identify equivalent products. Start without LLM matching; represent uncertainty explicitly.
+Implemented: deterministic brand-block candidates; exact quantity/dimension/count/total, pricing, brand and observed variant/container guards; pg_trgm similarity; evidence score and auto/review/incompatible/no-match outcomes; complete-link canonical grouping with retailer uniqueness; reviewed/applied additive canonical migration, versioned links, shared retailer-lock transactions, guarded recomputation/idempotency; matching/evaluation CLIs; read-only production-blocked `/dev/matching`; unit and isolated PostgreSQL tests. No AI, new retailer, public UI or npm dependency.
+
+Initial verification on 151 listings: 744 candidates, 12 auto matches, 50 reviews, 667 incompatible and 15 no-match; 12 two-retailer canonical groups with 24 links, zero three-retailer groups. Repeated normalization/matching writes nothing, and matching leaves price history unchanged. The 66 reviewed real pairs yield TP 12 / FP 0 / TN 49 / FN 5, 100% observed automatic precision and 70.59% recall. The poorly balanced 26-pair holdout has zero automatic predictions and one missed positive; independent precision was unestablished at that stage. All 12 automatic matches and at least ten reviews plus high-similarity rejects were inspected.
+
+Follow-up verified: the user confirmed local default Turbopack build and Chromium E2E passed for the earlier staged implementation. Authorized bounded dairy expansion added 100 Tottus, 50 Plaza Vea and 50 Metro listings, yielding 351 normalized listings. Matcher/normalizer hashes stayed unchanged. The frozen matcher produces 7278 candidates, 46 auto pairs, 355 reviews, 6703 incompatible and 174 no-match; saved groups are 19 two-retailer and nine three-retailer, with 65 associations. All 28 groups were inspected. A separate 105-pair independent audit includes 34 new automatic decisions, 30 reviews, 30 rejects and eleven targeted contrasts: TP 34 / FP 0 / TN 52 / FN 19, 100% observed automatic precision and 64.15% audit-sample recall. No thresholds/rules were changed. See [independent audit](catalog-matching-audit.md) for separate calibration metrics, suspicious cases and evidence limits.
+
+Pending: fresh local production build/E2E for the minimal allowlisted Tottus dairy/omitted-price-unit boundary and audit additions, then the intended commit. The independent-audit target is met; do not claim final completion before these updated-code checks pass. Stage and wait for confirmation; no push or public search.
 
 ## Milestone 4 — Search MVP
 

@@ -10,6 +10,7 @@ import {
   uniqueIndex,
   check,
   index,
+  foreignKey,
 } from "drizzle-orm/pg-core";
 const time = (name: string) => timestamp(name, { withTimezone: true });
 export const retailers = pgTable(
@@ -47,6 +48,7 @@ export const retailerListings = pgTable(
   },
   (t) => [
     uniqueIndex("listing_source_identity").on(t.retailerId, t.externalId),
+    uniqueIndex("listing_id_retailer").on(t.id, t.retailerId),
     index("listing_last_seen").on(t.lastSeenAt),
     check(
       "listing_money",
@@ -158,5 +160,57 @@ export const listingNormalizations = pgTable(
       "normalization_basis",
       sql`(${t.pricingBasis} = 'kg' and ${t.soldByWeight} and ${t.quantityValue} is null and ${t.packageCount} is null) or (${t.pricingBasis} = 'unit' and not ${t.soldByWeight})`,
     ),
+  ],
+);
+
+export const canonicalProducts = pgTable(
+  "canonical_products",
+  {
+    id: uuid("id").primaryKey(),
+    displayName: text("display_name").notNull(),
+    brandKey: text("brand_key").notNull(),
+    quantityValue: integer("quantity_value").notNull(),
+    quantityUnit: text("quantity_unit").notNull(),
+    packageCount: integer("package_count").notNull(),
+    totalQuantityValue: integer("total_quantity_value").notNull(),
+    createdAt: time("created_at").notNull().defaultNow(),
+  },
+  (t) => [
+    check(
+      "canonical_content",
+      sql`${t.quantityValue}>0 and ${t.quantityUnit} in ('g','ml','unit') and ${t.packageCount}>0 and ${t.totalQuantityValue}::bigint=${t.quantityValue}::bigint*${t.packageCount}::bigint`,
+    ),
+  ],
+);
+export const canonicalProductListings = pgTable(
+  "canonical_product_listings",
+  {
+    listingId: uuid("listing_id")
+      .primaryKey()
+      .references(() => retailerListings.id, { onDelete: "cascade" }),
+    canonicalProductId: uuid("canonical_product_id")
+      .notNull()
+      .references(() => canonicalProducts.id, { onDelete: "cascade" }),
+    retailerId: text("retailer_id")
+      .notNull()
+      .references(() => retailers.id),
+    confidence: numeric("confidence").notNull(),
+    matchingVersion: integer("matching_version").notNull(),
+    method: text("method").notNull(),
+    reasons: text("reasons").array().notNull(),
+    linkedAt: time("linked_at").notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("canonical_one_retailer").on(t.canonicalProductId, t.retailerId),
+    foreignKey({
+      name: "canonical_listing_retailer",
+      columns: [t.listingId, t.retailerId],
+      foreignColumns: [retailerListings.id, retailerListings.retailerId],
+    }).onDelete("cascade"),
+    check(
+      "canonical_confidence",
+      sql`${t.confidence}>=0 and ${t.confidence}<=1 and ${t.matchingVersion}>0`,
+    ),
+    check("canonical_method", sql`${t.method} in ('automatic','manual')`),
   ],
 );

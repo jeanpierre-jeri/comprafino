@@ -12,7 +12,10 @@
     "db:migrate": "drizzle-kit migrate --config drizzle.migrate.config.ts",
     "test": "vitest run --exclude '**/*.integration.test.ts'",
     "test:integration": "vitest run src/ingestion.integration.test.ts",
-    "normalize:catalog": "node --env-file-if-exists=../../.env --experimental-strip-types src/catalog-cli.ts"
+    "normalize:catalog": "node --env-file-if-exists=../../.env --experimental-strip-types src/catalog-cli.ts",
+    "match:catalog": "node --env-file-if-exists=../../.env --experimental-strip-types src/matching-cli.ts",
+    "match:evaluate": "node --env-file-if-exists=../../.env --experimental-strip-types src/matching-evaluate-cli.ts",
+    "match:audit": "node --env-file-if-exists=../../.env --experimental-strip-types src/matching-independent-cli.ts"
   },
   "dependencies": {
     "@comprafino/core": "workspace:*",

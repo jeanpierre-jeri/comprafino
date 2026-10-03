@@ -1,0 +1,4194 @@
+{
+  "reviewedOn": "2026-10-03",
+  "matchingVersion": 1,
+  "independence": "New pairs with at least one newly ingested listing; all 12 previously audited automatic pairs excluded. Labels collected after the frozen matcher output, without changing weights, thresholds, compatibility or title/identity logic. Manual review by the development agent, not a separate blinded reviewer; no manufacturer/barcode confirmation. Pair labels are correlated within canonical groups.",
+  "selection": "All 34 new auto pairs; top 30 new review pairs by score; top 30 new rejected pairs by similarity; 11 targeted brand/missing-content/product-family contrasts. Pairwise decisions determine automatic precision; candidate generation eligibility is recorded separately.",
+  "listings": {
+    "l000": {
+      "id": "l000",
+      "retailer": "metro",
+      "title": "Tripack Leche Entera UHT Gloria Bolsa 800ml",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "tripack leche entera uht gloria bolsa 800ml",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 800,
+          "unit": "ml"
+        },
+        "packageCount": 3,
+        "totalQuantity": {
+          "value": 2400,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "10400"
+    },
+    "l001": {
+      "id": "l001",
+      "retailer": "metro",
+      "title": "Yogurt Frutado con Fresa Danlac Botella 900g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt frutado con fresa danlac botella 900g",
+        "brand": "Danlac",
+        "brandKey": "danlac",
+        "brandSource": "source",
+        "quantity": {
+          "value": 900,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 900,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Tamaño: Familiar",
+        "issues": []
+      },
+      "sourceExternalId": "11297"
+    },
+    "l002": {
+      "id": "l002",
+      "retailer": "metro",
+      "title": "Sixpack Mezcla Láctea Bonlé Familiar Caja 480g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "sixpack mezcla láctea bonlé familiar caja 480g",
+        "brand": "Bonlé",
+        "brandKey": "bonlé",
+        "brandSource": "source",
+        "quantity": {
+          "value": 480,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2880,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "34895"
+    },
+    "l003": {
+      "id": "l003",
+      "retailer": "metro",
+      "title": "Queso Parmesano Rallado Laive 35g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "queso parmesano rallado laive 35g",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 35,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 35,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "3490"
+    },
+    "l007": {
+      "id": "l007",
+      "retailer": "metro",
+      "title": "Sixpack Mezcla Láctea Sin Lactosa Bonlé Caja 480g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "sixpack mezcla láctea sin lactosa bonlé caja 480g",
+        "brand": "Bonlé",
+        "brandKey": "bonlé",
+        "brandSource": "source",
+        "quantity": {
+          "value": 480,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2880,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "36493"
+    },
+    "l011": {
+      "id": "l011",
+      "retailer": "metro",
+      "title": "Yogurt Griego Vakimu Frutos del Bosque 960g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt griego vakimu frutos del bosque 960g",
+        "brand": "Vakimu",
+        "brandKey": "vakimu",
+        "brandSource": "source",
+        "quantity": {
+          "value": 960,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 960,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "39141600"
+    },
+    "l012": {
+      "id": "l012",
+      "retailer": "metro",
+      "title": "Yogurt Griego Vakimu Original 960g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt griego vakimu original 960g",
+        "brand": "Vakimu",
+        "brandKey": "vakimu",
+        "brandSource": "source",
+        "quantity": {
+          "value": 960,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 960,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "39141623"
+    },
+    "l015": {
+      "id": "l015",
+      "retailer": "metro",
+      "title": "Leche Evaporada Entera Cuisine & Co Lata 410g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche evaporada entera cuisine & co lata 410g",
+        "brand": "Cuisine & Co",
+        "brandKey": "cuisine & co",
+        "brandSource": "source",
+        "quantity": {
+          "value": 410,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 410,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "39148085"
+    },
+    "l018": {
+      "id": "l018",
+      "retailer": "metro",
+      "title": "Queso Fresco Sin Lactosa Laive x kg",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "queso fresco sin lactosa laive x kg",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "pricingBasis": "kg",
+        "soldByWeight": true,
+        "sourcePackageDescription": "unitMultiplier: 0.3 kg",
+        "issues": []
+      },
+      "sourceExternalId": "39170294"
+    },
+    "l023": {
+      "id": "l023",
+      "retailer": "metro",
+      "title": "Queso Fresco Laive x kg",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "queso fresco laive x kg",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "pricingBasis": "kg",
+        "soldByWeight": true,
+        "sourcePackageDescription": "unitMultiplier: 0.3 kg",
+        "issues": []
+      },
+      "sourceExternalId": "39184930"
+    },
+    "l026": {
+      "id": "l026",
+      "retailer": "metro",
+      "title": "Queso Edam Laive 90g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "queso edam laive 90g",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 90,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 90,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "39192648"
+    },
+    "l031": {
+      "id": "l031",
+      "retailer": "metro",
+      "title": "Leche Reconstituida Gloria Lata 390g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche reconstituida gloria lata 390g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Envase: Lata; Formato: Líquido; Tamaño: Individual; Pack-Unitario: Unitario",
+        "issues": []
+      },
+      "sourceExternalId": "39233308"
+    },
+    "l032": {
+      "id": "l032",
+      "retailer": "metro",
+      "title": "Sixpack Leche Reconstituida Gloria Lata 390g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "sixpack leche reconstituida gloria lata 390g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2340,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Formato: Líquido; Pack-Unitario: Pack",
+        "issues": []
+      },
+      "sourceExternalId": "39233309"
+    },
+    "l036": {
+      "id": "l036",
+      "retailer": "metro",
+      "title": "Yogurt Gloria Griego con Miel 800g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt gloria griego con miel 800g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 800,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 800,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "39235492"
+    },
+    "l037": {
+      "id": "l037",
+      "retailer": "metro",
+      "title": "Yogurt Gloria Griego Sabor Frutos Rojos 800g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt gloria griego sabor frutos rojos 800g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 800,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 800,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "39235493"
+    },
+    "l042": {
+      "id": "l042",
+      "retailer": "metro",
+      "title": "Yogurt Gloria Griego Sabor Mango 120g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt gloria griego sabor mango 120g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 120,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 120,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "39246130"
+    },
+    "l043": {
+      "id": "l043",
+      "retailer": "metro",
+      "title": "Yogurt Gloria Griego Sabor Natural 800g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt gloria griego sabor natural 800g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 800,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 800,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Envase: Bolsa; Formato: Envasado; Pack-Unitario: Unitario",
+        "issues": []
+      },
+      "sourceExternalId": "39246131"
+    },
+    "l044": {
+      "id": "l044",
+      "retailer": "metro",
+      "title": "Yogurt Gloria Griego Sabor Mango 800g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt gloria griego sabor mango 800g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 800,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 800,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Envase: Bolsa; Formato: Envasado; Pack-Unitario: Unitario",
+        "issues": []
+      },
+      "sourceExternalId": "39246134"
+    },
+    "l047": {
+      "id": "l047",
+      "retailer": "metro",
+      "title": "Leche Light Laive Sin Lactosa Botella 390g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche light laive sin lactosa botella 390g",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "39256389"
+    },
+    "l048": {
+      "id": "l048",
+      "retailer": "metro",
+      "title": "Sixpack Leche Light Laive Sin Lactosa Botella 390g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "sixpack leche light laive sin lactosa botella 390g",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2340,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "39256390"
+    },
+    "l050": {
+      "id": "l050",
+      "retailer": "metro",
+      "title": "Sixpack Mezcla Láctea Laive Light Sin Lactosa Caja 480g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "sixpack mezcla láctea laive light sin lactosa caja 480g",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 480,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2880,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "39257363"
+    },
+    "l054": {
+      "id": "l054",
+      "retailer": "metro",
+      "title": "Yogurt Laive Griego Frutos Rojos 115g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt laive griego frutos rojos 115g",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 115,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 115,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "39269160"
+    },
+    "l057": {
+      "id": "l057",
+      "retailer": "metro",
+      "title": "Leche UHT Sin Lactosa Gloria Zero Lacto Bolsa 800ml",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche uht sin lactosa gloria zero lacto bolsa 800ml",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 800,
+          "unit": "ml"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 800,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "39272346"
+    },
+    "l058": {
+      "id": "l058",
+      "retailer": "metro",
+      "title": "Tripack Leche UHT Sin Lactosa Gloria Zero Lacto Caja 946ml",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "tripack leche uht sin lactosa gloria zero lacto caja 946ml",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "packageCount": 3,
+        "totalQuantity": {
+          "value": 2838,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "39274018"
+    },
+    "l059": {
+      "id": "l059",
+      "retailer": "metro",
+      "title": "Yogurt Frutado Danlac Maracumango 900g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt frutado danlac maracumango 900g",
+        "brand": "Danlac",
+        "brandKey": "danlac",
+        "brandSource": "source",
+        "quantity": {
+          "value": 900,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 900,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "39276111"
+    },
+    "l066": {
+      "id": "l066",
+      "retailer": "metro",
+      "title": "Mantequilla con Sal Laive 350g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "mantequilla con sal laive 350g",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 350,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 350,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "39314713"
+    },
+    "l067": {
+      "id": "l067",
+      "retailer": "metro",
+      "title": "Leche Parcialmente Descremada UHT Gloria Zero Lacto",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche parcialmente descremada uht gloria zero lacto",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": ["unknown-package-count"]
+      },
+      "sourceExternalId": "39318834"
+    },
+    "l070": {
+      "id": "l070",
+      "retailer": "metro",
+      "title": "Sixpack Leche Light Gloria Zero Lacto Lata 390g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "sixpack leche light gloria zero lacto lata 390g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2340,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "39324387"
+    },
+    "l071": {
+      "id": "l071",
+      "retailer": "metro",
+      "title": "Queso Mozarella Gloria Bola 250g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "queso mozarella gloria bola 250g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 250,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 250,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "39324668"
+    },
+    "l073": {
+      "id": "l073",
+      "retailer": "metro",
+      "title": "Sixpack Leche Gloria Niños Lata 390g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "sixpack leche gloria niños lata 390g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2340,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "39337181"
+    },
+    "l076": {
+      "id": "l076",
+      "retailer": "metro",
+      "title": "Margarina Sello de Oro Barra 200g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "margarina sello de oro barra 200g",
+        "brand": "Sello De Oro",
+        "brandKey": "sello de oro",
+        "brandSource": "source",
+        "quantity": {
+          "value": 200,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 200,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "4218"
+    },
+    "l078": {
+      "id": "l078",
+      "retailer": "metro",
+      "title": "Mantequilla con Sal Gloria 180g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "mantequilla con sal gloria 180g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 180,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 180,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "4235"
+    },
+    "l079": {
+      "id": "l079",
+      "retailer": "metro",
+      "title": "Mantequilla con Sal Gloria 390g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "mantequilla con sal gloria 390g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "4238"
+    },
+    "l080": {
+      "id": "l080",
+      "retailer": "metro",
+      "title": "Mantequilla con Sal Laive 180g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "mantequilla con sal laive 180g",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 180,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 180,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "4244"
+    },
+    "l086": {
+      "id": "l086",
+      "retailer": "metro",
+      "title": "Yogurt Bebible Gloria Fresa Galonera 1.6kg",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt bebible gloria fresa galonera 1.6kg",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 1600,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 1600,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Tamaño: Familiar",
+        "issues": []
+      },
+      "sourceExternalId": "5423"
+    },
+    "l090": {
+      "id": "l090",
+      "retailer": "metro",
+      "title": "Sixpack Mezcla Láctea Ideal Cremosita Lata 390g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "sixpack mezcla láctea ideal cremosita lata 390g",
+        "brand": "Ideal",
+        "brandKey": "ideal",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2340,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "8419"
+    },
+    "l091": {
+      "id": "l091",
+      "retailer": "metro",
+      "title": "Pack x6 Mezcla Láctea Laive Sin Lactosa 480g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "pack x6 mezcla láctea laive sin lactosa 480g",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 480,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2880,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "8441"
+    },
+    "l096": {
+      "id": "l096",
+      "retailer": "metro",
+      "title": "Tripack Leche Entera UHT Gloria Caja 946ml",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "tripack leche entera uht gloria caja 946ml",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "packageCount": 3,
+        "totalQuantity": {
+          "value": 2838,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "8501"
+    },
+    "l098": {
+      "id": "l098",
+      "retailer": "metro",
+      "title": "Tripack Leche UHT Gloria Light Caja 946ml",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "tripack leche uht gloria light caja 946ml",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "packageCount": 3,
+        "totalQuantity": {
+          "value": 2838,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": null,
+        "issues": []
+      },
+      "sourceExternalId": "8510"
+    },
+    "l100": {
+      "id": "l100",
+      "retailer": "plaza-vea",
+      "title": "Leche Light UHT GLORIA Bolsa 800ml",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche light uht gloria bolsa 800ml",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 800,
+          "unit": "ml"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 800,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Bolsa 800ml",
+        "issues": []
+      },
+      "sourceExternalId": "10019771"
+    },
+    "l101": {
+      "id": "l101",
+      "retailer": "plaza-vea",
+      "title": "Leche Entera UHT GLORIA Bolsa 800ml",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche entera uht gloria bolsa 800ml",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 800,
+          "unit": "ml"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 800,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Bolsa 800ml",
+        "issues": []
+      },
+      "sourceExternalId": "10020837"
+    },
+    "l102": {
+      "id": "l102",
+      "retailer": "plaza-vea",
+      "title": "Leche Entera UHT GLORIA Bolsa 800ml Paquete 3un",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche entera uht gloria bolsa 800ml paquete 3un",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 800,
+          "unit": "ml"
+        },
+        "packageCount": 3,
+        "totalQuantity": {
+          "value": 2400,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 3un",
+        "issues": []
+      },
+      "sourceExternalId": "10020839"
+    },
+    "l104": {
+      "id": "l104",
+      "retailer": "plaza-vea",
+      "title": "Mezcla Láctea sin Lactosa LAIVE Caja 480g Paquete 6un",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "mezcla láctea sin lactosa laive caja 480g paquete 6un",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 480,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2880,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 6un",
+        "issues": []
+      },
+      "sourceExternalId": "10207330"
+    },
+    "l108": {
+      "id": "l108",
+      "retailer": "plaza-vea",
+      "title": "Mantequilla con Sal LAIVE Barra 180g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "mantequilla con sal laive barra 180g",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 180,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 180,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Barra 180g",
+        "issues": []
+      },
+      "sourceExternalId": "10585194"
+    },
+    "l109": {
+      "id": "l109",
+      "retailer": "plaza-vea",
+      "title": "Mezcla Láctea IDEAL Cremosita Lata 390g Paquete 6un",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "mezcla láctea ideal cremosita lata 390g paquete 6un",
+        "brand": "Ideal",
+        "brandKey": "ideal",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2340,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 6un",
+        "issues": []
+      },
+      "sourceExternalId": "10670704"
+    },
+    "l111": {
+      "id": "l111",
+      "retailer": "plaza-vea",
+      "title": "Mezcla Láctea BONLÉ Familiar Caja 480g Paquete 6un",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "mezcla láctea bonlé familiar caja 480g paquete 6un",
+        "brand": "Bonlé",
+        "brandKey": "bonlé",
+        "brandSource": "source",
+        "quantity": {
+          "value": 480,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2880,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 6un",
+        "issues": []
+      },
+      "sourceExternalId": "10723769"
+    },
+    "l116": {
+      "id": "l116",
+      "retailer": "plaza-vea",
+      "title": "Yogurt Batido GLORIA Griego Sabor Mango Vaso 120g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt batido gloria griego sabor mango vaso 120g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 120,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 120,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Vaso 120g",
+        "issues": []
+      },
+      "sourceExternalId": "10761914"
+    },
+    "l121": {
+      "id": "l121",
+      "retailer": "plaza-vea",
+      "title": "Yogurt Parcialmente Descremado GLORIA Fresa Galonera 1.6Kg",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt parcialmente descremado gloria fresa galonera 1.6kg",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 1600,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 1600,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Galonera 1.6Kg",
+        "issues": []
+      },
+      "sourceExternalId": "10761928"
+    },
+    "l123": {
+      "id": "l123",
+      "retailer": "plaza-vea",
+      "title": "Mezcla Láctea sin Lactosa BONLÉ Caja 480g Paquete 6un",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "mezcla láctea sin lactosa bonlé caja 480g paquete 6un",
+        "brand": "Bonlé",
+        "brandKey": "bonlé",
+        "brandSource": "source",
+        "quantity": {
+          "value": 480,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2880,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 6un",
+        "issues": []
+      },
+      "sourceExternalId": "10790638"
+    },
+    "l126": {
+      "id": "l126",
+      "retailer": "plaza-vea",
+      "title": "Leche sin Lactosa LAIVE Light Botella 390g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche sin lactosa laive light botella 390g",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Botella 390g",
+        "issues": []
+      },
+      "sourceExternalId": "11102740"
+    },
+    "l127": {
+      "id": "l127",
+      "retailer": "plaza-vea",
+      "title": "Leche Light sin Lactosa LAIVE Botella 390g Paquete 6un",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche light sin lactosa laive botella 390g paquete 6un",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2340,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 6un",
+        "issues": []
+      },
+      "sourceExternalId": "11102742"
+    },
+    "l131": {
+      "id": "l131",
+      "retailer": "plaza-vea",
+      "title": "Yogurt Parcialmente Descremado GLORIA Fresa y Plátano Galonera 1.6Kg",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt parcialmente descremado gloria fresa y plátano galonera 1.6kg",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 1600,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 1600,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Galonera 1.6Kg",
+        "issues": []
+      },
+      "sourceExternalId": "11115780"
+    },
+    "l136": {
+      "id": "l136",
+      "retailer": "plaza-vea",
+      "title": "Mezcla Láctea Light sin Lactosa LAIVE Caja 480g Paquete 6un",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "mezcla láctea light sin lactosa laive caja 480g paquete 6un",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 480,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2880,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 6un",
+        "issues": []
+      },
+      "sourceExternalId": "11129262"
+    },
+    "l139": {
+      "id": "l139",
+      "retailer": "plaza-vea",
+      "title": "Leche Light sin Lactosa UHT LAIVE Caja 946ml Paquete 4un",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche light sin lactosa uht laive caja 946ml paquete 4un",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "packageCount": 4,
+        "totalQuantity": {
+          "value": 3784,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 4un",
+        "issues": []
+      },
+      "sourceExternalId": "11266788"
+    },
+    "l140": {
+      "id": "l140",
+      "retailer": "plaza-vea",
+      "title": "Leche sin Lactosa UHT LAIVE Caja 946ml Paquete 4un",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche sin lactosa uht laive caja 946ml paquete 4un",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "packageCount": 4,
+        "totalQuantity": {
+          "value": 3784,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 4un",
+        "issues": []
+      },
+      "sourceExternalId": "11266791"
+    },
+    "l141": {
+      "id": "l141",
+      "retailer": "plaza-vea",
+      "title": "Leche Entera UHT LAIVE Caja 946ml Paquete 4un",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche entera uht laive caja 946ml paquete 4un",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "packageCount": 4,
+        "totalQuantity": {
+          "value": 3784,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 4un",
+        "issues": []
+      },
+      "sourceExternalId": "11266793"
+    },
+    "l142": {
+      "id": "l142",
+      "retailer": "plaza-vea",
+      "title": "Mantequilla con Sal GLORIA Paquete 180g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "mantequilla con sal gloria paquete 180g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 180,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 180,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 180g",
+        "issues": []
+      },
+      "sourceExternalId": "11266795"
+    },
+    "l143": {
+      "id": "l143",
+      "retailer": "plaza-vea",
+      "title": "Mantequilla sin Sal GLORIA Paquete 180g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "mantequilla sin sal gloria paquete 180g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 180,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 180,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 180g",
+        "issues": []
+      },
+      "sourceExternalId": "11266796"
+    },
+    "l144": {
+      "id": "l144",
+      "retailer": "plaza-vea",
+      "title": "Yogurt Griego LAIVE Sabor a Frutos Rojos Vaso 115g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt griego laive sabor a frutos rojos vaso 115g",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 115,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 115,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Vaso 115g",
+        "issues": []
+      },
+      "sourceExternalId": "11289303"
+    },
+    "l148": {
+      "id": "l148",
+      "retailer": "plaza-vea",
+      "title": "Yogurt Frutado DANLAC Maracumango Botella 900g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt frutado danlac maracumango botella 900g",
+        "brand": "Danlac",
+        "brandKey": "danlac",
+        "brandSource": "source",
+        "quantity": {
+          "value": 900,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 900,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Botella 900g",
+        "issues": []
+      },
+      "sourceExternalId": "11298857"
+    },
+    "l149": {
+      "id": "l149",
+      "retailer": "plaza-vea",
+      "title": "Leche GLORIA Zero Lacto Lata 390g Paquete 6un",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche gloria zero lacto lata 390g paquete 6un",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2340,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 6un",
+        "issues": []
+      },
+      "sourceExternalId": "11358979"
+    },
+    "l150": {
+      "id": "l150",
+      "retailer": "plaza-vea",
+      "title": "Leche UHT GLORIA Zero Lacto Bolsa 800ml",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche uht gloria zero lacto bolsa 800ml",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 800,
+          "unit": "ml"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 800,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Bolsa 800ml",
+        "issues": []
+      },
+      "sourceExternalId": "11358983"
+    },
+    "l152": {
+      "id": "l152",
+      "retailer": "plaza-vea",
+      "title": "Leche sin Lactosa LAIVE Botella 390g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche sin lactosa laive botella 390g",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Botella 390g",
+        "issues": []
+      },
+      "sourceExternalId": "11359041"
+    },
+    "l153": {
+      "id": "l153",
+      "retailer": "plaza-vea",
+      "title": "Leche sin Lactosa LAIVE Botella 390g Paquete 6un",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche sin lactosa laive botella 390g paquete 6un",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2340,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 6un",
+        "issues": []
+      },
+      "sourceExternalId": "11359043"
+    },
+    "l155": {
+      "id": "l155",
+      "retailer": "plaza-vea",
+      "title": "Leche Reconstituida Entera GLORIA Lata 390g Paquete 6un",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche reconstituida entera gloria lata 390g paquete 6un",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2340,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 6un",
+        "issues": []
+      },
+      "sourceExternalId": "11359692"
+    },
+    "l157": {
+      "id": "l157",
+      "retailer": "plaza-vea",
+      "title": "Leche UHT GLORIA Zero Lacto Caja 946ml",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche uht gloria zero lacto caja 946ml",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Caja 946ml",
+        "issues": []
+      },
+      "sourceExternalId": "11370895"
+    },
+    "l158": {
+      "id": "l158",
+      "retailer": "plaza-vea",
+      "title": "Leche Reconstituida Entera GLORIA Lata 390g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche reconstituida entera gloria lata 390g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Lata 390g",
+        "issues": []
+      },
+      "sourceExternalId": "11389960"
+    },
+    "l159": {
+      "id": "l159",
+      "retailer": "plaza-vea",
+      "title": "Leche Light GLORIA Lata 390g Paquete 6un",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche light gloria lata 390g paquete 6un",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2340,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 6un",
+        "issues": []
+      },
+      "sourceExternalId": "11390020"
+    },
+    "l160": {
+      "id": "l160",
+      "retailer": "plaza-vea",
+      "title": "Leche Evaporada Entera GLORIA Lata 390g Paquete 6un",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche evaporada entera gloria lata 390g paquete 6un",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2340,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 6un",
+        "issues": []
+      },
+      "sourceExternalId": "11390023"
+    },
+    "l161": {
+      "id": "l161",
+      "retailer": "plaza-vea",
+      "title": "Leche UHT GLORIA Zero Lacto Caja 946ml Paquete 3un",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche uht gloria zero lacto caja 946ml paquete 3un",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "packageCount": 3,
+        "totalQuantity": {
+          "value": 2838,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 3un",
+        "issues": []
+      },
+      "sourceExternalId": "11390026"
+    },
+    "l172": {
+      "id": "l172",
+      "retailer": "plaza-vea",
+      "title": "Mantequilla con Sal LAIVE Pote 350g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "mantequilla con sal laive pote 350g",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 350,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 350,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Pote 350g",
+        "issues": []
+      },
+      "sourceExternalId": "11884053"
+    },
+    "l173": {
+      "id": "l173",
+      "retailer": "plaza-vea",
+      "title": "Yogurt Griego GLORIA Batido Frutos Rojos Bolsa 800g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt griego gloria batido frutos rojos bolsa 800g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 800,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 800,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Bolsa 800g",
+        "issues": []
+      },
+      "sourceExternalId": "11935862"
+    },
+    "l174": {
+      "id": "l174",
+      "retailer": "plaza-vea",
+      "title": "Leche UHT GLORIA Zero Lacto Bolsa 800ml Paquete 3un",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche uht gloria zero lacto bolsa 800ml paquete 3un",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 800,
+          "unit": "ml"
+        },
+        "packageCount": 3,
+        "totalQuantity": {
+          "value": 2400,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 3un",
+        "issues": []
+      },
+      "sourceExternalId": "11935898"
+    },
+    "l175": {
+      "id": "l175",
+      "retailer": "plaza-vea",
+      "title": "Leche UHT GLORIA Niños Sabor a Chocolate Caja 180ml Paquete 6un",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche uht gloria niños sabor a chocolate caja 180ml paquete 6un",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 180,
+          "unit": "ml"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 1080,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 6un",
+        "issues": []
+      },
+      "sourceExternalId": "12010297"
+    },
+    "l176": {
+      "id": "l176",
+      "retailer": "plaza-vea",
+      "title": "Yogurt Batido GLORIA Griego con Miel Bolsa 800g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt batido gloria griego con miel bolsa 800g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 800,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 800,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Bolsa 800g",
+        "issues": []
+      },
+      "sourceExternalId": "12081822"
+    },
+    "l177": {
+      "id": "l177",
+      "retailer": "plaza-vea",
+      "title": "Leche Light GLORIA Zero Lacto Lata 390g Paquete 6un",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche light gloria zero lacto lata 390g paquete 6un",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2340,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 6un",
+        "issues": []
+      },
+      "sourceExternalId": "12101168"
+    },
+    "l190": {
+      "id": "l190",
+      "retailer": "plaza-vea",
+      "title": "Leche Light UHT GLORIA Caja 946ml Paquete 3un",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche light uht gloria caja 946ml paquete 3un",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "packageCount": 3,
+        "totalQuantity": {
+          "value": 2838,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 3un",
+        "issues": []
+      },
+      "sourceExternalId": "3112"
+    },
+    "l193": {
+      "id": "l193",
+      "retailer": "plaza-vea",
+      "title": "Leche Entera UHT GLORIA Caja 946ml",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche entera uht gloria caja 946ml",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Caja 946ml",
+        "issues": []
+      },
+      "sourceExternalId": "3533"
+    },
+    "l194": {
+      "id": "l194",
+      "retailer": "plaza-vea",
+      "title": "Leche Entera UHT GLORIA Caja 946ml Paquete 3un",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche entera uht gloria caja 946ml paquete 3un",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "packageCount": 3,
+        "totalQuantity": {
+          "value": 2838,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Paquete 3un",
+        "issues": []
+      },
+      "sourceExternalId": "3701"
+    },
+    "l196": {
+      "id": "l196",
+      "retailer": "plaza-vea",
+      "title": "Margarina SELLO DE ORO Barra 200g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "margarina sello de oro barra 200g",
+        "brand": "Sello De Oro",
+        "brandKey": "sello de oro",
+        "brandSource": "source",
+        "quantity": {
+          "value": 200,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 200,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Barra 200g",
+        "issues": []
+      },
+      "sourceExternalId": "4694"
+    },
+    "l197": {
+      "id": "l197",
+      "retailer": "plaza-vea",
+      "title": "Yogurt Griego VAKIMU Original Pote 960g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt griego vakimu original pote 960g",
+        "brand": "Vakimu",
+        "brandKey": "vakimu",
+        "brandSource": "source",
+        "quantity": {
+          "value": 960,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 960,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Pote 960g",
+        "issues": []
+      },
+      "sourceExternalId": "54150"
+    },
+    "l198": {
+      "id": "l198",
+      "retailer": "plaza-vea",
+      "title": "Yogurt Griego VAKIMU Frutos del Bosque Pote 960g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt griego vakimu frutos del bosque pote 960g",
+        "brand": "Vakimu",
+        "brandKey": "vakimu",
+        "brandSource": "source",
+        "quantity": {
+          "value": 960,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 960,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Pote 960g",
+        "issues": []
+      },
+      "sourceExternalId": "54200"
+    },
+    "l201": {
+      "id": "l201",
+      "retailer": "tottus",
+      "title": "Mezcla Láctea Laive Sin Lactosa Sixpack Caja 480 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "mezcla láctea laive sin lactosa sixpack caja 480 g",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 480,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2880,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Sixpack Caja 480 g",
+        "issues": []
+      },
+      "sourceExternalId": "113705686"
+    },
+    "l202": {
+      "id": "l202",
+      "retailer": "tottus",
+      "title": "Leche Evaporada Tottus Sixpack Lata 410 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche evaporada tottus sixpack lata 410 g",
+        "brand": "Tottus",
+        "brandKey": "tottus",
+        "brandSource": "source",
+        "quantity": {
+          "value": 410,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2460,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Sixpack Lata 410 g",
+        "issues": []
+      },
+      "sourceExternalId": "113705718"
+    },
+    "l204": {
+      "id": "l204",
+      "retailer": "tottus",
+      "title": "Yogurt Frutado Danlac Fresa Botella 900 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt frutado danlac fresa botella 900 g",
+        "brand": "Danlac",
+        "brandKey": "danlac",
+        "brandSource": "source",
+        "quantity": {
+          "value": 900,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 900,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Botella 900 g",
+        "issues": []
+      },
+      "sourceExternalId": "113706247"
+    },
+    "l205": {
+      "id": "l205",
+      "retailer": "tottus",
+      "title": "Margarina en Barra Sello de Oro Empaque 200 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "margarina en barra sello de oro empaque 200 g",
+        "brand": "Sello De Oro",
+        "brandKey": "sello de oro",
+        "brandSource": "source",
+        "quantity": {
+          "value": 200,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 200,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Empaque 200 g",
+        "issues": []
+      },
+      "sourceExternalId": "113706393"
+    },
+    "l207": {
+      "id": "l207",
+      "retailer": "tottus",
+      "title": "Mezcla Láctea Ideal Cremosita Sixpack Lata 390 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "mezcla láctea ideal cremosita sixpack lata 390 g",
+        "brand": "Ideal",
+        "brandKey": "ideal",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2340,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Sixpack Lata 390 g",
+        "issues": []
+      },
+      "sourceExternalId": "113706451"
+    },
+    "l224": {
+      "id": "l224",
+      "retailer": "tottus",
+      "title": "Queso Parmesano Rallado Laive Bolsa 35 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "queso parmesano rallado laive bolsa 35 g",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 35,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 35,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Rallado",
+        "issues": []
+      },
+      "sourceExternalId": "113928693"
+    },
+    "l228": {
+      "id": "l228",
+      "retailer": "tottus",
+      "title": "Queso Edam Laive Empaque 180 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "queso edam laive empaque 180 g",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 180,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 180,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "En Tajadas",
+        "issues": []
+      },
+      "sourceExternalId": "115462459"
+    },
+    "l229": {
+      "id": "l229",
+      "retailer": "tottus",
+      "title": "Queso Edam Laive Empaque 440 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "queso edam laive empaque 440 g",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 440,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 440,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "En Tajadas",
+        "issues": []
+      },
+      "sourceExternalId": "115805366"
+    },
+    "l230": {
+      "id": "l230",
+      "retailer": "tottus",
+      "title": "Mantequilla con Sal Laive en Barra Empaque 180 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "mantequilla con sal laive en barra empaque 180 g",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 180,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 180,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Empaque 180 g",
+        "issues": []
+      },
+      "sourceExternalId": "115805397"
+    },
+    "l231": {
+      "id": "l231",
+      "retailer": "tottus",
+      "title": "Mezcla Láctea Bonlé Familiar Sixpack Caja 480 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "mezcla láctea bonlé familiar sixpack caja 480 g",
+        "brand": "Bonle",
+        "brandKey": "bonle",
+        "brandSource": "source",
+        "quantity": {
+          "value": 480,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2880,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Sixpack Caja 480 g",
+        "issues": []
+      },
+      "sourceExternalId": "115807100"
+    },
+    "l232": {
+      "id": "l232",
+      "retailer": "tottus",
+      "title": "Leche Gloria Reconstituida Sixpack Lata 170 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche gloria reconstituida sixpack lata 170 g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 170,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 1020,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Sixpack Lata 170 g",
+        "issues": []
+      },
+      "sourceExternalId": "115807116"
+    },
+    "l257": {
+      "id": "l257",
+      "retailer": "tottus",
+      "title": "Queso Fresco Laive x Kg",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "queso fresco laive x kg",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "pricingBasis": "kg",
+        "soldByWeight": true,
+        "sourcePackageDescription": "Empaque 300 g Aprox.",
+        "issues": []
+      },
+      "sourceExternalId": "115845012"
+    },
+    "l259": {
+      "id": "l259",
+      "retailer": "tottus",
+      "title": "Queso Fresco Laive Sin Lactosa x Kg",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "queso fresco laive sin lactosa x kg",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "pricingBasis": "kg",
+        "soldByWeight": true,
+        "sourcePackageDescription": "Empaque 300 g Aprox.",
+        "issues": []
+      },
+      "sourceExternalId": "115845022"
+    },
+    "l294": {
+      "id": "l294",
+      "retailer": "tottus",
+      "title": "Mezcla Láctea Laive Light Sin Lactosa Sixpack Caja 480 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "mezcla láctea laive light sin lactosa sixpack caja 480 g",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 480,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2880,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Sixpack Caja 480 g",
+        "issues": []
+      },
+      "sourceExternalId": "125379282"
+    },
+    "l295": {
+      "id": "l295",
+      "retailer": "tottus",
+      "title": "Mantequilla Con Sal 180 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "mantequilla con sal 180 g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 180,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 180,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Empaque 180 g",
+        "issues": []
+      },
+      "sourceExternalId": "126571918"
+    },
+    "l297": {
+      "id": "l297",
+      "retailer": "tottus",
+      "title": "Mantequilla Sin Sal Gloria en Barra Empaque 180 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "mantequilla sin sal gloria en barra empaque 180 g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 180,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 180,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Empaque 180 g",
+        "issues": []
+      },
+      "sourceExternalId": "126846843"
+    },
+    "l298": {
+      "id": "l298",
+      "retailer": "tottus",
+      "title": "Leche Laive Light Sin Lactosa Pack 4 Cajas 946 mL",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche laive light sin lactosa pack 4 cajas 946 ml",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "packageCount": 4,
+        "totalQuantity": {
+          "value": 3784,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Pack 4 Cajas 946 mL",
+        "issues": []
+      },
+      "sourceExternalId": "126990822"
+    },
+    "l299": {
+      "id": "l299",
+      "retailer": "tottus",
+      "title": "Leche Laive Entera Pack 4 Cajas 946 mL",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche laive entera pack 4 cajas 946 ml",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "packageCount": 4,
+        "totalQuantity": {
+          "value": 3784,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Pack 4 Cajas 946 mL",
+        "issues": []
+      },
+      "sourceExternalId": "126990858"
+    },
+    "l300": {
+      "id": "l300",
+      "retailer": "tottus",
+      "title": "Leche Laive Sin Lactosa Pack 4 Cajas 946 mL",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche laive sin lactosa pack 4 cajas 946 ml",
+        "brand": "Laive",
+        "brandKey": "laive",
+        "brandSource": "source",
+        "quantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "packageCount": 4,
+        "totalQuantity": {
+          "value": 3784,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Pack 4 Cajas 946 mL",
+        "issues": []
+      },
+      "sourceExternalId": "126990866"
+    },
+    "l301": {
+      "id": "l301",
+      "retailer": "tottus",
+      "title": "Yogurt Frutado Danlac Maracumango Botella 900 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt frutado danlac maracumango botella 900 g",
+        "brand": "Danlac",
+        "brandKey": "danlac",
+        "brandSource": "source",
+        "quantity": {
+          "value": 900,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 900,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Botella 900 g",
+        "issues": []
+      },
+      "sourceExternalId": "127373637"
+    },
+    "l305": {
+      "id": "l305",
+      "retailer": "tottus",
+      "title": "Leche Gloria Zero Lacto Sixpack Lata 390 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche gloria zero lacto sixpack lata 390 g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2340,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Sixpack Lata 390 g",
+        "issues": []
+      },
+      "sourceExternalId": "129087768"
+    },
+    "l306": {
+      "id": "l306",
+      "retailer": "tottus",
+      "title": "Leche Gloria Reconstituida Entera Lata 390 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche gloria reconstituida entera lata 390 g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Lata 390 g",
+        "issues": []
+      },
+      "sourceExternalId": "129087922"
+    },
+    "l307": {
+      "id": "l307",
+      "retailer": "tottus",
+      "title": "Leche Gloria Reconstituida Entera Sixpack Lata 390 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche gloria reconstituida entera sixpack lata 390 g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2340,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Sixpack Lata 390 g",
+        "issues": []
+      },
+      "sourceExternalId": "129087925"
+    },
+    "l308": {
+      "id": "l308",
+      "retailer": "tottus",
+      "title": "Leche Gloria Evaporada Entera Sixpack Lata 390 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche gloria evaporada entera sixpack lata 390 g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2340,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Sixpack Lata 390 g",
+        "issues": []
+      },
+      "sourceExternalId": "129087931"
+    },
+    "l309": {
+      "id": "l309",
+      "retailer": "tottus",
+      "title": "Leche Gloria Light Sixpack Lata 390 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche gloria light sixpack lata 390 g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2340,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Sixpack Lata 390 g",
+        "issues": []
+      },
+      "sourceExternalId": "129087937"
+    },
+    "l316": {
+      "id": "l316",
+      "retailer": "tottus",
+      "title": "Yogurt Griego Natural Tottus Envase 960 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt griego natural tottus envase 960 g",
+        "brand": "Tottus",
+        "brandKey": "tottus",
+        "brandSource": "source",
+        "quantity": {
+          "value": 960,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 960,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Envase 960 g",
+        "issues": []
+      },
+      "sourceExternalId": "144573090"
+    },
+    "l317": {
+      "id": "l317",
+      "retailer": "tottus",
+      "title": "Yogurt Griego Tottus Frutos del Bosque Botella 960 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt griego tottus frutos del bosque botella 960 g",
+        "brand": "Tottus",
+        "brandKey": "tottus",
+        "brandSource": "source",
+        "quantity": {
+          "value": 960,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 960,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Botella 960 g",
+        "issues": []
+      },
+      "sourceExternalId": "144573182"
+    },
+    "l320": {
+      "id": "l320",
+      "retailer": "tottus",
+      "title": "Yogurt Tottus Fresa Botella 1.6 Kg",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt tottus fresa botella 1.6 kg",
+        "brand": "Tottus",
+        "brandKey": "tottus",
+        "brandSource": "source",
+        "quantity": {
+          "value": 1600,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 1600,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Botella 1.6 Kg",
+        "issues": []
+      },
+      "sourceExternalId": "144788761"
+    },
+    "l322": {
+      "id": "l322",
+      "retailer": "tottus",
+      "title": "Leche UHT Sin Lactosa Gloria Zero Lacto Pack 3 Cajas 946 mL",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche uht sin lactosa gloria zero lacto pack 3 cajas 946 ml",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "packageCount": 3,
+        "totalQuantity": {
+          "value": 2838,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Pack 3 Cajas 946 mL",
+        "issues": []
+      },
+      "sourceExternalId": "144942677"
+    },
+    "l325": {
+      "id": "l325",
+      "retailer": "tottus",
+      "title": "Leche UHT Entera Gloria Pack 3 Cajas 946 mL",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche uht entera gloria pack 3 cajas 946 ml",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "packageCount": 3,
+        "totalQuantity": {
+          "value": 2838,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Pack 3 Cajas 946 mL",
+        "issues": []
+      },
+      "sourceExternalId": "144942890"
+    },
+    "l326": {
+      "id": "l326",
+      "retailer": "tottus",
+      "title": "Leche Light UHT Gloria Pack 3 Cajas 946 mL",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche light uht gloria pack 3 cajas 946 ml",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "packageCount": 3,
+        "totalQuantity": {
+          "value": 2838,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Pack 3 Cajas 946 mL",
+        "issues": []
+      },
+      "sourceExternalId": "145796790"
+    },
+    "l331": {
+      "id": "l331",
+      "retailer": "tottus",
+      "title": "Yogurt Parcialmente Descremado Gloria Fresa Plátano Botella 1.6 Kg",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt parcialmente descremado gloria fresa plátano botella 1.6 kg",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 1600,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 1600,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Botella 1.6 Kg",
+        "issues": []
+      },
+      "sourceExternalId": "145813824"
+    },
+    "l333": {
+      "id": "l333",
+      "retailer": "tottus",
+      "title": "Leche UHT Gloria Niños Sabor Chocolate Empaque 6 Und 180 mL",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche uht gloria niños sabor chocolate empaque 6 und 180 ml",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 180,
+          "unit": "ml"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 1080,
+          "unit": "ml"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Empaque 6 Und",
+        "issues": []
+      },
+      "sourceExternalId": "146228720"
+    },
+    "l334": {
+      "id": "l334",
+      "retailer": "tottus",
+      "title": "Yogurt Gloria Griego Frutos Rojos Bolsa 800 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt gloria griego frutos rojos bolsa 800 g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 800,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 800,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Bolsa 800 g",
+        "issues": []
+      },
+      "sourceExternalId": "146239182"
+    },
+    "l336": {
+      "id": "l336",
+      "retailer": "tottus",
+      "title": "Yogurt Gloria Griego Natural Bolsa 800 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt gloria griego natural bolsa 800 g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 800,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 800,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Bolsa 800 g",
+        "issues": []
+      },
+      "sourceExternalId": "146645487"
+    },
+    "l339": {
+      "id": "l339",
+      "retailer": "tottus",
+      "title": "Yogurt Gloria Griego Mango Bolsa 800 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt gloria griego mango bolsa 800 g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 800,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 800,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Bolsa 800 g",
+        "issues": []
+      },
+      "sourceExternalId": "146645565"
+    },
+    "l340": {
+      "id": "l340",
+      "retailer": "tottus",
+      "title": "Yogurt Gloria Griego con Miel Bolsa 800 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "yogurt gloria griego con miel bolsa 800 g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 800,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 800,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Bolsa 800 g",
+        "issues": []
+      },
+      "sourceExternalId": "146645648"
+    },
+    "l341": {
+      "id": "l341",
+      "retailer": "tottus",
+      "title": "Queso Mozzarella Gloria Bola Empaque 250 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "queso mozzarella gloria bola empaque 250 g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 250,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 250,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Empaque 250 g",
+        "issues": []
+      },
+      "sourceExternalId": "146645654"
+    },
+    "l343": {
+      "id": "l343",
+      "retailer": "tottus",
+      "title": "Leche Light Gloria Zero Lacto Sixpack Lata 390 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche light gloria zero lacto sixpack lata 390 g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2340,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Sixpack Lata 390 g",
+        "issues": []
+      },
+      "sourceExternalId": "148088542"
+    },
+    "l348": {
+      "id": "l348",
+      "retailer": "tottus",
+      "title": "Leche Gloria Niños Sixpack Lata 390 g",
+      "attributes": {
+        "normalizationVersion": 1,
+        "normalizedTitle": "leche gloria niños sixpack lata 390 g",
+        "brand": "Gloria",
+        "brandKey": "gloria",
+        "brandSource": "source",
+        "quantity": {
+          "value": 390,
+          "unit": "g"
+        },
+        "packageCount": 6,
+        "totalQuantity": {
+          "value": 2340,
+          "unit": "g"
+        },
+        "pricingBasis": "unit",
+        "soldByWeight": false,
+        "sourcePackageDescription": "Sixpack Lata 390 g",
+        "issues": []
+      },
+      "sourceExternalId": "153527576"
+    }
+  },
+  "pairs": [
+    {
+      "a": "l050",
+      "b": "l136",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Laive Light lactose-free dairy mixture, six 480 g cartons; light modifier present on both sides.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l050",
+      "b": "l294",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Laive Light lactose-free mixture, six 480 g cartons across Metro/Tottus.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l136",
+      "b": "l294",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Laive Light lactose-free mixture, six 480 g cartons across Plaza Vea/Tottus.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l123",
+      "b": "l007",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Bonlé lactose-free mixture, six 480 g cartons; no Familiar or Light substitution.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l224",
+      "b": "l003",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Laive grated Parmesan, single 35 g. Metro omits bag wording; no contrary format appears.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l198",
+      "b": "l011",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Vakimu Greek forest-fruit yogurt, single 960 g. Neither is Original or Mango Pasión.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l177",
+      "b": "l343",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Gloria Light Zero Lacto six-pack of 390 g cans; both light and lactose variant agree.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l196",
+      "b": "l076",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Sello de Oro margarine, single 200 g bar; brand, content and bar presentation agree.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l126",
+      "b": "l047",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Laive Light lactose-free milk, single 390 g bottle; six-packs remain separate.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l150",
+      "b": "l057",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Gloria Zero Lacto UHT milk, single 800 ml bag; lactose-free alias is compatible.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l149",
+      "b": "l305",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Gloria Zero Lacto milk six-pack of 390 g cans; Light not named on either side.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l322",
+      "b": "l161",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Gloria Zero Lacto UHT milk, three 946 ml cartons across Tottus/Plaza Vea.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l343",
+      "b": "l070",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Gloria Light Zero Lacto milk, six 390 g cans across Tottus/Metro.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l078",
+      "b": "l295",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Gloria salted butter single 180 g; Tottus structured brand supplies the omitted title brand.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l142",
+      "b": "l295",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Gloria salted butter single 180 g across Plaza Vea/Tottus; generic package wording only.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l073",
+      "b": "l348",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Gloria Niños milk six-pack of 390 g cans. Neither title states honey; the separately explicit honey formulation stays review. Identity relies on source descriptions, not manufacturer confirmation.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l207",
+      "b": "l090",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Ideal Cremosita dairy mixture, six 390 g cans across Tottus/Metro.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l098",
+      "b": "l326",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Gloria Light UHT milk, three 946 ml cartons across Metro/Tottus; whole remains separate.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l326",
+      "b": "l190",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Gloria Light UHT milk, three 946 ml cartons across Tottus/Plaza Vea.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l301",
+      "b": "l148",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Danlac Frutado Maracumango yogurt single 900 g across Tottus/Plaza Vea; flavor agrees.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l159",
+      "b": "l309",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Gloria Light milk six-pack of 390 g cans; neither side names Zero Lacto or whole.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l322",
+      "b": "l058",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Gloria Zero Lacto UHT milk, three 946 ml cartons across Tottus/Metro.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l066",
+      "b": "l172",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Laive salted butter single 350 g; Metro omits pot wording, with no contradictory format.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l207",
+      "b": "l109",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Ideal Cremosita dairy mixture, six 390 g cans across Tottus/Plaza Vea.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l301",
+      "b": "l059",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Danlac Frutado Maracumango yogurt single 900 g across Tottus/Metro.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l148",
+      "b": "l059",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Danlac Frutado Maracumango yogurt single 900 g across Plaza Vea/Metro.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l194",
+      "b": "l325",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Gloria whole UHT milk, three 946 ml cartons across Plaza Vea/Tottus.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l096",
+      "b": "l325",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Gloria whole UHT milk, three 946 ml cartons across Metro/Tottus.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l155",
+      "b": "l307",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Gloria reconstituted whole milk, six 390 g cans; evaporated formulation remains separate.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l036",
+      "b": "l340",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Gloria Greek honey yogurt single 800 g; honey modifier present on both sides.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l308",
+      "b": "l160",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Gloria evaporated whole milk, six 390 g cans; reconstituted formulation remains separate.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l091",
+      "b": "l201",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same standard Laive lactose-free mixture six-pack of 480 g cartons across Metro/Tottus; Light group separate.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l104",
+      "b": "l201",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same standard Laive lactose-free mixture six-pack of 480 g cartons across Plaza Vea/Tottus.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l158",
+      "b": "l306",
+      "expected": "match",
+      "stratum": "new_auto",
+      "rationale": "Same Gloria reconstituted whole milk single 390 g can; six-pack remains separate.",
+      "observedDecision": "auto_match"
+    },
+    {
+      "a": "l331",
+      "b": "l131",
+      "expected": "match",
+      "rationale": "Same partially skim strawberry-banana yogurt; conjunction y differs",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l333",
+      "b": "l175",
+      "expected": "match",
+      "rationale": "Same children chocolate UHT six-pack, 180 ml each; preposition a differs",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l298",
+      "b": "l139",
+      "expected": "review",
+      "rationale": "UHT processing omitted in Tottus; no proof from fixed quantity alone",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l230",
+      "b": "l080",
+      "expected": "match",
+      "rationale": "Same salted Laive butter 180 g; en barra wording differs",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l230",
+      "b": "l108",
+      "expected": "match",
+      "rationale": "Same salted Laive butter bar 180 g; preposition en differs",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l341",
+      "b": "l071",
+      "expected": "match",
+      "rationale": "Same Gloria mozzarella ball 250 g; mozzarella spelling differs",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l297",
+      "b": "l143",
+      "expected": "match",
+      "rationale": "Same unsalted Gloria butter 180 g; en barra wording differs",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l331",
+      "b": "l121",
+      "expected": "no_match",
+      "rationale": "Strawberry-banana versus strawberry; flavor differs",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l204",
+      "b": "l001",
+      "expected": "match",
+      "rationale": "Same Danlac frutado strawberry yogurt bottle 900 g; con differs",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l050",
+      "b": "l201",
+      "expected": "no_match",
+      "rationale": "Explicit light mixture versus standard lactose-free mixture",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l136",
+      "b": "l091",
+      "expected": "no_match",
+      "rationale": "Explicit light mixture versus standard lactose-free mixture",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l136",
+      "b": "l201",
+      "expected": "no_match",
+      "rationale": "Explicit light mixture versus standard lactose-free mixture",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l294",
+      "b": "l091",
+      "expected": "no_match",
+      "rationale": "Explicit light mixture versus standard lactose-free mixture",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l294",
+      "b": "l104",
+      "expected": "no_match",
+      "rationale": "Explicit light mixture versus standard lactose-free mixture",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l037",
+      "b": "l334",
+      "expected": "match",
+      "rationale": "Same Gloria Greek red-fruit yogurt bag 800 g; sabor descriptor differs",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l140",
+      "b": "l300",
+      "expected": "review",
+      "rationale": "UHT processing omitted in Tottus; uncertain formulation",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l334",
+      "b": "l173",
+      "expected": "match",
+      "rationale": "Same Gloria Greek red-fruit yogurt bag 800 g; batido style descriptor omitted",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l043",
+      "b": "l336",
+      "expected": "match",
+      "rationale": "Same Gloria Greek natural yogurt 800 g; sabor descriptor differs",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l042",
+      "b": "l116",
+      "expected": "match",
+      "rationale": "Same Gloria Greek mango yogurt 120 g; batido style descriptor omitted",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l149",
+      "b": "l343",
+      "expected": "no_match",
+      "rationale": "Light Zero Lacto versus standard Zero Lacto milk",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l152",
+      "b": "l047",
+      "expected": "no_match",
+      "rationale": "Light lactose-free Laive versus standard lactose-free milk",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l177",
+      "b": "l305",
+      "expected": "no_match",
+      "rationale": "Light Zero Lacto versus standard Zero Lacto milk",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l305",
+      "b": "l070",
+      "expected": "no_match",
+      "rationale": "Light Zero Lacto versus standard Zero Lacto milk",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l196",
+      "b": "l205",
+      "expected": "match",
+      "rationale": "Same Sello de Oro margarine bar 200 g; en differs",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l076",
+      "b": "l205",
+      "expected": "match",
+      "rationale": "Same Sello de Oro margarine bar 200 g; en differs",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l176",
+      "b": "l036",
+      "expected": "match",
+      "rationale": "Same Gloria Greek honey yogurt bag 800 g; batido descriptor omitted",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l176",
+      "b": "l340",
+      "expected": "match",
+      "rationale": "Same Gloria Greek honey yogurt bag 800 g; batido descriptor omitted",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l144",
+      "b": "l054",
+      "expected": "match",
+      "rationale": "Same Laive Greek red-fruit yogurt 115 g; sabor a descriptor differs",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l299",
+      "b": "l141",
+      "expected": "review",
+      "rationale": "UHT processing omitted in Tottus whole milk; uncertain processing",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l339",
+      "b": "l044",
+      "expected": "match",
+      "rationale": "Same Gloria Greek mango yogurt 800 g; sabor descriptor differs",
+      "stratum": "high_review",
+      "observedDecision": "review"
+    },
+    {
+      "a": "l102",
+      "b": "l325",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_quantity, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l193",
+      "b": "l325",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_package_count, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l000",
+      "b": "l325",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_quantity, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l023",
+      "b": "l257",
+      "expected": "review",
+      "rationale": "Both variable-weight cheeses lack fixed package identity; do not automatically establish a purchasable variant",
+      "stratum": "high_reject",
+      "observedDecision": "no_match"
+    },
+    {
+      "a": "l158",
+      "b": "l307",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_package_count, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l026",
+      "b": "l229",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_quantity, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l026",
+      "b": "l228",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_quantity, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l152",
+      "b": "l300",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_dimension, different_package_count, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l101",
+      "b": "l325",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_quantity, different_package_count, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l031",
+      "b": "l232",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_quantity, different_package_count, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l150",
+      "b": "l322",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_quantity, different_package_count, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l098",
+      "b": "l100",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_quantity, different_package_count, different_total_quantity, different_container",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l298",
+      "b": "l048",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_dimension, different_package_count, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l298",
+      "b": "l126",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_dimension, different_package_count, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l298",
+      "b": "l047",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_dimension, different_package_count, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l298",
+      "b": "l127",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_dimension, different_package_count, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l048",
+      "b": "l126",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_package_count, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l032",
+      "b": "l232",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_quantity, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l259",
+      "b": "l018",
+      "expected": "review",
+      "rationale": "Both variable-weight cheeses lack fixed package identity; do not automatically establish a purchasable variant",
+      "stratum": "high_reject",
+      "observedDecision": "no_match"
+    },
+    {
+      "a": "l174",
+      "b": "l057",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_package_count, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l174",
+      "b": "l322",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_quantity, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l174",
+      "b": "l058",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_quantity, different_total_quantity, different_container",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l153",
+      "b": "l300",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_dimension, different_package_count, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l057",
+      "b": "l322",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_quantity, different_package_count, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l057",
+      "b": "l161",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_quantity, different_package_count, different_total_quantity, different_container",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l057",
+      "b": "l157",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_quantity, different_total_quantity, different_container",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l322",
+      "b": "l157",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_package_count, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l080",
+      "b": "l172",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_quantity, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l295",
+      "b": "l079",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_quantity, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l326",
+      "b": "l100",
+      "expected": "no_match",
+      "rationale": "Reviewed fixed quantity/dimension/count/container conflict: different_quantity, different_package_count, different_total_quantity",
+      "stratum": "high_reject",
+      "observedDecision": "incompatible"
+    },
+    {
+      "a": "l316",
+      "b": "l012",
+      "expected": "no_match",
+      "rationale": "Store-brand Tottus vs national-brand Vakimu Greek natural/original 960 g",
+      "stratum": "targeted",
+      "observedDecision": "not_generated"
+    },
+    {
+      "a": "l317",
+      "b": "l011",
+      "expected": "no_match",
+      "rationale": "Store-brand Tottus vs Vakimu forest-fruit Greek 960 g",
+      "stratum": "targeted",
+      "observedDecision": "not_generated"
+    },
+    {
+      "a": "l320",
+      "b": "l086",
+      "expected": "no_match",
+      "rationale": "Tottus vs Gloria strawberry yogurt, both 1600 g",
+      "stratum": "targeted",
+      "observedDecision": "not_generated"
+    },
+    {
+      "a": "l202",
+      "b": "l015",
+      "expected": "no_match",
+      "rationale": "Tottus vs Cuisine & Co evaporated milk 410 g; pack count also differs",
+      "stratum": "targeted",
+      "observedDecision": "not_generated"
+    },
+    {
+      "a": "l202",
+      "b": "l160",
+      "expected": "no_match",
+      "rationale": "Tottus store brand vs Gloria milk six-pack; per-can content also differs",
+      "stratum": "targeted",
+      "observedDecision": "not_generated"
+    },
+    {
+      "a": "l316",
+      "b": "l197",
+      "expected": "no_match",
+      "rationale": "Tottus vs Vakimu Greek natural/original 960 g across another retailer",
+      "stratum": "targeted",
+      "observedDecision": "not_generated"
+    },
+    {
+      "a": "l306",
+      "b": "l079",
+      "expected": "no_match",
+      "rationale": "Same brand and total 390 g, but milk vs butter; family/format differ",
+      "stratum": "targeted",
+      "observedDecision": "not_generated"
+    },
+    {
+      "a": "l067",
+      "b": "l157",
+      "expected": "review",
+      "rationale": "Metro quantity/count unknown and diagnostic present; skim formulation unspecified at Plaza Vea",
+      "stratum": "targeted",
+      "observedDecision": "not_generated"
+    },
+    {
+      "a": "l067",
+      "b": "l322",
+      "expected": "review",
+      "rationale": "Metro quantity/count unknown; exact purchasable package cannot be established",
+      "stratum": "targeted",
+      "observedDecision": "not_generated"
+    },
+    {
+      "a": "l231",
+      "b": "l002",
+      "expected": "match",
+      "rationale": "Same Bonle Familiar mixture six-pack 480 g; source-brand Bonle/Bonlé accent spelling differs",
+      "stratum": "targeted",
+      "observedDecision": "not_generated"
+    },
+    {
+      "a": "l231",
+      "b": "l111",
+      "expected": "match",
+      "rationale": "Same Bonle Familiar mixture six-pack 480 g; exact brand keys differ by accent",
+      "stratum": "targeted",
+      "observedDecision": "not_generated"
+    }
+  ],
+  "canonicalGroups": [
+    {
+      "members": ["l002", "l111"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l102", "l000"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l050", "l136", "l294"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l308", "l160"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l198", "l011"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l149", "l305"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l194", "l096", "l325"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l012", "l197"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l158", "l306"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l078", "l142", "l295"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l150", "l057"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l196", "l076"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l098", "l326", "l190"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l177", "l343", "l070"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l073", "l348"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l123", "l007"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l224", "l003"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l048", "l127"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l301", "l148", "l059"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l126", "l047"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l091", "l104", "l201"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l322", "l161", "l058"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l080", "l108"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l159", "l309"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l207", "l090", "l109"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l036", "l340"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l066", "l172"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    },
+    {
+      "members": ["l155", "l307"],
+      "reviewed": true,
+      "outcome": "consistent_variant",
+      "notes": "Reviewed every member for brand, dimension, quantity/count/total, flavor/formulation and presentation. No false canonical merge established from available source evidence."
+    }
+  ],
+  "frozenFiles": {
+    "packages/core/src/matching.ts": "e46dda295c9a6f69118d0e431b6def1ff9005a3b658c09b985c29e6381d5da57",
+    "packages/db/src/matching.ts": "f24d9274a478cb2348cb629f245408b11146d05669560d91a9da3173a51f1466",
+    "packages/core/src/catalog.ts": "901e6656b37caea1114ae295bfe4e682602b5a57f15c43f3f8d5be49a359d395"
+  },
+  "findings": [
+    {
+      "case": "Gloria Niños canned milk",
+      "severity": "source_evidence_limit",
+      "finding": "Both matched titles omit honey; separate explicit honey listing remains review. No contrary formulation established, but manufacturer-level proof is absent."
+    },
+    {
+      "case": "Gloria salted butter 180 g",
+      "severity": "possible_same_retailer_duplicate",
+      "finding": "Tottus also lists an Envase 180 g title for the same brand/salt/content. Different source identities are retained; strict title tokens leave that alternative outside the canonical group. No within-retailer merge attempted."
+    },
+    {
+      "case": "Bonle / Bonlé source brands",
+      "severity": "false_negative",
+      "finding": "Two independent positives are not generated because source brand keys differ by accent. The frozen brand policy is retained."
+    },
+    {
+      "case": "Strawberry-banana / strawberry yogurt and light / standard mixtures",
+      "severity": "review_boundary",
+      "finding": "Some negatives retain very high review scores, but differing identity tokens prevent automatic links. No false canonical association."
+    },
+    {
+      "case": "Missing quantity/count Metro Zero Lacto",
+      "severity": "unresolved",
+      "finding": "Unknown content and normalization diagnostic remain nonautomatic."
+    }
+  ]
+}

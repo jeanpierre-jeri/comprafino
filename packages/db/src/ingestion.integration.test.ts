@@ -4,9 +4,14 @@ import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
+import { normalizeCatalogListing } from "@comprafino/core";
 import type { NormalizedRetailerListing } from "@comprafino/core";
 import { requireDatabaseUrl } from "./env.ts";
 import { catalogRecordSchema, persistCatalogNormalizations } from "./catalog.ts";
+import { evaluateIndependentAudit } from "./matching-independent.ts";
+import { evaluateMatching } from "./matching-evaluate.ts";
+import { evaluatePairs, persistMatching } from "./matching.ts";
+import type { MatchingSnapshot } from "./matching.ts";
 import { persistListings } from "./ingestion.ts";
 import * as schema from "./schema.ts";
 
@@ -90,6 +95,7 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
     const statements = journal.entries.flatMap(({ tag }) =>
       readFileSync(new URL(`../migrations/${tag}.sql`, import.meta.url), "utf8")
         .split("--> statement-breakpoint")
+        .filter((text) => !text.trim().startsWith("CREATE EXTENSION"))
         .map((text) => client.query(text.replaceAll('"public".', `${quotedSchema}.`))),
     );
     await client.transaction([
@@ -371,5 +377,205 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
         query(`update listing_normalizations set ${change} where listing_id = $1`, [rows[0]!.id]),
       ).rejects.toMatchObject({ code: "23514" });
     }
+  }, 30_000);
+  async function matchingRows(externalIds: string[]): Promise<MatchingSnapshot[]> {
+    const records = z
+      .array(
+        z.object({ raw: z.string(), normalized: z.string(), priorGroupId: z.string().nullable() }),
+      )
+      .parse(
+        await query(
+          `select to_jsonb(l)::text as raw,to_jsonb(n)::text as normalized,c.canonical_product_id::text as "priorGroupId"
+       from retailer_listings l join listing_normalizations n on n.listing_id=l.id
+       left join canonical_product_listings c on c.listing_id=l.id where l.external_id=any($1::text[]) order by l.id`,
+          [JSON.stringify(externalIds).replace("[", "{").replace("]", "}")],
+        ),
+      );
+    return records.map((r) => {
+      const raw = z
+        .object({
+          id: z.uuid(),
+          retailer_id: z.enum(["tottus", "metro", "plaza-vea"]),
+          title: z.string(),
+          price_unit: z.enum(["UN", "KG"]),
+          source_brand: z.string().nullable(),
+        })
+        .parse(JSON.parse(r.raw) as unknown);
+      return {
+        id: raw.id,
+        retailer: raw.retailer_id,
+        title: raw.title,
+        attributes: normalizeCatalogListing({
+          title: raw.title,
+          priceUnit: raw.price_unit,
+          sourceBrand: raw.source_brand,
+        }),
+        rawSnapshot: r.raw,
+        normalizedSnapshot: r.normalized,
+        priorGroupId: r.priorGroupId,
+      };
+    });
+  }
+  async function seedMatch(prefix: string) {
+    for (const retailer of ["metro", "plaza-vea"] as const) {
+      const value = {
+        ...observation(`${prefix}-${retailer}`, 0),
+        retailer,
+        title: "Leche Gloria Entera Caja 946ml",
+        sourceBrand: "Gloria",
+      };
+      await persistListings(db, retailer, [value]);
+      await persistCatalogNormalizations(db, await catalogRows(value.externalId));
+    }
+    const rows = await matchingRows([`${prefix}-metro`, `${prefix}-plaza-vea`]);
+    const pairs = await evaluatePairs(db, [[rows[0]!, rows[1]!]]);
+    return { rows, pairs };
+  }
+  it("creates canonical links with real pg_trgm, idempotent concurrent reruns and SQL constraints", async () => {
+    const { rows, pairs } = await seedMatch("matching");
+    expect(pairs[0]!.result).toMatchObject({ decision: "auto_match", similarity: 1 });
+    const results = await Promise.all([
+      persistMatching(db, rows, pairs),
+      persistMatching(db, rows, pairs),
+    ]);
+    expect(results.reduce((sum, r) => sum + r.productsCreated, 0)).toBe(1);
+    expect(results.reduce((sum, r) => sum + r.linksCreated, 0)).toBe(2);
+    const products = await query("select * from canonical_products order by id");
+    const links = await query("select * from canonical_product_listings order by listing_id");
+    expect(await persistMatching(db, rows, pairs)).toMatchObject({
+      productsCreated: 0,
+      linksCreated: 0,
+      linksRemoved: 0,
+      stale: false,
+    });
+    expect(await query("select * from canonical_products order by id")).toEqual(products);
+    expect(await query("select * from canonical_product_listings order by listing_id")).toEqual(
+      links,
+    );
+    await expect(
+      query(
+        "insert into canonical_product_listings select * from canonical_product_listings limit 1",
+      ),
+    ).rejects.toMatchObject({ code: "23505" });
+    await expect(
+      query("update canonical_product_listings set retailer_id='tottus' where listing_id=$1", [
+        rows[0]!.id,
+      ]),
+    ).rejects.toMatchObject({ code: "23503" });
+    await persistListings(db, rows[0]!.retailer, [
+      { ...observation("matching-duplicate-retailer", 0), retailer: rows[0]!.retailer },
+    ]);
+    const duplicate = (await catalogRows("matching-duplicate-retailer"))[0]!;
+    await expect(
+      query(
+        `insert into canonical_product_listings(listing_id,canonical_product_id,retailer_id,confidence,matching_version,method,reasons)
+      select $1::uuid,canonical_product_id,retailer_id,confidence,matching_version,method,reasons from canonical_product_listings where listing_id=$2`,
+        [duplicate.id, rows[0]!.id],
+      ),
+    ).rejects.toMatchObject({ code: "23505", constraint: "canonical_one_retailer" });
+    await expect(
+      query("update canonical_product_listings set confidence=1.1 where listing_id=$1", [
+        rows[0]!.id,
+      ]),
+    ).rejects.toMatchObject({ code: "23514" });
+    await query(
+      "update retailer_listings set title='Leche Entera Gloria Caja 946ml' where id=$1 or id=$2",
+      rows.map((r) => r.id),
+    );
+    for (const externalId of ["matching-metro", "matching-plaza-vea"])
+      await persistCatalogNormalizations(db, await catalogRows(externalId));
+    const renamed = await matchingRows(["matching-metro", "matching-plaza-vea"]);
+    const renamedPairs = await evaluatePairs(db, [[renamed[0]!, renamed[1]!]]);
+    expect(await persistMatching(db, renamed, renamedPairs)).toMatchObject({
+      productsCreated: 0,
+      productsUpdated: 1,
+      linksCreated: 0,
+      linksRemoved: 0,
+    });
+  }, 30_000);
+  it("refuses stale snapshots and scopes splitting groups; protects manual decisions and rebuilds obsolete links", async () => {
+    const { rows, pairs } = await seedMatch("matching-rebuild");
+    await persistMatching(db, rows, pairs);
+    const fresh = await matchingRows(["matching-rebuild-metro", "matching-rebuild-plaza-vea"]);
+    expect(await persistMatching(db, [fresh[0]!], [])).toMatchObject({
+      stale: true,
+      linksRemoved: 0,
+    });
+    await query("update canonical_product_listings set method='manual' where listing_id=$1", [
+      fresh[0]!.id,
+    ]);
+    expect(await persistMatching(db, fresh, [])).toMatchObject({ stale: true, linksRemoved: 0 });
+    await query("update canonical_product_listings set method='automatic' where listing_id=$1", [
+      fresh[0]!.id,
+    ]);
+    await query(
+      "update retailer_listings set title='Leche Gloria Entera Caja 1500ml' where id=$1",
+      [fresh[0]!.id],
+    );
+    expect(await persistMatching(db, fresh, pairs)).toMatchObject({
+      stale: true,
+      linksCreated: 0,
+      linksRemoved: 0,
+    });
+    await persistCatalogNormalizations(
+      db,
+      await catalogRows(
+        fresh[0]!.retailer === "metro" ? "matching-rebuild-metro" : "matching-rebuild-plaza-vea",
+      ),
+    );
+    const updated = await matchingRows(["matching-rebuild-metro", "matching-rebuild-plaza-vea"]);
+    const rejected = await evaluatePairs(db, [[updated[0]!, updated[1]!]]);
+    expect(rejected[0]!.result.decision).toBe("incompatible");
+    expect(await persistMatching(db, updated, rejected)).toMatchObject({
+      stale: false,
+      linksRemoved: 2,
+      productsRemoved: 1,
+    });
+  }, 30_000);
+  it("rolls back the whole canonical assignment when an association constraint fails", async () => {
+    const { rows, pairs } = await seedMatch("matching-rollback");
+    const before = await query("select * from canonical_products order by id");
+    await query(
+      `alter table canonical_product_listings add constraint test_reject_match check(listing_id<>'${rows[0]!.id}'::uuid)`,
+    );
+    try {
+      await expect(persistMatching(db, rows, pairs)).rejects.toMatchObject({ code: "23514" });
+      expect(await query("select * from canonical_products order by id")).toEqual(before);
+      expect(
+        await query(
+          "select * from canonical_product_listings where listing_id=$1 or listing_id=$2",
+          rows.map((r) => r.id),
+        ),
+      ).toEqual([]);
+    } finally {
+      await query("alter table canonical_product_listings drop constraint test_reject_match");
+    }
+  }, 30_000);
+
+  it("evaluates every reviewed real pair with PostgreSQL similarity and preserves automatic precision", async () => {
+    const evaluated = await evaluateMatching(db);
+    const metrics = evaluated.metrics.find((m) => m.split === "all")!;
+    expect(metrics.pairs).toBe(66);
+    expect(metrics.falsePositives).toBe(0);
+    expect(metrics.truePositives).toBeGreaterThanOrEqual(11);
+    expect(metrics.autoMatchPrecision).toBe(1);
+  }, 30_000);
+  it("reports independent-audit precision separately without modifying the frozen matcher", async () => {
+    const audit = await evaluateIndependentAudit(db);
+    expect(audit.canonicalGroupsReviewed).toBe(28);
+    expect(audit.metrics.find((m) => m.stratum === "all")).toMatchObject({
+      pairs: 105,
+      truePositives: 34,
+      falsePositives: 0,
+      trueNegatives: 52,
+      falseNegatives: 19,
+      autoMatchPrecision: 1,
+    });
+    expect(audit.metrics.find((m) => m.stratum === "new_auto")).toMatchObject({
+      pairs: 34,
+      truePositives: 34,
+      falsePositives: 0,
+      autoMatchPrecision: 1,
+    });
   }, 30_000);
 });

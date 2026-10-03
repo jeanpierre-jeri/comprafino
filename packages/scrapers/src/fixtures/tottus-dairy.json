@@ -1,0 +1,180 @@
+{
+  "props": {
+    "pageProps": {
+      "results": [
+        {
+          "brand": "GLORIA",
+          "productId": "129087924",
+          "skuId": "129087925",
+          "displayName": "Leche Gloria Reconstituida Entera Sixpack Lata 390 g",
+          "url": "https://www.tottus.com.pe/tottus-pe/articulo/129087924/leche-gloria-reconstituida-entera-sixpack-lata-390-g",
+          "sellerId": "TOTTUS_PERU",
+          "measurements": {
+            "format": "Sixpack Lata 390 g  ",
+            "unit": "UN"
+          },
+          "merchantCategoryId": "J0101070405",
+          "prices": [
+            {
+              "type": "cmrPrice",
+              "symbol": "S/ ",
+              "crossed": false,
+              "price": ["20.90"]
+            },
+            {
+              "type": "internetPrice",
+              "symbol": "S/ ",
+              "crossed": false,
+              "price": ["21.90"]
+            },
+            {
+              "type": "normalPrice",
+              "symbol": "S/ ",
+              "crossed": true,
+              "price": ["24.60"]
+            }
+          ]
+        },
+        {
+          "brand": "GLORIA",
+          "productId": "144942676",
+          "skuId": "144942677",
+          "displayName": "Leche UHT Sin Lactosa Gloria Zero Lacto Pack 3 Cajas 946 mL",
+          "url": "https://www.tottus.com.pe/tottus-pe/articulo/144942676/leche-uht-sin-lactosa-gloria-zero-lacto-pack-3-cajas-946-ml",
+          "sellerId": "TOTTUS_PERU",
+          "measurements": {
+            "format": "Pack 3 Cajas 946 mL",
+            "unit": "UN"
+          },
+          "merchantCategoryId": "J0101070503",
+          "prices": [
+            {
+              "type": "internetPrice",
+              "symbol": "S/ ",
+              "crossed": false,
+              "price": ["16.10"]
+            },
+            {
+              "type": "normalPrice",
+              "symbol": "S/ ",
+              "crossed": true,
+              "price": ["18.30"]
+            }
+          ]
+        },
+        {
+          "brand": "GLORIA",
+          "productId": "144942889",
+          "skuId": "144942890",
+          "displayName": "Leche UHT Entera Gloria Pack 3 Cajas 946 mL",
+          "url": "https://www.tottus.com.pe/tottus-pe/articulo/144942889/leche-uht-entera-gloria-pack-3-cajas-946-ml",
+          "sellerId": "TOTTUS_PERU",
+          "measurements": {
+            "format": "Pack 3 Cajas 946 mL",
+            "unit": "UN"
+          },
+          "merchantCategoryId": "J0101070503",
+          "prices": [
+            {
+              "type": "internetPrice",
+              "symbol": "S/ ",
+              "crossed": false,
+              "price": ["16.10"]
+            },
+            {
+              "type": "normalPrice",
+              "symbol": "S/ ",
+              "crossed": true,
+              "price": ["17.90"]
+            }
+          ]
+        },
+        {
+          "brand": "BRAEDT",
+          "productId": "115776320",
+          "skuId": "115776323",
+          "displayName": "Queso Edam en Láminas Braedt Empaque 440 g",
+          "url": "https://www.tottus.com.pe/tottus-pe/articulo/115776320/queso-edam-en-laminas-braedt-empaque-440-g",
+          "sellerId": "TOTTUS_PERU",
+          "measurements": {
+            "format": "En Tajadas"
+          },
+          "merchantCategoryId": "J0502040301",
+          "prices": [
+            {
+              "type": "internetPrice",
+              "symbol": "S/ ",
+              "crossed": false,
+              "price": ["18.40"]
+            },
+            {
+              "type": "normalPrice",
+              "symbol": "S/ ",
+              "crossed": true,
+              "price": ["24.50"]
+            }
+          ]
+        },
+        {
+          "brand": "LAIVE",
+          "productId": "113705685",
+          "skuId": "113705686",
+          "displayName": "Mezcla Láctea Laive Sin Lactosa Sixpack Caja 480 g",
+          "url": "https://www.tottus.com.pe/tottus-pe/articulo/113705685/mezcla-lactea-laive-sin-lactosa-sixpack-caja-480-g",
+          "sellerId": "TOTTUS_PERU",
+          "measurements": {
+            "format": "Sixpack Caja 480 g",
+            "unit": "UN"
+          },
+          "merchantCategoryId": "J0101070404",
+          "prices": [
+            {
+              "type": "internetPrice",
+              "symbol": "S/ ",
+              "crossed": false,
+              "price": ["21.30"]
+            },
+            {
+              "type": "normalPrice",
+              "symbol": "S/ ",
+              "crossed": true,
+              "price": ["23.40"]
+            }
+          ]
+        },
+        {
+          "brand": "GLORIA",
+          "productId": "129087935",
+          "skuId": "129087937",
+          "displayName": "Leche Gloria Light Sixpack Lata 390 g",
+          "url": "https://www.tottus.com.pe/tottus-pe/articulo/129087935/leche-gloria-light-sixpack-lata-390-g",
+          "sellerId": "TOTTUS_PERU",
+          "measurements": {
+            "format": "Sixpack Lata 390 g  ",
+            "unit": "UN"
+          },
+          "merchantCategoryId": "J0101070407",
+          "prices": [
+            {
+              "type": "internetPrice",
+              "symbol": "S/ ",
+              "crossed": false,
+              "price": ["23.50"]
+            },
+            {
+              "type": "normalPrice",
+              "symbol": "S/ ",
+              "crossed": true,
+              "price": ["25.80"]
+            }
+          ]
+        }
+      ],
+      "pagination": {
+        "count": 728,
+        "perPage": 48,
+        "currentPage": 1
+      }
+    }
+  }
+}

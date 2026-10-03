@@ -78,3 +78,7 @@ Verified sources: npm registry stable tags, engine and peer ranges; [Next.js ins
 The pnpm workspace explicitly permits esbuild installation scripts (required platform-binary setup for Drizzle Kit tooling). Exact stable Turbo 2.11.7 packages are excluded from pnpm’s default release-age delay because their current stable release was verified during bootstrap. No arbitrary dependency scripts are allowed.
 
 Milestone 1A also adds `@comprafino/db` (`workspace:*`) to web for developer inspection and `@comprafino/core` (`workspace:*`) to db for boundary validation and transition comparisons. All external additions reuse exact versions already installed in the workspace; no new external package/version or scraping library is introduced. The CLI uses Node 24 native TypeScript stripping and root `.env` loading. `allowImportingTsExtensions` supports explicit local `.ts` imports required by that runner with the existing no-emit TypeScript configuration.
+
+## Matching database extension
+
+Milestone 3 adds no npm packages. The reviewed canonical migration enables PostgreSQL `pg_trgm` in public for deterministic `similarity()` over generated candidate pairs. No external search service or trigram index is justified by the current bounded batch query. Integration databases require this extension before isolated-schema tests; the tests do not create/drop shared public extensions.
