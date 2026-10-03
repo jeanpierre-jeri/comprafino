@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "turbo run dev",
+    "dev": "pnpm --filter @comprafino/web dev",
     "build": "turbo run build",
     "lint": "oxlint --type-aware --deny-warnings .",
     "lint:fix": "oxlint --type-aware --fix .",

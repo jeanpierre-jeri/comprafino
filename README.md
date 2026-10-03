@@ -53,12 +53,13 @@ Internal dependencies are intentionally minimal: `web → ui`. Core, database an
 Requires Node.js **24.x** and pnpm **12.8.1**. Use your existing version manager/Corepack to select the pinned pnpm version; do not install dependencies globally for this project.
 
 ```sh
-cd comprafino
 pnpm install --frozen-lockfile
 pnpm dev
 ```
 
 Open <http://127.0.0.1:3000>. Stop with Ctrl+C. The app uses system fonts, so builds need no external font download. Only the shared Base UI button is a Client Component; the homepage and layout remain Server Components.
+
+Codex repository instructions live in the root `AGENTS.md`. Next.js agent-file auto-generation is disabled so development does not create `CLAUDE.md` or duplicate app-level instructions.
 
 If you are using the original bootstrap workspace and its older system pnpm, the ignored project-local binary is available:
 
@@ -89,7 +90,7 @@ Generation reads the schema locally and needs no database. The schema is intenti
 
 | Command                             | Purpose                                                        |
 | ----------------------------------- | -------------------------------------------------------------- |
-| `pnpm dev`                          | Start the Next.js development server                           |
+| `pnpm dev`                          | Start the web development server directly through pnpm         |
 | `pnpm build`                        | Build production application through Turbo                     |
 | `pnpm lint` / `pnpm lint:fix`       | Type-aware Oxlint checks / fixes                               |
 | `pnpm format` / `pnpm format:check` | Oxfmt formatting / verification                                |
@@ -99,7 +100,7 @@ Generation reads the schema locally and needs no database. The schema is intenti
 | `pnpm db:generate`                  | Generate reviewed migrations from the schema                   |
 | `pnpm db:migrate`                   | Apply migrations; requires `DATABASE_URL`                      |
 
-Turbo caches builds, type checks and unit tests; development servers are persistent and uncached. Repository lint/format run once from the root. Only workspaces with actual tasks declare them.
+Turbo caches builds, type checks and unit tests. The root development command starts the single web server directly through pnpm, avoiding Turbo's child-process output interaction with pnpm 12's Node.js fallback launcher. Development is uncached. Repository lint/format run once from the root. Only workspaces with actual tasks declare them.
 
 ## Testing
 

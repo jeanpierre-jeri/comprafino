@@ -4,6 +4,7 @@
 - Keep TypeScript strict. Avoid `any`; validate external values at boundaries.
 - Prefer simple solutions and add dependencies/infrastructure only for a current requirement.
 - Prefer React Server Components; use Client Components for required interaction/browser APIs.
+- Before Next.js changes, consult version-matched docs in `apps/web/node_modules/next/dist/docs/`. Keep Codex instructions here; do not add `CLAUDE.md`.
 - Keep framework-independent domain logic in `packages/core`, PostgreSQL/Drizzle in `packages/db`, retailer ingestion in `packages/scrapers`, shared UI in `packages/ui`, and app UI in `apps/web`.
 - Use `workspace:*` for internal dependencies; avoid circular relationships and unnecessary duplication.
 - Schema changes require reviewed migrations. Never commit credentials.
