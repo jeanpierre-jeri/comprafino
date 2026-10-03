@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "sortTailwindcss": {
+    "stylesheet": "packages/ui/src/styles/globals.css",
+    "functions": ["cn", "cva"]
+  },
+  "ignorePatterns": [
+    "**/.next/**",
+    "**/next-env.d.ts",
+    "pnpm-lock.yaml",
+    ".tools/**",
+    ".pnpm-store/**"
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "name": "comprafino",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "oxlint --type-aware --deny-warnings .",
+    "lint:fix": "oxlint --type-aware --fix .",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:e2e": "pnpm --filter @comprafino/web test:e2e",
+    "db:generate": "pnpm --filter @comprafino/db db:generate",
+    "db:migrate": "pnpm --filter @comprafino/db db:migrate"
+  },
+  "devDependencies": {
+    "oxfmt": "0.71.0",
+    "oxlint": "1.86.0",
+    "oxlint-tsgolint": "7.0.2003",
+    "turbo": "2.11.7",
+    "typescript": "7.0.2"
+  },
+  "engines": {
+    "node": "24.x"
+  },
+  "packageManager": "pnpm@12.8.1"
+}

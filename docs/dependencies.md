@@ -1,0 +1,73 @@
+# Direct dependency inventory
+
+Stable exact versions are pinned. Runtime ownership follows use; root owns repository tooling. React is a UI peer with development copies for independent checks; pnpm deduplicates compatible packages.
+
+## comprafino
+
+| Dependency        | Version    | Kind            | Purpose                                |
+| ----------------- | ---------- | --------------- | -------------------------------------- |
+| `turbo`           | `2.11.7`   | devDependencies | task ordering, parallelism and caching |
+| `typescript`      | `7.0.2`    | devDependencies | authoritative strict type checker      |
+| `oxlint`          | `1.86.0`   | devDependencies | correctness linting                    |
+| `oxlint-tsgolint` | `7.0.2003` | devDependencies | type-aware lint analysis               |
+| `oxfmt`           | `0.71.0`   | devDependencies | sole formatter and Tailwind sorting    |
+
+## @comprafino/web
+
+| Dependency             | Version       | Kind            | Purpose                             |
+| ---------------------- | ------------- | --------------- | ----------------------------------- |
+| `next`                 | `16.3.8`      | dependencies    | App Router and production web build |
+| `react`                | `19.3.0`      | dependencies    | React rendering / UI peer           |
+| `react-dom`            | `19.3.0`      | dependencies    | DOM rendering / Base UI peer        |
+| `@comprafino/ui`       | `workspace:*` | dependencies    | shared button and theme             |
+| `tailwindcss`          | `4.3.3`       | devDependencies | Tailwind 4 CSS compilation          |
+| `@tailwindcss/postcss` | `4.3.3`       | devDependencies | Next PostCSS integration            |
+| `@types/node`          | `24.19.1`     | devDependencies | Node 24 API types                   |
+| `@types/react`         | `19.3.0`      | devDependencies | React types                         |
+| `@types/react-dom`     | `19.3.0`      | devDependencies | React DOM types                     |
+| `@playwright/test`     | `1.63.0`      | devDependencies | application Chromium E2E testing    |
+
+## @comprafino/core
+
+| Dependency | Version | Kind            | Purpose    |
+| ---------- | ------- | --------------- | ---------- |
+| `vitest`   | `5.0.3` | devDependencies | unit tests |
+
+## @comprafino/db
+
+| Dependency                 | Version   | Kind            | Purpose                                  |
+| -------------------------- | --------- | --------------- | ---------------------------------------- |
+| `drizzle-orm`              | `0.45.3`  | dependencies    | typed PostgreSQL queries                 |
+| `@neondatabase/serverless` | `1.2.0`   | dependencies    | Neon serverless HTTP driver              |
+| `zod`                      | `4.6.5`   | dependencies    | database environment boundary validation |
+| `drizzle-kit`              | `0.31.11` | devDependencies | SQL generation and migration CLI         |
+| `dotenv`                   | `18.0.5`  | devDependencies | root .env loading for migration CLI only |
+| `@types/node`              | `24.19.1` | devDependencies | Node 24 API types                        |
+| `vitest`                   | `5.0.3`   | devDependencies | unit tests                               |
+
+## @comprafino/scrapers
+
+| Dependency | Version | Kind | Purpose                |
+| ---------- | ------- | ---- | ---------------------- |
+| None       | —       | —    | No adapter implemented |
+
+## @comprafino/ui
+
+| Dependency                 | Version   | Kind             | Purpose                                    |
+| -------------------------- | --------- | ---------------- | ------------------------------------------ |
+| `@base-ui/react`           | `1.8.0`   | dependencies     | shadcn accessible Base UI button primitive |
+| `class-variance-authority` | `0.7.1`   | dependencies     | button variant/size classes                |
+| `clsx`                     | `2.1.1`   | dependencies     | conditional class composition              |
+| `tailwind-merge`           | `3.7.0`   | dependencies     | Tailwind conflict resolution               |
+| `react`                    | `19.3.0`  | devDependencies  | React rendering / UI peer                  |
+| `react-dom`                | `19.3.0`  | devDependencies  | DOM rendering / Base UI peer               |
+| `@types/react`             | `19.3.0`  | devDependencies  | React types                                |
+| `@types/react-dom`         | `19.3.0`  | devDependencies  | React DOM types                            |
+| `react`                    | `^19.3.0` | peerDependencies | React rendering / UI peer                  |
+| `react-dom`                | `^19.3.0` | peerDependencies | DOM rendering / Base UI peer               |
+
+pnpm 12.8.1 is pinned in `packageManager`, not an application dependency. shadcn distributes component source; no runtime shadcn package is needed. The button source was fetched from the official Base UI `base-nova` registry and its `cn` import adapted to this workspace. The Lucide CLI preference installs no icon dependency; the initial button needs none.
+
+Verified sources: npm registry stable tags, engine and peer ranges; [Next.js installation](https://nextjs.org/docs/app/getting-started/installation), [shadcn monorepos](https://ui.shadcn.com/docs/monorepo), [Base UI button registry](https://ui.shadcn.com/r/styles/base-nova/button.json), [Oxlint type-aware linting](https://oxc.rs/docs/guide/usage/linter/type-aware.html), [Oxfmt configuration](https://oxc.rs/docs/guide/usage/formatter/config-file-reference), and official releases for [checkout](https://github.com/actions/checkout/releases), [setup-node](https://github.com/actions/setup-node/releases), [pnpm action](https://github.com/pnpm/action-setup/releases).
+
+The pnpm workspace explicitly permits esbuild installation scripts (required platform-binary setup for Drizzle Kit tooling). Exact stable Turbo 2.11.7 packages are excluded from pnpm’s default release-age delay because their current stable release was verified during bootstrap. No arbitrary dependency scripts are allowed.
