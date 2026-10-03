@@ -1,6 +1,6 @@
 # Architecture
 
-CompraFino starts serverless first to reduce idle costs and operational work while validating data. This is the intended deployment; no cloud resources have been provisioned; bounded Tottus ingestion is implemented:
+CompraFino starts serverless first to reduce idle costs and operational work while validating data. This is the intended deployment; the developer has configured Neon, while the web application and scheduled ingestion are not deployed. Bounded Tottus ingestion is implemented:
 
 ```mermaid
 flowchart LR
@@ -44,4 +44,4 @@ A listing is identified by retailer plus source SKU, retaining the product ID se
 
 The Neon HTTP driver executes a bounded batch transaction: lock the retailer row, upsert fresh observations, close changed history states, then insert missing current states. All writers must use this lock convention. A partial unique index enforces one open price state per listing. Equal/older observations cannot overwrite newer state. Repeated unchanged observations update freshness without appending history. Bounded samples never deactivate unseen listings. Run start/finish records are separate from the atomic listing batch; interrupted processes can leave a `running` record. `listingsChanged` counts newly opened price states, including first observations.
 
-The `/dev/ingestion` Server Component reads at request time, shows helpful missing-DB/error messages and is blocked in production. Migration application and real PostgreSQL transaction/concurrency verification remain outstanding; deterministic model and SQL-generation tests are not substitutes for those checks.
+The `/dev/ingestion` Server Component reads at request time, shows helpful missing-DB/error messages and is blocked in production. The migration and live Neon schema have been verified. Repeated live Tottus persistence is idempotent. Separate isolated-schema PostgreSQL integration tests exercise transitions, rollback and concurrent writers through the real batch transaction; they require explicit `TEST_DATABASE_URL` and never fall back to the application database configuration. Unit tests remain credential-free.

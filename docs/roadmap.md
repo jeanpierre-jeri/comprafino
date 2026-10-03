@@ -1,6 +1,6 @@
 # Roadmap
 
-Milestone 0 is implemented. Milestone 1A has a working live Tottus dry-run and persistence implementation; live PostgreSQL verification remains pending. Later consumer milestones describe planned functionality.
+Milestone 0 is implemented. Milestone 1A ingestion correctness is verified with live Tottus/Neon idempotency and controlled PostgreSQL transition, rollback and concurrency tests. Default Turbopack build verification remains environment-blocked; webpack builds provide supplementary evidence. Later consumer milestones describe planned functionality.
 
 ## Milestone 0 — Foundation
 
@@ -14,7 +14,7 @@ Implement adapters one at a time: **Tottus → Plaza Vea → Metro**. Inspect le
 
 Implemented: public hydration JSON investigation, bounded native-fetch adapter, SKU identity, Zod validation, integer PEN cents, source package/unit metadata, sanitized fixtures, generated schema/migration, atomic persistence SQL, price-state reference tests, run records, CLI, development inspection route and manual workflow. Live dry-run passed with 20 unique listings. No scraping libraries added.
 
-Pending: review/apply migration to the developer's PostgreSQL, run persisted ingestion twice, verify price transitions/rollback and concurrent writers on PostgreSQL. Availability and location-sensitive coverage remain unproven. Do not mark the full end-to-end proof complete until those checks pass. Plaza Vea and Metro are unimplemented.
+Verified: applied migration and actual Neon constraints/indexes; two live runs (96 fetched / 50 persisted each, 50 then 0 new states); controlled PostgreSQL price transitions, rollback and concurrent writers in isolated test schemas. Availability and location-sensitive coverage remain limitations. Normal Turbopack builds cannot bind their worker port in the Codex environment; the default configuration is preserved. Next retailer milestone: Plaza Vea public-source ingestion proof. Plaza Vea and Metro are unimplemented.
 
 ## Milestone 2 — Catalog normalization
 
