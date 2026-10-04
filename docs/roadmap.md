@@ -116,9 +116,9 @@ Milestone 11 is complete in the user-provided baseline `6c3a52f`. The pending no
 
 ## Milestone 12 — Public visual polish and product-experience refinement
 
-Implemented: composed sage home hero and search surface, starter links and short how-it-helps section, retailer strip, distinct exact/generic search sections, native responsive toolbar, reusable Server Component cards, stronger ordinary-price hierarchy, secondary CMR surfaces, framed images and quieter freshness, product comparison hero/retailer rows, shared colors/radii/shadows, skip link and focus/reduced-motion support. No dependencies, backend expansion, model/migration changes or price-history UI.
+Implemented: composed sage home hero and search surface, starter links and short how-it-helps section, retailer strip, distinct exact/generic search sections, responsive toolbar with Base UI custom Select menus, reusable Server Component cards, stronger ordinary-price hierarchy, secondary CMR surfaces, framed images and quieter freshness, product comparison hero/retailer rows, shared colors/radii/shadows, skip link and focus/reduced-motion support. No dependencies, backend expansion, model/migration changes or price-history UI.
 
-Milestone 12 is complete: format/lint/types, 511 unit tests, 36 isolated PostgreSQL tests, the fresh default production build and all 14 Chromium E2E tests pass. Real desktop/390px review and additional overflow/focus checks pass. See [UI polish](ui-polish.md) for acceptance and limitations.
+The first pass is committed at `bff4659`, with all original validation passing. A focused second iteration replaces numbered home explanations with search shortcuts, compacts desktop/mobile cards, strengthens prices and retailer provenance, adds relative result freshness, reduces framing, and refines the wordmark and product hero. The latest follow-up also adds System/Light/Dark appearance with local preference persistence and shared theme tokens. Milestone 12 is accepted following user visual review. Milestone 13 has not started. See [UI polish](ui-polish.md) for acceptance and limitations.
 
 ## Milestone 13 — Price-history UX (planned)
 

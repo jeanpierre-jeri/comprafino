@@ -21,12 +21,18 @@ import { ExactProductCard, GenericOfferCard } from "../../components/offer-card"
 export const metadata: Metadata = {
   title: "Buscar productos y precios | CompraFino",
 };
+async function loadSearchContext(
+  searchParams: Promise<Record<string, string | string[] | undefined>>,
+) {
+  return { params: await searchParams, observedNow: new Date() };
+}
+
 export default async function SearchPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const params = await searchParams;
+  const { params, observedNow } = await loadSearchContext(searchParams);
   const query = typeof params.q === "string" ? params.q : "";
   const filters = searchFilters(params);
   const sort = filters.sort;
@@ -38,7 +44,7 @@ export default async function SearchPage({
   if (usefulSearchQuery(query)) {
     try {
       const db = createDatabase();
-      const results = await searchPublicProducts(db, query, sort, undefined, filters);
+      const results = await searchPublicProducts(db, query, sort, observedNow, filters);
       products = results.products;
       offers = results.offers;
       units = results.availableUnits;
@@ -107,8 +113,11 @@ export default async function SearchPage({
           <>
             {products.length > 0 && (
               <section className="exact-section" aria-label="Comparaciones del mismo producto">
-                <h2 className="text-2xl font-semibold tracking-tight">Compara el mismo producto</h2>
-                <p className="mt-2 mb-5 text-sm text-muted-foreground">
+                <p className="eyebrow">Entre supermercados</p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight">
+                  Compara el mismo producto
+                </h2>
+                <p className="mt-2 mb-4 text-xs text-muted-foreground">
                   {products.length === 20 ? "Hasta 20" : products.length} productos para «{query}»
                 </p>
                 <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -118,6 +127,7 @@ export default async function SearchPage({
                         product={product}
                         benefits={filters.priceMode === "benefits"}
                         eager={index === 0}
+                        observedNow={observedNow}
                       />
                     </li>
                   ))}
@@ -142,7 +152,7 @@ export default async function SearchPage({
                     distinguir peso neto y escurrido.
                   </p>
                 )}
-                <p className="mt-2 mb-5 text-sm text-muted-foreground">
+                <p className="mt-2 mb-4 text-xs text-muted-foreground">
                   {offers.length === 30 ? "Hasta 30" : offers.length} ofertas para «{query}»
                 </p>
                 {(sort === "unit-price"
@@ -181,6 +191,7 @@ export default async function SearchPage({
                           <li key={offer.id}>
                             <GenericOfferCard
                               offer={offer}
+                              observedNow={observedNow}
                               benefits={filters.priceMode === "benefits"}
                             />
                           </li>

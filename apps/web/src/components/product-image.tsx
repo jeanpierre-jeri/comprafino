@@ -14,15 +14,15 @@ export function ProductImage({ src, name, loading, compact = false }: Props) {
   const [failed, setFailed] = useState(false);
   return (
     <div
-      className={`product-image relative flex w-full items-center justify-center rounded-2xl bg-white ${compact ? "h-28 sm:h-44" : "aspect-square max-h-52 sm:max-h-none"}`}
+      className={`product-image relative flex w-full items-center justify-center overflow-hidden rounded-xl bg-white ${compact ? "h-28 sm:h-34" : "h-48 sm:h-64"}`}
     >
       {src && !failed ? (
         <Image
           src={src}
           alt={name}
           fill
-          sizes={compact ? "(max-width: 640px) 112px, 320px" : "(max-width: 640px) 90vw, 288px"}
-          className="object-contain p-3 sm:p-5"
+          sizes={compact ? "(max-width: 639px) 112px, 136px" : "(max-width: 640px) 90vw, 288px"}
+          className="object-contain p-1"
           onError={() => setFailed(true)}
           loading={loading}
         />

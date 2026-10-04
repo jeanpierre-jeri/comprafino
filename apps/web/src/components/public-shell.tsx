@@ -1,3 +1,4 @@
+import { ThemeControl } from "./theme-control";
 import Link from "next/link";
 
 export function PublicShell({ children }: { children: React.ReactNode }) {
@@ -7,14 +8,18 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
         Saltar al contenido
       </a>
       <header className="flex flex-wrap items-center justify-between gap-3 border-b py-5 sm:py-6">
-        <Link
-          href="/"
-          className="text-2xl font-bold tracking-tight focus-visible:outline-2 focus-visible:outline-primary"
-          aria-label="CompraFino, inicio"
-        >
-          CompraFino<span className="text-primary">.</span>
+        <Link href="/" className="wordmark" aria-label="CompraFino, inicio">
+          <span>Compra</span>
+          <span className="text-primary">
+            Fino<span className="wordmark-dot">.</span>
+          </span>
         </Link>
-        <span className="text-xs text-muted-foreground sm:text-sm">Hecho para comprar en Perú</span>
+        <div className="flex items-center gap-3">
+          <span className="hidden text-xs text-muted-foreground sm:inline sm:text-sm">
+            Hecho para comprar en Perú
+          </span>
+          <ThemeControl />
+        </div>
       </header>
       <main id="main-content" className="min-w-0 flex-1 py-7 sm:py-10">
         {children}

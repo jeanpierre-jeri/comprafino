@@ -7,26 +7,37 @@ import { ObservedAt, packageSummary, RetailerBadge } from "./product-info";
 export function GenericOfferCard({
   offer,
   benefits,
+  observedNow,
 }: {
+  observedNow: Date;
   offer: GenericProductOffer;
   benefits: boolean;
 }) {
   return (
     <article data-offer-id={offer.id} className="product-card">
       <div className="product-summary">
-        <a
-          href={offer.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={`Ver ${offer.title} en ${offer.retailerName} (nueva pestaña)`}
-          className="block min-w-0"
-        >
-          <ProductImage compact src={offer.imageUrl} name={offer.title} loading="lazy" />
-        </a>
+        <ProductImage compact src={offer.imageUrl} name={offer.title} loading="lazy" />
         <div className="min-w-0">
-          <RetailerBadge id={offer.retailerId} name={offer.retailerName} />
-          {offer.brand && <p className="mt-3 text-xs text-muted-foreground">{offer.brand}</p>}
-          <h3 className="mt-1 text-base font-semibold leading-snug">{offer.title}</h3>
+          <h3 className="product-title">
+            {offer.canonicalId ? (
+              <Link
+                className="product-title-link"
+                href={`/products/${offer.canonicalId}${benefits ? "?priceMode=benefits" : ""}`}
+              >
+                {offer.title}
+              </Link>
+            ) : (
+              <a
+                className="product-title-link"
+                href={offer.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {offer.title}
+                <span className="sr-only"> (en {offer.retailerName}, nueva pestaña)</span>
+              </a>
+            )}
+          </h3>
           {offer.quantity && offer.packageCount && (
             <p className="mt-2 text-xs text-muted-foreground">
               {packageSummary({
@@ -39,12 +50,12 @@ export function GenericOfferCard({
         </div>
       </div>
       <div className="card-price">
-        <p className="text-3xl font-semibold tracking-tight text-primary tabular-nums">
+        <p className="card-amount">
           {formatPen(offer.currentPriceCents)}
           {offer.pricingBasis === "kg" ? " / kg" : ""}
         </p>
         <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-          <p>Precio online para todos</p>
+          <p>Precio para todos</p>
           {offer.regularPriceCents !== null && (
             <p>
               Antes <s>{formatPen(offer.regularPriceCents)}</s>
@@ -69,8 +80,11 @@ export function GenericOfferCard({
         ))}
       </div>
       <div className="card-footer">
-        <ObservedAt date={offer.observedAt} />
-        <a href={offer.url} target="_blank" rel="noopener noreferrer" className="card-link">
+        <div className="card-provenance">
+          <RetailerBadge id={offer.retailerId} name={offer.retailerName} />
+          <ObservedAt date={offer.observedAt} relativeTo={observedNow} />
+        </div>
+        <a href={offer.url} target="_blank" rel="noopener noreferrer" className="source-link">
           Ver producto en {offer.retailerName}
           <span aria-hidden="true"> ↗</span>
           <span className="sr-only"> (nueva pestaña)</span>
@@ -78,7 +92,7 @@ export function GenericOfferCard({
         {offer.canonicalId && (
           <Link
             href={`/products/${offer.canonicalId}${benefits ? "?priceMode=benefits" : ""}`}
-            className="mt-3 block text-xs font-medium text-primary underline decoration-primary/30 underline-offset-4"
+            className="comparison-link"
           >
             Comparar este producto en {offer.retailerCount} supermercados
           </Link>
@@ -92,14 +106,28 @@ export function ExactProductCard({
   product,
   benefits,
   eager,
+  observedNow,
 }: {
   product: ProductComparison;
   benefits: boolean;
   eager: boolean;
+  observedNow: Date;
 }) {
   const conditionalRanking = product.lowestBenefit;
+  // One conservative freshness label for ordinary-price ties; detail keeps every timestamp.
+  const observedAt = product.offers
+    .filter(
+      (offer) =>
+        offer.freshness === "fresh" &&
+        offer.available !== false &&
+        offer.currentPriceCents === product.lowestPriceCents,
+    )
+    .reduce<Date | null>(
+      (oldest, offer) => (!oldest || offer.observedAt < oldest ? offer.observedAt : oldest),
+      null,
+    );
   return (
-    <article className="product-card">
+    <article className="product-card exact-card">
       <Link
         href={`/products/${product.id}${benefits ? "?priceMode=benefits" : ""}`}
         className="group block rounded-xl"
@@ -112,11 +140,7 @@ export function ExactProductCard({
             loading={eager ? "eager" : "lazy"}
           />
           <div className="min-w-0">
-            <span className="comparison-badge">{product.retailerCount} supermercados</span>
-            <p className="mt-3 text-xs text-muted-foreground">{product.brand}</p>
-            <h3 className="mt-1 text-base font-semibold leading-snug group-hover:text-primary">
-              {product.displayName}
-            </h3>
+            <h3 className="product-title group-hover:text-primary">{product.displayName}</h3>
             <p className="mt-2 text-xs text-muted-foreground">{packageSummary(product)}</p>
           </div>
         </div>
@@ -126,9 +150,7 @@ export function ExactProductCard({
           ) : (
             <>
               <p className="text-xs text-muted-foreground">Desde · para todos</p>
-              <p className="mt-1 text-3xl font-semibold tracking-tight text-primary tabular-nums">
-                {formatPen(product.lowestPriceCents)}
-              </p>
+              <p className="mt-1 card-amount">{formatPen(product.lowestPriceCents)}</p>
               <p className="mt-1 text-sm">{product.cheapestRetailers.join(" y ")}</p>
               {conditionalRanking && (
                 <div className="benefit-surface">
@@ -144,24 +166,12 @@ export function ExactProductCard({
             </>
           )}
         </div>
-        <p className="card-link">
-          Ver comparación<span aria-hidden="true"> →</span>
+        <p className="comparison-link">
+          Comparar en {product.retailerCount} supermercados<span aria-hidden="true"> →</span>
         </p>
       </Link>
       <div className="mt-auto">
-        {product.offers
-          .filter(
-            (offer) =>
-              offer.freshness === "fresh" &&
-              offer.available !== false &&
-              offer.currentPriceCents === product.lowestPriceCents,
-          )
-          .map((offer) => (
-            <div key={offer.retailerId}>
-              <span className="sr-only">{offer.retailerName}: </span>
-              <ObservedAt date={offer.observedAt} />
-            </div>
-          ))}
+        {observedAt && <ObservedAt date={observedAt} relativeTo={observedNow} />}
       </div>
     </article>
   );

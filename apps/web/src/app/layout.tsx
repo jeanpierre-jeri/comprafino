@@ -1,3 +1,4 @@
+import { themeInit } from "../components/theme-init";
 import type { Metadata } from "next";
 import "@comprafino/ui/globals.css";
 
@@ -8,7 +9,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es-PE">
+    <html lang="es-PE" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInit }} />
+      </head>
       <body className="min-h-screen font-sans antialiased">{children}</body>
     </html>
   );

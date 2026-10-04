@@ -1,10 +1,15 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import {
   createDatabase,
   formatPen,
   getCanonicalProductComparison,
   searchCanonicalProducts,
 } from "@comprafino/db";
+
+async function choose(page: Page, label: string, option: string) {
+  await page.getByRole("combobox", { name: label, exact: true }).click();
+  await page.getByRole("option", { name: option, exact: true }).click();
+}
 
 test("missing and blank searches explain how to start", async ({ page }) => {
   for (const path of ["/search", "/search?q=%20%20", "/search?q=g", "/search?q=%25%25"]) {
@@ -93,7 +98,7 @@ test.describe("generic persisted offers (explicit DATABASE_URL)", () => {
     await page.goto("/search?q=huevos");
     const section = page.getByRole("region", { name: "Opciones en supermercados" });
     await expect(section).toBeVisible();
-    await page.getByLabel("Ordenar", { exact: true }).selectOption("unit-price");
+    await choose(page, "Ordenar", "Menor por unidad");
     await expect(page.getByRole("button", { name: "Aplicar" })).toHaveCount(0);
     await expect(page).toHaveURL(/sort=unit-price/);
     const first = section.locator("article[data-offer-id]").first();
@@ -108,6 +113,24 @@ test.describe("generic persisted offers (explicit DATABASE_URL)", () => {
     await expect(independentCard.getByRole("link", { name: /Comparar este producto/ })).toHaveCount(
       0,
     );
+    await expect(first.locator("time")).toHaveAttribute(
+      "datetime",
+      countOffers[0]!.observedAt.toISOString(),
+    );
+    await expect(first.locator("time")).toHaveText(/^hace /);
+    const linked = offers.find((offer) => offer.canonicalId);
+    expect(linked).toBeDefined();
+    const linkedCard = section.locator(`article[data-offer-id="${linked!.id}"]`);
+    await expect(linkedCard.getByRole("link", { name: /Ver producto en/ })).toHaveAttribute(
+      "href",
+      linked!.url,
+    );
+    await expect(linkedCard.getByRole("link", { name: /Ver producto en/ })).toHaveAttribute(
+      "target",
+      "_blank",
+    );
+    await linkedCard.click({ position: { x: 12, y: 12 } });
+    await expect(page).toHaveURL(new RegExp(`/products/${linked!.canonicalId}$`));
   });
 });
 
@@ -143,9 +166,9 @@ test.describe("immediate filters and CMR (explicit DATABASE_URL)", () => {
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/search?q=huevos");
-    await page.getByLabel("Ordenar", { exact: true }).selectOption("unit-price");
+    await choose(page, "Ordenar", "Menor por unidad");
     await expect(page).toHaveURL(/sort=unit-price/);
-    await page.getByLabel("Supermercado", { exact: true }).selectOption("metro");
+    await choose(page, "Supermercado", "Metro");
     await expect(page).toHaveURL(/retailer=metro/);
     const { searchPublicProducts, searchFilters } = await import("@comprafino/db");
     const expected = await searchPublicProducts(
@@ -156,12 +179,20 @@ test.describe("immediate filters and CMR (explicit DATABASE_URL)", () => {
       searchFilters({ retailer: "metro", sort: "unit-price" }),
     );
     await expect(page.locator("article[data-offer-id]")).toHaveCount(expected.offers.length);
-    await page.getByLabel("Precios", { exact: true }).selectOption("benefits");
+    await choose(page, "Precios", "Incluir beneficios");
     await expect(page).toHaveURL(/priceMode=benefits/);
     await page.goBack();
-    await expect(page.getByLabel("Precios", { exact: true })).toHaveValue("standard");
+    await expect(page.getByRole("combobox", { name: "Precios", exact: true })).toHaveText(
+      "Para todos",
+    );
     await page.goBack();
-    await expect(page.getByLabel("Supermercado", { exact: true })).toHaveValue("");
+    await expect(page.getByRole("combobox", { name: "Supermercado", exact: true })).toHaveText(
+      "Todos",
+    );
+    await page.goForward();
+    await expect(page.getByRole("combobox", { name: "Supermercado", exact: true })).toHaveText(
+      "Metro",
+    );
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );
@@ -186,7 +217,7 @@ test.describe("immediate filters and CMR (explicit DATABASE_URL)", () => {
       }),
     ).toBeVisible();
     await expect(row.getByText("Requiere tarjeta CMR", { exact: true })).toBeVisible();
-    await page.getByLabel("Precios", { exact: true }).selectOption("benefits");
+    await choose(page, "Precios", "Incluir beneficios");
     await expect(page).toHaveURL(/priceMode=benefits/);
     await expect(row.getByText("Precio online para todos", { exact: true })).toBeVisible();
   });

@@ -12,7 +12,7 @@ The roadmap aims to help people decide where to buy, when to buy, whether a pric
 
 ## Current status
 
-Milestones 0–11 are complete in the provided baseline (`6c3a52f`). Milestone 12 refines the public home, search, cards and comparison pages with a shared visual system and intentional mobile layouts. See [UI polish](docs/ui-polish.md) for the design, manual audit and validation, [conditional pricing](docs/conditional-pricing.md) for separate CMR semantics and [search UX](docs/search-ux.md) for URL controls. The homepage remains database-independent. Price-history UX is planned for Milestone 13.
+Milestones 0–11 are complete in the provided baseline (`6c3a52f`). Milestone 12 refines the public home, search, cards and comparison pages with a shared visual system and intentional mobile layouts. Its focused second design iteration, custom Select menus and light/dark themes are accepted following user visual review. See [UI polish](docs/ui-polish.md) for the design, manual audit and validation, [conditional pricing](docs/conditional-pricing.md) for separate CMR semantics and [search UX](docs/search-ux.md) for URL controls. The homepage remains database-independent. Price-history UX is planned for Milestone 13.
 
 ## Initial retailers
 

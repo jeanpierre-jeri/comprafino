@@ -17,7 +17,7 @@ export function SearchForm({ query = "" }: { query?: string }) {
             maxLength={maximumSearchLength}
             placeholder="Huevos, arroz, leche Gloria…"
             aria-describedby="search-status"
-            className="h-12 min-w-0 flex-1 rounded-xl border bg-white px-3 sm:px-4 text-base placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            className="h-12 min-w-0 flex-1 rounded-xl border bg-surface px-3 sm:px-4 text-base placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           />
           <Button type="submit" className="h-12 rounded-xl px-4 sm:px-6">
             Buscar

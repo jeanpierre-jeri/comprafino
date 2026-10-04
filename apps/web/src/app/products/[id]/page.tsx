@@ -70,12 +70,12 @@ export default async function ProductPage({ params, searchParams }: Props) {
         />
         <div>
           <p className="eyebrow">El mismo producto, tienda por tienda</p>
-          <p className="mt-4 text-sm text-muted-foreground">{product.brand}</p>
+          <p className="mt-2 text-xs text-muted-foreground">{product.brand}</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
             {product.displayName}
           </h1>
-          <p className="mt-4 text-muted-foreground">{packageSummary(product)}</p>
-          <div className="mt-6 rounded-2xl border border-primary/15 bg-primary/5 p-5">
+          <p className="mt-3 text-sm text-muted-foreground">{packageSummary(product)}</p>
+          <div className="detail-best-price">
             {product.lowestPriceCents === null ? (
               <p className="text-sm text-muted-foreground">Estamos actualizando este producto.</p>
             ) : (
@@ -91,23 +91,22 @@ export default async function ProductPage({ params, searchParams }: Props) {
               </>
             )}
           </div>
+          {product.lowestBenefit &&
+            product.lowestBenefit.priceCents < (product.lowestPriceCents ?? Infinity) && (
+              <aside className="benefit-surface">
+                <p className="text-sm font-medium">Con tarjeta CMR</p>
+                <p className="mt-1 text-lg font-semibold">
+                  {formatPen(product.lowestBenefit.priceCents)} con CMR
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {product.lowestBenefit.retailers.join(" y ")} ·{" "}
+                  {product.lowestBenefit.conditions.join(" · ")}
+                </p>
+              </aside>
+            )}
         </div>
       </div>
       <SearchControls query="" filters={filters} comparisonPath={`/products/${product.id}`} />
-      {filters.priceMode === "benefits" &&
-        product.lowestBenefit &&
-        product.lowestBenefit.priceCents < (product.lowestPriceCents ?? Infinity) && (
-          <aside className="benefit-surface mt-4">
-            <p className="text-sm font-medium">Precio más bajo con beneficio</p>
-            <p className="mt-1 text-xl font-semibold">
-              {formatPen(product.lowestBenefit.priceCents)} con CMR
-            </p>
-            <p className="text-sm">
-              {product.lowestBenefit.retailers.join(" y ")} ·{" "}
-              {product.lowestBenefit.conditions.join(" · ")}
-            </p>
-          </aside>
-        )}
       <section className="mt-8" aria-labelledby="offers-title">
         <h2 id="offers-title" className="text-2xl font-semibold tracking-tight">
           Compara en {product.retailerCount} supermercados
@@ -121,9 +120,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
             const url = retailerProductUrl(offer);
             return (
               <li key={offer.retailerId}>
-                <article
-                  className={`comparison-row flex flex-col gap-5 rounded-2xl border p-5 sm:flex-row sm:items-center sm:justify-between ${best ? "border-primary/30 bg-primary/5" : "bg-white"}`}
-                >
+                <article className={`comparison-row ${best ? "best-offer" : ""}`}>
                   <div>
                     <h3>
                       <RetailerBadge id={offer.retailerId} name={offer.retailerName} />
@@ -151,7 +148,9 @@ export default async function ProductPage({ params, searchParams }: Props) {
                     ) : null}
                   </div>
                   <div className="sm:text-right">
-                    <p className="text-3xl font-semibold tracking-tight tabular-nums">
+                    <p
+                      className={`text-3xl font-semibold tracking-tight tabular-nums ${best ? "text-primary" : ""}`}
+                    >
                       {formatPen(offer.currentPriceCents)}
                     </p>
                     <p className="text-xs text-muted-foreground">Precio online para todos</p>
