@@ -10,3 +10,4 @@ export * from "./discovery.ts";
 export * from "./listing-refresh.ts";
 
 export * from "./coverage.ts";
+export * from "./generic-offers.ts";

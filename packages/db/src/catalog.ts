@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
-import { asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, isNull, sql } from "drizzle-orm";
 import {
+  calculateUnitPrice,
   catalogInputSchema,
   normalizeCatalogListing,
   normalizationVersion,
@@ -9,7 +10,7 @@ import {
 import type { CatalogInput, RetailerId } from "@comprafino/core";
 import { z } from "zod";
 import { createDatabase } from "./client.ts";
-import { listingNormalizations, retailerListings } from "./schema.ts";
+import { listingNormalizations, retailerListings, priceHistory } from "./schema.ts";
 
 type Database = ReturnType<typeof createDatabase>;
 export const catalogRecordSchema = catalogInputSchema
@@ -168,9 +169,17 @@ export async function inspectCatalog(db = createDatabase()) {
   const groups = await Promise.all(
     retailerIdSchema.options.map((retailer) =>
       db
-        .select({ listing: retailerListings, normalization: listingNormalizations })
+        .select({
+          listing: retailerListings,
+          normalization: listingNormalizations,
+          price: priceHistory,
+        })
         .from(retailerListings)
         .leftJoin(listingNormalizations, eq(retailerListings.id, listingNormalizations.listingId))
+        .leftJoin(
+          priceHistory,
+          and(eq(retailerListings.id, priceHistory.listingId), isNull(priceHistory.validUntil)),
+        )
         .where(eq(retailerListings.retailerId, retailer))
         .orderBy(asc(retailerListings.externalId))
         .limit(20),
@@ -178,6 +187,19 @@ export async function inspectCatalog(db = createDatabase()) {
   );
   return groups.flat().map((row) => ({
     ...row,
+    unitPriceCalculation:
+      row.price &&
+      row.normalization &&
+      row.normalization.inputFingerprint === catalogFingerprint(catalogRecord(row.listing)) &&
+      row.normalization.normalizationVersion === normalizationVersion
+        ? calculateUnitPrice({
+            ...normalizeCatalogListing(catalogRecord(row.listing)),
+            title: row.listing.title,
+            currentPriceCents: row.price.currentPriceCents,
+            observedAt: row.listing.lastSeenAt,
+            available: row.listing.available,
+          })
+        : null,
     stale: row.normalization
       ? row.normalization.inputFingerprint !== catalogFingerprint(catalogRecord(row.listing)) ||
         row.normalization.normalizationVersion !== normalizationVersion

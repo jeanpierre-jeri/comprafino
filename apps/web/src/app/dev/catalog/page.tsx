@@ -1,4 +1,4 @@
-import { inspectCatalog } from "@comprafino/db";
+import { inspectCatalog, formatPen, formatUnitPrice } from "@comprafino/db";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 export const metadata = {
@@ -52,6 +52,8 @@ export default async function CatalogPage() {
                   "Packages",
                   "Total",
                   "Pricing basis",
+                  "Ordinary price",
+                  "Unit price / unavailable reason",
                   "Sold by weight",
                   "Source package",
                   "Issues / status",
@@ -61,7 +63,7 @@ export default async function CatalogPage() {
               </tr>
             </thead>
             <tbody>
-              {rows.map(({ listing, normalization: a, stale }) => (
+              {rows.map(({ listing, normalization: a, stale, price, unitPriceCalculation }) => (
                 <tr key={listing.id}>
                   <td>{listing.retailerId}</td>
                   <td>{listing.title}</td>
@@ -73,6 +75,14 @@ export default async function CatalogPage() {
                     {a?.totalQuantityValue ? `${a.totalQuantityValue} ${a.totalQuantityUnit}` : "—"}
                   </td>
                   <td>{a?.pricingBasis ?? "—"}</td>
+                  <td>
+                    {price ? `${formatPen(price.currentPriceCents)} / ${price.priceUnit}` : "—"}
+                  </td>
+                  <td>
+                    {unitPriceCalculation?.price
+                      ? formatUnitPrice(unitPriceCalculation.price)
+                      : (unitPriceCalculation?.reason ?? "Missing / stale normalization or price")}
+                  </td>
                   <td>{a ? (a.soldByWeight ? "Yes" : "No") : "—"}</td>
                   <td>{listing.packageText ?? "—"}</td>
                   <td>

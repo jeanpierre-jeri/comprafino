@@ -1,0 +1,2278 @@
+{
+  "observedAt": "2026-10-04T03:31:53.020Z",
+  "knownActiveOpenOffers": 534,
+  "eligibleOffers": 534,
+  "withUnitPrice": 499,
+  "withoutUnitPrice": 35,
+  "reasons": {
+    "ambiguous-quantity": 34,
+    "missing-quantity": 1
+  },
+  "staleNormalization": 0,
+  "categories": [
+    {
+      "term": "huevo",
+      "eligible": 34,
+      "withUnitPrice": 29,
+      "withoutUnitPrice": 5
+    },
+    {
+      "term": "arroz",
+      "eligible": 34,
+      "withUnitPrice": 34,
+      "withoutUnitPrice": 0
+    },
+    {
+      "term": "azúcar",
+      "eligible": 9,
+      "withUnitPrice": 7,
+      "withoutUnitPrice": 2
+    },
+    {
+      "term": "aceite",
+      "eligible": 40,
+      "withUnitPrice": 36,
+      "withoutUnitPrice": 4
+    },
+    {
+      "term": "leche",
+      "eligible": 104,
+      "withUnitPrice": 101,
+      "withoutUnitPrice": 3
+    },
+    {
+      "term": "pasta",
+      "eligible": 0,
+      "withUnitPrice": 0,
+      "withoutUnitPrice": 0
+    },
+    {
+      "term": "harina",
+      "eligible": 1,
+      "withUnitPrice": 1,
+      "withoutUnitPrice": 0
+    },
+    {
+      "term": "avena",
+      "eligible": 0,
+      "withUnitPrice": 0,
+      "withoutUnitPrice": 0
+    },
+    {
+      "term": "detergente",
+      "eligible": 29,
+      "withUnitPrice": 24,
+      "withoutUnitPrice": 5
+    }
+  ],
+  "samples": {
+    "eggs": [
+      {
+        "title": "Huevos Gallinas Libres 12un",
+        "brand": "La Calera",
+        "retailer": "metro",
+        "priceCents": 1440,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 12,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 12,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "1440",
+          "denominator": "12",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 1.20 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos Orgánicos Pachacamac 12un",
+        "brand": "Genérico",
+        "retailer": "metro",
+        "priceCents": 1750,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 12,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 12,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "1750",
+          "denominator": "12",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 1.46 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos Pardos Artisan 15un",
+        "brand": "Avinka",
+        "retailer": "metro",
+        "priceCents": 1650,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 15,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 15,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "1650",
+          "denominator": "15",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 1.10 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos Pardos Metro 15un",
+        "brand": "Metro",
+        "retailer": "metro",
+        "priceCents": 930,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 15,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 15,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "930",
+          "denominator": "15",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 0.62 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos Pardos Metro 30un",
+        "brand": "Metro",
+        "retailer": "metro",
+        "priceCents": 1650,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 30,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 30,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "1650",
+          "denominator": "30",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 0.55 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos Rosados Avivel 90un",
+        "brand": "Genérico",
+        "retailer": "metro",
+        "priceCents": 4790,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 90,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 90,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "4790",
+          "denominator": "90",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 0.53 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos de Corral Metro 12un",
+        "brand": "Metro",
+        "retailer": "metro",
+        "priceCents": 1390,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 12,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 12,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "1390",
+          "denominator": "12",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 1.16 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos Pardos ARTISAN Bandeja 15un",
+        "brand": "Artisan",
+        "retailer": "plaza-vea",
+        "priceCents": 1420,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 15,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 15,
+          "unit": "unit"
+        },
+        "association": "ee6d05db-1419-8815-9aa7-bd945790fa7b",
+        "unitPrice": {
+          "numerator": "1420",
+          "denominator": "15",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 0.95 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos Pardos BELL'S Bandeja 30un",
+        "brand": "Bell's",
+        "retailer": "plaza-vea",
+        "priceCents": 1590,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 30,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 30,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "1590",
+          "denominator": "30",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 0.53 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos Pardos LA CALERA Bandeja 15un",
+        "brand": "La Calera",
+        "retailer": "plaza-vea",
+        "priceCents": 990,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 15,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 15,
+          "unit": "unit"
+        },
+        "association": "e2be6338-627a-8655-bfcd-f6771dd304fc",
+        "unitPrice": {
+          "numerator": "990",
+          "denominator": "15",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 0.66 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos Pardos LA CALERA Paquete 30un",
+        "brand": "La Calera",
+        "retailer": "plaza-vea",
+        "priceCents": 1790,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 30,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 30,
+          "unit": "unit"
+        },
+        "association": "05c25031-29a8-8ee6-9dff-129036aa42c9",
+        "unitPrice": {
+          "numerator": "1790",
+          "denominator": "30",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 0.60 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos de Codorniz BELL'S Bandeja 18un",
+        "brand": "Bell's",
+        "retailer": "plaza-vea",
+        "priceCents": 690,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 18,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 18,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "690",
+          "denominator": "18",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 0.38 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos de Codorniz BELL'S Bandeja 24un",
+        "brand": "Bell's",
+        "retailer": "plaza-vea",
+        "priceCents": 890,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 24,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 24,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "890",
+          "denominator": "24",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 0.37 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos de Codorniz LA CALERA Paquete 18un",
+        "brand": "La Calera",
+        "retailer": "plaza-vea",
+        "priceCents": 690,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 18,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 18,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "690",
+          "denominator": "18",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 0.38 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos de Corral LA CALERA Paquete 30un",
+        "brand": "La Calera",
+        "retailer": "plaza-vea",
+        "priceCents": 3290,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 30,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 30,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "3290",
+          "denominator": "30",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 1.10 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos de Gallina BELL'S Pardos Bandeja 15un",
+        "brand": "Bell's",
+        "retailer": "plaza-vea",
+        "priceCents": 940,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 15,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 15,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "940",
+          "denominator": "15",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 0.63 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos de Gallina LA CALERA de Corral Paquete 12un",
+        "brand": "La Calera",
+        "retailer": "plaza-vea",
+        "priceCents": 1450,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 12,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 12,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "1450",
+          "denominator": "12",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 1.21 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevo Corral La Calera Empaque 30 Und",
+        "brand": "La Calera",
+        "retailer": "tottus",
+        "priceCents": 3290,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 30,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 30,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "3290",
+          "denominator": "30",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 1.10 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevo Orgánico La Calera Bandeja 12 Und",
+        "brand": "La Calera",
+        "retailer": "tottus",
+        "priceCents": 1750,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 12,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 12,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "1750",
+          "denominator": "12",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 1.46 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos Gallina Libre Pastoreo Cocó y sus Amigas Bandeja 12 Und",
+        "brand": "Coco Y Sus Amigas",
+        "retailer": "tottus",
+        "priceCents": 1340,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 12,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 12,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "1340",
+          "denominator": "12",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 1.12 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos Pardos Artisan Caja 15 Und",
+        "brand": "Artisan",
+        "retailer": "tottus",
+        "priceCents": 1580,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 15,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 15,
+          "unit": "unit"
+        },
+        "association": "ee6d05db-1419-8815-9aa7-bd945790fa7b",
+        "unitPrice": {
+          "numerator": "1580",
+          "denominator": "15",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 1.05 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos Pardos Avivel Empaque 15 Und",
+        "brand": "Avivel",
+        "retailer": "tottus",
+        "priceCents": 950,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 15,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 15,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "950",
+          "denominator": "15",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 0.63 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos Pardos La Calera Bandeja 15 Und",
+        "brand": "La Calera",
+        "retailer": "tottus",
+        "priceCents": 990,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 15,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 15,
+          "unit": "unit"
+        },
+        "association": "e2be6338-627a-8655-bfcd-f6771dd304fc",
+        "unitPrice": {
+          "numerator": "990",
+          "denominator": "15",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 0.66 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos Pardos La Calera Bandeja 30 Und",
+        "brand": "La Calera",
+        "retailer": "tottus",
+        "priceCents": 1790,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 30,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 30,
+          "unit": "unit"
+        },
+        "association": "05c25031-29a8-8ee6-9dff-129036aa42c9",
+        "unitPrice": {
+          "numerator": "1790",
+          "denominator": "30",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 0.60 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos Pardos Tottus Bandeja 15 Und",
+        "brand": "Tottus",
+        "retailer": "tottus",
+        "priceCents": 950,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 15,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 15,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "950",
+          "denominator": "15",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 0.63 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos Pardos Tottus Bandeja 30 Und",
+        "brand": "Tottus",
+        "retailer": "tottus",
+        "priceCents": 1590,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 30,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 30,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "1590",
+          "denominator": "30",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 0.53 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos San Fernando Bandeja 15 Und",
+        "brand": "San Fernando",
+        "retailer": "tottus",
+        "priceCents": 1130,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 15,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 15,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "1130",
+          "denominator": "15",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 0.75 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos Súper Jumbo La Calera Bandeja 10 Und",
+        "brand": "La Calera",
+        "retailer": "tottus",
+        "priceCents": 1150,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 10,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 10,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "1150",
+          "denominator": "10",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 1.15 / unidad",
+        "reason": null
+      },
+      {
+        "title": "Huevos de Gallina San Fernando Bandeja 30 Und",
+        "brand": "San Fernando",
+        "retailer": "tottus",
+        "priceCents": 2250,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 30,
+          "unit": "unit"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 30,
+          "unit": "unit"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "2250",
+          "denominator": "30",
+          "dimension": "count",
+          "displayUnit": "unit"
+        },
+        "display": "S/ 0.75 / unidad",
+        "reason": null
+      }
+    ],
+    "mass": [
+      {
+        "title": "Arroz Costeño Añejo Extra 5kg",
+        "brand": "Costeño",
+        "retailer": "metro",
+        "priceCents": 2090,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 5000,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 5000,
+          "unit": "g"
+        },
+        "association": "f4ca36bb-f925-85b3-9655-47fdc755b4c4",
+        "unitPrice": {
+          "numerator": "2090000",
+          "denominator": "5000",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 4.18 / kg",
+        "reason": null
+      },
+      {
+        "title": "Arroz Costeño Añejo Extra 750g",
+        "brand": "Costeño",
+        "retailer": "metro",
+        "priceCents": 430,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 750,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 750,
+          "unit": "g"
+        },
+        "association": "fa773473-d62a-8b31-ab41-57c3880c325e",
+        "unitPrice": {
+          "numerator": "430000",
+          "denominator": "750",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 5.73 / kg",
+        "reason": null
+      },
+      {
+        "title": "Arroz Costeño Extra 3kg",
+        "brand": "Costeño",
+        "retailer": "metro",
+        "priceCents": 1590,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 3000,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 3000,
+          "unit": "g"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "1590000",
+          "denominator": "3000",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 5.30 / kg",
+        "reason": null
+      },
+      {
+        "title": "Arroz Costeño Extra Añejo 10kg",
+        "brand": "Costeño",
+        "retailer": "metro",
+        "priceCents": 4190,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 10000,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 10000,
+          "unit": "g"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "4190000",
+          "denominator": "10000",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 4.19 / kg",
+        "reason": null
+      },
+      {
+        "title": "Arroz Costeño Extra Añejo 3kg",
+        "brand": "Costeño",
+        "retailer": "metro",
+        "priceCents": 1590,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 3000,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 3000,
+          "unit": "g"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "1590000",
+          "denominator": "3000",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 5.30 / kg",
+        "reason": null
+      },
+      {
+        "title": "Arroz Extra Costeño 5kg",
+        "brand": "Costeño",
+        "retailer": "metro",
+        "priceCents": 2270,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 5000,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 5000,
+          "unit": "g"
+        },
+        "association": "5e0fa08c-677b-85a7-bd60-8ade55acc304",
+        "unitPrice": {
+          "numerator": "2270000",
+          "denominator": "5000",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 4.54 / kg",
+        "reason": null
+      },
+      {
+        "title": "Arroz Extra Costeño 750g",
+        "brand": "Costeño",
+        "retailer": "metro",
+        "priceCents": 450,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 750,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 750,
+          "unit": "g"
+        },
+        "association": "eac37db3-4aab-85a8-accf-f5ebea9409f6",
+        "unitPrice": {
+          "numerator": "450000",
+          "denominator": "750",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 6.00 / kg",
+        "reason": null
+      },
+      {
+        "title": "Arroz Integral Costeño 750g",
+        "brand": "Costeño",
+        "retailer": "metro",
+        "priceCents": 580,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 750,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 750,
+          "unit": "g"
+        },
+        "association": "153f87c0-98d4-85a0-9a27-1e843ac7dfbf",
+        "unitPrice": {
+          "numerator": "580000",
+          "denominator": "750",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 7.73 / kg",
+        "reason": null
+      },
+      {
+        "title": "Arroz Superior Costeño 5kg",
+        "brand": "Costeño",
+        "retailer": "metro",
+        "priceCents": 2090,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 5000,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 5000,
+          "unit": "g"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "2090000",
+          "denominator": "5000",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 4.18 / kg",
+        "reason": null
+      },
+      {
+        "title": "Arroz Superior Costeño 750g",
+        "brand": "Costeño",
+        "retailer": "metro",
+        "priceCents": 410,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 750,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 750,
+          "unit": "g"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "410000",
+          "denominator": "750",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 5.47 / kg",
+        "reason": null
+      },
+      {
+        "title": "Arroz Arborio COSTEÑO Bolsa 750g",
+        "brand": "Costeño",
+        "retailer": "plaza-vea",
+        "priceCents": 1190,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 750,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 750,
+          "unit": "g"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "1190000",
+          "denominator": "750",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 15.87 / kg",
+        "reason": null
+      },
+      {
+        "title": "Arroz Añejo Extra COSTEÑO Bolsa 5Kg",
+        "brand": "Costeño",
+        "retailer": "plaza-vea",
+        "priceCents": 2390,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 5000,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 5000,
+          "unit": "g"
+        },
+        "association": "f4ca36bb-f925-85b3-9655-47fdc755b4c4",
+        "unitPrice": {
+          "numerator": "2390000",
+          "denominator": "5000",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 4.78 / kg",
+        "reason": null
+      },
+      {
+        "title": "Arroz Añejo Extra COSTEÑO Bolsa 750g",
+        "brand": "Costeño",
+        "retailer": "plaza-vea",
+        "priceCents": 410,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 750,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 750,
+          "unit": "g"
+        },
+        "association": "fa773473-d62a-8b31-ab41-57c3880c325e",
+        "unitPrice": {
+          "numerator": "410000",
+          "denominator": "750",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 5.47 / kg",
+        "reason": null
+      },
+      {
+        "title": "Arroz Extra COSTEÑO Bolsa 5Kg",
+        "brand": "Costeño",
+        "retailer": "plaza-vea",
+        "priceCents": 2390,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 5000,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 5000,
+          "unit": "g"
+        },
+        "association": "5e0fa08c-677b-85a7-bd60-8ade55acc304",
+        "unitPrice": {
+          "numerator": "2390000",
+          "denominator": "5000",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 4.78 / kg",
+        "reason": null
+      },
+      {
+        "title": "Arroz Extra COSTEÑO Bolsa 750g",
+        "brand": "Costeño",
+        "retailer": "plaza-vea",
+        "priceCents": 450,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 750,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 750,
+          "unit": "g"
+        },
+        "association": "eac37db3-4aab-85a8-accf-f5ebea9409f6",
+        "unitPrice": {
+          "numerator": "450000",
+          "denominator": "750",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 6.00 / kg",
+        "reason": null
+      },
+      {
+        "title": "Arroz Extra GRAN CHALAN Añejo Bolsa 5Kg",
+        "brand": "Gran Chalan",
+        "retailer": "plaza-vea",
+        "priceCents": 2050,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 5000,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 5000,
+          "unit": "g"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "2050000",
+          "denominator": "5000",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 4.10 / kg",
+        "reason": null
+      },
+      {
+        "title": "Arroz Integral COSTEÑO Bolsa 750g",
+        "brand": "Costeño",
+        "retailer": "plaza-vea",
+        "priceCents": 650,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 750,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 750,
+          "unit": "g"
+        },
+        "association": "153f87c0-98d4-85a0-9a27-1e843ac7dfbf",
+        "unitPrice": {
+          "numerator": "650000",
+          "denominator": "750",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 8.67 / kg",
+        "reason": null
+      },
+      {
+        "title": "Arroz Parbolizado COSTEÑO Bolsa 750g",
+        "brand": "Costeño",
+        "retailer": "plaza-vea",
+        "priceCents": 560,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 750,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 750,
+          "unit": "g"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "560000",
+          "denominator": "750",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 7.47 / kg",
+        "reason": null
+      },
+      {
+        "title": "Harina de Arroz COSTEÑO Bolsa 1kg",
+        "brand": "Costeño",
+        "retailer": "plaza-vea",
+        "priceCents": 890,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 1000,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 1000,
+          "unit": "g"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "890000",
+          "denominator": "1000",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 8.90 / kg",
+        "reason": null
+      },
+      {
+        "title": "Arroz Costeño Extra Añejo Bolsa 10 Kg",
+        "brand": "Costeno",
+        "retailer": "tottus",
+        "priceCents": 4190,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 10000,
+          "unit": "g"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 10000,
+          "unit": "g"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "4190000",
+          "denominator": "10000",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 4.19 / kg",
+        "reason": null
+      }
+    ],
+    "volume": [
+      {
+        "title": "Aceite Vegetal Primor Clásico Botella 1.8L",
+        "brand": "Primor",
+        "retailer": "metro",
+        "priceCents": 1750,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 1800,
+          "unit": "ml"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 1800,
+          "unit": "ml"
+        },
+        "association": "49421a9b-916c-8c4c-bf73-835c6d5ea091",
+        "unitPrice": {
+          "numerator": "1750000",
+          "denominator": "1800",
+          "dimension": "volume",
+          "displayUnit": "l"
+        },
+        "display": "S/ 9.72 / L",
+        "reason": null
+      },
+      {
+        "title": "Aceite Vegetal Primor Clásico Botella 900ml",
+        "brand": "Primor",
+        "retailer": "metro",
+        "priceCents": 850,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 900,
+          "unit": "ml"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 900,
+          "unit": "ml"
+        },
+        "association": "d62b1ffc-dae3-895c-80b1-86a161e7461b",
+        "unitPrice": {
+          "numerator": "850000",
+          "denominator": "900",
+          "dimension": "volume",
+          "displayUnit": "l"
+        },
+        "display": "S/ 9.44 / L",
+        "reason": null
+      },
+      {
+        "title": "Aceite Vegetal Primor Premium Botella 900ml",
+        "brand": "Primor",
+        "retailer": "metro",
+        "priceCents": 950,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 900,
+          "unit": "ml"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 900,
+          "unit": "ml"
+        },
+        "association": "aa2da7be-a4bf-8349-9646-ce348de8c7cf",
+        "unitPrice": {
+          "numerator": "950000",
+          "denominator": "900",
+          "dimension": "volume",
+          "displayUnit": "l"
+        },
+        "display": "S/ 10.56 / L",
+        "reason": null
+      },
+      {
+        "title": "Fourpack Leche Semidescremada UHT Laive Sin Lactosa Caja 946ml",
+        "brand": "Laive",
+        "retailer": "metro",
+        "priceCents": 2150,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "packageCount": 4,
+        "totalQuantity": {
+          "value": 3784,
+          "unit": "ml"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "2150000",
+          "denominator": "3784",
+          "dimension": "volume",
+          "displayUnit": "l"
+        },
+        "display": "S/ 5.68 / L",
+        "reason": null
+      },
+      {
+        "title": "Fourpack Leche Semidescremada UHT Laive Sin Lactosa Light Caja 946ml",
+        "brand": "Laive",
+        "retailer": "metro",
+        "priceCents": 2390,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "packageCount": 4,
+        "totalQuantity": {
+          "value": 3784,
+          "unit": "ml"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "2390000",
+          "denominator": "3784",
+          "dimension": "volume",
+          "displayUnit": "l"
+        },
+        "display": "S/ 6.32 / L",
+        "reason": null
+      },
+      {
+        "title": "Leche Descremada UHT Laive Sbelt Caja 946ml",
+        "brand": "Laive",
+        "retailer": "metro",
+        "priceCents": 590,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 946,
+          "unit": "ml"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "590000",
+          "denominator": "946",
+          "dimension": "volume",
+          "displayUnit": "l"
+        },
+        "display": "S/ 6.24 / L",
+        "reason": null
+      },
+      {
+        "title": "Leche Deslactosada Danlac Light Botella 900ml",
+        "brand": "Danlac",
+        "retailer": "metro",
+        "priceCents": 900,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 900,
+          "unit": "ml"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 900,
+          "unit": "ml"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "900000",
+          "denominator": "900",
+          "dimension": "volume",
+          "displayUnit": "l"
+        },
+        "display": "S/ 10.00 / L",
+        "reason": null
+      },
+      {
+        "title": "Leche Entera Pasteurizada Danlac Botella 900ml",
+        "brand": "Danlac",
+        "retailer": "metro",
+        "priceCents": 690,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 900,
+          "unit": "ml"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 900,
+          "unit": "ml"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "690000",
+          "denominator": "900",
+          "dimension": "volume",
+          "displayUnit": "l"
+        },
+        "display": "S/ 7.67 / L",
+        "reason": null
+      },
+      {
+        "title": "Leche Fresca Piamonte Bolsa 950 ml",
+        "brand": "Piamonte",
+        "retailer": "metro",
+        "priceCents": 650,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 950,
+          "unit": "ml"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 950,
+          "unit": "ml"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "650000",
+          "denominator": "950",
+          "dimension": "volume",
+          "displayUnit": "l"
+        },
+        "display": "S/ 6.84 / L",
+        "reason": null
+      },
+      {
+        "title": "Leche Parcialmente Descremada Gloria Light Bolsa 800ml",
+        "brand": "Gloria",
+        "retailer": "metro",
+        "priceCents": 470,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 800,
+          "unit": "ml"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 800,
+          "unit": "ml"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "470000",
+          "denominator": "800",
+          "dimension": "volume",
+          "displayUnit": "l"
+        },
+        "display": "S/ 5.88 / L",
+        "reason": null
+      },
+      {
+        "title": "Leche UHT Entera Cuisine & Co Caja 1 lt",
+        "brand": "Cuisine & Co",
+        "retailer": "metro",
+        "priceCents": 590,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 1000,
+          "unit": "ml"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 1000,
+          "unit": "ml"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "590000",
+          "denominator": "1000",
+          "dimension": "volume",
+          "displayUnit": "l"
+        },
+        "display": "S/ 5.90 / L",
+        "reason": null
+      },
+      {
+        "title": "Leche UHT Laive Bolsa 800ml",
+        "brand": "Laive",
+        "retailer": "metro",
+        "priceCents": 480,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 800,
+          "unit": "ml"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 800,
+          "unit": "ml"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "480000",
+          "denominator": "800",
+          "dimension": "volume",
+          "displayUnit": "l"
+        },
+        "display": "S/ 6.00 / L",
+        "reason": null
+      },
+      {
+        "title": "Leche UHT Sin Lactosa Deslactosada Vigor Bolsa 800ml",
+        "brand": "Vigor",
+        "retailer": "metro",
+        "priceCents": 550,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 800,
+          "unit": "ml"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 800,
+          "unit": "ml"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "550000",
+          "denominator": "800",
+          "dimension": "volume",
+          "displayUnit": "l"
+        },
+        "display": "S/ 6.88 / L",
+        "reason": null
+      },
+      {
+        "title": "Leche UHT Sin Lactosa Gloria Zero Lacto Bolsa 800ml",
+        "brand": "Gloria",
+        "retailer": "metro",
+        "priceCents": 520,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 800,
+          "unit": "ml"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 800,
+          "unit": "ml"
+        },
+        "association": "157d7678-aa71-832c-bf8d-dd6885a89e42",
+        "unitPrice": {
+          "numerator": "520000",
+          "denominator": "800",
+          "dimension": "volume",
+          "displayUnit": "l"
+        },
+        "display": "S/ 6.50 / L",
+        "reason": null
+      },
+      {
+        "title": "Leche Uht Vigor Bolsa 800ml",
+        "brand": "Vigor",
+        "retailer": "metro",
+        "priceCents": 530,
+        "pricingBasis": "unit",
+        "quantity": {
+          "value": 800,
+          "unit": "ml"
+        },
+        "packageCount": 1,
+        "totalQuantity": {
+          "value": 800,
+          "unit": "ml"
+        },
+        "association": null,
+        "unitPrice": {
+          "numerator": "530000",
+          "denominator": "800",
+          "dimension": "volume",
+          "displayUnit": "l"
+        },
+        "display": "S/ 6.63 / L",
+        "reason": null
+      }
+    ],
+    "directKg": [
+      {
+        "title": "Pollo Entero Sin Menudencia Redondos x kg",
+        "brand": "Redondos",
+        "retailer": "metro",
+        "priceCents": 990,
+        "pricingBasis": "kg",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": {
+          "numerator": "990",
+          "denominator": "1",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 9.90 / kg",
+        "reason": null
+      },
+      {
+        "title": "Pollo Entero con Menudencia Metro x kg",
+        "brand": "Metro",
+        "retailer": "metro",
+        "priceCents": 890,
+        "pricingBasis": "kg",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": {
+          "numerator": "890",
+          "denominator": "1",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 8.90 / kg",
+        "reason": null
+      },
+      {
+        "title": "Pollo Fresco Sin Menudencia Artisan Libre de Antibióticos x kg",
+        "brand": "Artisan",
+        "retailer": "metro",
+        "priceCents": 1950,
+        "pricingBasis": "kg",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": {
+          "numerator": "1950",
+          "denominator": "1",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 19.50 / kg",
+        "reason": null
+      },
+      {
+        "title": "Pollo Fresco con Menudencia San Fernando x kg",
+        "brand": "San Fernando",
+        "retailer": "metro",
+        "priceCents": 770,
+        "pricingBasis": "kg",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": {
+          "numerator": "770",
+          "denominator": "1",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 7.70 / kg",
+        "reason": null
+      },
+      {
+        "title": "Pollo Trozado con Menudencia Redondos 8 Piezas x kg",
+        "brand": "Redondos",
+        "retailer": "metro",
+        "priceCents": 850,
+        "pricingBasis": "kg",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": {
+          "numerator": "850",
+          "denominator": "1",
+          "dimension": "mass",
+          "displayUnit": "kg"
+        },
+        "display": "S/ 8.50 / kg",
+        "reason": null
+      }
+    ],
+    "ambiguous": [
+      {
+        "title": "Cortador de Huevos Bynd",
+        "brand": "Bynd",
+        "retailer": "metro",
+        "priceCents": 2490,
+        "pricingBasis": "unit",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": null,
+        "display": null,
+        "reason": "ambiguous-quantity"
+      },
+      {
+        "title": "Detergente Líquido Bolívar Active Care 1.9L + 3L",
+        "brand": "Bolívar",
+        "retailer": "metro",
+        "priceCents": 8530,
+        "pricingBasis": "unit",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": null,
+        "display": null,
+        "reason": "ambiguous-quantity"
+      },
+      {
+        "title": "Leche Parcialmente Descremada UHT Gloria Zero Lacto",
+        "brand": "Gloria",
+        "retailer": "metro",
+        "priceCents": 1390,
+        "pricingBasis": "unit",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": null,
+        "display": null,
+        "reason": "ambiguous-quantity"
+      },
+      {
+        "title": "Organizador Bynd de Huevos",
+        "brand": "Bynd",
+        "retailer": "metro",
+        "priceCents": 1990,
+        "pricingBasis": "unit",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": null,
+        "display": null,
+        "reason": "ambiguous-quantity"
+      },
+      {
+        "title": "Pack Bolívar: Detergente Líquido 3L + Suavizante Orquídea 2.8L",
+        "brand": "Bolívar",
+        "retailer": "metro",
+        "priceCents": 6200,
+        "pricingBasis": "unit",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": null,
+        "display": null,
+        "reason": "ambiguous-quantity"
+      },
+      {
+        "title": "Pack Bolívar: Detergente Líquido Active Care 3L + Suavizante Aroma Floral 5L",
+        "brand": "Bolívar",
+        "retailer": "metro",
+        "priceCents": 9290,
+        "pricingBasis": "unit",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": null,
+        "display": null,
+        "reason": "ambiguous-quantity"
+      },
+      {
+        "title": "Pack Primor: Aceite Vegetal Premium 900ml + Filete de Atún en Aceite 2un",
+        "brand": "Primor",
+        "retailer": "metro",
+        "priceCents": 1890,
+        "pricingBasis": "unit",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": null,
+        "display": null,
+        "reason": "ambiguous-quantity"
+      },
+      {
+        "title": "Pack Primor: Aceite Vegetal Premium 900ml + Trozos de Atún en Aceite 2un",
+        "brand": "Primor",
+        "retailer": "metro",
+        "priceCents": 1890,
+        "pricingBasis": "unit",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": null,
+        "display": null,
+        "reason": "ambiguous-quantity"
+      },
+      {
+        "title": "Pack x6 Leche Evaporada Gloria Entera",
+        "brand": "Gloria",
+        "retailer": "metro",
+        "priceCents": 2290,
+        "pricingBasis": "unit",
+        "quantity": null,
+        "packageCount": 6,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": null,
+        "display": null,
+        "reason": "missing-quantity"
+      },
+      {
+        "title": "Pollo Entero con Papa Wong + Chicha Morada Naturale 1 Litro + 1/4 de Pollo",
+        "brand": "Wong",
+        "retailer": "metro",
+        "priceCents": 3990,
+        "pricingBasis": "unit",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": null,
+        "display": null,
+        "reason": "ambiguous-quantity"
+      },
+      {
+        "title": "Pollo Entero con Papa Wong + Gaseosa 1.5 Litro + 1/4 de Pollo",
+        "brand": "Wong",
+        "retailer": "metro",
+        "priceCents": 3990,
+        "pricingBasis": "unit",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": null,
+        "display": null,
+        "reason": "ambiguous-quantity"
+      },
+      {
+        "title": "Pollo Rostizado + Papas Fritas",
+        "brand": "Metro",
+        "retailer": "metro",
+        "priceCents": 2490,
+        "pricingBasis": "unit",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": null,
+        "display": null,
+        "reason": "ambiguous-quantity"
+      },
+      {
+        "title": "Pollo Rostizado + Papas Fritas",
+        "brand": "Wong",
+        "retailer": "metro",
+        "priceCents": 3290,
+        "pricingBasis": "unit",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": null,
+        "display": null,
+        "reason": "ambiguous-quantity"
+      },
+      {
+        "title": "Pollo Rostizado + Papas Fritas + Ensalada",
+        "brand": "Wong",
+        "retailer": "metro",
+        "priceCents": 3890,
+        "pricingBasis": "unit",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": null,
+        "display": null,
+        "reason": "ambiguous-quantity"
+      },
+      {
+        "title": "Pollo Rostizado + Papas Fritas + Ensalada + Chicha Morada Naturale 1L",
+        "brand": "Metro",
+        "retailer": "metro",
+        "priceCents": 4599,
+        "pricingBasis": "unit",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": null,
+        "display": null,
+        "reason": "ambiguous-quantity"
+      },
+      {
+        "title": "Pollo Rostizado + Papas Fritas + Gaseosa Inca Kola Sin Azúcar 1.5L",
+        "brand": "Metro",
+        "retailer": "metro",
+        "priceCents": 2990,
+        "pricingBasis": "unit",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": null,
+        "display": null,
+        "reason": "ambiguous-quantity"
+      },
+      {
+        "title": "Pollo Rostizado Sin Papas",
+        "brand": "Wong",
+        "retailer": "metro",
+        "priceCents": 2390,
+        "pricingBasis": "unit",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": null,
+        "display": null,
+        "reason": "ambiguous-quantity"
+      },
+      {
+        "title": "Pollo Rostizado Sin Papas + Gaseosa Inca Kola Sin Azúcar 1.5L",
+        "brand": "Metro",
+        "retailer": "metro",
+        "priceCents": 2650,
+        "pricingBasis": "unit",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": null,
+        "display": null,
+        "reason": "ambiguous-quantity"
+      },
+      {
+        "title": "Pollo Sabor Cilindro x un",
+        "brand": "Genérico",
+        "retailer": "metro",
+        "priceCents": 2850,
+        "pricingBasis": "unit",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": null,
+        "display": null,
+        "reason": "ambiguous-quantity"
+      },
+      {
+        "title": "Queso Edam Laive + Jamón Americano Suiza 300g",
+        "brand": "Laive",
+        "retailer": "metro",
+        "priceCents": 1190,
+        "pricingBasis": "unit",
+        "quantity": null,
+        "packageCount": null,
+        "totalQuantity": null,
+        "association": null,
+        "unitPrice": null,
+        "display": null,
+        "reason": "ambiguous-quantity"
+      }
+    ]
+  },
+  "searches": [
+    {
+      "query": "huevos",
+      "canonicalResults": 3,
+      "genericResults": 30,
+      "resultLimit": 30,
+      "dimensions": ["count"],
+      "unitPriceCoverage": 27,
+      "cheapestPackage": {
+        "title": "Huevos de Codorniz BELL'S Bandeja 18un",
+        "retailer": "plaza-vea",
+        "priceCents": 690,
+        "id": "1cc4efe7-af70-48a6-8620-95e3fc8e8577"
+      },
+      "cheapestByDimension": [
+        {
+          "dimension": "count",
+          "title": "Huevos de Codorniz BELL'S Bandeja 24un",
+          "retailer": "plaza-vea",
+          "priceCents": 890,
+          "display": "S/ 0.37 / unidad",
+          "id": "14fead91-87b1-4888-859e-f52523b5f593"
+        }
+      ]
+    },
+    {
+      "query": "arroz",
+      "canonicalResults": 5,
+      "genericResults": 30,
+      "resultLimit": 30,
+      "dimensions": ["mass"],
+      "unitPriceCoverage": 30,
+      "cheapestPackage": {
+        "title": "Yogurt GLORIA Battimix Vainilla con Arroz Crujiente Bañado en Chocolate Vaso 146g",
+        "retailer": "plaza-vea",
+        "priceCents": 300,
+        "id": "88e89abe-7d1a-4c43-9db9-8d6616f08f81"
+      },
+      "cheapestByDimension": [
+        {
+          "dimension": "mass",
+          "title": "Arroz Extra Tottus Bolsa 10 Kg",
+          "retailer": "tottus",
+          "priceCents": 3800,
+          "display": "S/ 3.80 / kg",
+          "id": "25496623-c086-41a2-b59f-13cd4c3c4f9a"
+        }
+      ]
+    },
+    {
+      "query": "azúcar",
+      "canonicalResults": 0,
+      "genericResults": 9,
+      "resultLimit": 30,
+      "dimensions": ["volume"],
+      "unitPriceCoverage": 7,
+      "cheapestPackage": {
+        "title": "Bebida Gaseosa Coca Cola Zero Azúcar Botella 600 mL",
+        "retailer": "tottus",
+        "priceCents": 360,
+        "id": "fa72445f-64e8-4e52-bd5d-a8adfecd6ddb"
+      },
+      "cheapestByDimension": [
+        {
+          "dimension": "volume",
+          "title": "Gaseosa INCA KOLA sin Azúcar Botella 1.5L Paquete 2un",
+          "retailer": "plaza-vea",
+          "priceCents": 1230,
+          "display": "S/ 4.10 / L",
+          "id": "19cf13d7-ee48-4919-950d-3098f7769b14"
+        }
+      ]
+    },
+    {
+      "query": "aceite",
+      "canonicalResults": 3,
+      "genericResults": 30,
+      "resultLimit": 30,
+      "dimensions": ["volume", "mass", "count"],
+      "unitPriceCoverage": 28,
+      "cheapestPackage": {
+        "title": "Trozos de Atún PRIMOR en Aceite Vegetal Lata 140g",
+        "retailer": "plaza-vea",
+        "priceCents": 490,
+        "id": "fa4e7301-d443-41b0-a472-71ac6a036e2d"
+      },
+      "cheapestByDimension": [
+        {
+          "dimension": "mass",
+          "title": "Trozos de Atún PRIMOR en Aceite Vegetal Lata 140g",
+          "retailer": "plaza-vea",
+          "priceCents": 490,
+          "display": "S/ 35.00 / kg",
+          "id": "fa4e7301-d443-41b0-a472-71ac6a036e2d"
+        },
+        {
+          "dimension": "volume",
+          "title": "Aceite Vegetal BELL'S Botella 900ml",
+          "retailer": "plaza-vea",
+          "priceCents": 550,
+          "display": "S/ 6.11 / L",
+          "id": "e5c26829-9994-43e3-91a8-6d133547c066"
+        },
+        {
+          "dimension": "count",
+          "title": "Filete de Atún Florida en Aceite de Girasol Pack 3 Und",
+          "retailer": "tottus",
+          "priceCents": 1290,
+          "display": "S/ 4.30 / unidad",
+          "id": "5cbace42-318f-4559-bd75-ee0ae167e494"
+        }
+      ]
+    },
+    {
+      "query": "leche",
+      "canonicalResults": 15,
+      "genericResults": 30,
+      "resultLimit": 30,
+      "dimensions": ["volume", "mass"],
+      "unitPriceCoverage": 30,
+      "cheapestPackage": {
+        "title": "Leche Evaporada Bella Holandesa Lata 405g",
+        "retailer": "metro",
+        "priceCents": 320,
+        "id": "c7103529-6e7f-4fb5-9b92-ef69193b0796"
+      },
+      "cheapestByDimension": [
+        {
+          "dimension": "mass",
+          "title": "Leche Evaporada Bella Holandesa Lata 405g",
+          "retailer": "metro",
+          "priceCents": 320,
+          "display": "S/ 7.90 / kg",
+          "id": "c7103529-6e7f-4fb5-9b92-ef69193b0796"
+        },
+        {
+          "dimension": "volume",
+          "title": "Leche Entera UHT MILKITO Bolsa 800ml",
+          "retailer": "plaza-vea",
+          "priceCents": 420,
+          "display": "S/ 5.25 / L",
+          "id": "484843fe-49a9-49b1-9888-04b0c0b652e8"
+        }
+      ]
+    },
+    {
+      "query": "harina",
+      "canonicalResults": 0,
+      "genericResults": 1,
+      "resultLimit": 30,
+      "dimensions": ["mass"],
+      "unitPriceCoverage": 1,
+      "cheapestPackage": {
+        "title": "Harina de Arroz COSTEÑO Bolsa 1kg",
+        "retailer": "plaza-vea",
+        "priceCents": 890,
+        "id": "c42f69d6-0c7e-4d7b-9a45-f3eb95625ada"
+      },
+      "cheapestByDimension": [
+        {
+          "dimension": "mass",
+          "title": "Harina de Arroz COSTEÑO Bolsa 1kg",
+          "retailer": "plaza-vea",
+          "priceCents": 890,
+          "display": "S/ 8.90 / kg",
+          "id": "c42f69d6-0c7e-4d7b-9a45-f3eb95625ada"
+        }
+      ]
+    },
+    {
+      "query": "avena",
+      "canonicalResults": 0,
+      "genericResults": 0,
+      "resultLimit": 30,
+      "dimensions": [],
+      "unitPriceCoverage": 0,
+      "cheapestPackage": null,
+      "cheapestByDimension": []
+    },
+    {
+      "query": "pasta",
+      "canonicalResults": 0,
+      "genericResults": 0,
+      "resultLimit": 30,
+      "dimensions": [],
+      "unitPriceCoverage": 0,
+      "cheapestPackage": null,
+      "cheapestByDimension": []
+    },
+    {
+      "query": "detergente",
+      "canonicalResults": 0,
+      "genericResults": 29,
+      "resultLimit": 30,
+      "dimensions": ["mass", "volume"],
+      "unitPriceCoverage": 24,
+      "cheapestPackage": {
+        "title": "Detergente en Polvo Bolívar Cuidado Total Bolsa 730 g",
+        "retailer": "tottus",
+        "priceCents": 950,
+        "id": "6e0100c9-0e8e-47ef-a4c7-6c866921f637"
+      },
+      "cheapestByDimension": [
+        {
+          "dimension": "mass",
+          "title": "Detergente en Polvo Sapolio Limón Bolsa 2 Kg",
+          "retailer": "tottus",
+          "priceCents": 1690,
+          "display": "S/ 8.45 / kg",
+          "id": "21794ecb-f7ea-435a-a2bb-7e2dbc6b0f8f"
+        },
+        {
+          "dimension": "volume",
+          "title": "Pack Detergente Líquido BOLÍVAR Cuidado Total Doypack 3L x2un",
+          "retailer": "plaza-vea",
+          "priceCents": 7990,
+          "display": "S/ 13.32 / L",
+          "id": "6478c15f-bbbc-479e-803e-1ee59feebe1f"
+        }
+      ]
+    }
+  ],
+  "exactGloria946": 4
+}

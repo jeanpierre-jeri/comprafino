@@ -1,6 +1,6 @@
 # Roadmap
 
-Milestones 0–6 are complete and deployed in the user-provided baseline (`558cb56`). Milestone 7 is implemented with bounded live validation; fresh local build/E2E confirmation remains pending. Historical pending notes in earlier sections refer to their original agent runs.
+Milestones 0–7 are complete, committed and pushed in the user-provided baseline (`13cb4ee`). Milestone 8 is implemented and data-validated; local build/E2E confirmation remains pending. Historical pending notes in earlier sections refer to their original agent runs.
 
 ## Milestone 0 — Foundation
 
@@ -74,42 +74,44 @@ Validation: deterministic unit tests and isolated concurrent PostgreSQL tests, r
 
 Next catalog-coverage recommendation: use accumulated demand to review representative new listings and conservative normalization/matching gaps, measure source/downstream workload and intentionally expand refresh coverage for already-discovered products. Review the complete-catalog processing bound before increasing sustained ingestion. Proactive category expansion remains a separate authorized milestone; do not start it automatically.
 
-## Milestone 7 — Validated unit-price comparison
-
-Ordinary prices for exact variants are implemented in Milestone 4. Generalized price-per-unit comparisons across packaged, counted and weighted products remain a separate validation task.
-
-## Milestone 8 — Price history
-
-Store and visualize meaningful price changes. Avoid redundant unchanged observations while preserving freshness information.
-
-## Milestone 9 — Promotions
-
-Model percentage discounts, 2x1, second-unit discounts, quantity discounts, date ranges, specific weekdays, payment requirements and membership requirements. Test effective prices and eligibility.
-
-## Milestone 10 — Buy now or wait
-
-Use current/historical prices, confirmed future promotions and clearly labelled historical patterns. Never present unconfirmed future prices as facts.
-
-## Milestone 11 — Shopping lists
-
-Allow users to assemble full grocery baskets, using the simplest adequate state/persistence approach.
-
-## Milestone 12 — Basket optimization
-
-Compare one-store purchases and two-store combinations, delivery/travel costs where applicable and user preferences. Test explicit constraints.
-
-## Milestone 13 — Accounts and alerts
-
-Add authentication only when user-specific lists, preferences or alerts justify it.
-
-## Milestone 14 — Scale only as needed
-
-Potential options, not guaranteed requirements: TanStack Query, TanStack Form, shadcn Chart/Recharts, Cheerio, browser Playwright, Upstash, Inngest, dedicated workers and a dedicated search engine. Introduce each only for demonstrated requirements or measured workloads.
-
 ## Milestone 7 — Freshness for discovered products and demand-guided coverage
 
 Implemented: exact Tottus product-page variant and Plaza Vea/Metro SKU lookups; same normalized listing and persistence contract; immutable acquisition/query provenance, category observations, latest targeted attempt/outcome migration; public-first oldest-observation admission, 24-hour age, twelve-hour attempt cooldown and 100-per-run budget; sequential requests, three-error retailer circuit and partial-failure reporting; integration before one normalization/matching pass; read-only demand/coverage report and development metrics; fresh ≤36h / labelled stale ≤72h / historical >72h public semantics, only fresh usable offers participating in best price. No scoring/threshold change, new dependency, retailer, category expansion or service.
 
-Verified: existing category cycle passed, nine public listings observed twice with zero price/normalization/matching writes, 93 fresh public offers audited, twenty-four verified discovery-created public listings now have a targeted path (nineteen historical plus five newly attributed). The [audit](listing-refresh.md) records the changing live catalog and exact counts/limits. Default build hit the known Turbopack CSS-worker port restriction and E2E could not start; staged changes await local confirmation before `feat: keep discovered product prices fresh` may be committed. Milestone 7 is not complete until this gate passes.
+Verified: existing category cycle passed, nine public listings observed twice with zero price/normalization/matching writes, 93 fresh public offers audited, twenty-four verified discovery-created public listings now have a targeted path (nineteen historical plus five newly attributed). The [audit](listing-refresh.md) records the changing live catalog and exact counts/limits. The original agent build/E2E restriction described in that document is historical. Milestone 7 is complete in the user-provided committed/pushed baseline `13cb4ee`.
 
 Future category review should inspect egg demand within existing coverage, then consider measured rice/oil demand and proven comparability, followed by tuna/detergent after normalization gaps are reviewed. This milestone does not begin that expansion.
+
+## Milestone 8 — Generic product comparison and unit pricing
+
+Implemented: independent fresh normalized retailer offers alongside unchanged exact groups; bigint rational kg/L/unit prices, direct KG semantics, multipack totals and conservative unavailable reasons; native URL relevance/package/unit sorting with separate dimensions; single-retailer eligibility, trusted provenance, exact-group links and combined zero-result discovery admission; development price inspection and read-only audit command. No matching thresholds, identity rules, dependencies or schema changed.
+
+Verified: 534 eligible offers, 499 calculable / 35 withheld; reviewed 29 eggs, twenty mass staples, fifteen volume offers and direct-KG samples; real huevos/arroz/azúcar/aceite/milk searches. Format/lint/types, 430 unit tests and 28 isolated PostgreSQL tests pass. Default build remains blocked by Turbopack CSS-worker port permissions; Chromium E2E could not start. Staged without commit/push pending the user's local confirmation. See [generic comparison](generic-comparison.md) for architecture, audit and candid keyword/category limitations (no actual packaged sugar/oat/pasta yet). Milestone 8 remains incomplete until that gate passes. No next milestone started.
+
+## Later — Price history
+
+Store and visualize meaningful price changes. Avoid redundant unchanged observations while preserving freshness information.
+
+## Later — Promotions
+
+Model percentage discounts, 2x1, second-unit discounts, quantity discounts, date ranges, specific weekdays, payment requirements and membership requirements. Test effective prices and eligibility.
+
+## Later — Buy now or wait
+
+Use current/historical prices, confirmed future promotions and clearly labelled historical patterns. Never present unconfirmed future prices as facts.
+
+## Later — Shopping lists
+
+Allow users to assemble full grocery baskets, using the simplest adequate state/persistence approach.
+
+## Later — Basket optimization
+
+Compare one-store purchases and two-store combinations, delivery/travel costs where applicable and user preferences. Test explicit constraints.
+
+## Later — Accounts and alerts
+
+Add authentication only when user-specific lists, preferences or alerts justify it.
+
+## Later — Scale only as needed
+
+Potential options, not guaranteed requirements: TanStack Query, TanStack Form, shadcn Chart/Recharts, Cheerio, browser Playwright, Upstash, Inngest, dedicated workers and a dedicated search engine. Introduce each only for demonstrated requirements or measured workloads.

@@ -79,3 +79,34 @@ test.describe("persisted public catalog (explicit DATABASE_URL)", () => {
     await expect(page.getByRole("heading", { name: "No encontramos ese producto." })).toBeVisible();
   });
 });
+
+test.describe("generic persisted offers (explicit DATABASE_URL)", () => {
+  test.skip(!process.env.DATABASE_URL, "Requires an explicitly supplied persisted database");
+  test("eggs show independent options and unit-price sorting agrees with persisted exact fractions", async ({
+    page,
+  }) => {
+    const { searchGenericProductOffers, formatUnitPrice } = await import("@comprafino/db");
+    const offers = await searchGenericProductOffers(createDatabase(), "huevos", "unit-price");
+    expect(offers.length).toBeGreaterThan(0);
+    const countOffers = offers.filter((o) => o.unitPrice?.dimension === "count");
+    expect(countOffers.length).toBeGreaterThan(0);
+    await page.goto("/search?q=huevos");
+    const section = page.getByRole("region", { name: "Opciones en supermercados" });
+    await expect(section).toBeVisible();
+    await page.getByLabel("Ordenar:").selectOption("unit-price");
+    await page.getByRole("button", { name: "Aplicar" }).click();
+    await expect(page).toHaveURL(/sort=unit-price/);
+    const first = section.locator("article[data-offer-id]").first();
+    await expect(first).toHaveAttribute("data-offer-id", countOffers[0]!.id);
+    await expect(
+      first.getByText(formatUnitPrice(countOffers[0]!.unitPrice!), { exact: true }),
+    ).toBeVisible();
+    const independent = offers.find((o) => !o.canonicalId);
+    expect(independent).toBeDefined();
+    const independentCard = section.locator(`article[data-offer-id="${independent!.id}"]`);
+    await expect(independentCard).toBeVisible();
+    await expect(independentCard.getByRole("link", { name: /Comparar este producto/ })).toHaveCount(
+      0,
+    );
+  });
+});

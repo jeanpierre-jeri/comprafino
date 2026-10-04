@@ -35,6 +35,7 @@ import {
   finishListingRefresh,
 } from "./listing-refresh.ts";
 import { coverageReport } from "./coverage.ts";
+import { searchGenericProductOffers, searchPublicProducts } from "./generic-offers.ts";
 const publicNow = new Date("2026-10-03T09:10:00Z");
 const getCanonicalProductComparison = (...args: Parameters<typeof queryComparison>) =>
   queryComparison(args[0], args[1], publicNow);
@@ -668,6 +669,101 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
       autoMatchPrecision: 1,
     });
   }, 30_000);
+  async function seedGeneric(title: string, cents: number, priceUnit: "UN" | "KG" = "UN") {
+    const value = { ...observation(`generic-${randomUUID()}`, 0, cents), title, priceUnit };
+    await persistListings(db, "tottus", [value]);
+    await persistCatalogNormalizations(db, await catalogRows(value.externalId));
+    return (await catalogRows(value.externalId))[0]!;
+  }
+  it("generic search includes independent one-store offers, uses open prices and sorts before limiting", async () => {
+    const small = await seedGeneric("Huevos Auditgeneric Bandeja 15un", 990);
+    const large = await seedGeneric("Huevos Auditgeneric Bandeja 30un", 1790);
+    const missing = await seedGeneric("Huevos Auditgeneric Premium bandeja", 1290);
+    expect(
+      (await searchGenericProductOffers(db, "auditgeneric", "total-price", publicNow)).map(
+        (o) => o.id,
+      ),
+    ).toEqual([small.id, missing.id, large.id]);
+    const sorted = await searchGenericProductOffers(db, "auditgeneric", "unit-price", publicNow);
+    expect(sorted.map((o) => o.id)).toEqual([large.id, small.id, missing.id]);
+    expect(sorted.every((o) => o.canonicalId === null)).toBe(true);
+    await query("update retailer_listings set current_price_cents=1 where id=$1", [large.id]);
+    expect(
+      (await searchGenericProductOffers(db, "auditgeneric", "unit-price", publicNow))[0]!
+        .currentPriceCents,
+    ).toBe(1790);
+    // Thirty cheaper options must be selected from the complete candidate set.
+    const batch = Array.from({ length: 32 }, (_, i) => ({
+      ...observation(`generic-limit-${i}`, 0, 100 + i),
+      title: `Arroz Auditlimit bolsa 1kg`,
+    }));
+    await persistListings(db, "tottus", batch);
+    await persistCatalogNormalizations(
+      db,
+      (await Promise.all(batch.map((v) => catalogRows(v.externalId)))).flat(),
+    );
+    const limited = await searchGenericProductOffers(db, "auditlimit", "total-price", publicNow);
+    expect(limited).toHaveLength(30);
+    expect(limited[29]!.currentPriceCents).toBe(129);
+    await seedGeneric("Auditlimit leche 1L", 500);
+    await seedGeneric("Auditlimit jar", 450);
+    const unitLimited = await searchGenericProductOffers(db, "auditlimit", "unit-price", publicNow);
+    expect(unitLimited).toHaveLength(30);
+    expect(unitLimited.some((o) => o.unitPrice?.dimension === "volume")).toBe(true);
+    expect(unitLimited.at(-1)!.unitPrice).toBeNull();
+  }, 30000);
+  it("generic public eligibility rejects stale, unavailable, inactive, unnormalized and changed inputs", async () => {
+    const rows = await Promise.all(
+      [0, 1, 2, 3, 4].map((i) => seedGeneric(`Arroz Auditeligibility ${i} bolsa 1kg`, 100 + i)),
+    );
+    await query(
+      "update retailer_listings set last_seen_at=last_seen_at-interval '40 hours',first_seen_at=first_seen_at-interval '40 hours' where id=$1",
+      [rows[0]!.id],
+    );
+    await query("update retailer_listings set available=false where id=$1", [rows[1]!.id]);
+    await query("update retailer_listings set active=false where id=$1", [rows[2]!.id]);
+    await query("delete from listing_normalizations where listing_id=$1", [rows[3]!.id]);
+    await query(
+      "update retailer_listings set title='Arroz Auditeligibility bolsa 5kg' where id=$1",
+      [rows[4]!.id],
+    );
+    expect(
+      await searchGenericProductOffers(db, "auditeligibility", "unit-price", publicNow),
+    ).toEqual([]);
+  }, 30000);
+  it("generic ranking separates mass, volume, count and direct KG semantics", async () => {
+    await seedGeneric("Auditdimensions aceite 500ml", 500);
+    await seedGeneric("Auditdimensions arroz 500g", 500);
+    await seedGeneric("Auditdimensions huevos 30un", 1790);
+    await seedGeneric("Auditdimensions arroz por kg", 1890, "KG");
+    const results = await searchGenericProductOffers(
+      db,
+      "auditdimensions",
+      "unit-price",
+      publicNow,
+    );
+    expect(results.map((o) => o.unitPrice!.dimension)).toEqual(["mass", "mass", "volume", "count"]);
+    expect(results[1]!.unitPrice!.denominator).toBe(1n);
+    expect(
+      await searchGenericProductOffers(db, "auditdimensions' OR 1=1 --", "relevance", publicNow),
+    ).toEqual([]);
+  }, 30000);
+  it("combined generic-only success suppresses discovery while true empty searches record demand", async () => {
+    await seedGeneric("Huevos Auditdiscovery Bandeja 30un", 1790);
+    const results = await searchPublicProducts(db, "auditdiscovery", "relevance", publicNow);
+    expect(results.products).toHaveLength(0);
+    expect(results.offers).toHaveLength(1);
+    expect(await recordDiscoveryForSearch(db, "auditdiscovery", results.usefulResultCount)).toBe(
+      false,
+    );
+    expect(
+      await query("select id from discovery_queries where normalized_query='auditdiscovery'"),
+    ).toEqual([]);
+    const empty = await searchPublicProducts(db, "auditemptyzzzz", "relevance", publicNow);
+    expect(await recordDiscoveryForSearch(db, "auditemptyzzzz", empty.usefulResultCount)).toBe(
+      true,
+    );
+  }, 30000);
   async function seedPublicProduct(prefix: string, title: string, acquisition?: Acquisition) {
     for (const retailer of ["metro", "plaza-vea"] as const) {
       const value = {
@@ -697,6 +793,16 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
   }
   it("searches trusted groups with normalized terms, deterministic ranking and variant preservation", async () => {
     const whole = await seedPublicProduct("public-whole", "Leche UHT Gloria Entera Caja 946ml");
+    const generic = await searchGenericProductOffers(
+      db,
+      "gloria entera 946",
+      "relevance",
+      publicNow,
+    );
+    expect(generic.filter((o) => o.canonicalId === whole.id)).toHaveLength(2);
+    expect(
+      generic.filter((o) => o.canonicalId === whole.id).every((o) => o.retailerCount === 2),
+    ).toBe(true);
     const light = await seedPublicProduct("public-light", "Leche UHT Gloria Light Caja 946ml");
     expect((await searchCanonicalProducts(db, "  GLORIA; 946ml ")).map((p) => p.id)).toEqual(
       expect.arrayContaining([whole.id, light.id]),

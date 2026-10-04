@@ -116,14 +116,14 @@ export function publicProduct(raw: unknown, now = new Date()): ProductComparison
   };
 }
 /** SQL counterpart of normalizeSearchQuery; letters, accents and numbers survive. */
-function searchText(text: SQL): SQL {
+export function searchText(text: SQL): SQL {
   return sql`trim(regexp_replace(regexp_replace(regexp_replace(lower(normalize(${text}, NFKC)),
     '([0-9])([[:alpha:]])', '\\1 \\2', 'g'), '([[:alpha:]])([0-9])', '\\1 \\2', 'g'),
     '[^[:alnum:]]+', ' ', 'g'))`;
 }
 // No review table or unmatched listing participates. Reject groups with a manual,
 // obsolete-version or below-auto-confidence link, even if two other links qualify.
-const eligibleProducts = sql`with offers as (
+export const eligibleProducts = sql`with offers as (
   select a.canonical_product_id, r.id as retailer_id, r.name as retailer_name,
     l.title, l.url, l.image_url, l.last_seen_at, l.available, n.brand, n.normalized_title,
     h.current_price_cents, h.regular_price_cents

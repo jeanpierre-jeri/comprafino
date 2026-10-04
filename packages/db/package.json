@@ -16,7 +16,8 @@
     "match:catalog": "node --env-file-if-exists=../../.env --experimental-strip-types src/matching-cli.ts",
     "match:evaluate": "node --env-file-if-exists=../../.env --experimental-strip-types src/matching-evaluate-cli.ts",
     "match:audit": "node --env-file-if-exists=../../.env --experimental-strip-types src/matching-independent-cli.ts",
-    "coverage:report": "node --env-file-if-exists=../../.env --experimental-strip-types src/coverage-cli.ts"
+    "coverage:report": "node --env-file-if-exists=../../.env --experimental-strip-types src/coverage-cli.ts",
+    "audit:unit-prices": "node --env-file-if-exists=../../.env --experimental-strip-types src/unit-price-audit-cli.ts"
   },
   "dependencies": {
     "@comprafino/core": "workspace:*",

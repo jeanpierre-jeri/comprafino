@@ -12,7 +12,7 @@ The roadmap aims to help people decide where to buy, when to buy, whether a pric
 
 ## Current status
 
-Milestones 0–6 are complete and deployed in the user-provided baseline (`558cb56`). Milestone 7 adds bounded known-listing refresh after category ingestion, exact public retailer lookups, demand/coverage reporting and safe public stale-price handling. Local build/Chromium E2E confirmation is pending because this agent cannot bind Turbopack's CSS-worker port. See [listing refresh and audit](docs/listing-refresh.md), [discovery](docs/discovery.md) and [operations](docs/operations.md). The homepage requires no database.
+Milestones 0–7 are complete, committed and pushed in the user-provided baseline (`13cb4ee`). Milestone 8 adds independent retailer options, exact unit prices and URL sorting alongside verified exact-product search. See [generic comparison](docs/generic-comparison.md) for the real-data audit and remaining validation gate. Local build/Chromium E2E confirmation is pending because this agent cannot bind Turbopack's CSS-worker port. See [listing refresh and audit](docs/listing-refresh.md), [discovery](docs/discovery.md) and [operations](docs/operations.md). The homepage requires no database.
 
 ## Initial retailers
 
@@ -176,6 +176,7 @@ Both modes read root `DATABASE_URL`; dry-run previews demand without writes or r
 | `pnpm test:e2e`                     | Chromium smoke test against a production server (build first)             |
 | `pnpm discover:catalog`             | Process bounded zero-result discovery demand; read-only dry-run available |
 | `pnpm refresh:listings`             | Refresh eligible known SKUs; optional read-only selection preview         |
+| `pnpm audit:unit-prices`            | Read-only unit-price coverage, samples and real-search audit              |
 | `pnpm coverage:report`              | Read-only freshness, category coverage and discovery demand audit         |
 | `pnpm refresh:catalog`              | Refresh validated retailer scopes, normalize and match; optional dry-run  |
 | `pnpm db:generate`                  | Generate reviewed migrations from the schema                              |
