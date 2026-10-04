@@ -184,6 +184,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@comprafino/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@comprafino/db':
         specifier: workspace:*
         version: link:../../packages/db

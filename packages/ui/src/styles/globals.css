@@ -112,6 +112,16 @@
 }
 
 @layer components {
+  .navigation-link[aria-busy="true"] {
+    opacity: 0.7;
+    cursor: progress;
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+    border-radius: var(--radius-lg);
+  }
+  .navigation-link:active {
+    opacity: 0.75;
+  }
   .eyebrow {
     @apply text-xs font-semibold tracking-widest text-primary;
   }

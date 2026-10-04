@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { SearchPageLoading } from "../../components/page-loading";
 import { ArrowRight } from "@comprafino/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -34,6 +36,19 @@ export default async function SearchPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { params, observedNow } = await loadSearchContext(searchParams);
+  return (
+    <Suspense key={JSON.stringify(params)} fallback={<SearchPageLoading />}>
+      <SearchResults params={params} observedNow={observedNow} />
+    </Suspense>
+  );
+}
+async function SearchResults({
+  params,
+  observedNow,
+}: {
+  params: Record<string, string | string[] | undefined>;
+  observedNow: Date;
+}) {
   const query = typeof params.q === "string" ? params.q : "";
   const filters = searchFilters(params);
   const sort = filters.sort;

@@ -1,5 +1,5 @@
 import { ArrowRight, ArrowUpRight } from "@comprafino/ui";
-import Link from "next/link";
+import { NavigationLink } from "../components/navigation-link";
 import { SearchForm } from "../components/search-form";
 import { PublicShell } from "../components/public-shell";
 
@@ -37,8 +37,7 @@ export default function Home() {
             <ul className="flex flex-wrap gap-2">
               {examples.map((name) => (
                 <li key={name}>
-                  <Link
-                    prefetch={false}
+                  <NavigationLink
                     className="search-chip"
                     href={`/search?q=${encodeURIComponent(name.toLowerCase())}`}
                   >
@@ -48,7 +47,7 @@ export default function Home() {
                       size={14}
                       className="ml-1 inline-block shrink-0 align-middle"
                     />
-                  </Link>
+                  </NavigationLink>
                 </li>
               ))}
             </ul>
@@ -77,7 +76,7 @@ export default function Home() {
             ["Limpieza", "Lo esencial para tu casa", "detergente", "Ver detergentes"],
           ].map(([title, copy, query, action]) => (
             <li key={query}>
-              <Link prefetch={false} href={`/search?q=${query}`} className="browse-link">
+              <NavigationLink href={`/search?q=${query}`} className="browse-link">
                 <h3 className="text-xl font-semibold tracking-tight">{title}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{copy}</p>
                 <span className="mt-5 block text-sm font-semibold">
@@ -88,7 +87,7 @@ export default function Home() {
                     className="ml-1 inline-block shrink-0 align-middle"
                   />
                 </span>
-              </Link>
+              </NavigationLink>
             </li>
           ))}
         </ul>

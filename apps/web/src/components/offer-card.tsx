@@ -1,5 +1,5 @@
 import { ArrowRight, ArrowUpRight } from "@comprafino/ui";
-import Link from "next/link";
+import { NavigationLink } from "./navigation-link";
 import { formatPen, formatUnitPrice } from "@comprafino/db";
 import type { GenericProductOffer, ProductComparison } from "@comprafino/db";
 import { ProductImage } from "./product-image";
@@ -21,12 +21,12 @@ export function GenericOfferCard({
         <div className="min-w-0">
           <h3 className="product-title">
             {offer.canonicalId ? (
-              <Link
+              <NavigationLink
                 className="product-title-link"
                 href={`/products/${offer.canonicalId}${benefits ? "?priceMode=benefits" : ""}`}
               >
                 {offer.title}
-              </Link>
+              </NavigationLink>
             ) : (
               <a
                 className="product-title-link"
@@ -95,12 +95,12 @@ export function GenericOfferCard({
           <span className="sr-only"> (nueva pestaña)</span>
         </a>
         {offer.canonicalId && (
-          <Link
+          <NavigationLink
             href={`/products/${offer.canonicalId}${benefits ? "?priceMode=benefits" : ""}`}
             className="comparison-link"
           >
             Comparar este producto en {offer.retailerCount} supermercados
-          </Link>
+          </NavigationLink>
         )}
       </div>
     </article>
@@ -133,7 +133,7 @@ export function ExactProductCard({
     );
   return (
     <article className="product-card exact-card">
-      <Link
+      <NavigationLink
         href={`/products/${product.id}${benefits ? "?priceMode=benefits" : ""}`}
         className="group block rounded-xl"
       >
@@ -179,7 +179,7 @@ export function ExactProductCard({
             className="ml-1 inline-block shrink-0 align-middle"
           />
         </p>
-      </Link>
+      </NavigationLink>
       <div className="mt-auto">
         {observedAt && <ObservedAt date={observedAt} relativeTo={observedNow} />}
       </div>
