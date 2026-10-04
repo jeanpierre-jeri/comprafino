@@ -113,3 +113,7 @@ The adapter now accepts the small validated allowlist `dairy`, `sugar-brown`, `s
 ## Milestone 10 source-quality audit
 
 [Quantity quality](../quantity-quality.md) records the retailer-specific raw tuna/paper/detergent/control inspection and [sanitized source samples](../quantity-source-audit.json). No unverified net/drained, sheet or roll-length specification becomes a denominator. Approximate roll prices and semantically unresolved tuna prices have explicit comparison policy; retailer adapters, ingestion metadata and permanent category bounds are unchanged.
+
+## Milestone 11 conditional-pricing investigation
+
+[Conditional pricing](../conditional-pricing.md) records the current anonymous source audit, exact fields, program/quantity/date/context limits and supported extraction. Observed payment-method/discount teasers remain excluded because the sampled metadata does not safely establish a concrete payable amount and complete consumer eligibility. Ordinary current/reference extraction and source bounds remain unchanged. [Source evidence](../conditional-source-audit.json) and [persisted validation](../conditional-live-validation.json) distinguish source observations from fixture-only safety cases.

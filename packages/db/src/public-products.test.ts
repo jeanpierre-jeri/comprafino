@@ -115,3 +115,48 @@ it("preserves products with all stale prices and excludes stale or unavailable c
   });
   expect(unavailable.lowestPriceCents).toBe(620);
 });
+
+it("keeps the ordinary winner while explicitly selecting benefits, ties and program identity", () => {
+  const cmr = {
+    conditionType: "payment_card",
+    programKey: "cmr",
+    conditionLabel: "Requiere tarjeta CMR",
+    priceCents: 550,
+    observedAt: now,
+  };
+  const input = {
+    ...raw,
+    offers: [
+      offer,
+      { ...raw.offers[1], retailerId: "tottus", retailerName: "Tottus", conditionalOffers: [cmr] },
+    ],
+  };
+  const standard = mapPublicProduct(input, now);
+  expect(standard.lowestPriceCents).toBe(590);
+  expect(standard.bestRanking?.retailers).toEqual(["Metro"]);
+  const benefits = mapPublicProduct(input, now, "benefits");
+  expect(benefits.lowestPriceCents).toBe(590);
+  expect(benefits.bestRanking).toEqual({
+    priceCents: 550,
+    retailers: ["Tottus"],
+    conditions: ["Requiere tarjeta CMR"],
+  });
+  const tied = mapPublicProduct(
+    { ...input, offers: [{ ...offer, currentPriceCents: 550 }, input.offers[1]] },
+    now,
+    "benefits",
+  );
+  expect(tied.bestRanking?.retailers).toEqual(["Metro", "Tottus"]);
+  const stale = mapPublicProduct(
+    {
+      ...input,
+      offers: [
+        offer,
+        { ...input.offers[1], conditionalOffers: [{ ...cmr, observedAt: new Date("2026-09-01") }] },
+      ],
+    },
+    now,
+    "benefits",
+  );
+  expect(stale.bestRanking?.retailers).toEqual(["Metro"]);
+});

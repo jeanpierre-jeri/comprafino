@@ -13,3 +13,5 @@ export * from "./coverage.ts";
 export * from "./generic-offers.ts";
 
 export * from "./catalog-budget.ts";
+
+export * from "./conditional-pricing.ts";

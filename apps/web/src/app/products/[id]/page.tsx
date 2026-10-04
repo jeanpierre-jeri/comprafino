@@ -9,18 +9,20 @@ import {
   getCanonicalProductComparison,
   isPublicProductId,
   retailerProductUrl,
+  searchFilters,
 } from "@comprafino/db";
+import { SearchControls } from "../../../components/search-controls";
 import { ProductImage } from "../../../components/product-image";
 import { ObservedAt, packageSummary } from "../../../components/product-info";
 import { PriceNotice, PublicDataError, PublicShell } from "../../../components/public-shell";
 
 // React cache deduplicates metadata/page reads within this request only.
-const loadProduct = cache(async (id: string) => {
+const loadProduct = cache(async (id: string, mode: "standard" | "benefits" = "standard") => {
   if (!isPublicProductId(id)) return { product: null, failed: false };
   await connection();
   try {
     return {
-      product: await getCanonicalProductComparison(createDatabase(), id),
+      product: await getCanonicalProductComparison(createDatabase(), id, new Date(), mode),
       failed: false,
     };
   } catch (error) {
@@ -28,7 +30,10 @@ const loadProduct = cache(async (id: string) => {
     return { product: null, failed: true };
   }
 });
-type Props = { params: Promise<{ id: string }> };
+type Props = {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { product } = await loadProduct((await params).id);
   return {
@@ -37,8 +42,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       : "Comparar precios | CompraFino",
   };
 }
-export default async function ProductPage({ params }: Props) {
-  const { product, failed } = await loadProduct((await params).id);
+export default async function ProductPage({ params, searchParams }: Props) {
+  const filters = searchFilters(await searchParams);
+  const { product, failed } = await loadProduct((await params).id, filters.priceMode);
   if (failed)
     return (
       <PublicShell>
@@ -71,7 +77,7 @@ export default async function ProductPage({ params }: Props) {
             ) : (
               <>
                 <p className="text-sm font-medium">
-                  Mejor precio observado
+                  Mejor precio para todos
                   {product.cheapestRetailers.length > 1 ? " · Empate" : ""}
                 </p>
                 <p className="mt-2 text-3xl font-semibold text-primary">
@@ -83,7 +89,22 @@ export default async function ProductPage({ params }: Props) {
           </div>
         </div>
       </div>
-      <section className="mt-12" aria-labelledby="offers-title">
+      <SearchControls query="" filters={filters} comparisonPath={`/products/${product.id}`} />
+      {filters.priceMode === "benefits" &&
+        product.lowestBenefit &&
+        product.lowestBenefit.priceCents < (product.lowestPriceCents ?? Infinity) && (
+          <aside className="mt-4 rounded-xl border p-4">
+            <p className="text-sm font-medium">Precio más bajo con beneficio</p>
+            <p className="mt-1 text-xl font-semibold">
+              {formatPen(product.lowestBenefit.priceCents)} con CMR
+            </p>
+            <p className="text-sm">
+              {product.lowestBenefit.retailers.join(" y ")} ·{" "}
+              {product.lowestBenefit.conditions.join(" · ")}
+            </p>
+          </aside>
+        )}
+      <section className="mt-8" aria-labelledby="offers-title">
         <h2 id="offers-title" className="text-xl font-semibold">
           Compara en {product.retailerCount} supermercados
         </h2>
@@ -105,7 +126,7 @@ export default async function ProductPage({ params }: Props) {
                       <p className="mt-1 text-sm font-medium text-primary">
                         {product.cheapestRetailers.length > 1
                           ? "Mejor precio compartido"
-                          : "Mejor precio observado"}
+                          : "Mejor precio para todos"}
                       </p>
                     )}
                     <ObservedAt date={offer.observedAt} />
@@ -125,11 +146,18 @@ export default async function ProductPage({ params }: Props) {
                   </div>
                   <div className="sm:text-right">
                     <p className="text-2xl font-semibold">{formatPen(offer.currentPriceCents)}</p>
+                    <p className="text-xs text-muted-foreground">Precio online para todos</p>
                     {offer.regularPriceCents !== null && (
                       <p className="mt-1 text-sm text-muted-foreground">
                         Antes <s>{formatPen(offer.regularPriceCents)}</s>
                       </p>
                     )}
+                    {offer.conditionalOffers.map((benefit) => (
+                      <div key={benefit.programKey} className="mt-3 rounded-lg bg-muted p-3">
+                        <p className="font-semibold">{formatPen(benefit.priceCents)} con CMR</p>
+                        <p className="text-xs">{benefit.conditionLabel}</p>
+                      </div>
+                    ))}
                     {url && (
                       <a
                         href={url}

@@ -6,7 +6,7 @@ import {
   formatPen,
   maximumSearchLength,
   searchPublicProducts,
-  genericOfferSort,
+  searchFilters,
   formatUnitPrice,
   unitPriceBases,
   unitPriceBasisLabel,
@@ -15,6 +15,7 @@ import {
   recordDiscoveryForSearch,
 } from "@comprafino/db";
 import type { ProductComparison, GenericProductOffer } from "@comprafino/db";
+import { SearchControls } from "../../components/search-controls";
 import { SearchForm } from "../../components/search-form";
 import { PriceNotice, PublicDataError, PublicShell } from "../../components/public-shell";
 import { ProductImage } from "../../components/product-image";
@@ -26,26 +27,31 @@ export const metadata: Metadata = {
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string | string[]; sort?: string | string[] }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
   const query = typeof params.q === "string" ? params.q : "";
-  const sort = genericOfferSort(params.sort);
+  const filters = searchFilters(params);
+  const sort = filters.sort;
+  let units: string[] = [];
+  let underlyingCount = 0;
   let products: ProductComparison[] = [];
   let offers: GenericProductOffer[] = [];
   let failed = false;
   if (usefulSearchQuery(query)) {
     try {
       const db = createDatabase();
-      const results = await searchPublicProducts(db, query, sort);
+      const results = await searchPublicProducts(db, query, sort, undefined, filters);
       products = results.products;
       offers = results.offers;
-      if (discoveryQueryForSearch(query, products.length + offers.length)) {
+      units = results.availableUnits;
+      underlyingCount = results.usefulResultCount;
+      if (discoveryQueryForSearch(query, underlyingCount)) {
         // Database demand recording only, after the response. Retailer work is
         // exclusively performed by the scheduled command, never by this route.
         after(async () => {
           try {
-            await recordDiscoveryForSearch(db, query, products.length + offers.length);
+            await recordDiscoveryForSearch(db, query, underlyingCount);
           } catch {
             console.error("Discovery demand recording failed.");
           }
@@ -60,7 +66,10 @@ export default async function SearchPage({
     <PublicShell>
       <h1 className="mb-6 text-3xl font-semibold tracking-tight">Encuentra y compara</h1>
       <SearchForm query={query.slice(0, maximumSearchLength)} />
-      <section className="mt-10" aria-label="Resultados de búsqueda">
+      {usefulSearchQuery(query) && !failed && (
+        <SearchControls query={query} filters={filters} units={units} />
+      )}
+      <section className="mt-6" aria-label="Resultados de búsqueda">
         {failed ? (
           <PublicDataError />
         ) : !usefulSearchQuery(query) ? (
@@ -69,10 +78,15 @@ export default async function SearchPage({
           </p>
         ) : !products.length && !offers.length ? (
           <div className="rounded-xl border p-6">
-            <h2 className="text-xl font-semibold">No encontramos ese producto todavía.</h2>
+            <h2 className="text-xl font-semibold">
+              {underlyingCount
+                ? "No hay opciones con estos filtros."
+                : "No encontramos ese producto todavía."}
+            </h2>
             <p className="mt-2 text-muted-foreground">
-              Tomamos en cuenta las búsquedas sin resultados para ampliar el catálogo. Prueba con
-              otra marca o producto.
+              {underlyingCount
+                ? "Prueba otro supermercado o selecciona todas las medidas."
+                : "Tomamos en cuenta las búsquedas sin resultados para ampliar el catálogo. Prueba con otra marca o producto."}
             </p>
           </div>
         ) : (
@@ -86,12 +100,13 @@ export default async function SearchPage({
                 <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                   {products.map((product, index) => (
                     <li key={product.id}>
-                      <article className="h-full rounded-2xl border p-5">
+                      <article className="h-full rounded-2xl border p-4 shadow-sm">
                         <Link
-                          href={`/products/${product.id}`}
+                          href={`/products/${product.id}${filters.priceMode === "benefits" ? "?priceMode=benefits" : ""}`}
                           className="group block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
                         >
                           <ProductImage
+                            compact
                             src={product.imageUrl}
                             name={product.displayName}
                             loading={index === 0 ? "eager" : "lazy"}
@@ -112,11 +127,25 @@ export default async function SearchPage({
                               <p className="mt-5 text-sm">
                                 Desde{" "}
                                 <strong className="text-2xl text-primary">
-                                  {formatPen(product.lowestPriceCents)}
+                                  {formatPen(
+                                    filters.priceMode === "benefits"
+                                      ? (product.bestRanking?.priceCents ??
+                                          product.lowestPriceCents)
+                                      : product.lowestPriceCents,
+                                  )}
                                 </strong>
                               </p>
                               <p className="mt-1 text-sm">
-                                {product.cheapestRetailers.join(" y ")}
+                                {(filters.priceMode === "benefits"
+                                  ? (product.bestRanking?.retailers ?? product.cheapestRetailers)
+                                  : product.cheapestRetailers
+                                ).join(" y ")}
+                                {filters.priceMode === "benefits" &&
+                                  product.bestRanking?.conditions.map((condition) => (
+                                    <span className="block font-medium" key={condition}>
+                                      {condition}
+                                    </span>
+                                  ))}
                               </p>
                             </>
                           )}
@@ -129,7 +158,9 @@ export default async function SearchPage({
                             (offer) =>
                               offer.freshness === "fresh" &&
                               offer.available !== false &&
-                              offer.currentPriceCents === product.lowestPriceCents,
+                              (filters.priceMode === "benefits"
+                                ? offer.ranking.priceCents === product.bestRanking?.priceCents
+                                : offer.currentPriceCents === product.lowestPriceCents),
                           )
                           .map((offer) => (
                             <div key={offer.retailerId}>
@@ -161,27 +192,6 @@ export default async function SearchPage({
                     distinguir peso neto y escurrido.
                   </p>
                 )}
-                <form
-                  action="/search"
-                  method="get"
-                  className="my-5 flex flex-wrap items-center gap-3"
-                >
-                  <input type="hidden" name="q" value={query} />
-                  <label htmlFor="sort">Ordenar:</label>
-                  <select
-                    id="sort"
-                    name="sort"
-                    defaultValue={sort}
-                    className="rounded-lg border bg-background p-2"
-                  >
-                    <option value="relevance">Relevancia</option>
-                    <option value="total-price">Menor precio</option>
-                    <option value="unit-price">Precio por unidad comparable</option>
-                  </select>
-                  <button type="submit" className="rounded-lg border px-4 py-2">
-                    Aplicar
-                  </button>
-                </form>
                 <p className="mb-4 text-sm text-muted-foreground">
                   {offers.length === 30 ? "Hasta 30" : offers.length} ofertas para «{query}»
                 </p>
@@ -221,12 +231,13 @@ export default async function SearchPage({
                           <li key={offer.id}>
                             <article
                               data-offer-id={offer.id}
-                              className="h-full rounded-2xl border p-5"
+                              className="h-full rounded-2xl border p-4 shadow-sm"
                             >
                               <ProductImage
+                                compact
                                 src={offer.imageUrl}
                                 name={offer.title}
-                                loading="eager"
+                                loading="lazy"
                               />
                               {offer.brand && (
                                 <p className="mt-4 text-sm text-muted-foreground">{offer.brand}</p>
@@ -246,14 +257,33 @@ export default async function SearchPage({
                                 {formatPen(offer.currentPriceCents)}
                                 {offer.pricingBasis === "kg" ? " / kg" : ""}
                               </p>
+                              <p className="text-xs text-muted-foreground">
+                                Precio online para todos
+                              </p>
+                              {offer.regularPriceCents !== null && (
+                                <p className="text-xs text-muted-foreground">
+                                  Antes <s>{formatPen(offer.regularPriceCents)}</s>
+                                </p>
+                              )}
                               {offer.unitPrice && offer.pricingBasis !== "kg" && (
                                 <p className="mt-1 text-sm">
                                   {formatUnitPrice(offer.unitPrice)}
+                                  {offer.ranking.condition ? " · con CMR" : ""}
                                   {offer.unitPrice.quality === "approximate"
                                     ? " · orientativo"
                                     : ""}
                                 </p>
                               )}
+                              {offer.conditionalOffers.map((benefit) => (
+                                <p
+                                  key={benefit.programKey}
+                                  className="mt-2 rounded-lg bg-muted px-3 py-2 text-sm"
+                                >
+                                  <strong>Con CMR: {formatPen(benefit.priceCents)}</strong>
+                                  {offer.pricingBasis === "kg" ? " / kg" : ""}
+                                  <span className="block text-xs">{benefit.conditionLabel}</span>
+                                </p>
+                              ))}
                               <ObservedAt date={offer.observedAt} />
                               <a
                                 href={offer.url}
@@ -265,7 +295,7 @@ export default async function SearchPage({
                               </a>
                               {offer.canonicalId && (
                                 <Link
-                                  href={`/products/${offer.canonicalId}`}
+                                  href={`/products/${offer.canonicalId}${filters.priceMode === "benefits" ? "?priceMode=benefits" : ""}`}
                                   className="mt-3 block text-sm underline"
                                 >
                                   Comparar este producto en {offer.retailerCount} supermercados

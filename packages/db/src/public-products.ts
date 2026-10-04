@@ -1,3 +1,6 @@
+import { listingOffers } from "./conditional-pricing.ts";
+import { conditionalOfferSchema, currentConditionalOffers, rankedPrice } from "@comprafino/core";
+import type { PriceMode } from "@comprafino/core";
 import { sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import { z } from "zod";
@@ -30,6 +33,7 @@ const offerSchema = z.object({
   regularPriceCents: z.number().int().nonnegative().nullable(),
   observedAt: z.coerce.date(),
   available: z.boolean().nullable().optional(),
+  conditionalOffers: z.array(conditionalOfferSchema).default([]),
 });
 const productSchema = z.object({
   id: z.uuid(),
@@ -42,6 +46,7 @@ const productSchema = z.object({
 });
 export type RetailerOffer = z.infer<typeof offerSchema> & {
   freshness: ReturnType<typeof offerFreshness>;
+  ranking: ReturnType<typeof rankedPrice>;
 };
 export type ProductComparison = Omit<z.infer<typeof productSchema>, "offers"> & {
   offers: RetailerOffer[];
@@ -49,6 +54,8 @@ export type ProductComparison = Omit<z.infer<typeof productSchema>, "offers"> & 
   retailerCount: number;
   lowestPriceCents: number | null;
   cheapestRetailers: string[];
+  bestRanking: { priceCents: number; retailers: string[]; conditions: string[] } | null;
+  lowestBenefit: { priceCents: number; retailers: string[]; conditions: string[] } | null;
 };
 const retailerHosts: Record<RetailerId, string> = {
   tottus: "www.tottus.com.pe",
@@ -87,12 +94,28 @@ export function productImageUrl(raw: string | null): string | null {
   const prefix = url.hostname === "media.tottus.com.pe" ? "/tottusPE/" : "/arquivos/ids/";
   return url.pathname.startsWith(prefix) ? trusted : null;
 }
-export function publicProduct(raw: unknown, now = new Date()): ProductComparison {
+export function publicProduct(
+  raw: unknown,
+  now = new Date(),
+  mode: PriceMode = "standard",
+): ProductComparison {
   const product = productSchema.parse(raw);
   const offers = product.offers
     .map((offer): RetailerOffer => ({
       ...offer,
       freshness: offerFreshness(offer.observedAt, now),
+      conditionalOffers:
+        offer.available === false || offerFreshness(offer.observedAt, now) !== "fresh"
+          ? []
+          : currentConditionalOffers(offer.conditionalOffers, now),
+      ranking: rankedPrice(
+        offer.currentPriceCents,
+        offer.available === false || offerFreshness(offer.observedAt, now) !== "fresh"
+          ? []
+          : offer.conditionalOffers,
+        mode,
+        now,
+      ),
       regularPriceCents: meaningfulReferencePrice(offer.currentPriceCents, offer.regularPriceCents),
       imageUrl: productImageUrl(offer.imageUrl),
     }))
@@ -106,8 +129,39 @@ export function publicProduct(raw: unknown, now = new Date()): ProductComparison
       .sort((a, b) => a.retailerId.localeCompare(b.retailerId))
       .find((offer) => offer.imageUrl)?.imageUrl ?? null;
   const cheapest = cheapestOffers(offers, now);
+  const ranked = offers
+    .filter((o) => o.freshness === "fresh" && o.available !== false)
+    .sort((a, b) => a.ranking.priceCents - b.ranking.priceCents);
+  const rankedTies = ranked.filter((o) => o.ranking.priceCents === ranked[0]?.ranking.priceCents);
+  const benefits = offers
+    .filter((o) => o.freshness === "fresh" && o.available !== false)
+    .flatMap((o) => o.conditionalOffers.map((b) => ({ ...b, retailerName: o.retailerName })))
+    .sort((a, b) => a.priceCents - b.priceCents);
+  const lowest = benefits[0]?.priceCents;
+  const ties = benefits.filter((b) => b.priceCents === lowest);
   return {
     ...product,
+    bestRanking: ranked[0]
+      ? {
+          priceCents: ranked[0].ranking.priceCents,
+          retailers: rankedTies.map((o) => o.retailerName),
+          conditions: [
+            ...new Set(
+              rankedTies.flatMap((o) =>
+                o.ranking.condition ? [o.ranking.condition.conditionLabel] : [],
+              ),
+            ),
+          ],
+        }
+      : null,
+    lowestBenefit:
+      lowest === undefined
+        ? null
+        : {
+            priceCents: lowest,
+            retailers: ties.map((b) => b.retailerName),
+            conditions: [...new Set(ties.map((b) => b.conditionLabel))],
+          },
     offers,
     imageUrl,
     retailerCount: offers.length,
@@ -126,7 +180,8 @@ export function searchText(text: SQL): SQL {
 export const eligibleProducts = sql`with offers as (
   select a.canonical_product_id, r.id as retailer_id, r.name as retailer_name,
     l.title, l.url, l.image_url, l.last_seen_at, l.available, n.brand, n.normalized_title,
-    h.current_price_cents, h.regular_price_cents
+    h.current_price_cents, h.regular_price_cents,
+    ${listingOffers(sql`l.id`, sql`l.last_seen_at`)} as conditional_offers
   from canonical_product_listings a
   join retailer_listings l on l.id=a.listing_id and l.retailer_id=a.retailer_id
   join retailers r on r.id=l.retailer_id
@@ -143,7 +198,7 @@ export const eligibleProducts = sql`with offers as (
     ${searchText(sql`c.display_name || ' ' || c.brand_key || ' ' || string_agg(o.normalized_title, ' ')`)} as identity_text,
     jsonb_agg(jsonb_build_object('retailerId',o.retailer_id,'retailerName',o.retailer_name,
       'title',o.title,'url',o.url,'imageUrl',o.image_url,'currentPriceCents',o.current_price_cents,
-      'regularPriceCents',o.regular_price_cents,'observedAt',o.last_seen_at,'available',o.available) order by o.retailer_id) as offers,
+      'regularPriceCents',o.regular_price_cents,'observedAt',o.last_seen_at,'available',o.available,'conditionalOffers',o.conditional_offers) order by o.retailer_id) as offers,
     array_agg(${searchText(sql`o.normalized_title`)}) as retailer_titles
   from canonical_products c join offers o on o.canonical_product_id=c.id
   where not exists (select 1 from canonical_product_listings a where a.canonical_product_id=c.id
@@ -188,6 +243,7 @@ export async function getCanonicalProductComparison(
   db: Database,
   id: string,
   now = new Date(),
+  mode: PriceMode = "standard",
 ): Promise<ProductComparison | null> {
   if (!isPublicProductId(id)) return null;
   const [result] = await db.batch([
@@ -195,5 +251,5 @@ export async function getCanonicalProductComparison(
     select ${publicColumns} from products where id=${id}::uuid`),
   ]);
   const rows = z.array(z.unknown()).parse(result.rows);
-  return rows.length ? publicProduct(rows[0], now) : null;
+  return rows.length ? publicProduct(rows[0], now, mode) : null;
 }

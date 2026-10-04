@@ -1,11 +1,13 @@
 import { expect, it } from "vitest";
 import {
   limitGenericOffers,
+  filterGenericOffers,
   genericProductOffer,
   sortGenericOffers,
   searchGenericProductOffers,
 } from "./generic-offers.ts";
 import { catalogFingerprint } from "./catalog.ts";
+import { searchFilters } from "@comprafino/core";
 import { normalizationVersion } from "@comprafino/core";
 import { createDatabase } from "./client.ts";
 const now = new Date("2026-10-03T10:00:00Z");
@@ -143,4 +145,53 @@ it("sorts approximate rolls separately from physical item counts, reserving both
   expect(sortGenericOffers([paper, egg], "unit-price")).toEqual([egg, paper]);
   const many = Array.from({ length: 40 }, (_, i) => ({ ...egg, id: String(i) }));
   expect(limitGenericOffers([...many, paper], "unit-price")).toContain(paper);
+});
+
+it("benefits ranking and unit prices retain the ordinary quote and required card", () => {
+  const conditionalOffers = [
+    {
+      conditionType: "payment_card",
+      programKey: "cmr",
+      conditionLabel: "Requiere tarjeta CMR",
+      priceCents: 1490,
+      observedAt: now,
+    },
+  ];
+  const standard = genericProductOffer({ ...raw, conditionalOffers }, now)!;
+  const benefits = genericProductOffer({ ...raw, conditionalOffers }, now, "benefits")!;
+  expect(standard.ranking.priceCents).toBe(1790);
+  expect(benefits.currentPriceCents).toBe(1790);
+  expect(benefits.ranking.condition?.programKey).toBe("cmr");
+  expect(benefits.unitPrice?.numerator).toBe(1490n);
+  expect(sortGenericOffers([standard, benefits], "total-price")[0]).toBe(benefits);
+});
+
+it("unit and retailer filters never mix mass, litres, physical items or approximate rolls", () => {
+  const base = genericProductOffer(raw, now)!;
+  const variants = [
+    { ...base, retailerId: "tottus" as const },
+    ...(["mass", "volume", "roll"] as const).map((basis) => ({
+      ...base,
+      unitPrice: {
+        ...base.unitPrice!,
+        basis,
+        quality: basis === "roll" ? ("approximate" as const) : ("strong" as const),
+        displayUnit:
+          basis === "mass"
+            ? ("kg" as const)
+            : basis === "volume"
+              ? ("l" as const)
+              : ("roll" as const),
+      },
+    })),
+  ];
+  for (const unit of ["kg", "L", "unit", "roll"]) {
+    const result = filterGenericOffers(variants, searchFilters({ unit }));
+    expect(result).toHaveLength(1);
+    expect(result[0]?.unitPrice?.displayUnit).toBe(unit === "L" ? "l" : unit);
+  }
+  expect(filterGenericOffers(variants, searchFilters({ retailer: "tottus" }))).toEqual([
+    variants[0],
+  ]);
+  expect(filterGenericOffers(variants, searchFilters({ retailer: "plaza-vea" }))).toEqual([]);
 });

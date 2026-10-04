@@ -1,6 +1,6 @@
 # Roadmap
 
-Milestones 0–7 are complete, committed and pushed in the user-provided baseline (`13cb4ee`). Milestone 8 is implemented and data-validated; local build/E2E confirmation remains pending. Historical pending notes in earlier sections refer to their original agent runs.
+Milestones 0–10 are complete in the user-provided task baseline (`f2505e7`). Historical pending notes below refer to earlier agent runs. Milestone 11 is implemented/data-validated with local production build, Chromium E2E and visual confirmation pending.
 
 ## Milestone 0 — Foundation
 
@@ -102,11 +102,19 @@ Implemented: explicit comparison basis and strong/approximate quality, conservat
 
 Verified: 736 listings, 127 public exact offers / 57 groups, 763 history states; 605 strong physical + 31 strong item-count + 38 approximate roll comparisons, 62 withheld. Full refresh 76.503s / 27 category requests / zero targeted, 8,853 candidates / zero matching writes. Two normalization repeats and one targeted lookup wrote zero and preserved history. Format/lint/types, 499 unit tests and 34 isolated PostgreSQL tests pass. See [quantity quality](quantity-quality.md) and [catalog budget](catalog-budget.md) for source evidence, safety policies, unavailable metrics and projections.
 
-Pending: fresh local `pnpm build` and Chromium `pnpm test:e2e` confirmation after the known Turbopack CSS-worker port restriction. Changes are staged without commit/push until that explicit gate; Milestone 10 is not complete yet.
+Milestone 10 is complete in the user-provided baseline `f2505e7`; historical pending notes in quantity/budget documents describe that earlier agent run.
 
 Recommend reviewing the 1000-listing guard and validating small Tottus sources before future bounded expansion. The first price-history UX should show ordinary observed changes/timestamps/gaps on exact product detail pages; no later milestone is started.
 
-## Later — Price history
+## Milestone 11 — Conditional retailer pricing and search UX
+
+Implemented: evidence-backed Tottus concrete CMR prices, separate current-offer table/migration, atomic fresh observation synchronization, zero-row-update unchanged benefits, freshness/validity gates, separate ordinary and potential-benefit ranking, adjacent card labels, immediate URL sort/retailer/unit/benefits controls, filtered-empty discovery protection and compact responsive search cards. Plaza Vea/Metro complex discount teasers remain excluded after current public-source audit. No matcher/normalizer changes, dependencies, accounts, source expansion or infrastructure.
+
+Live validation: seven CMR products; two bounded dairy ingestions each 51 fetched / 48 persisted / zero ordinary changes. All 763 ordinary history states retain the same complete digest; all seven offer revisions remain unchanged on repeat. Normalization reports zero writes across 736 listings. Standard Gloria six-pack minimum is S/ 21.50 at Plaza Vea; benefits mode can choose S/ 20.90 requiring CMR at Tottus, whose ordinary price remains S/ 21.90. See [pricing semantics](conditional-pricing.md), [search UX](search-ux.md) and [validation report](milestone-11-validation.md).
+
+Pending: local default production build, Chromium E2E and desktop/390px manual audit after the documented sandbox worker-port failure. Stage and wait before the requested commit; no push or next milestone.
+
+## Milestone 12 — Price-history UX (planned)
 
 Store and visualize meaningful price changes. Avoid redundant unchanged observations while preserving freshness information.
 

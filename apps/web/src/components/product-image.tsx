@@ -7,12 +7,15 @@ interface Props {
   src: string | null;
   name: string;
   loading?: "lazy" | "eager";
+  compact?: boolean;
 }
 
-export function ProductImage({ src, name, loading }: Props) {
+export function ProductImage({ src, name, loading, compact = false }: Props) {
   const [failed, setFailed] = useState(false);
   return (
-    <div className="relative flex aspect-square w-full items-center justify-center rounded-xl bg-white p-4">
+    <div
+      className={`relative flex w-full items-center justify-center rounded-xl bg-white p-4 ${compact ? "h-36" : "aspect-square"}`}
+    >
       {src && !failed ? (
         <Image
           src={src}

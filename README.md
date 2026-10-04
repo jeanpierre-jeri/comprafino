@@ -12,7 +12,7 @@ The roadmap aims to help people decide where to buy, when to buy, whether a pric
 
 ## Current status
 
-Milestones 0–9 are complete in the user-provided baseline (`d8858b3`). Milestone 10 adds explicit comparison bases/quality and read-only catalog budgeting; implementation/data checks pass, while fresh local build/Chromium E2E confirmation is pending under the known worker-port restriction. See [quantity quality](docs/quantity-quality.md), [catalog budget](docs/catalog-budget.md), [generic comparison](docs/generic-comparison.md) and [operations](docs/operations.md). The homepage requires no database.
+Milestones 0–10 are complete in the user-provided baseline (`f2505e7`). Milestone 11 adds separate current Tottus CMR offers and immediate URL-driven search filters. Implementation/data checks are being validated; local production build, Chromium E2E and visual confirmation remain pending under the known worker-port restriction. See [conditional pricing](docs/conditional-pricing.md), [search UX](docs/search-ux.md), [validation](docs/milestone-11-validation.md), [quantity quality](docs/quantity-quality.md) and [catalog budget](docs/catalog-budget.md). The homepage requires no database.
 
 ## Initial retailers
 
@@ -227,3 +227,9 @@ TanStack Form, TanStack Query and shadcn Chart/Recharts are intended options for
 ## Quantity quality and operating budget
 
 Comparison bases distinguish physical kg/L and item counts from approximate paper-roll prices. Current cross-retailer tuna content remains semantically unresolved and has no unit price, including count-only packs. Exact normalization stays version 1 and matching remains unchanged. `pnpm audit:quantity-quality` and `pnpm catalog:budget` require migrated root `DATABASE_URL`, without retailer requests or writes. Budget runtime evidence is the timestamped local `docs/catalog-refresh-measurement.json`; missing evidence reports unavailable timing. See [policies and audited counts](docs/quantity-quality.md) and [operating limits and expansion scenarios](docs/catalog-budget.md).
+
+## Conditional pricing and immediate filters
+
+Apply reviewed migration `0005_redundant_deadpool.sql` using `pnpm db:migrate` before deploying Milestone 11 readers and ingestion together. Existing Tottus category/search/targeted acquisition now confirms explicit CMR prices separately from ordinary history. Plaza Vea/Metro teaser discounts remain excluded. Existing scrape/refresh commands and request bounds are unchanged; no new environment variables or dependencies.
+
+Search supports immediate sorting, retailer selection, optional kg/L/item/approximate-roll basis and `priceMode=benefits`. Defaults omit URL parameters; browser back/forward restores them. Ordinary prices still determine default winners, and filtered emptiness never creates discovery demand when underlying catalog results exist. See [conditional pricing](docs/conditional-pricing.md) and [search UX](docs/search-ux.md).

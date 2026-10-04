@@ -4,6 +4,7 @@ import { neon, NeonQueryPromise } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
+import { searchFilters } from "@comprafino/core";
 import { normalizeCatalogListing } from "@comprafino/core";
 import type { NormalizedRetailerListing } from "@comprafino/core";
 import { requireDatabaseUrl } from "./env.ts";
@@ -1318,5 +1319,149 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
     ).toMatchObject({ queries: 1 });
     expect(report.demand.find((q) => q.query === "refresh controlled demand")?.requests).toBe(1);
     expect(await query("select * from retailer_listings order by id")).toEqual(before);
+  }, 30000);
+  it("persists current benefits idempotently, updates/removes them and never changes ordinary history for benefits", async () => {
+    const base = observation("conditional-state", 0, 1090);
+    const cmr = {
+      conditionType: "payment_card" as const,
+      programKey: "cmr" as const,
+      conditionLabel: "Requiere tarjeta CMR" as const,
+      priceCents: 990,
+      observedAt: base.observedAt,
+    };
+    const first = { ...base, conditionalOffers: [cmr] };
+    await persistListings(db, "tottus", [first]);
+    const before = await states(base.externalId);
+    const read = () =>
+      query(
+        "select o.*,o.xmin::text as revision from retailer_listing_offers o join retailer_listings l on l.id=o.listing_id where l.external_id=$1",
+        [base.externalId],
+      );
+    const initial = await read();
+    expect(initial).toHaveLength(1);
+    expect(initial[0]).toMatchObject({ price_cents: 990, program_key: "cmr" });
+    await persistListings(db, "tottus", [{ ...first, observedAt: observation("x", 1).observedAt }]);
+    expect(await read()).toEqual(initial);
+    expect(await states(base.externalId)).toEqual(before);
+    const changed = {
+      ...first,
+      observedAt: observation("x", 2).observedAt,
+      conditionalOffers: [{ ...cmr, priceCents: 890 }],
+    };
+    await persistListings(db, "tottus", [changed]);
+    expect((await read())[0]).toMatchObject({ price_cents: 890 });
+    await persistListings(db, "tottus", [first]);
+    await persistListings(db, "tottus", [{ ...changed, conditionalOffers: [] }]);
+    expect((await read())[0]).toMatchObject({ price_cents: 890 });
+    await persistListings(db, "tottus", [
+      { ...first, observedAt: observation("x", 3).observedAt, conditionalOffers: [] },
+    ]);
+    expect(await read()).toEqual([]);
+    expect(await states(base.externalId)).toEqual(before);
+  }, 30000);
+
+  it("public benefits ranking, retailer/unit filters and filtered-empty discovery preserve standard behavior", async () => {
+    const first = {
+      ...observation("conditional-search", 0, 1090),
+      title: "Arroz Auditbenefits Bolsa 1kg",
+      sourceBrand: "Auditbenefits",
+      conditionalOffers: [
+        {
+          conditionType: "payment_card" as const,
+          programKey: "cmr" as const,
+          conditionLabel: "Requiere tarjeta CMR" as const,
+          priceCents: 890,
+          observedAt: publicNow,
+        },
+      ],
+    };
+    await persistListings(db, "tottus", [first]);
+    await persistCatalogNormalizations(db, await catalogRows(first.externalId));
+    const other = {
+      ...first,
+      externalId: "conditional-search-metro",
+      retailer: "metro" as const,
+      url: "https://www.metro.pe/arroz/p",
+      currentPriceCents: 990,
+      conditionalOffers: [],
+    };
+    await persistListings(db, "metro", [other]);
+    await persistCatalogNormalizations(db, await catalogRows(other.externalId));
+    const standard = await searchPublicProducts(db, "auditbenefits", "total-price", publicNow);
+    expect(standard.offers[0]?.currentPriceCents).toBe(990);
+    const benefits = await searchPublicProducts(
+      db,
+      "auditbenefits",
+      "total-price",
+      publicNow,
+      searchFilters({ priceMode: "benefits", sort: "total-price" }),
+    );
+    expect(benefits.offers[0]).toMatchObject({
+      currentPriceCents: 1090,
+      ranking: { priceCents: 890, condition: { programKey: "cmr" } },
+    });
+    expect(benefits.offers[0]?.conditionalOffers[0]?.observedAt).toEqual(first.observedAt);
+    const retailer = await searchPublicProducts(
+      db,
+      "auditbenefits",
+      "unit-price",
+      publicNow,
+      searchFilters({ retailer: "tottus", unit: "kg", sort: "unit-price" }),
+    );
+    expect(retailer.offers).toHaveLength(1);
+    expect(retailer.offers[0]?.retailerId).toBe("tottus");
+    const empty = await searchPublicProducts(
+      db,
+      "auditbenefits",
+      "relevance",
+      publicNow,
+      searchFilters({ retailer: "plaza-vea", unit: "L" }),
+    );
+    expect(empty.offers).toEqual([]);
+    expect(empty.usefulResultCount).toBe(2);
+    expect(await recordDiscoveryForSearch(db, "auditbenefits", empty.usefulResultCount)).toBe(
+      false,
+    );
+    const matchRows = await matchingRows([first.externalId, other.externalId]);
+    await persistMatching(db, matchRows, await evaluatePairs(db, [[matchRows[0]!, matchRows[1]!]]));
+    const links = z
+      .array(z.object({ id: z.uuid() }))
+      .parse(
+        await query(
+          "select canonical_product_id as id from canonical_product_listings where listing_id=$1",
+          [matchRows[0]!.id],
+        ),
+      );
+    expect(links).toHaveLength(1);
+    const ordinary = await queryComparison(db, links[0]!.id, publicNow);
+    const withBenefits = await queryComparison(db, links[0]!.id, publicNow, "benefits");
+    expect(ordinary?.bestRanking).toMatchObject({
+      priceCents: 990,
+      retailers: ["Metro"],
+      conditions: [],
+    });
+    expect(withBenefits?.bestRanking).toMatchObject({
+      priceCents: 890,
+      retailers: ["Tottus"],
+      conditions: ["Requiere tarjeta CMR"],
+    });
+    expect(withBenefits?.lowestPriceCents).toBe(990);
+    const stale = await queryComparison(
+      db,
+      links[0]!.id,
+      new Date(publicNow.getTime() + 40 * 3600000),
+      "benefits",
+    );
+    expect(stale?.bestRanking).toBeNull();
+    expect(stale?.lowestBenefit).toBeNull();
+    await query("update retailer_listing_offers set ends_at=$1", [publicNow.toISOString()]);
+    const expired = await searchPublicProducts(
+      db,
+      "auditbenefits",
+      "total-price",
+      publicNow,
+      searchFilters({ priceMode: "benefits" }),
+    );
+    expect(expired.offers[0]?.currentPriceCents).toBe(990);
   }, 30000);
 });

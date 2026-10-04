@@ -91,3 +91,7 @@ Milestone 8 is complete in the user-provided baseline `1401f97`; its original pe
 ## Milestone 10 follow-up
 
 Current comparison policy and audited quantities are in [quantity quality](quantity-quality.md); current operating counts, request budgets and headroom are in [catalog budget](catalog-budget.md). Comparison bases now separate approximate rolls from physical item counts, and all semantically unresolved tuna unit prices are withheld. Persisted normalization version 1, canonical matcher rules and existing source/refresh limits remain unchanged. Earlier milestone validation notes are historical; Milestones 0–9 are complete in the user-provided baseline `d8858b3`.
+
+## Milestone 11 follow-up
+
+[Immediate URL controls](search-ux.md) replace native Apply sorting and add retailer, compatible basis and optional benefits. Filtering precedes the existing card bound; discovery depends on unfiltered eligible candidates. Concrete CMR prices remain separate from ordinary totals/history; only explicit benefits mode recalculates ranked unit prices using the conditional amount, with adjacent card labels. Existing basis/quality policy, relevance, matching and normalization remain unchanged. See [conditional pricing](conditional-pricing.md).

@@ -81,3 +81,7 @@ Core classifies small observed product families from current source leaf evidenc
 ### Quantity quality and operational reporting
 
 Core comparison output has explicit mass/volume/item-count/approximate-roll bases and quality. These are separate from persisted exact-match normalization (version 1) and do not enter matching identity. DB owns read-only catalog/size/candidate metrics; the scraper developer CLI combines them with local category/workflow configuration and optional recorded refresh evidence. This preserves the existing dependency graph. No telemetry service, schema, source expansion or new infrastructure is introduced; see [quantity quality](quantity-quality.md) and [catalog budget](catalog-budget.md).
+
+## Conditional pricing and URL controls
+
+Core owns validated concrete conditional offers, CMR identity, validity/freshness eligibility, potential-benefit ranking and URL filter parsing. DB owns a separate current `retailer_listing_offers` model, synchronized inside accepted listing upserts under the existing retailer lock. Unchanged offer states reuse atomically verified listing freshness without offer-row rewrites; ordinary history remains independent. Retailer adapters interpret only evidence-backed source amounts. The web toolbar immediately navigates URL filters while results remain server-rendered; discovery uses the unfiltered query count. See [conditional pricing](conditional-pricing.md) and [search UX](search-ux.md).

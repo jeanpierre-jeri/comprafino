@@ -93,8 +93,8 @@ test.describe("generic persisted offers (explicit DATABASE_URL)", () => {
     await page.goto("/search?q=huevos");
     const section = page.getByRole("region", { name: "Opciones en supermercados" });
     await expect(section).toBeVisible();
-    await page.getByLabel("Ordenar:").selectOption("unit-price");
-    await page.getByRole("button", { name: "Aplicar" }).click();
+    await page.getByLabel("Ordenar", { exact: true }).selectOption("unit-price");
+    await expect(page.getByRole("button", { name: "Aplicar" })).toHaveCount(0);
     await expect(page).toHaveURL(/sort=unit-price/);
     const first = section.locator("article[data-offer-id]").first();
     await expect(first).toHaveAttribute("data-offer-id", countOffers[0]!.id);
@@ -133,5 +133,61 @@ test.describe("staple persisted relevance (explicit DATABASE_URL)", () => {
         (title) => /aceite/iu.test(title) && /primor/iu.test(title) && !/atún/iu.test(title),
       ),
     ).toBe(true);
+  });
+});
+
+test.describe("immediate filters and CMR (explicit DATABASE_URL)", () => {
+  test.skip(!process.env.DATABASE_URL, "Requires migrated persisted catalog");
+  test("retailer, sort, benefits and browser back restore URL controls on mobile", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/search?q=huevos");
+    await page.getByLabel("Ordenar", { exact: true }).selectOption("unit-price");
+    await expect(page).toHaveURL(/sort=unit-price/);
+    await page.getByLabel("Supermercado", { exact: true }).selectOption("metro");
+    await expect(page).toHaveURL(/retailer=metro/);
+    const { searchPublicProducts, searchFilters } = await import("@comprafino/db");
+    const expected = await searchPublicProducts(
+      createDatabase(),
+      "huevos",
+      "unit-price",
+      new Date(),
+      searchFilters({ retailer: "metro", sort: "unit-price" }),
+    );
+    await expect(page.locator("article[data-offer-id]")).toHaveCount(expected.offers.length);
+    await page.getByLabel("Precios", { exact: true }).selectOption("benefits");
+    await expect(page).toHaveURL(/priceMode=benefits/);
+    await page.goBack();
+    await expect(page.getByLabel("Precios", { exact: true })).toHaveValue("standard");
+    await page.goBack();
+    await expect(page.getByLabel("Supermercado", { exact: true })).toHaveValue("");
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+  });
+  test("CMR product detail shows ordinary, reference and conditional prices separately", async ({
+    page,
+  }) => {
+    const products = await searchCanonicalProducts(createDatabase(), "gloria");
+    const product = products.find((p) =>
+      p.offers.some((o) => o.retailerId === "tottus" && o.conditionalOffers.length),
+    );
+    expect(product, "At least one freshly ingested exact CMR product is required").toBeDefined();
+    await page.goto(`/products/${product!.id}`);
+    const row = page
+      .getByRole("article")
+      .filter({ has: page.getByRole("heading", { name: "Tottus", exact: true }) });
+    const offer = product!.offers.find((o) => o.retailerId === "tottus")!;
+    await expect(row.getByText(formatPen(offer.currentPriceCents), { exact: true })).toBeVisible();
+    await expect(
+      row.getByText(`${formatPen(offer.conditionalOffers[0]!.priceCents)} con CMR`, {
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(row.getByText("Requiere tarjeta CMR", { exact: true })).toBeVisible();
+    await page.getByLabel("Precios", { exact: true }).selectOption("benefits");
+    await expect(page).toHaveURL(/priceMode=benefits/);
+    await expect(row.getByText("Precio online para todos", { exact: true })).toBeVisible();
   });
 });

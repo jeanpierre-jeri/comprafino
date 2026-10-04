@@ -1,6 +1,13 @@
 import { z } from "zod";
 import { listingSchema, normalizeWhitespace, parsePenCents } from "@comprafino/core";
 
+const sourcePrice = z.object({
+  type: z.string(),
+  symbol: z.string(),
+  icons: z.string().optional(),
+  crossed: z.boolean(),
+  price: z.array(z.union([z.string(), z.number()])).length(1),
+});
 const sourceProduct = z.object({
   brand: z.string().trim().min(1).optional(),
   productId: z.string().regex(/^\d+$/u),
@@ -11,13 +18,17 @@ const sourceProduct = z.object({
   mediaUrls: z.array(z.url()).optional(),
   measurements: z.object({ format: z.string().optional(), unit: z.enum(["KG", "UN"]).optional() }),
   merchantCategoryId: z.string().optional(),
-  prices: z.array(
-    z.object({
-      type: z.string(),
-      symbol: z.string(),
-      crossed: z.boolean(),
-      price: z.array(z.union([z.string(), z.number()])).length(1),
-    }),
+  prices: z.preprocess(
+    (raw) =>
+      Array.isArray(raw)
+        ? raw.filter((value: unknown) => {
+            const type = z.object({ type: z.string() }).safeParse(value);
+            return type.success && type.data.type === "cmrPrice"
+              ? sourcePrice.safeParse(value).success
+              : true;
+          })
+        : raw,
+    z.array(sourcePrice),
   ),
 });
 const sourcePage = z.object({
@@ -77,7 +88,30 @@ export function normalizeTottusProduct(input: unknown, observedAt: Date) {
   url.hash = "";
   const currentPriceCents = parsePenCents(current[0]!.price[0]!);
   const normalPriceCents = regular[0] ? parsePenCents(regular[0].price[0]!) : undefined;
+  const cmr = product.prices.filter((price) => price.type === "cmrPrice");
+  const conditionalOffers = [];
+  if (
+    cmr.length === 1 &&
+    !cmr[0]!.crossed &&
+    cmr[0]!.icons === "cmr-icon" &&
+    cmr[0]!.symbol.trim() === "S/"
+  ) {
+    try {
+      const priceCents = parsePenCents(cmr[0]!.price[0]!);
+      if (priceCents > 0 && priceCents < currentPriceCents)
+        conditionalOffers.push({
+          conditionType: "payment_card",
+          programKey: "cmr",
+          conditionLabel: "Requiere tarjeta CMR",
+          priceCents,
+          observedAt,
+        });
+    } catch {
+      /* An invalid benefit never replaces or discards a valid ordinary price. */
+    }
+  }
   return listingSchema.parse({
+    conditionalOffers,
     retailer: "tottus",
     externalId: product.skuId,
     productId: product.productId,

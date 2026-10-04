@@ -108,3 +108,7 @@ Native fetch reads the public `/tottus-pe/buscar?Ntt=…&page=1` hydration page,
 ## Milestone 10 source-quality audit
 
 [Quantity quality](../quantity-quality.md) records the retailer-specific raw tuna/paper/detergent/control inspection and [sanitized source samples](../quantity-source-audit.json). No unverified net/drained, sheet or roll-length specification becomes a denominator. Approximate roll prices and semantically unresolved tuna prices have explicit comparison policy; retailer adapters, ingestion metadata and permanent category bounds are unchanged.
+
+## Milestone 11 conditional-pricing investigation
+
+[Conditional pricing](../conditional-pricing.md) records the current anonymous source audit, exact fields, program/quantity/date/context limits and supported extraction. Explicit concrete CMR prices are now retained separately from ordinary quotes. Ordinary current/reference extraction and source bounds remain unchanged. [Source evidence](../conditional-source-audit.json) and [persisted validation](../conditional-live-validation.json) distinguish source observations from fixture-only safety cases.

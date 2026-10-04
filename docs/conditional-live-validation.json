@@ -1,0 +1,806 @@
+{
+  "observedAt": "2026-10-04T18:17:09.310Z",
+  "limit": 48,
+  "category": "dairy",
+  "runs": [
+    {
+      "id": "964d5899-20a1-4af8-9710-420075cc8f67",
+      "fetched": 51,
+      "persisted": 48,
+      "changed": 0
+    },
+    {
+      "id": "85186ee0-f81f-4700-9ec5-2a20f702a60c",
+      "fetched": 51,
+      "persisted": 48,
+      "changed": 0
+    }
+  ],
+  "history": {
+    "before": {
+      "digest": "db3e44dab8fbfa44c75542c511a15d17",
+      "count": 763
+    },
+    "first": {
+      "digest": "db3e44dab8fbfa44c75542c511a15d17",
+      "count": 763
+    },
+    "repeat": {
+      "digest": "db3e44dab8fbfa44c75542c511a15d17",
+      "count": 763
+    },
+    "afterNormalization": {
+      "digest": "db3e44dab8fbfa44c75542c511a15d17",
+      "count": 763
+    }
+  },
+  "changedOrdinary": [],
+  "conditionalOffers": [
+    {
+      "external_id": "126990866",
+      "title": "Leche Laive Sin Lactosa Pack 4 Cajas 946 mL",
+      "current_price_cents": 2050,
+      "regular_price_cents": 2450,
+      "last_seen_at": "2026-10-04 18:16:54.733+00",
+      "program_key": "cmr",
+      "price_cents": 1950,
+      "condition_label": "Requiere tarjeta CMR",
+      "observed_at": "2026-10-04 18:16:52.128+00",
+      "revision": "18035"
+    },
+    {
+      "external_id": "129087925",
+      "title": "Leche Gloria Reconstituida Entera Sixpack Lata 390 g",
+      "current_price_cents": 2190,
+      "regular_price_cents": 2460,
+      "last_seen_at": "2026-10-04 18:16:54.733+00",
+      "program_key": "cmr",
+      "price_cents": 2090,
+      "condition_label": "Requiere tarjeta CMR",
+      "observed_at": "2026-10-04 18:16:52.128+00",
+      "revision": "18035"
+    },
+    {
+      "external_id": "145813806",
+      "title": "Yogurt Gloria Durazno Botella 1.6 Kg",
+      "current_price_cents": 890,
+      "regular_price_cents": 1080,
+      "last_seen_at": "2026-10-04 18:16:54.733+00",
+      "program_key": "cmr",
+      "price_cents": 790,
+      "condition_label": "Requiere tarjeta CMR",
+      "observed_at": "2026-10-04 18:16:52.128+00",
+      "revision": "18035"
+    },
+    {
+      "external_id": "145813808",
+      "title": "Yogurt Gloria Lúcuma Botella 1.6 Kg",
+      "current_price_cents": 890,
+      "regular_price_cents": 1080,
+      "last_seen_at": "2026-10-04 18:16:54.733+00",
+      "program_key": "cmr",
+      "price_cents": 790,
+      "condition_label": "Requiere tarjeta CMR",
+      "observed_at": "2026-10-04 18:16:52.128+00",
+      "revision": "18035"
+    },
+    {
+      "external_id": "145813821",
+      "title": "Yogurt Gloria Fresa Botella 1.6 Kg",
+      "current_price_cents": 890,
+      "regular_price_cents": 1080,
+      "last_seen_at": "2026-10-04 18:16:54.733+00",
+      "program_key": "cmr",
+      "price_cents": 790,
+      "condition_label": "Requiere tarjeta CMR",
+      "observed_at": "2026-10-04 18:16:52.128+00",
+      "revision": "18035"
+    },
+    {
+      "external_id": "145813824",
+      "title": "Yogurt Parcialmente Descremado Gloria Fresa Plátano Botella 1.6 Kg",
+      "current_price_cents": 890,
+      "regular_price_cents": 1080,
+      "last_seen_at": "2026-10-04 18:16:54.733+00",
+      "program_key": "cmr",
+      "price_cents": 790,
+      "condition_label": "Requiere tarjeta CMR",
+      "observed_at": "2026-10-04 18:16:52.128+00",
+      "revision": "18035"
+    },
+    {
+      "external_id": "145813834",
+      "title": "Yogurt Gloria Vainilla Botella 1.6 Kg",
+      "current_price_cents": 890,
+      "regular_price_cents": 1080,
+      "last_seen_at": "2026-10-04 18:16:54.733+00",
+      "program_key": "cmr",
+      "price_cents": 790,
+      "condition_label": "Requiere tarjeta CMR",
+      "observed_at": "2026-10-04 18:16:52.128+00",
+      "revision": "18035"
+    }
+  ],
+  "unchangedOfferRows": true,
+  "normalization": {
+    "coverage": {
+      "processed": 736,
+      "brand": 736,
+      "measurableQuantity": 572,
+      "countQuantity": 71,
+      "packageCount": 651,
+      "soldByWeight": 57,
+      "withIssues": 35,
+      "unresolved": 36
+    },
+    "persisted": {
+      "changed": 0,
+      "unchanged": 736,
+      "stale": 0
+    }
+  },
+  "searches": [
+    {
+      "query": "huevos",
+      "modes": {
+        "standard": {
+          "underlyingCount": 32,
+          "exact": 3,
+          "offers": 29,
+          "units": ["unit"],
+          "sample": [
+            {
+              "id": "1cc4efe7-af70-48a6-8620-95e3fc8e8577",
+              "title": "Huevos de Codorniz BELL'S Bandeja 18un",
+              "retailer": "plaza-vea",
+              "currentPriceCents": 690,
+              "ranking": {
+                "priceCents": 690,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "690",
+                "denominator": "18",
+                "basis": "item-count",
+                "quality": "strong",
+                "dimension": "count",
+                "displayUnit": "unit"
+              }
+            },
+            {
+              "id": "6a7875c3-71d3-4815-b904-bc77a73a6500",
+              "title": "Huevos de Codorniz LA CALERA Paquete 18un",
+              "retailer": "plaza-vea",
+              "currentPriceCents": 690,
+              "ranking": {
+                "priceCents": 690,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "690",
+                "denominator": "18",
+                "basis": "item-count",
+                "quality": "strong",
+                "dimension": "count",
+                "displayUnit": "unit"
+              }
+            },
+            {
+              "id": "14fead91-87b1-4888-859e-f52523b5f593",
+              "title": "Huevos de Codorniz BELL'S Bandeja 24un",
+              "retailer": "plaza-vea",
+              "currentPriceCents": 890,
+              "ranking": {
+                "priceCents": 890,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "890",
+                "denominator": "24",
+                "basis": "item-count",
+                "quality": "strong",
+                "dimension": "count",
+                "displayUnit": "unit"
+              }
+            }
+          ]
+        },
+        "benefits": {
+          "underlyingCount": 32,
+          "exact": 3,
+          "offers": 29,
+          "units": ["unit"],
+          "sample": [
+            {
+              "id": "1cc4efe7-af70-48a6-8620-95e3fc8e8577",
+              "title": "Huevos de Codorniz BELL'S Bandeja 18un",
+              "retailer": "plaza-vea",
+              "currentPriceCents": 690,
+              "ranking": {
+                "priceCents": 690,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "690",
+                "denominator": "18",
+                "basis": "item-count",
+                "quality": "strong",
+                "dimension": "count",
+                "displayUnit": "unit"
+              }
+            },
+            {
+              "id": "6a7875c3-71d3-4815-b904-bc77a73a6500",
+              "title": "Huevos de Codorniz LA CALERA Paquete 18un",
+              "retailer": "plaza-vea",
+              "currentPriceCents": 690,
+              "ranking": {
+                "priceCents": 690,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "690",
+                "denominator": "18",
+                "basis": "item-count",
+                "quality": "strong",
+                "dimension": "count",
+                "displayUnit": "unit"
+              }
+            },
+            {
+              "id": "14fead91-87b1-4888-859e-f52523b5f593",
+              "title": "Huevos de Codorniz BELL'S Bandeja 24un",
+              "retailer": "plaza-vea",
+              "currentPriceCents": 890,
+              "ranking": {
+                "priceCents": 890,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "890",
+                "denominator": "24",
+                "basis": "item-count",
+                "quality": "strong",
+                "dimension": "count",
+                "displayUnit": "unit"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "query": "arroz",
+      "modes": {
+        "standard": {
+          "underlyingCount": 36,
+          "exact": 5,
+          "offers": 30,
+          "units": ["kg"],
+          "sample": [
+            {
+              "id": "9127d738-2b8e-4c0e-9aa4-2ef195946566",
+              "title": "Arroz Extra Tottus Bolsa 750 g",
+              "retailer": "tottus",
+              "currentPriceCents": 350,
+              "ranking": {
+                "priceCents": 350,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "350000",
+                "denominator": "750",
+                "basis": "mass",
+                "quality": "strong",
+                "dimension": "mass",
+                "displayUnit": "kg"
+              }
+            },
+            {
+              "id": "7e17f974-fc02-455b-831c-2eaa97d1af5c",
+              "title": "Arroz Superior Costeño 750g",
+              "retailer": "metro",
+              "currentPriceCents": 410,
+              "ranking": {
+                "priceCents": 410,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "410000",
+                "denominator": "750",
+                "basis": "mass",
+                "quality": "strong",
+                "dimension": "mass",
+                "displayUnit": "kg"
+              }
+            },
+            {
+              "id": "f1e56587-be7e-4908-b794-d2653fb30cc6",
+              "title": "Arroz Añejo Extra COSTEÑO Bolsa 750g",
+              "retailer": "plaza-vea",
+              "currentPriceCents": 410,
+              "ranking": {
+                "priceCents": 410,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "410000",
+                "denominator": "750",
+                "basis": "mass",
+                "quality": "strong",
+                "dimension": "mass",
+                "displayUnit": "kg"
+              }
+            }
+          ]
+        },
+        "benefits": {
+          "underlyingCount": 36,
+          "exact": 5,
+          "offers": 30,
+          "units": ["kg"],
+          "sample": [
+            {
+              "id": "9127d738-2b8e-4c0e-9aa4-2ef195946566",
+              "title": "Arroz Extra Tottus Bolsa 750 g",
+              "retailer": "tottus",
+              "currentPriceCents": 350,
+              "ranking": {
+                "priceCents": 350,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "350000",
+                "denominator": "750",
+                "basis": "mass",
+                "quality": "strong",
+                "dimension": "mass",
+                "displayUnit": "kg"
+              }
+            },
+            {
+              "id": "7e17f974-fc02-455b-831c-2eaa97d1af5c",
+              "title": "Arroz Superior Costeño 750g",
+              "retailer": "metro",
+              "currentPriceCents": 410,
+              "ranking": {
+                "priceCents": 410,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "410000",
+                "denominator": "750",
+                "basis": "mass",
+                "quality": "strong",
+                "dimension": "mass",
+                "displayUnit": "kg"
+              }
+            },
+            {
+              "id": "f1e56587-be7e-4908-b794-d2653fb30cc6",
+              "title": "Arroz Añejo Extra COSTEÑO Bolsa 750g",
+              "retailer": "plaza-vea",
+              "currentPriceCents": 410,
+              "ranking": {
+                "priceCents": 410,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "410000",
+                "denominator": "750",
+                "basis": "mass",
+                "quality": "strong",
+                "dimension": "mass",
+                "displayUnit": "kg"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "query": "aceite",
+      "modes": {
+        "standard": {
+          "underlyingCount": 30,
+          "exact": 3,
+          "offers": 27,
+          "units": ["L"],
+          "sample": [
+            {
+              "id": "e5c26829-9994-43e3-91a8-6d133547c066",
+              "title": "Aceite Vegetal BELL'S Botella 900ml",
+              "retailer": "plaza-vea",
+              "currentPriceCents": 550,
+              "ranking": {
+                "priceCents": 550,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "550000",
+                "denominator": "900",
+                "basis": "volume",
+                "quality": "strong",
+                "dimension": "volume",
+                "displayUnit": "l"
+              }
+            },
+            {
+              "id": "967f04cc-f278-477e-b4b2-66af7b11fa1e",
+              "title": "Aceite Vegetal Tottus Botella 900 mL",
+              "retailer": "tottus",
+              "currentPriceCents": 570,
+              "ranking": {
+                "priceCents": 570,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "570000",
+                "denominator": "900",
+                "basis": "volume",
+                "quality": "strong",
+                "dimension": "volume",
+                "displayUnit": "l"
+              }
+            },
+            {
+              "id": "5a10dff2-83e2-4447-acd6-5f41e3146bfd",
+              "title": "Aceite de Soya Precio Uno Botella 900 mL",
+              "retailer": "tottus",
+              "currentPriceCents": 600,
+              "ranking": {
+                "priceCents": 600,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "600000",
+                "denominator": "900",
+                "basis": "volume",
+                "quality": "strong",
+                "dimension": "volume",
+                "displayUnit": "l"
+              }
+            }
+          ]
+        },
+        "benefits": {
+          "underlyingCount": 30,
+          "exact": 3,
+          "offers": 27,
+          "units": ["L"],
+          "sample": [
+            {
+              "id": "e5c26829-9994-43e3-91a8-6d133547c066",
+              "title": "Aceite Vegetal BELL'S Botella 900ml",
+              "retailer": "plaza-vea",
+              "currentPriceCents": 550,
+              "ranking": {
+                "priceCents": 550,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "550000",
+                "denominator": "900",
+                "basis": "volume",
+                "quality": "strong",
+                "dimension": "volume",
+                "displayUnit": "l"
+              }
+            },
+            {
+              "id": "967f04cc-f278-477e-b4b2-66af7b11fa1e",
+              "title": "Aceite Vegetal Tottus Botella 900 mL",
+              "retailer": "tottus",
+              "currentPriceCents": 570,
+              "ranking": {
+                "priceCents": 570,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "570000",
+                "denominator": "900",
+                "basis": "volume",
+                "quality": "strong",
+                "dimension": "volume",
+                "displayUnit": "l"
+              }
+            },
+            {
+              "id": "5a10dff2-83e2-4447-acd6-5f41e3146bfd",
+              "title": "Aceite de Soya Precio Uno Botella 900 mL",
+              "retailer": "tottus",
+              "currentPriceCents": 600,
+              "ranking": {
+                "priceCents": 600,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "600000",
+                "denominator": "900",
+                "basis": "volume",
+                "quality": "strong",
+                "dimension": "volume",
+                "displayUnit": "l"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "query": "gloria",
+      "modes": {
+        "standard": {
+          "underlyingCount": 151,
+          "exact": 16,
+          "offers": 30,
+          "units": ["kg", "L", "unit"],
+          "sample": [
+            {
+              "id": "5885d111-8120-4dc3-b70d-154999217cf9",
+              "title": "Yogurt Frutado Gloria Fresa Vaso 120 g",
+              "retailer": "metro",
+              "currentPriceCents": 190,
+              "ranking": {
+                "priceCents": 190,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "190000",
+                "denominator": "120",
+                "basis": "mass",
+                "quality": "strong",
+                "dimension": "mass",
+                "displayUnit": "kg"
+              }
+            },
+            {
+              "id": "af81b5e8-dd9c-4487-920d-0bda57b2d77b",
+              "title": "Yogurt GLORIA Frutado Fresa Vaso 120g",
+              "retailer": "plaza-vea",
+              "currentPriceCents": 190,
+              "ranking": {
+                "priceCents": 190,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "190000",
+                "denominator": "120",
+                "basis": "mass",
+                "quality": "strong",
+                "dimension": "mass",
+                "displayUnit": "kg"
+              }
+            },
+            {
+              "id": "833ce379-c189-4ca8-9628-567fc342d7be",
+              "title": "Yogurt Frutado Gloria Durazno Vaso 120 g",
+              "retailer": "metro",
+              "currentPriceCents": 190,
+              "ranking": {
+                "priceCents": 190,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "190000",
+                "denominator": "120",
+                "basis": "mass",
+                "quality": "strong",
+                "dimension": "mass",
+                "displayUnit": "kg"
+              }
+            }
+          ]
+        },
+        "benefits": {
+          "underlyingCount": 151,
+          "exact": 16,
+          "offers": 30,
+          "units": ["kg", "L", "unit"],
+          "sample": [
+            {
+              "id": "5885d111-8120-4dc3-b70d-154999217cf9",
+              "title": "Yogurt Frutado Gloria Fresa Vaso 120 g",
+              "retailer": "metro",
+              "currentPriceCents": 190,
+              "ranking": {
+                "priceCents": 190,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "190000",
+                "denominator": "120",
+                "basis": "mass",
+                "quality": "strong",
+                "dimension": "mass",
+                "displayUnit": "kg"
+              }
+            },
+            {
+              "id": "af81b5e8-dd9c-4487-920d-0bda57b2d77b",
+              "title": "Yogurt GLORIA Frutado Fresa Vaso 120g",
+              "retailer": "plaza-vea",
+              "currentPriceCents": 190,
+              "ranking": {
+                "priceCents": 190,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "190000",
+                "denominator": "120",
+                "basis": "mass",
+                "quality": "strong",
+                "dimension": "mass",
+                "displayUnit": "kg"
+              }
+            },
+            {
+              "id": "833ce379-c189-4ca8-9628-567fc342d7be",
+              "title": "Yogurt Frutado Gloria Durazno Vaso 120 g",
+              "retailer": "metro",
+              "currentPriceCents": 190,
+              "ranking": {
+                "priceCents": 190,
+                "condition": null
+              },
+              "unitPrice": {
+                "numerator": "190000",
+                "denominator": "120",
+                "basis": "mass",
+                "quality": "strong",
+                "dimension": "mass",
+                "displayUnit": "kg"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "cmrDetail": {
+    "standard": {
+      "id": "df95f601-09b4-88a7-a48b-12d304075fee",
+      "displayName": "Leche Gloria Reconstituida Entera Sixpack Lata 390 g",
+      "brand": "Gloria",
+      "quantityValue": 390,
+      "quantityUnit": "g",
+      "packageCount": 6,
+      "offers": [
+        {
+          "retailerId": "plaza-vea",
+          "retailerName": "Plaza Vea",
+          "title": "Leche Reconstituida Entera GLORIA Lata 390g Paquete 6un",
+          "url": "https://www.plazavea.com.pe/leche-reconstituida-entera-gloria-lata-390g-paquete-6un-20402655/p",
+          "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/35081592/20402655.jpg?v=639177613125270000",
+          "currentPriceCents": 2150,
+          "regularPriceCents": 2460,
+          "observedAt": "2026-10-04T17:31:53.495Z",
+          "available": true,
+          "conditionalOffers": [],
+          "freshness": "fresh",
+          "ranking": {
+            "priceCents": 2150,
+            "condition": null
+          }
+        },
+        {
+          "retailerId": "tottus",
+          "retailerName": "Tottus",
+          "title": "Leche Gloria Reconstituida Entera Sixpack Lata 390 g",
+          "url": "https://www.tottus.com.pe/tottus-pe/articulo/129087924/leche-gloria-reconstituida-entera-sixpack-lata-390-g",
+          "imageUrl": "https://media.tottus.com.pe/tottusPE/43273630_1/public",
+          "currentPriceCents": 2190,
+          "regularPriceCents": 2460,
+          "observedAt": "2026-10-04T18:16:54.733Z",
+          "available": null,
+          "conditionalOffers": [
+            {
+              "conditionType": "payment_card",
+              "programKey": "cmr",
+              "conditionLabel": "Requiere tarjeta CMR",
+              "priceCents": 2090,
+              "observedAt": "2026-10-04T18:16:54.733Z",
+              "startsAt": null,
+              "endsAt": null
+            }
+          ],
+          "freshness": "fresh",
+          "ranking": {
+            "priceCents": 2190,
+            "condition": null
+          }
+        }
+      ],
+      "bestRanking": {
+        "priceCents": 2150,
+        "retailers": ["Plaza Vea"],
+        "conditions": []
+      },
+      "lowestBenefit": {
+        "priceCents": 2090,
+        "retailers": ["Tottus"],
+        "conditions": ["Requiere tarjeta CMR"]
+      },
+      "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/35081592/20402655.jpg?v=639177613125270000",
+      "retailerCount": 2,
+      "lowestPriceCents": 2150,
+      "cheapestRetailers": ["Plaza Vea"]
+    },
+    "benefits": {
+      "id": "df95f601-09b4-88a7-a48b-12d304075fee",
+      "displayName": "Leche Gloria Reconstituida Entera Sixpack Lata 390 g",
+      "brand": "Gloria",
+      "quantityValue": 390,
+      "quantityUnit": "g",
+      "packageCount": 6,
+      "offers": [
+        {
+          "retailerId": "plaza-vea",
+          "retailerName": "Plaza Vea",
+          "title": "Leche Reconstituida Entera GLORIA Lata 390g Paquete 6un",
+          "url": "https://www.plazavea.com.pe/leche-reconstituida-entera-gloria-lata-390g-paquete-6un-20402655/p",
+          "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/35081592/20402655.jpg?v=639177613125270000",
+          "currentPriceCents": 2150,
+          "regularPriceCents": 2460,
+          "observedAt": "2026-10-04T17:31:53.495Z",
+          "available": true,
+          "conditionalOffers": [],
+          "freshness": "fresh",
+          "ranking": {
+            "priceCents": 2150,
+            "condition": null
+          }
+        },
+        {
+          "retailerId": "tottus",
+          "retailerName": "Tottus",
+          "title": "Leche Gloria Reconstituida Entera Sixpack Lata 390 g",
+          "url": "https://www.tottus.com.pe/tottus-pe/articulo/129087924/leche-gloria-reconstituida-entera-sixpack-lata-390-g",
+          "imageUrl": "https://media.tottus.com.pe/tottusPE/43273630_1/public",
+          "currentPriceCents": 2190,
+          "regularPriceCents": 2460,
+          "observedAt": "2026-10-04T18:16:54.733Z",
+          "available": null,
+          "conditionalOffers": [
+            {
+              "conditionType": "payment_card",
+              "programKey": "cmr",
+              "conditionLabel": "Requiere tarjeta CMR",
+              "priceCents": 2090,
+              "observedAt": "2026-10-04T18:16:54.733Z",
+              "startsAt": null,
+              "endsAt": null
+            }
+          ],
+          "freshness": "fresh",
+          "ranking": {
+            "priceCents": 2090,
+            "condition": {
+              "conditionType": "payment_card",
+              "programKey": "cmr",
+              "conditionLabel": "Requiere tarjeta CMR",
+              "priceCents": 2090,
+              "observedAt": "2026-10-04T18:16:54.733Z",
+              "startsAt": null,
+              "endsAt": null
+            }
+          }
+        }
+      ],
+      "bestRanking": {
+        "priceCents": 2090,
+        "retailers": ["Tottus"],
+        "conditions": ["Requiere tarjeta CMR"]
+      },
+      "lowestBenefit": {
+        "priceCents": 2090,
+        "retailers": ["Tottus"],
+        "conditions": ["Requiere tarjeta CMR"]
+      },
+      "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/35081592/20402655.jpg?v=639177613125270000",
+      "retailerCount": 2,
+      "lowestPriceCents": 2150,
+      "cheapestRetailers": ["Plaza Vea"]
+    }
+  }
+}

@@ -23,8 +23,9 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
 export function PriceNotice() {
   return (
     <p className="mt-8 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-      Precios ordinarios observados en línea, sin descuentos de tarjeta o membresía. Pueden variar
-      según ubicación, canal, disponibilidad y actualizaciones del supermercado.
+      Precios ordinarios observados en línea, disponibles sin tarjeta o membresía. Los beneficios
+      aparecen por separado y requieren la condición indicada. Los precios pueden variar según
+      ubicación, canal, disponibilidad y actualizaciones del supermercado.
     </p>
   );
 }

@@ -1,7 +1,16 @@
+import { listingOffers } from "./conditional-pricing.ts";
+import {
+  conditionalOfferSchema,
+  currentConditionalOffers,
+  rankedPrice,
+  searchFilters,
+} from "@comprafino/core";
+import type { PriceMode, SearchFilters } from "@comprafino/core";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   calculateUnitPrice,
+  meaningfulReferencePrice,
   unitPriceBases,
   classifyProductFamily,
   resolveProductFamilyQuery,
@@ -18,6 +27,7 @@ import type { GenericOfferSort } from "@comprafino/core";
 import type { createDatabase } from "./client.ts";
 import { catalogFingerprint, catalogRecordSchema } from "./catalog.ts";
 import {
+  publicProduct,
   eligibleProducts,
   productImageUrl,
   retailerProductUrl,
@@ -38,6 +48,8 @@ const rowSchema = z.object({
   url: z.string(),
   imageUrl: z.string().nullable(),
   currentPriceCents: z.number().int().nonnegative(),
+  regularPriceCents: z.number().int().nonnegative().nullable().optional(),
+  conditionalOffers: z.array(conditionalOfferSchema).default([]),
   observedAt: z.coerce.date(),
   available: z.boolean().nullable(),
   fingerprint: z.string(),
@@ -45,7 +57,7 @@ const rowSchema = z.object({
   canonicalId: z.uuid().nullable(),
   retailerCount: z.number().int().nonnegative(),
 });
-export function genericProductOffer(raw: unknown, now = new Date()) {
+export function genericProductOffer(raw: unknown, now = new Date(), mode: PriceMode = "standard") {
   const row = rowSchema.parse(raw);
   if (row.version !== normalizationVersion || row.fingerprint !== catalogFingerprint(row.listing))
     return null;
@@ -58,12 +70,14 @@ export function genericProductOffer(raw: unknown, now = new Date()) {
     retailerId,
     sourceCategory: row.sourceCategory,
   });
+  const conditionalOffers = currentConditionalOffers(row.conditionalOffers, now);
+  const ranking = rankedPrice(row.currentPriceCents, conditionalOffers, mode, now);
   const calculation = calculateUnitPrice(
     {
       ...attributes,
       title: row.listing.title,
       productFamily: family.family,
-      currentPriceCents: row.currentPriceCents,
+      currentPriceCents: ranking.priceCents,
       observedAt: row.observedAt,
       available: row.available,
     },
@@ -83,6 +97,12 @@ export function genericProductOffer(raw: unknown, now = new Date()) {
     totalQuantity: attributes.totalQuantity,
     pricingBasis: attributes.pricingBasis,
     currentPriceCents: row.currentPriceCents,
+    regularPriceCents: meaningfulReferencePrice(
+      row.currentPriceCents,
+      row.regularPriceCents ?? null,
+    ),
+    conditionalOffers,
+    ranking,
     observedAt: row.observedAt,
     url,
     imageUrl: productImageUrl(row.imageUrl),
@@ -101,7 +121,7 @@ export function sortGenericOffers(offers: readonly GenericProductOffer[], sort: 
       // A KG quote is not a package total; keep direct quotes in a separate block.
       return (
         Number(a.pricingBasis === "kg") - Number(b.pricingBasis === "kg") ||
-        a.currentPriceCents - b.currentPriceCents
+        a.ranking.priceCents - b.ranking.priceCents
       );
     }
     if (sort !== "unit-price") return 0;
@@ -136,6 +156,8 @@ export async function searchGenericProductOffers(
   rawQuery: string,
   sort: GenericOfferSort = "relevance",
   now = new Date(),
+  filters: SearchFilters = searchFilters({ sort }),
+  unlimited = false,
 ): Promise<GenericProductOffer[]> {
   if (!usefulSearchQuery(rawQuery)) return [];
   const query = normalizeSearchQuery(rawQuery);
@@ -150,7 +172,8 @@ export async function searchGenericProductOffers(
     select jsonb_build_object('id',l.id,'retailerId',l.retailer_id,'title',l.title,
       'priceUnit',h.price_unit,'packageText',l.package_text,'sourceBrand',l.source_brand,
       'sourceUnitMultiplier',l.source_unit_multiplier::float8) as listing,
-      l.category as "sourceCategory", r.name as "retailerName", l.url, l.image_url as "imageUrl", h.current_price_cents as "currentPriceCents",
+      l.category as "sourceCategory", r.name as "retailerName", l.url, l.image_url as "imageUrl", h.current_price_cents as "currentPriceCents", h.regular_price_cents as "regularPriceCents",
+      ${listingOffers(sql`l.id`, sql`l.last_seen_at`)} as "conditionalOffers",
       l.last_seen_at as "observedAt", l.available, n.input_fingerprint as fingerprint, n.normalization_version as version,
       p.id as "canonicalId", coalesce(jsonb_array_length(p.offers),0) as "retailerCount",
       ${searchText(sql`n.normalized_title`)} as title_text,
@@ -171,22 +194,29 @@ export async function searchGenericProductOffers(
   // lowest-price modes must consider every admitted candidate before limiting.
   if (result.rows.length > 1000) throw new Error("Generic search candidate bound exceeded");
   const offers = result.rows
-    .map((row) => genericProductOffer(row, now))
+    .map((row) => genericProductOffer(row, now, filters.priceMode))
     .filter((offer) => offer !== null);
-  return limitGenericOffers(
-    interpretation ? selectFamilyOffers(offers, interpretation.family) : offers,
-    genericOfferSort(sort),
-  );
+  const relevant = interpretation ? selectFamilyOffers(offers, interpretation.family) : offers;
+  const filtered = filterGenericOffers(relevant, filters);
+  return unlimited ? filtered : limitGenericOffers(filtered, genericOfferSort(sort));
 }
 export async function searchPublicProducts(
   db: ReturnType<typeof createDatabase>,
   query: string,
   sort: GenericOfferSort = "relevance",
   now = new Date(),
+  filters: SearchFilters = searchFilters({ sort }),
 ) {
   const [products, offers] = await Promise.all([
     searchCanonicalProducts(db, query, now),
-    searchGenericProductOffers(db, query, sort, now),
+    searchGenericProductOffers(
+      db,
+      query,
+      sort,
+      now,
+      searchFilters({ sort, priceMode: filters.priceMode }),
+      true,
+    ),
   ]);
   // Exact comparison identity/routes remain unchanged. In a recognized family
   // search, an incidental ingredient in an exact group is not useful coverage.
@@ -198,9 +228,36 @@ export async function searchPublicProducts(
         ),
       )
     : products;
+  const filteredOffers = filterGenericOffers(offers, filters);
   return {
-    products: relevantProducts,
-    offers,
+    products: relevantProducts
+      .map((p) => publicProduct(p, now, filters.priceMode))
+      .filter(
+        (p) =>
+          (!filters.retailer || p.offers.some((o) => o.retailerId === filters.retailer)) &&
+          (!filters.unit || filteredOffers.some((o) => o.canonicalId === p.id)),
+      ),
+    offers: limitGenericOffers(filteredOffers, sort),
+    availableUnits: [
+      ...new Set(
+        offers
+          .filter((o) => !filters.retailer || o.retailerId === filters.retailer)
+          .flatMap((o) =>
+            o.unitPrice ? [o.unitPrice.displayUnit === "l" ? "L" : o.unitPrice.displayUnit] : [],
+          ),
+      ),
+    ],
     usefulResultCount: relevantProducts.length + offers.length,
   };
+}
+
+export function filterGenericOffers(
+  offers: readonly GenericProductOffer[],
+  filters: SearchFilters,
+) {
+  return offers.filter(
+    (o) =>
+      (!filters.retailer || o.retailerId === filters.retailer) &&
+      (!filters.unit || o.unitPrice?.displayUnit === (filters.unit === "L" ? "l" : filters.unit)),
+  );
 }

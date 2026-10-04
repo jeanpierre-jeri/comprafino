@@ -1,0 +1,369 @@
+{
+  "observedAt": "2026-10-04T18:07:15.816Z",
+  "products": [
+    {
+      "brand": "GLORIA",
+      "productId": "129087924",
+      "skuId": "129087925",
+      "displayName": "Leche Gloria Reconstituida Entera Sixpack Lata 390 g",
+      "url": "https://www.tottus.com.pe/tottus-pe/articulo/129087924/leche-gloria-reconstituida-entera-sixpack-lata-390-g",
+      "sellerId": "TOTTUS_PERU",
+      "mediaUrls": [
+        "https://media.tottus.com.pe/tottusPE/43273630_1/public",
+        "https://media.tottus.com.pe/tottusPE/43273630_8/public"
+      ],
+      "measurements": {
+        "format": "Sixpack Lata 390 g  ",
+        "unit": "UN",
+        "minUnits": 1,
+        "maxUnits": 6,
+        "limit": "Máximo 6 Un."
+      },
+      "merchantCategoryId": "J0101070405",
+      "prices": [
+        {
+          "label": "",
+          "icons": "cmr-icon",
+          "symbol": "S/ ",
+          "type": "cmrPrice",
+          "crossed": false,
+          "price": ["20.90"]
+        },
+        {
+          "label": "",
+          "icons": "",
+          "symbol": "S/ ",
+          "type": "internetPrice",
+          "crossed": false,
+          "price": ["21.90"]
+        },
+        {
+          "label": "",
+          "icons": "",
+          "symbol": "S/ ",
+          "type": "normalPrice",
+          "crossed": true,
+          "price": ["24.60"]
+        }
+      ],
+      "promotions": [],
+      "badges": [],
+      "multipurposeBadges": []
+    },
+    {
+      "brand": "GLORIA",
+      "productId": "145813819",
+      "skuId": "145813821",
+      "displayName": "Yogurt Gloria Fresa Botella 1.6 Kg",
+      "url": "https://www.tottus.com.pe/tottus-pe/articulo/145813819/yogurt-gloria-fresa-botella-1-6-kg",
+      "sellerId": "TOTTUS_PERU",
+      "mediaUrls": ["https://media.tottus.com.pe/tottusPE/43555320_1/public"],
+      "measurements": {
+        "format": "Botella 1.6 Kg",
+        "unit": "UN",
+        "minUnits": 1,
+        "maxUnits": 12,
+        "limit": "Máximo 12 Un."
+      },
+      "merchantCategoryId": "J0502050201",
+      "prices": [
+        {
+          "label": "",
+          "icons": "cmr-icon",
+          "symbol": "S/ ",
+          "type": "cmrPrice",
+          "crossed": false,
+          "price": ["7.90"]
+        },
+        {
+          "label": "",
+          "icons": "",
+          "symbol": "S/ ",
+          "type": "internetPrice",
+          "crossed": false,
+          "price": ["8.90"]
+        },
+        {
+          "label": "",
+          "icons": "",
+          "symbol": "S/ ",
+          "type": "normalPrice",
+          "crossed": true,
+          "price": ["10.80"]
+        }
+      ],
+      "promotions": [],
+      "badges": [],
+      "multipurposeBadges": []
+    },
+    {
+      "brand": "GLORIA",
+      "productId": "145813833",
+      "skuId": "145813834",
+      "displayName": "Yogurt Gloria Vainilla Botella 1.6 Kg",
+      "url": "https://www.tottus.com.pe/tottus-pe/articulo/145813833/yogurt-gloria-vainilla-botella-1-6-kg",
+      "sellerId": "TOTTUS_PERU",
+      "mediaUrls": ["https://media.tottus.com.pe/tottusPE/43555322_1/public"],
+      "measurements": {
+        "format": "Botella 1.6 Kg",
+        "unit": "UN",
+        "minUnits": 1,
+        "maxUnits": 12,
+        "limit": "Máximo 12 Un."
+      },
+      "merchantCategoryId": "J0502050201",
+      "prices": [
+        {
+          "label": "",
+          "icons": "cmr-icon",
+          "symbol": "S/ ",
+          "type": "cmrPrice",
+          "crossed": false,
+          "price": ["7.90"]
+        },
+        {
+          "label": "",
+          "icons": "",
+          "symbol": "S/ ",
+          "type": "internetPrice",
+          "crossed": false,
+          "price": ["8.90"]
+        },
+        {
+          "label": "",
+          "icons": "",
+          "symbol": "S/ ",
+          "type": "normalPrice",
+          "crossed": true,
+          "price": ["10.80"]
+        }
+      ],
+      "promotions": [],
+      "badges": [],
+      "multipurposeBadges": []
+    },
+    {
+      "brand": "LAIVE",
+      "productId": "126990865",
+      "skuId": "126990866",
+      "displayName": "Leche Laive Sin Lactosa Pack 4 Cajas 946 mL",
+      "url": "https://www.tottus.com.pe/tottus-pe/articulo/126990865/leche-laive-sin-lactosa-pack-4-cajas-946-ml",
+      "sellerId": "TOTTUS_PERU",
+      "mediaUrls": [
+        "https://media.tottus.com.pe/tottusPE/43220576_1/public",
+        "https://media.tottus.com.pe/tottusPE/43220576_2/public"
+      ],
+      "measurements": {
+        "format": "Pack 4 Cajas 946 mL",
+        "unit": "UN",
+        "minUnits": 1,
+        "maxUnits": 6,
+        "limit": "Máximo 6 Un."
+      },
+      "merchantCategoryId": "J0101070502",
+      "prices": [
+        {
+          "label": "",
+          "icons": "cmr-icon",
+          "symbol": "S/ ",
+          "type": "cmrPrice",
+          "crossed": false,
+          "price": ["19.50"]
+        },
+        {
+          "label": "",
+          "icons": "",
+          "symbol": "S/ ",
+          "type": "internetPrice",
+          "crossed": false,
+          "price": ["20.50"]
+        },
+        {
+          "label": "",
+          "icons": "",
+          "symbol": "S/ ",
+          "type": "normalPrice",
+          "crossed": true,
+          "price": ["24.50"]
+        }
+      ],
+      "promotions": [],
+      "badges": [],
+      "multipurposeBadges": []
+    },
+    {
+      "brand": "GLORIA",
+      "productId": "145813807",
+      "skuId": "145813808",
+      "displayName": "Yogurt Gloria Lúcuma Botella 1.6 Kg",
+      "url": "https://www.tottus.com.pe/tottus-pe/articulo/145813807/yogurt-gloria-lucuma-botella-1-6-kg",
+      "sellerId": "TOTTUS_PERU",
+      "mediaUrls": ["https://media.tottus.com.pe/tottusPE/43555323_1/public"],
+      "measurements": {
+        "format": "Botella 1.6 Kg",
+        "unit": "UN",
+        "minUnits": 1,
+        "maxUnits": 12,
+        "limit": "Máximo 12 Un."
+      },
+      "merchantCategoryId": "J0502050201",
+      "prices": [
+        {
+          "label": "",
+          "icons": "cmr-icon",
+          "symbol": "S/ ",
+          "type": "cmrPrice",
+          "crossed": false,
+          "price": ["7.90"]
+        },
+        {
+          "label": "",
+          "icons": "",
+          "symbol": "S/ ",
+          "type": "internetPrice",
+          "crossed": false,
+          "price": ["8.90"]
+        },
+        {
+          "label": "",
+          "icons": "",
+          "symbol": "S/ ",
+          "type": "normalPrice",
+          "crossed": true,
+          "price": ["10.80"]
+        }
+      ],
+      "promotions": [],
+      "badges": [],
+      "multipurposeBadges": []
+    },
+    {
+      "brand": "GLORIA",
+      "productId": "145813823",
+      "skuId": "145813824",
+      "displayName": "Yogurt Parcialmente Descremado Gloria Fresa Plátano Botella 1.6 Kg",
+      "url": "https://www.tottus.com.pe/tottus-pe/articulo/145813823/yogurt-parcialmente-descremado-gloria-fresa-platano-botella-1-6-kg",
+      "sellerId": "TOTTUS_PERU",
+      "mediaUrls": ["https://media.tottus.com.pe/tottusPE/43555325_1/public"],
+      "measurements": {
+        "format": "Botella 1.6 Kg",
+        "unit": "UN",
+        "minUnits": 1,
+        "maxUnits": 12,
+        "limit": "Máximo 12 Un."
+      },
+      "merchantCategoryId": "J0502050201",
+      "prices": [
+        {
+          "label": "",
+          "icons": "cmr-icon",
+          "symbol": "S/ ",
+          "type": "cmrPrice",
+          "crossed": false,
+          "price": ["7.90"]
+        },
+        {
+          "label": "",
+          "icons": "",
+          "symbol": "S/ ",
+          "type": "internetPrice",
+          "crossed": false,
+          "price": ["8.90"]
+        },
+        {
+          "label": "",
+          "icons": "",
+          "symbol": "S/ ",
+          "type": "normalPrice",
+          "crossed": true,
+          "price": ["10.80"]
+        }
+      ],
+      "promotions": [],
+      "badges": [],
+      "multipurposeBadges": []
+    },
+    {
+      "brand": "GLORIA",
+      "productId": "145813805",
+      "skuId": "145813806",
+      "displayName": "Yogurt Gloria Durazno Botella 1.6 Kg",
+      "url": "https://www.tottus.com.pe/tottus-pe/articulo/145813805/yogurt-gloria-durazno-botella-1-6-kg",
+      "sellerId": "TOTTUS_PERU",
+      "mediaUrls": ["https://media.tottus.com.pe/tottusPE/43555321_1/public"],
+      "measurements": {
+        "format": "Botella 1.6 Kg",
+        "unit": "UN",
+        "minUnits": 1,
+        "maxUnits": 12,
+        "limit": "Máximo 12 Un."
+      },
+      "merchantCategoryId": "J0502050201",
+      "prices": [
+        {
+          "label": "",
+          "icons": "cmr-icon",
+          "symbol": "S/ ",
+          "type": "cmrPrice",
+          "crossed": false,
+          "price": ["7.90"]
+        },
+        {
+          "label": "",
+          "icons": "",
+          "symbol": "S/ ",
+          "type": "internetPrice",
+          "crossed": false,
+          "price": ["8.90"]
+        },
+        {
+          "label": "",
+          "icons": "",
+          "symbol": "S/ ",
+          "type": "normalPrice",
+          "crossed": true,
+          "price": ["10.80"]
+        }
+      ],
+      "promotions": [],
+      "badges": [],
+      "multipurposeBadges": []
+    },
+    {
+      "brand": "NAN",
+      "productId": "127702855",
+      "skuId": "127702858",
+      "displayName": "Fórmula Láctea Nan 3 Crecimiento Pack 8 Latas 390 g",
+      "url": "https://www.tottus.com.pe/tottus-pe/articulo/127702855/formula-lactea-nan-3-crecimiento-pack-8-latas-390-g",
+      "sellerId": "TOTTUS_PERU",
+      "mediaUrls": [
+        "https://media.tottus.com.pe/tottusPE/43238299_1/public",
+        "https://media.tottus.com.pe/tottusPE/43238299_3/public",
+        "https://media.tottus.com.pe/tottusPE/43238299_2/public",
+        "https://media.tottus.com.pe/tottusPE/43238299_4/public",
+        "https://media.tottus.com.pe/tottusPE/43238299_5/public"
+      ],
+      "measurements": {
+        "format": "Pack 8 Latas 390 g  ",
+        "unit": "UN",
+        "minUnits": 1,
+        "maxUnits": 12,
+        "limit": "Máximo 12 Un."
+      },
+      "merchantCategoryId": "J0101070406",
+      "prices": [
+        {
+          "label": "",
+          "icons": "",
+          "symbol": "S/ ",
+          "type": "internetPrice",
+          "crossed": false,
+          "price": ["40.40"]
+        }
+      ],
+      "promotions": [],
+      "badges": [],
+      "multipurposeBadges": []
+    }
+  ]
+}

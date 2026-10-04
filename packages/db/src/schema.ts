@@ -273,3 +273,32 @@ export const canonicalProductListings = pgTable(
     check("canonical_method", sql`${t.method} in ('automatic','manual')`),
   ],
 );
+
+/** Current observed benefits only; ordinary price_history stays independent. */
+export const retailerListingOffers = pgTable(
+  "retailer_listing_offers",
+  {
+    listingId: uuid("listing_id")
+      .notNull()
+      .references(() => retailerListings.id, { onDelete: "cascade" }),
+    programKey: text("program_key").notNull(),
+    conditionType: text("condition_type").notNull(),
+    conditionLabel: text("condition_label").notNull(),
+    priceCents: integer("price_cents").notNull(),
+    observedAt: time("observed_at").notNull(),
+    startsAt: time("starts_at"),
+    endsAt: time("ends_at"),
+  },
+  (t) => [
+    uniqueIndex("listing_offer_program").on(t.listingId, t.programKey),
+    check("listing_offer_price", sql`${t.priceCents} > 0`),
+    check(
+      "listing_offer_condition",
+      sql`${t.conditionType}='payment_card' and ${t.programKey}='cmr' and ${t.conditionLabel}='Requiere tarjeta CMR'`,
+    ),
+    check(
+      "listing_offer_window",
+      sql`${t.startsAt} is null or ${t.endsAt} is null or ${t.startsAt}<${t.endsAt}`,
+    ),
+  ],
+);

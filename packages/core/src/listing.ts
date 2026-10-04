@@ -1,3 +1,4 @@
+import { conditionalOfferSchema } from "./conditional-offer.ts";
 import { z } from "zod";
 
 export const retailerIdSchema = z.enum(["tottus", "plaza-vea", "metro"]);
@@ -20,6 +21,7 @@ export const listingSchema = z.object({
   packageText: z.string().trim().min(1).optional(),
   category: z.string().trim().min(1).optional(),
   observedAt: z.date(),
+  conditionalOffers: z.array(conditionalOfferSchema).max(1).optional(),
 });
 export type NormalizedRetailerListing = z.infer<typeof listingSchema>;
 export function normalizeWhitespace(value: string): string {

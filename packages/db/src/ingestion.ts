@@ -43,6 +43,7 @@ export function persistenceStatements(
       package_text: listing.packageText ?? null,
       category: listing.category ?? null,
       observed_at: listing.observedAt.toISOString(),
+      offers: listing.conditionalOffers ?? [],
     })),
   );
   const ids = JSON.stringify(listings.map((listing) => listing.externalId));
@@ -50,7 +51,7 @@ export function persistenceStatements(
   return [
     sql`select id from retailers where id = ${retailer} for update`,
     sql`
-      insert into retailer_listings (retailer_id, external_id, product_id, title, url, image_url,
+      with updated as (insert into retailer_listings (retailer_id, external_id, product_id, title, url, image_url,
         current_price_cents, regular_price_cents, currency, price_unit, available, source_brand, source_unit_multiplier, package_text, category, first_seen_at, last_seen_at, first_seen_via, discovery_query_id, last_category_observed_at)
       select retailer_id, external_id, product_id, title, url, image_url, current_price_cents,
         regular_price_cents, currency, price_unit, available, source_brand, source_unit_multiplier, package_text, category, observed_at, observed_at,
@@ -65,7 +66,26 @@ export function persistenceStatements(
         source_brand = excluded.source_brand, source_unit_multiplier = excluded.source_unit_multiplier,
         package_text = excluded.package_text, category = excluded.category, last_seen_at = excluded.last_seen_at, active = true,
         last_category_observed_at = coalesce(excluded.last_category_observed_at, retailer_listings.last_category_observed_at)
-      where retailer_listings.last_seen_at < excluded.last_seen_at returning id, (xmax=0) as inserted`,
+      where retailer_listings.last_seen_at < excluded.last_seen_at returning id, external_id, (xmax=0) as inserted),
+      incoming as (
+        select u.id, x.observed_at, x.offers from updated u
+        join jsonb_to_recordset(${payload}::jsonb) as x(external_id text, observed_at timestamptz, offers jsonb)
+        on x.external_id=u.external_id
+      ), removed as (
+        delete from retailer_listing_offers o using incoming i where o.listing_id=i.id
+        and not exists (select 1 from jsonb_array_elements(i.offers) v where v->>'programKey'=o.program_key)
+      ), saved as (
+        insert into retailer_listing_offers (listing_id,program_key,condition_type,condition_label,price_cents,observed_at,starts_at,ends_at)
+        select i.id,v->>'programKey',v->>'conditionType',v->>'conditionLabel',(v->>'priceCents')::integer,
+          i.observed_at,(v->>'startsAt')::timestamptz,(v->>'endsAt')::timestamptz
+        from incoming i cross join lateral jsonb_array_elements(i.offers) v
+        on conflict (listing_id,program_key) do update set
+          condition_type=excluded.condition_type, condition_label=excluded.condition_label,
+          price_cents=excluded.price_cents, observed_at=excluded.observed_at,
+          starts_at=excluded.starts_at, ends_at=excluded.ends_at
+        where (retailer_listing_offers.condition_type,retailer_listing_offers.condition_label,retailer_listing_offers.price_cents,retailer_listing_offers.starts_at,retailer_listing_offers.ends_at)
+          is distinct from (excluded.condition_type,excluded.condition_label,excluded.price_cents,excluded.starts_at,excluded.ends_at)
+      ) select id,inserted from updated`,
     sql`
       update price_history h set valid_until = l.last_seen_at from retailer_listings l
       where h.listing_id = l.id and h.valid_until is null and ${scope}
