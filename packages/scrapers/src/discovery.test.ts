@@ -26,6 +26,7 @@ const listing = (retailer: RetailerId, i = 0): NormalizedRetailerListing => ({
 function setup(failures: RetailerId[] = [], empty = false) {
   const adapters = (["tottus", "plaza-vea", "metro"] as const).map((retailer) => ({
     retailer,
+    lookupListing: async () => ({ status: "not-found" as const }),
     fetchListings: vi.fn<SearchRetailerAdapter["fetchListings"]>(),
     searchProducts: vi.fn<SearchRetailerAdapter["searchProducts"]>(async () => {
       if (failures.includes(retailer)) throw new Error("postgresql://secret@host/password");

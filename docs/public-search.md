@@ -103,3 +103,7 @@ Public search is complete in the current user-provided baseline (`8cd5689`); ear
 ## Milestone 6 discovery follow-up
 
 The public search query and canonical eligibility are unchanged. A successful zero-result query meeting the stricter 3–80-character [discovery boundary](discovery.md) schedules a deduplicated demand upsert with Next.js `after`; the response never waits for retailer requests or processing. Existing-result and invalid searches create no demand. `/dev/discovery` adds read-only developer inspection and production-404 smoke coverage. Discovery runs the existing offline matcher and never associates products from query text.
+
+## Milestone 7 observation freshness
+
+[Known listing refresh](listing-refresh.md) adds request-time observation classification: fresh ≤36h, visible stale >36–72h, historical >72h. Only fresh offers whose availability is not false participate in cheapest retailer/ties, result minimum and `Desde`. Missing current best price is represented as null and rendered as `Estamos actualizando este producto.` Existing trusted two-retailer groups retain historical pages, including unavailable members, without treating them as usable current prices. Public reads use actual `last_seen_at`, never derivation timestamps. Earlier two-usable-retailer and last-known-good descriptions above are historical; source/version/confidence, active-row, open-history and price-unit gates remain. No request triggers retailer scraping.

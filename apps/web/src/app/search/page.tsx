@@ -86,19 +86,32 @@ export default async function SearchPage({
                       <p className="mt-2 text-sm text-muted-foreground">
                         {packageSummary(product)}
                       </p>
-                      <p className="mt-5 text-sm">
-                        Desde{" "}
-                        <strong className="text-2xl text-primary">
-                          {formatPen(product.lowestPriceCents)}
-                        </strong>
-                      </p>
-                      <p className="mt-1 text-sm">{product.cheapestRetailers.join(" y ")}</p>
+                      {product.lowestPriceCents === null ? (
+                        <p className="mt-5 text-sm text-muted-foreground">
+                          Estamos actualizando este producto.
+                        </p>
+                      ) : (
+                        <>
+                          <p className="mt-5 text-sm">
+                            Desde{" "}
+                            <strong className="text-2xl text-primary">
+                              {formatPen(product.lowestPriceCents)}
+                            </strong>
+                          </p>
+                          <p className="mt-1 text-sm">{product.cheapestRetailers.join(" y ")}</p>
+                        </>
+                      )}
                       <p className="mt-2 text-sm text-muted-foreground">
                         {product.retailerCount} supermercados · Ver comparación
                       </p>
                     </Link>
                     {product.offers
-                      .filter((offer) => offer.currentPriceCents === product.lowestPriceCents)
+                      .filter(
+                        (offer) =>
+                          offer.freshness === "fresh" &&
+                          offer.available !== false &&
+                          offer.currentPriceCents === product.lowestPriceCents,
+                      )
                       .map((offer) => (
                         <div key={offer.retailerId}>
                           <span className="sr-only">{offer.retailerName}: </span>

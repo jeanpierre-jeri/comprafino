@@ -1,12 +1,13 @@
 # Catalog refresh and operational freshness
 
-Milestone 5's bounded refresh and operational freshness are complete and deployed in the developer-provided baseline. Historical validation notes below describe that earlier implementation run. Milestone 6 adds a separate [discovery workflow](discovery.md), sharing refresh concurrency and the existing database secret. Its new build/E2E gate and remote activation remain pending.
+Milestones 0–6 are complete and deployed in the user-provided baseline `558cb56`. Milestone 7 adds [known listing refresh](listing-refresh.md) between category ingestion and the existing single normalization/matching pass. That document specifies exact lookup mechanisms, budgets, observation freshness, unavailable/missing semantics, public cheapest-price exclusion and the real audit. Milestone 7 awaits local build/E2E confirmation; historical notes below describe earlier runs.
 
 ## Architecture and coverage
 
 ```text
 GitHub Actions → pnpm refresh:catalog
   → Tottus (meat + dairy), Plaza Vea (dairy/eggs), Metro (dairy), sequentially
+  → up to 100 eligible known-listing targeted lookups
   → existing normalizeCatalog API
   → existing matchCatalog API
   → Neon/PostgreSQL → public persisted search/comparison reads
@@ -24,15 +25,15 @@ Changing source ordering can discover a new item inside an existing bounded samp
 
 The stable concurrency group `comprafino-catalog-refresh` and `cancel-in-progress: false` prevent overlapping full refresh workflows without canceling a running refresh. GitHub's default concurrency queue keeps one pending run; another trigger can replace that pending run. This is not a durable queue of every requested execution. Retailer-specific manual workflows retain their own groups; database retailer-row locks and atomic batches remain the safeguards across manual/local writers. The full workflow's concurrency does not serialize arbitrary local processes.
 
-The workflow checks out code, uses the repository-pinned pnpm and Node 24, installs with `--frozen-lockfile`, and passes `${{ secrets.DATABASE_URL }}` only to the refresh command. Its timeout is thirty minutes. It does not apply migrations or run scraping in ordinary CI.
+The workflow checks out code, uses the repository-pinned pnpm and Node 24, installs with `--frozen-lockfile`, and passes `${{ secrets.DATABASE_URL }}` only to the refresh command. Its timeout is sixty minutes to accommodate up to 100 sequential targeted requests, each with a thirty-second timeout. It does not apply migrations or run scraping in ordinary CI.
 
 Scheduled jobs may begin late or be dropped under GitHub load. They run from the default branch; the workflow must exist there and Actions must be enabled. Public-repository schedules may be disabled after sixty days of inactivity. See [GitHub schedule documentation](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule) and [concurrency documentation](https://docs.github.com/en/actions/concepts/workflows-and-actions/concurrency). Neither the cron nor the freshness policy promises exact or real-time prices.
 
 ## Failure and last-known-good behavior
 
-Each retailer is attempted even when another fails. Fetch/parsing failure writes no listings; persistence uses the existing all-or-nothing listing/history transaction. No failed scrape deletes, deactivates or expires prior offers. On partial failure, successful retailers commit, then normalization and matching use all current rows, including failed retailers' last-known-good data. The overall command exits nonzero, so Actions visibly fails.
+Each retailer is attempted even when another fails. Fetch/parsing failure writes no listings; persistence uses the existing all-or-nothing listing/history transaction. No failed scrape deletes, deactivates or expires prior offers. Confirmed targeted unavailability can mark availability false without advancing price freshness; missing products retain prices and age naturally. Public stale prices cannot win best price; see the listing-refresh policy. On partial failure, successful retailers commit, then normalization and matching use all current rows, including failed retailers' last-known-good data. The overall command exits nonzero, so Actions visibly fails.
 
-If all retailers fail, both downstream stages are skipped. If normalization fails or returns stale rows, matching is skipped. Matching failure or a stale/split/manual scope yields failure; existing guarded transactional matching protects canonical associations against partial replacement. Successfully committed earlier stages are not rolled back across the entire pipeline: they are individually valid and the next refresh can reconcile derived data. A concurrent source change can refuse downstream writes; rerun the pipeline after checking its summary.
+If all category retailers fail, targeted lookup still runs; downstream stages run if targeted observations succeeded (or the targeted stage failed after possible partial writes). If no category or targeted observation succeeds, downstream stages are skipped. If normalization fails or returns stale rows, matching is skipped. Matching failure or a stale/split/manual scope yields failure; existing guarded transactional matching protects canonical associations against partial replacement. Successfully committed earlier stages are not rolled back across the entire pipeline: they are individually valid and the next refresh can reconcile derived data. A concurrent source change can refuse downstream writes; rerun the pipeline after checking its summary.
 
 Existing `ingestion_runs` already has `started_at`, `ended_at`, running/success/failed status, discovered/persisted/new-state counts and a concise safe error. No schema or migration is added. Run start/finish are separate from listing commits: termination may leave a running row, and a failure after the listing commit can need reconciliation. A database outage that prevents run creation/completion cannot reliably record its own failure; Actions logs/status remain the fallback. Fetch failure before the adapter returns records zero discovered rows, not partial progress.
 
@@ -87,7 +88,7 @@ For a failure, distinguish source/network validation from database configuration
 
 GitHub Actions failure notifications are the initial zero-additional-service alert mechanism. Enable Actions email/web notifications (optionally failures only) in GitHub notification settings; scheduled notifications go to the responsible schedule actor, not every collaborator. See [GitHub workflow notifications](https://docs.github.com/en/actions/concepts/workflows-and-actions/notifications-for-workflow-runs). Actions status is always available in the repository. No Slack, alert SaaS or paid monitoring is introduced.
 
-GitHub Actions + Neon + intended Vercel deployment remain the low/zero-cost architecture, subject to account quotas and provider limits. No dependencies, Redis, queues, worker, new host or external scheduler were added.
+GitHub Actions + Neon + Vercel deployment remain the low/zero-cost architecture, subject to account quotas and provider limits. No dependencies, Redis, queues, worker, new host or external scheduler were added.
 
 ## Live validation — October 3, 2026
 

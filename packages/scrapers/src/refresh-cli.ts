@@ -1,9 +1,12 @@
+import { refreshKnownListings } from "./listing-refresh.ts";
+import { listingRefreshTasks } from "./listing-refresh-tasks.ts";
 import {
   createDatabase,
   createIngestionStore,
   normalizeCatalog,
   matchCatalog,
   assertRefreshScope,
+  previewListingRefresh,
 } from "@comprafino/db";
 import { ingest } from "./ingestion.ts";
 import { refreshCatalog, parseRefreshOptions } from "./refresh.ts";
@@ -22,6 +25,18 @@ try {
         if (store) return ingest(adapter, limit, store);
         const sample = await adapter.fetchListings(limit);
         return { fetched: sample.discovered, persisted: 0, changed: 0 };
+      },
+      async targeted() {
+        if (!db) throw new Error("Database required");
+        return refreshKnownListings(
+          await previewListingRefresh(db, {
+            limit: 100,
+            dryRun: false,
+            retailer: undefined,
+            externalId: undefined,
+          }),
+          listingRefreshTasks(db),
+        );
       },
       async normalize() {
         if (!db) throw new Error("Database required");

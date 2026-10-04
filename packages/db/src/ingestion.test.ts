@@ -22,7 +22,9 @@ it("builds one transactional lock/upsert/close/open batch with parameterized sou
   expect(queries[1]?.sql).toContain("on conflict (retailer_id, external_id) do update");
   expect(queries[1]?.sql).toContain("retailer_listings.last_seen_at < excluded.last_seen_at");
   expect(queries[1]?.sql).not.toContain(listing.title);
-  expect(queries[1]?.params[0]).toContain(listing.title);
+  expect(
+    queries[1]?.params.some((value) => typeof value === "string" && value.includes(listing.title)),
+  ).toBe(true);
   expect(queries[2]?.sql).toContain("is distinct from");
   expect(queries[2]?.sql).toContain("valid_until = l.last_seen_at");
   expect(queries[3]?.sql).toContain("not exists");

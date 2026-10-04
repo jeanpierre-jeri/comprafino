@@ -1,6 +1,6 @@
 # Roadmap
 
-Milestones 0–5 are complete and deployed in the developer-provided baseline (`fb9c616`). Milestone 6 implements search-driven catalog discovery, with measured validation and the local build/E2E gate described in [discovery](discovery.md). Historical pending notes in earlier milestone sections refer to their original agent runs.
+Milestones 0–6 are complete and deployed in the user-provided baseline (`558cb56`). Milestone 7 is implemented with bounded live validation; fresh local build/E2E confirmation remains pending. Historical pending notes in earlier sections refer to their original agent runs.
 
 ## Milestone 0 — Foundation
 
@@ -105,3 +105,11 @@ Add authentication only when user-specific lists, preferences or alerts justify 
 ## Milestone 14 — Scale only as needed
 
 Potential options, not guaranteed requirements: TanStack Query, TanStack Form, shadcn Chart/Recharts, Cheerio, browser Playwright, Upstash, Inngest, dedicated workers and a dedicated search engine. Introduce each only for demonstrated requirements or measured workloads.
+
+## Milestone 7 — Freshness for discovered products and demand-guided coverage
+
+Implemented: exact Tottus product-page variant and Plaza Vea/Metro SKU lookups; same normalized listing and persistence contract; immutable acquisition/query provenance, category observations, latest targeted attempt/outcome migration; public-first oldest-observation admission, 24-hour age, twelve-hour attempt cooldown and 100-per-run budget; sequential requests, three-error retailer circuit and partial-failure reporting; integration before one normalization/matching pass; read-only demand/coverage report and development metrics; fresh ≤36h / labelled stale ≤72h / historical >72h public semantics, only fresh usable offers participating in best price. No scoring/threshold change, new dependency, retailer, category expansion or service.
+
+Verified: existing category cycle passed, nine public listings observed twice with zero price/normalization/matching writes, 93 fresh public offers audited, twenty-four verified discovery-created public listings now have a targeted path (nineteen historical plus five newly attributed). The [audit](listing-refresh.md) records the changing live catalog and exact counts/limits. Default build hit the known Turbopack CSS-worker port restriction and E2E could not start; staged changes await local confirmation before `feat: keep discovered product prices fresh` may be committed. Milestone 7 is not complete until this gate passes.
+
+Future category review should inspect egg demand within existing coverage, then consider measured rice/oil demand and proven comparability, followed by tuna/detergent after normalization gaps are reviewed. This milestone does not begin that expansion.

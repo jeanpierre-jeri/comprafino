@@ -12,7 +12,7 @@ The roadmap aims to help people decide where to buy, when to buy, whether a pric
 
 ## Current status
 
-Milestones 0–5 are complete and deployed in the developer-provided baseline (`fb9c616`). Milestone 6 implements search-driven catalog discovery: valid public zero-result searches record deduplicated demand after the response; a bounded scheduled command searches the existing retailers, persists listings and runs unchanged normalization/matching. Discovery has a 24-hour per-query cooldown and a database-enforced thirty-attempt UTC daily cap. Fresh local production build/Chromium E2E confirmation is pending because this agent cannot bind Turbopack's worker port; Milestone 6 stays staged and its new workflow is not remotely activated here. See [discovery](docs/discovery.md), [operations](docs/operations.md) and [public search](docs/public-search.md). The homepage requires no database.
+Milestones 0–6 are complete and deployed in the user-provided baseline (`558cb56`). Milestone 7 adds bounded known-listing refresh after category ingestion, exact public retailer lookups, demand/coverage reporting and safe public stale-price handling. Local build/Chromium E2E confirmation is pending because this agent cannot bind Turbopack's CSS-worker port. See [listing refresh and audit](docs/listing-refresh.md), [discovery](docs/discovery.md) and [operations](docs/operations.md). The homepage requires no database.
 
 ## Initial retailers
 
@@ -145,9 +145,11 @@ These commands use root `.env`/`DATABASE_URL`, without retailer requests. Matchi
 ```sh
 pnpm refresh:catalog
 pnpm refresh:catalog -- --dry-run
+pnpm refresh:listings -- --dry-run --limit=50
+pnpm coverage:report
 ```
 
-The full pipeline reuses ingestion, normalization and matching. Its GitHub workflow supports manual dispatch and cron `17 11,23 * * *`: 11:17/23:17 UTC, or 06:17/18:17 Peru. Full refresh workflows do not overlap or cancel a running refresh. Failed retailers retain prior data; successful retailers continue, while the command still exits nonzero. `/dev/ingestion` shows distinct latest attempts/successes and healthy (≤18h), delayed (≤30h) or stale (>30h) operational freshness. GitHub schedules can start late; prices remain observed rather than real-time. See [operations](docs/operations.md) for fixed category limits, safe failure behavior, notifications and troubleshooting.
+The full pipeline reuses category ingestion, up to 100 eligible known-listing lookups, then one normalization and matching pass. Public offers older than 36 hours cannot win cheapest price; retained historical prices remain labelled. Its GitHub workflow supports manual dispatch and cron `17 11,23 * * *`: 11:17/23:17 UTC, or 06:17/18:17 Peru. Full refresh workflows do not overlap or cancel a running refresh. Failed retailers retain prior data; successful retailers continue, while the command still exits nonzero. `/dev/ingestion` shows distinct latest attempts/successes and healthy (≤18h), delayed (≤30h) or stale (>30h) operational freshness. GitHub schedules can start late; prices remain observed rather than real-time. See [operations](docs/operations.md) for fixed category limits, safe failure behavior, notifications and troubleshooting.
 
 ## Search-driven discovery
 
@@ -173,6 +175,8 @@ Both modes read root `DATABASE_URL`; dry-run previews demand without writes or r
 | `pnpm test:integration`             | Isolated-schema PostgreSQL tests; explicit `TEST_DATABASE_URL`            |
 | `pnpm test:e2e`                     | Chromium smoke test against a production server (build first)             |
 | `pnpm discover:catalog`             | Process bounded zero-result discovery demand; read-only dry-run available |
+| `pnpm refresh:listings`             | Refresh eligible known SKUs; optional read-only selection preview         |
+| `pnpm coverage:report`              | Read-only freshness, category coverage and discovery demand audit         |
 | `pnpm refresh:catalog`              | Refresh validated retailer scopes, normalize and match; optional dry-run  |
 | `pnpm db:generate`                  | Generate reviewed migrations from the schema                              |
 | `pnpm normalize:catalog`            | Normalize bounded existing listings; requires `DATABASE_URL`              |
@@ -200,11 +204,11 @@ On a Linux machine missing Chromium system libraries, use `playwright install --
 
 ## Data ingestion philosophy
 
-Use legitimate publicly accessible data only, with conservative requests. Prefer simple JSON/data endpoints, then HTTP parsing; browser automation is a last step justified by a real adapter. Do not bypass authentication, CAPTCHAs, bot protection or access controls, and do not use stealth tooling. Validate external data before domain logic or persistence. No ingestion schedule exists yet.
+Use legitimate publicly accessible data only, with conservative requests. Prefer simple JSON/data endpoints, then HTTP parsing; browser automation is a last step justified by a real adapter. Do not bypass authentication, CAPTCHAs, bot protection or access controls, and do not use stealth tooling. Validate external data before domain logic or persistence. Bounded catalog refresh and discovery use scheduled GitHub Actions.
 
 ## Initial deployment strategy
 
-Intended free-tier starting point (not deployed): **Vercel** for web, **Neon** for PostgreSQL, **GitHub Actions** for scheduled ingestion. Free-tier quotas and provider terms must be assessed when deploying.
+The user-provided deployed baseline uses: **Vercel** for web, **Neon** for PostgreSQL, **GitHub Actions** for scheduled ingestion. Free-tier quotas and provider terms must be assessed when deploying.
 
 For a future Vercel project, select this monorepo, set Root Directory to `apps/web`, enable inclusion of source outside that directory, and use the Next.js preset with the pinned pnpm lockfile. Use `pnpm exec turbo run build --filter=@comprafino/web` from the repository root if customizing the build command; the default app `pnpm build` also works. Set `DATABASE_URL` for server database features; the developer inspection route remains unavailable in production. Provision Neon separately and run reviewed migrations explicitly before dependent releases. The manual Tottus, Plaza Vea and Metro ingestion workflows require the GitHub Actions secret `DATABASE_URL` and explicitly applied migrations. They have no schedule. Do not put credentials in build commands or client bundles.
 

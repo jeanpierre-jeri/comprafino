@@ -1,6 +1,6 @@
 # Architecture
 
-CompraFino starts serverless first to reduce idle costs and operational work while validating data. The existing Neon/Vercel/GitHub Actions deployment is complete in the developer-provided Milestones 0–5 baseline. Bounded Tottus, Plaza Vea and Metro ingestion is implemented:
+CompraFino starts serverless first to reduce idle costs and operational work while validating data. The existing Neon/Vercel/GitHub Actions deployment is complete in the developer-provided Milestones 0–6 baseline. Bounded Tottus, Plaza Vea and Metro ingestion is implemented:
 
 ```mermaid
 flowchart LR
@@ -32,7 +32,7 @@ TypeScript remains authoritative; type-aware Oxlint supplements it. Oxfmt is the
 
 The first generated migration creates `retailers`, `retailer_listings`, `price_history` and `ingestion_runs`, including retailer seeds. Add reviewed tables to `packages/db/src/schema.ts`, generate migrations, review and commit SQL/metadata, then apply explicitly with a validated URL. CLI-only dotenv loads root `.env`; deployed clients receive platform environment variables. Migrations never run during app build or startup.
 
-Vercel, Neon and scheduled GitHub Actions are intended deployment choices. The Tottus, Plaza Vea and Metro workflows are manual only and require a `DATABASE_URL` secret. The full catalog workflow now supports twice-daily bounded refresh; activation requires the workflow on the default branch, Actions enabled and the existing secret. No active remote schedule is claimed by local implementation. See [operations](operations.md). Validate free-tier quotas against measured workloads and provider terms when deploying.
+Vercel, Neon and scheduled GitHub Actions are the user-provided deployed baseline. The Tottus, Plaza Vea and Metro workflows are manual only and require a `DATABASE_URL` secret. The full catalog workflow now supports twice-daily bounded refresh; activation requires the workflow on the default branch, Actions enabled and the existing secret. No active remote schedule is claimed by local implementation. See [operations](operations.md). Validate free-tier quotas against measured workloads and provider terms when deploying.
 
 ## Deferred choices
 
@@ -65,3 +65,7 @@ The read-only `/dev/matching` Server Component is blocked in production. Standal
 ## Search-driven discovery ownership
 
 Public zero-result search uses Next.js `after` only for a validated database demand upsert, after the response. Core owns conservative query normalization/limits. DB owns deduplication, atomic counts, a locked UTC daily budget and 24-hour claim cooldown. Scrapers own single-page public text search and the discovery processor, reusing existing ingestion statements and complete normalization/matching APIs. GitHub Actions schedules small batches independently of public requests. `/dev/discovery` provides read-only demand inspection and is blocked in production. Query text never becomes canonical identity; no matcher logic or new infrastructure is introduced. See [discovery](discovery.md) for schema, exact admission/retry policy and validation.
+
+## Known listing refresh ownership
+
+Core owns deterministic targeted admission and public observation-age classification. DB owns immutable acquisition/query provenance, category observation and guarded targeted admission/outcomes; existing listing/history persistence remains the only quote-write path. Scrapers extend existing adapters with exact known-SKU/product-page lookup and sequential bounded processing, inserted after category ingestion before a single complete normalization/matching pass. Public queries classify observations at request time and retain historical groups without fabricating a current best price. Read-only demand/coverage reporting feeds the development ingestion page. See [listing refresh](listing-refresh.md) for migration, budgets, audit and pending build/E2E gate.

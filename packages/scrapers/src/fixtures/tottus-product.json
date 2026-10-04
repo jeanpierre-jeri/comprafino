@@ -1,0 +1,74 @@
+{
+  "props": {
+    "pageProps": {
+      "productData": {
+        "id": "113706602",
+        "brandName": "PRIMOR",
+        "merchantCategoryId": "J0101010104",
+        "isPublished": true,
+        "variants": [
+          {
+            "id": "113706603",
+            "name": "Aceite Vegetal Primor Premium Botella 900 mL",
+            "isPurchaseable": true,
+            "isOnlineSellable": true,
+            "offerings": [
+              {
+                "sellerId": "TOTTUS_PERU",
+                "isActive": true
+              }
+            ],
+            "prices": [
+              {
+                "label": "",
+                "icons": "",
+                "symbol": "S/ ",
+                "crossed": false,
+                "type": "internetPrice",
+                "price": ["9.70"]
+              },
+              {
+                "label": "",
+                "icons": "",
+                "symbol": "S/ ",
+                "crossed": true,
+                "type": "normalPrice",
+                "price": ["11"]
+              }
+            ],
+            "medias": [
+              {
+                "url": "https://media.falabella.com/tottusPE/42757359_2/public"
+              },
+              {
+                "url": "https://media.falabella.com/tottusPE/42757359_1/public"
+              },
+              {
+                "url": "https://media.falabella.com/tottusPE/42757359_3/public"
+              },
+              {
+                "url": "https://media.falabella.com/tottusPE/42757359_4/public"
+              },
+              {
+                "url": "https://media.falabella.com/tottusPE/42757359_5/public"
+              },
+              {
+                "url": "https://media.falabella.com/tottusPE/42757359_6/public"
+              },
+              {
+                "url": "https://media.falabella.com/tottusPE/42757359_7/public"
+              }
+            ],
+            "attributes": {
+              "measurement": {
+                "formato": "Botella 900 mL  ",
+                "unidad-de-medida": "UN",
+                "maximo-de-compra": 3
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

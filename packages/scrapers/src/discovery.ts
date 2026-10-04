@@ -9,6 +9,7 @@ export interface DiscoveryTasks {
   persist(
     retailer: RetailerId,
     rows: readonly NormalizedRetailerListing[],
+    claim: DiscoveryClaim,
   ): Promise<{ created: number; changed: number }>;
   normalize(): Promise<number>;
   match(): Promise<{ writes: number; created: number }>;
@@ -39,7 +40,7 @@ export async function processDiscoveryQuery(claim: DiscoveryClaim, tasks: Discov
       );
       if (rows.some((row) => row.retailer !== adapter.retailer)) throw new Error("Mixed retailers");
       const saved = rows.length
-        ? await tasks.persist(adapter.retailer, rows)
+        ? await tasks.persist(adapter.retailer, rows, claim)
         : { created: 0, changed: 0 };
       retailers.push({
         retailer: adapter.retailer,

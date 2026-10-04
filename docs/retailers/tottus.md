@@ -100,3 +100,7 @@ A captured Braedt cheese row omitted `measurements.unit` entirely. Such rows are
 ## Milestone 6 public text search
 
 Native fetch reads the public `/tottus-pe/buscar?Ntt=…&page=1` hydration page, independently of category browsing. `searchProducts(query, limit)` reuses the same parser/listing contract, stable SKU identity, ordinary/reference price interpretation and availability semantics. Discovery fetches exactly one page (at most 48 source products) and retains at most ten unique usable listings, without retries or pagination. Empty usable results are distinguished from request/schema failures. See [discovery](../discovery.md) for phrase encoding, Tottus semantic fallback, controlled live evidence and scheduling; category coverage is unchanged.
+
+## Milestone 7 targeted refresh
+
+[Known listing refresh](../listing-refresh.md) documents the verified exact lookup, shared price mapping, bounded sequential budget, unavailable/missing semantics and live repeat evidence. Category bounds are unchanged. Targeted refresh does not infer category coverage or delete historical data.

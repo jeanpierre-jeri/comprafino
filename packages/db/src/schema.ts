@@ -94,6 +94,11 @@ export const retailerListings = pgTable(
     firstSeenAt: time("first_seen_at").notNull(),
     lastSeenAt: time("last_seen_at").notNull(),
     active: boolean("active").notNull().default(true),
+    firstSeenVia: text("first_seen_via").notNull().default("unknown"),
+    discoveryQueryId: uuid("discovery_query_id").references(() => discoveryQueries.id),
+    lastCategoryObservedAt: time("last_category_observed_at"),
+    lastTargetedAttemptAt: time("last_targeted_attempt_at"),
+    targetedStatus: text("targeted_status"),
   },
   (t) => [
     uniqueIndex("listing_source_identity").on(t.retailerId, t.externalId),
@@ -105,6 +110,11 @@ export const retailerListings = pgTable(
     ),
     check("listing_currency", sql`${t.currency} = 'PEN'`),
     check("listing_unit", sql`${t.priceUnit} in ('KG', 'UN')`),
+    check("listing_origin", sql`${t.firstSeenVia} in ('unknown','category','discovery')`),
+    check(
+      "listing_targeted_status",
+      sql`${t.targetedStatus} is null or ${t.targetedStatus} in ('observed','unavailable','not-found','failed')`,
+    ),
     check("listing_times", sql`${t.lastSeenAt} >= ${t.firstSeenAt}`),
   ],
 );

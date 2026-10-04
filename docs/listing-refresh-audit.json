@@ -1,0 +1,428 @@
+{
+  "inspectedAt": "2026-10-04T02:53:58.348Z",
+  "knownListings": 534,
+  "publicOffers": 93,
+  "discoveryAcquiredPublicOffers": 5,
+  "fresh": 93,
+  "stale": 0,
+  "tooStale": 0,
+  "publicWithoutCategoryObservation": 26,
+  "publicOutsideCategoryCoverage": [
+    {
+      "retailer": "tottus",
+      "externalId": "116952985"
+    },
+    {
+      "retailer": "tottus",
+      "externalId": "119580636"
+    },
+    {
+      "retailer": "tottus",
+      "externalId": "115462449"
+    },
+    {
+      "retailer": "plaza-vea",
+      "externalId": "3701"
+    },
+    {
+      "retailer": "metro",
+      "externalId": "39257746"
+    },
+    {
+      "retailer": "metro",
+      "externalId": "427"
+    },
+    {
+      "retailer": "plaza-vea",
+      "externalId": "655"
+    },
+    {
+      "retailer": "plaza-vea",
+      "externalId": "10614794"
+    },
+    {
+      "retailer": "tottus",
+      "externalId": "113706603"
+    },
+    {
+      "retailer": "metro",
+      "externalId": "536"
+    },
+    {
+      "retailer": "tottus",
+      "externalId": "144752538"
+    },
+    {
+      "retailer": "metro",
+      "externalId": "521"
+    },
+    {
+      "retailer": "plaza-vea",
+      "externalId": "10614795"
+    },
+    {
+      "retailer": "metro",
+      "externalId": "39272346"
+    },
+    {
+      "retailer": "plaza-vea",
+      "externalId": "11129476"
+    },
+    {
+      "retailer": "tottus",
+      "externalId": "113706446"
+    },
+    {
+      "retailer": "metro",
+      "externalId": "39257745"
+    },
+    {
+      "retailer": "tottus",
+      "externalId": "144942900"
+    },
+    {
+      "retailer": "plaza-vea",
+      "externalId": "10181308"
+    },
+    {
+      "retailer": "plaza-vea",
+      "externalId": "618"
+    },
+    {
+      "retailer": "metro",
+      "externalId": "520"
+    },
+    {
+      "retailer": "plaza-vea",
+      "externalId": "565"
+    },
+    {
+      "retailer": "plaza-vea",
+      "externalId": "11129479"
+    },
+    {
+      "retailer": "tottus",
+      "externalId": "130751328"
+    },
+    {
+      "retailer": "metro",
+      "externalId": "39181622"
+    },
+    {
+      "retailer": "metro",
+      "externalId": "428"
+    }
+  ],
+  "targetRefreshable": 534,
+  "publicTargetRefreshable": 93,
+  "withoutTargetPath": 0,
+  "selected": [],
+  "retailers": [
+    {
+      "retailer": "tottus",
+      "known": 225,
+      "public": 25,
+      "categoryObservedPublic": 17,
+      "categoryObservedWithin24h": 17,
+      "outsideObservedCategoryCoverage": 8,
+      "eligible": 0,
+      "fresh": 25,
+      "stale": 0,
+      "tooStale": 0,
+      "unavailable": 0,
+      "lastTargetedAttempt": "2026-10-04T02:50:15.972Z",
+      "targetedLatestOutcomes": {
+        "observed": 2,
+        "unavailable": 0,
+        "not-found": 0,
+        "failed": 0
+      },
+      "publicOrigins": {
+        "unknown": 20,
+        "category": 0,
+        "discovery": 5
+      },
+      "origins": {
+        "unknown": 197,
+        "category": 5,
+        "discovery": 23
+      }
+    },
+    {
+      "retailer": "plaza-vea",
+      "known": 149,
+      "public": 37,
+      "categoryObservedPublic": 28,
+      "categoryObservedWithin24h": 28,
+      "outsideObservedCategoryCoverage": 9,
+      "eligible": 0,
+      "fresh": 37,
+      "stale": 0,
+      "tooStale": 0,
+      "unavailable": 0,
+      "lastTargetedAttempt": "2026-10-04T02:39:18.436Z",
+      "targetedLatestOutcomes": {
+        "observed": 3,
+        "unavailable": 0,
+        "not-found": 0,
+        "failed": 0
+      },
+      "publicOrigins": {
+        "unknown": 37,
+        "category": 0,
+        "discovery": 0
+      },
+      "origins": {
+        "unknown": 130,
+        "category": 2,
+        "discovery": 17
+      }
+    },
+    {
+      "retailer": "metro",
+      "known": 160,
+      "public": 31,
+      "categoryObservedPublic": 22,
+      "categoryObservedWithin24h": 22,
+      "outsideObservedCategoryCoverage": 9,
+      "eligible": 0,
+      "fresh": 31,
+      "stale": 0,
+      "tooStale": 0,
+      "unavailable": 0,
+      "lastTargetedAttempt": "2026-10-04T02:39:20.096Z",
+      "targetedLatestOutcomes": {
+        "observed": 4,
+        "unavailable": 0,
+        "not-found": 0,
+        "failed": 0
+      },
+      "publicOrigins": {
+        "unknown": 31,
+        "category": 0,
+        "discovery": 0
+      },
+      "origins": {
+        "unknown": 130,
+        "category": 2,
+        "discovery": 28
+      }
+    }
+  ],
+  "demand": [
+    {
+      "query": "huevos tottus",
+      "requests": 7,
+      "status": "completed",
+      "firstAcquisitionGroups": 0,
+      "currentlyMatchingPublicGroups": 0
+    },
+    {
+      "query": "huevos",
+      "requests": 4,
+      "status": "completed",
+      "firstAcquisitionGroups": 3,
+      "currentlyMatchingPublicGroups": 3
+    },
+    {
+      "query": "arroz costeño",
+      "requests": 2,
+      "status": "partial",
+      "firstAcquisitionGroups": 0,
+      "currentlyMatchingPublicGroups": 5
+    },
+    {
+      "query": "aceite primor",
+      "requests": 2,
+      "status": "partial",
+      "firstAcquisitionGroups": 0,
+      "currentlyMatchingPublicGroups": 3
+    },
+    {
+      "query": "atún florida",
+      "requests": 2,
+      "status": "partial",
+      "firstAcquisitionGroups": 0,
+      "currentlyMatchingPublicGroups": 0
+    },
+    {
+      "query": "arroz extra costeño",
+      "requests": 2,
+      "status": "completed",
+      "firstAcquisitionGroups": 0,
+      "currentlyMatchingPublicGroups": 4
+    },
+    {
+      "query": "aceite vegetal primor",
+      "requests": 2,
+      "status": "completed",
+      "firstAcquisitionGroups": 0,
+      "currentlyMatchingPublicGroups": 3
+    },
+    {
+      "query": "detergente bolivar",
+      "requests": 2,
+      "status": "completed",
+      "firstAcquisitionGroups": 0,
+      "currentlyMatchingPublicGroups": 0
+    },
+    {
+      "query": "zzzzproductoausentezzzz",
+      "requests": 1,
+      "status": "failed",
+      "firstAcquisitionGroups": 2,
+      "currentlyMatchingPublicGroups": 0
+    },
+    {
+      "query": "pollo",
+      "requests": 1,
+      "status": "completed",
+      "firstAcquisitionGroups": 0,
+      "currentlyMatchingPublicGroups": 0
+    },
+    {
+      "query": "pollo entero",
+      "requests": 1,
+      "status": "processing",
+      "firstAcquisitionGroups": 0,
+      "currentlyMatchingPublicGroups": 0
+    },
+    {
+      "query": "azucar",
+      "requests": 1,
+      "status": "processing",
+      "firstAcquisitionGroups": 0,
+      "currentlyMatchingPublicGroups": 0
+    },
+    {
+      "query": "aceite tottus",
+      "requests": 1,
+      "status": "processing",
+      "firstAcquisitionGroups": 0,
+      "currentlyMatchingPublicGroups": 0
+    }
+  ],
+  "recurringBrandsAndCategoriesOutsideObservedCoverage": [
+    {
+      "brand": "costeño",
+      "category": "1001284",
+      "listings": 9,
+      "queries": 0
+    },
+    {
+      "brand": "primor",
+      "category": "1000671",
+      "listings": 9,
+      "queries": 0
+    },
+    {
+      "brand": "bolívar",
+      "category": "1000715",
+      "listings": 8,
+      "queries": 0
+    },
+    {
+      "brand": "florida",
+      "category": "J0101020403",
+      "listings": 8,
+      "queries": 0
+    },
+    {
+      "brand": "bolivar",
+      "category": "413",
+      "listings": 5,
+      "queries": 0
+    },
+    {
+      "brand": "bolivar",
+      "category": "J0201020102",
+      "listings": 5,
+      "queries": 0
+    },
+    {
+      "brand": "costeno",
+      "category": "J0101010203",
+      "listings": 5,
+      "queries": 0
+    },
+    {
+      "brand": "metro",
+      "category": "1001624",
+      "listings": 5,
+      "queries": 1
+    },
+    {
+      "brand": "wong",
+      "category": "1001624",
+      "listings": 5,
+      "queries": 2
+    },
+    {
+      "brand": "costeño",
+      "category": "439",
+      "listings": 4,
+      "queries": 0
+    },
+    {
+      "brand": "primor",
+      "category": "600",
+      "listings": 4,
+      "queries": 0
+    },
+    {
+      "brand": "bell's",
+      "category": "600",
+      "listings": 3,
+      "queries": 0
+    },
+    {
+      "brand": "bolivar",
+      "category": "1371",
+      "listings": 3,
+      "queries": 0
+    },
+    {
+      "brand": "churu",
+      "category": "4169",
+      "listings": 3,
+      "queries": 1
+    },
+    {
+      "brand": "costeño",
+      "category": "442",
+      "listings": 3,
+      "queries": 0
+    },
+    {
+      "brand": "la calera",
+      "category": "J0501020204",
+      "listings": 3,
+      "queries": 1
+    },
+    {
+      "brand": "metro",
+      "category": "1001348",
+      "listings": 3,
+      "queries": 1
+    },
+    {
+      "brand": "pacasmayo",
+      "category": "J0101010203",
+      "listings": 3,
+      "queries": 0
+    },
+    {
+      "brand": "primor",
+      "category": "J0101010104",
+      "listings": 3,
+      "queries": 0
+    },
+    {
+      "brand": "redondos",
+      "category": "1001349",
+      "listings": 3,
+      "queries": 1
+    }
+  ],
+  "provenanceNote": "Historical origin and query attribution are unknown before migration 0004. Current search matches do not prove creation by a query. Missing category observations are unverified coverage until a complete scheduled scope has run."
+}

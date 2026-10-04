@@ -1,6 +1,6 @@
 # Search-driven catalog discovery
 
-Milestone 6 adds bounded demand-driven discovery using PostgreSQL and the existing GitHub Actions infrastructure. No retailer, category crawl, matcher rule, dependency or external service is added. The Milestones 0–5 baseline is complete and deployed according to the developer. The new workflow is local until merged/deployed; this document does not claim its remote activation.
+Milestone 6 adds bounded demand-driven discovery using PostgreSQL and the existing GitHub Actions infrastructure. No retailer, category crawl, matcher rule, dependency or external service is added. Milestones 0–6 are complete and deployed in the user-provided baseline `558cb56`; historical validation/gate notes below describe the earlier implementation. Milestone 7 [known listing refresh](listing-refresh.md) closes the discovery price-freshness gap and adds first-acquisition query provenance.
 
 ## Public path and privacy
 
@@ -57,7 +57,7 @@ If any usable listings were persisted, the existing complete-catalog normalizati
 
 `completed` means all retailers succeeded and usable listings exist; `no_results` means all succeeded with zero usable listings; `partial` means at least one retailer succeeded and at least one failed; `failed` means all retailers failed or downstream derivation failed. Successful empty retailer searches remain distinguishable from errors. Valid retailer results are retained on partial failure. Normalization failure skips matching; already committed listing batches are retained. Failed/partial commands exit nonzero so Actions reports the problem. Errors are allowlisted summaries, not source/driver exception text. A database outage can prevent recording completion; the claimed row and workflow status remain recovery evidence.
 
-The existing complete-catalog 1000-row guard remains. Exceeding it refuses downstream truncation and fails safely; source listings may already have persisted before that guard trips. Deliberately review workload and the bound before ongoing growth reaches it. Discovery freshness for products outside the existing scheduled category scopes is another limitation: their observations are revisited by later eligible discovery demand, not by a new catalog-wide refresh introduced here.
+The existing complete-catalog 1000-row guard remains. Exceeding it refuses downstream truncation and fails safely; source listings may already have persisted before that guard trips. Deliberately review workload and the bound before ongoing growth reaches it. Milestone 7 adds bounded exact lookups for known listings outside the existing category scopes; their freshness no longer depends on repeated discovery demand. It does not expand category coverage.
 
 Observed detergent coverage gaps are reserved for a later normalization/matching review: Metro's structured brand normalizes to `bolívar`, while Plaza Vea/Tottus use `bolivar`; strict brand identity keeps those distinct. Variant descriptors also differ. Metro's observed `Twopack … 3L` currently normalizes package count to one, while Plaza Vea's explicit `3L x2un` yields two; the unknown pack syntax must be reviewed before broader unit-price use. Mixed detergent/softener bundles retain unresolved content and diagnostics. No normalization aliases, matcher weights or safety gates were changed to improve discovery recall.
 

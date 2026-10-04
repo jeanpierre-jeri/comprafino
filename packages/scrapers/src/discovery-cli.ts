@@ -43,7 +43,8 @@ try {
       persist: (
         retailer: Parameters<typeof persistListingsDetailed>[1],
         rows: Parameters<typeof persistListingsDetailed>[2],
-      ) => persistListingsDetailed(db, retailer, rows),
+        claim: Parameters<typeof processDiscoveryQuery>[0],
+      ) => persistListingsDetailed(db, retailer, rows, { source: "discovery", queryId: claim.id }),
       async normalize() {
         await assertRefreshScope(db);
         const r = await normalizeCatalog(db, 1000);

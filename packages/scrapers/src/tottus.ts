@@ -1,101 +1,9 @@
-import { z } from "zod";
-import { listingSchema, normalizeWhitespace, parsePenCents } from "@comprafino/core";
+import { parseTottusPage } from "./tottus-parser.ts";
+export { parseTottusPage } from "./tottus-parser.ts";
+import { lookupTottus } from "./targeted.ts";
 import type { NormalizedRetailerListing } from "@comprafino/core";
-
 import type { SearchRetailerAdapter } from "./adapter.ts";
 import { assertRetailerSearch, boundedSearchListings } from "./search.ts";
-const sourceProduct = z.object({
-  brand: z.string().trim().min(1).optional(),
-  productId: z.string().regex(/^\d+$/u),
-  skuId: z.string().regex(/^\d+$/u),
-  displayName: z.string().min(1),
-  url: z.url(),
-  sellerId: z.literal("TOTTUS_PERU"),
-  mediaUrls: z.array(z.url()).optional(),
-  measurements: z.object({ format: z.string().optional(), unit: z.enum(["KG", "UN"]).optional() }),
-  merchantCategoryId: z.string().optional(),
-  prices: z.array(
-    z.object({
-      type: z.string(),
-      symbol: z.string(),
-      crossed: z.boolean(),
-      price: z.array(z.union([z.string(), z.number()])).length(1),
-    }),
-  ),
-});
-const sourcePage = z.object({
-  props: z.object({
-    pageProps: z.object({
-      results: z.array(sourceProduct),
-      pagination: z.object({
-        count: z.number().int().nonnegative(),
-        perPage: z.number().int().positive(),
-        currentPage: z.number().int().positive(),
-      }),
-    }),
-  }),
-});
-
-/** Read only the site's explicit hydration JSON; no general HTML parser required. */
-export function parseTottusPage(html: string, observedAt: Date) {
-  const script = /<script\b[^>]*\bid=["']__NEXT_DATA__["'][^>]*>([\s\S]*?)<\/script>/u.exec(html);
-  if (!script)
-    throw new Error("Tottus public listing JSON is missing; stop and inspect the source");
-  const raw: unknown = JSON.parse(script[1]!);
-  const page = sourcePage.parse(raw).props.pageProps;
-  // An omitted quote unit cannot safely become a package or per-KG price.
-  // Skip that source row; explicit unsupported units still fail schema validation.
-  const eligible = page.results.filter((product) => product.measurements.unit !== undefined);
-  const listings = eligible.map((product) => {
-    const current = product.prices.filter(
-      (price) => price.type === "internetPrice" && !price.crossed,
-    );
-    const regular = product.prices.filter((price) => price.type === "normalPrice");
-    if (current.length !== 1 || regular.length > 1)
-      throw new Error("Ambiguous or missing Tottus internet/regular price");
-    for (const price of [...current, ...regular]) {
-      if (price.symbol.trim() !== "S/") throw new Error("Unexpected Tottus currency");
-    }
-    const url = new URL(product.url);
-    if (
-      url.origin !== "https://www.tottus.com.pe" ||
-      !url.pathname.startsWith(`/tottus-pe/articulo/${product.productId}/`)
-    ) {
-      throw new Error("Unexpected Tottus product URL");
-    }
-    url.search = "";
-    url.hash = "";
-    const currentPriceCents = parsePenCents(current[0]!.price[0]!);
-    const normalPriceCents = regular[0] ? parsePenCents(regular[0].price[0]!) : undefined;
-    return listingSchema.parse({
-      retailer: "tottus",
-      externalId: product.skuId,
-      productId: product.productId,
-      title: normalizeWhitespace(product.displayName),
-      url: url.href,
-      imageUrl: product.mediaUrls?.[0],
-      currentPriceCents,
-      regularPriceCents:
-        normalPriceCents !== undefined && normalPriceCents > currentPriceCents
-          ? normalPriceCents
-          : undefined,
-      currency: "PEN",
-      priceUnit: product.measurements.unit,
-      packageText: product.measurements.format
-        ? normalizeWhitespace(product.measurements.format) || undefined
-        : undefined,
-      sourceBrand: product.brand,
-      category: product.merchantCategoryId || undefined,
-      observedAt,
-    });
-  });
-  return {
-    listings,
-    pagination: page.pagination,
-    discovered: page.results.length,
-    skippedMissingPriceUnit: page.results.length - eligible.length,
-  };
-}
 export const tottusCategoryUrl = "https://www.tottus.com.pe/tottus-pe/lista/CATG16076/Carnes";
 export const tottusCategoryUrls = {
   meat: tottusCategoryUrl,
@@ -108,6 +16,7 @@ export function createTottusAdapter(
   if (category !== "meat" && category !== "dairy") throw new Error("Unsupported Tottus category");
   return {
     retailer: "tottus",
+    lookupListing: (known) => lookupTottus(fetchPage, known),
     async searchProducts(query, limit) {
       assertRetailerSearch(query, limit);
       const url = new URL("https://www.tottus.com.pe/tottus-pe/buscar");

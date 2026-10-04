@@ -3,6 +3,7 @@ import type { SQL } from "drizzle-orm";
 import { z } from "zod";
 import {
   cheapestOffers,
+  offerFreshness,
   matchingVersion,
   meaningfulReferencePrice,
   normalizeSearchQuery,
@@ -28,6 +29,7 @@ const offerSchema = z.object({
   currentPriceCents: z.number().int().nonnegative(),
   regularPriceCents: z.number().int().nonnegative().nullable(),
   observedAt: z.coerce.date(),
+  available: z.boolean().nullable().optional(),
 });
 const productSchema = z.object({
   id: z.uuid(),
@@ -38,11 +40,14 @@ const productSchema = z.object({
   packageCount: z.number().int().positive(),
   offers: z.array(offerSchema).min(2),
 });
-export type RetailerOffer = z.infer<typeof offerSchema>;
-export type ProductComparison = z.infer<typeof productSchema> & {
+export type RetailerOffer = z.infer<typeof offerSchema> & {
+  freshness: ReturnType<typeof offerFreshness>;
+};
+export type ProductComparison = Omit<z.infer<typeof productSchema>, "offers"> & {
+  offers: RetailerOffer[];
   imageUrl: string | null;
   retailerCount: number;
-  lowestPriceCents: number;
+  lowestPriceCents: number | null;
   cheapestRetailers: string[];
 };
 const retailerHosts: Record<RetailerId, string> = {
@@ -82,11 +87,12 @@ export function productImageUrl(raw: string | null): string | null {
   const prefix = url.hostname === "media.tottus.com.pe" ? "/tottusPE/" : "/arquivos/ids/";
   return url.pathname.startsWith(prefix) ? trusted : null;
 }
-export function publicProduct(raw: unknown): ProductComparison {
+export function publicProduct(raw: unknown, now = new Date()): ProductComparison {
   const product = productSchema.parse(raw);
   const offers = product.offers
-    .map((offer) => ({
+    .map((offer): RetailerOffer => ({
       ...offer,
+      freshness: offerFreshness(offer.observedAt, now),
       regularPriceCents: meaningfulReferencePrice(offer.currentPriceCents, offer.regularPriceCents),
       imageUrl: productImageUrl(offer.imageUrl),
     }))
@@ -99,13 +105,13 @@ export function publicProduct(raw: unknown): ProductComparison {
     [...offers]
       .sort((a, b) => a.retailerId.localeCompare(b.retailerId))
       .find((offer) => offer.imageUrl)?.imageUrl ?? null;
-  const cheapest = cheapestOffers(offers);
+  const cheapest = cheapestOffers(offers, now);
   return {
     ...product,
     offers,
     imageUrl,
     retailerCount: offers.length,
-    lowestPriceCents: cheapest[0]!.currentPriceCents,
+    lowestPriceCents: cheapest[0]?.currentPriceCents ?? null,
     cheapestRetailers: cheapest.map((offer) => offer.retailerName),
   };
 }
@@ -119,7 +125,7 @@ function searchText(text: SQL): SQL {
 // obsolete-version or below-auto-confidence link, even if two other links qualify.
 const eligibleProducts = sql`with offers as (
   select a.canonical_product_id, r.id as retailer_id, r.name as retailer_name,
-    l.title, l.url, l.image_url, l.last_seen_at, n.brand, n.normalized_title,
+    l.title, l.url, l.image_url, l.last_seen_at, l.available, n.brand, n.normalized_title,
     h.current_price_cents, h.regular_price_cents
   from canonical_product_listings a
   join retailer_listings l on l.id=a.listing_id and l.retailer_id=a.retailer_id
@@ -127,7 +133,7 @@ const eligibleProducts = sql`with offers as (
   join listing_normalizations n on n.listing_id=l.id
   join price_history h on h.listing_id=l.id and h.valid_until is null
   where a.method='automatic' and a.matching_version=${matchingVersion} and a.confidence>=0.90
-    and l.active and l.available is distinct from false and h.currency='PEN' and h.price_unit='UN'
+    and l.active and h.currency='PEN' and h.price_unit='UN'
 ), products as (
   select c.id, c.display_name as "displayName", c.brand_key,
     c.quantity_value as "quantityValue", c.quantity_unit as "quantityUnit", c.package_count as "packageCount",
@@ -137,7 +143,7 @@ const eligibleProducts = sql`with offers as (
     ${searchText(sql`c.display_name || ' ' || c.brand_key || ' ' || string_agg(o.normalized_title, ' ')`)} as identity_text,
     jsonb_agg(jsonb_build_object('retailerId',o.retailer_id,'retailerName',o.retailer_name,
       'title',o.title,'url',o.url,'imageUrl',o.image_url,'currentPriceCents',o.current_price_cents,
-      'regularPriceCents',o.regular_price_cents,'observedAt',o.last_seen_at) order by o.retailer_id) as offers,
+      'regularPriceCents',o.regular_price_cents,'observedAt',o.last_seen_at,'available',o.available) order by o.retailer_id) as offers,
     array_agg(${searchText(sql`o.normalized_title`)}) as retailer_titles
   from canonical_products c join offers o on o.canonical_product_id=c.id
   where not exists (select 1 from canonical_product_listings a where a.canonical_product_id=c.id
@@ -148,6 +154,7 @@ const publicColumns = sql`id,"displayName",brand,"quantityValue","quantityUnit",
 export async function searchCanonicalProducts(
   db: Database,
   rawQuery: string,
+  now = new Date(),
 ): Promise<ProductComparison[]> {
   if (!usefulSearchQuery(rawQuery)) return [];
   const query = normalizeSearchQuery(rawQuery);
@@ -169,7 +176,10 @@ export async function searchCanonicalProducts(
         (select max(public.similarity(t,${query})) from unnest(retailer_titles) t)) desc,
       "displayName" collate "C", id limit 20`),
   ]);
-  return z.array(z.unknown()).parse(result.rows).map(publicProduct);
+  return z
+    .array(z.unknown())
+    .parse(result.rows)
+    .map((row) => publicProduct(row, now));
 }
 export function isPublicProductId(id: string): boolean {
   return z.uuid().safeParse(id).success;
@@ -177,6 +187,7 @@ export function isPublicProductId(id: string): boolean {
 export async function getCanonicalProductComparison(
   db: Database,
   id: string,
+  now = new Date(),
 ): Promise<ProductComparison | null> {
   if (!isPublicProductId(id)) return null;
   const [result] = await db.batch([
@@ -184,5 +195,5 @@ export async function getCanonicalProductComparison(
     select ${publicColumns} from products where id=${id}::uuid`),
   ]);
   const rows = z.array(z.unknown()).parse(result.rows);
-  return rows.length ? publicProduct(rows[0]) : null;
+  return rows.length ? publicProduct(rows[0], now) : null;
 }

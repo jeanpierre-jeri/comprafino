@@ -1,4 +1,9 @@
-import { inspectIngestion, inspectOperations, freshnessHours } from "@comprafino/db";
+import {
+  coverageReport,
+  inspectIngestion,
+  inspectOperations,
+  freshnessHours,
+} from "@comprafino/db";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 export const metadata = {
@@ -19,10 +24,15 @@ export default async function IngestionPage() {
       </main>
     );
   }
+  let coverage: Awaited<ReturnType<typeof coverageReport>>;
   let data: Awaited<ReturnType<typeof inspectIngestion>>;
   let operations: Awaited<ReturnType<typeof inspectOperations>>;
   try {
-    [data, operations] = await Promise.all([inspectIngestion(), inspectOperations()]);
+    [data, operations, coverage] = await Promise.all([
+      inspectIngestion(),
+      inspectOperations(),
+      coverageReport(),
+    ]);
   } catch {
     return (
       <main className="p-8">
@@ -34,6 +44,41 @@ export default async function IngestionPage() {
   return (
     <main className="mx-auto max-w-5xl space-y-6 p-8">
       <h1 className="text-2xl font-semibold">Developer ingestion inspection</h1>
+      <section className="space-y-3">
+        <h2 className="text-xl">Known listing refresh</h2>
+        <p>
+          Known: {coverage.knownListings} · Public: {coverage.publicOffers} · Fresh:{" "}
+          {coverage.fresh} · Stale: {coverage.stale} · Too stale: {coverage.tooStale}
+        </p>
+        <p>
+          Public without category observation: {coverage.publicWithoutCategoryObservation} · Target
+          refreshable: {coverage.publicTargetRefreshable}
+        </p>
+        <p className="text-sm">{coverage.provenanceNote}</p>
+        {coverage.retailers.map((row) => (
+          <article key={row.retailer}>
+            <h3 className="font-semibold">{row.retailer}</h3>
+            <p>
+              Known: {row.known} · Public: {row.public} · Category observed:{" "}
+              {row.categoryObservedPublic} · Eligible: {row.eligible} · Stale: {row.stale} · Too
+              stale: {row.tooStale}
+            </p>
+            <p>
+              Latest targeted attempt: {formatTime(row.lastTargetedAttempt ?? undefined)} · Latest
+              outcomes: {JSON.stringify(row.targetedLatestOutcomes)}
+            </p>
+          </article>
+        ))}
+        <h3 className="font-semibold">Discovery demand and public coverage</h3>
+        <ul>
+          {coverage.demand.map((row) => (
+            <li key={row.query}>
+              {row.query} · {row.requests} requests · {row.currentlyMatchingPublicGroups} matching
+              public groups · {row.firstAcquisitionGroups} first-acquisition groups
+            </li>
+          ))}
+        </ul>
+      </section>
       <section className="space-y-4">
         <h2 className="text-xl">Retailer operations</h2>
         <p>

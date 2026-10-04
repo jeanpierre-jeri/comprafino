@@ -62,13 +62,19 @@ export default async function ProductPage({ params }: Props) {
           </h1>
           <p className="mt-4 text-muted-foreground">{packageSummary(product)}</p>
           <div className="mt-6 rounded-xl bg-primary/5 p-5">
-            <p className="text-sm font-medium">
-              Mejor precio observado{product.cheapestRetailers.length > 1 ? " · Empate" : ""}
-            </p>
-            <p className="mt-2 text-3xl font-semibold text-primary">
-              {formatPen(product.lowestPriceCents)}
-            </p>
-            <p className="mt-2">{product.cheapestRetailers.join(" y ")}</p>
+            {product.lowestPriceCents === null ? (
+              <p className="text-sm text-muted-foreground">Estamos actualizando este producto.</p>
+            ) : (
+              <>
+                <p className="text-sm font-medium">
+                  Mejor precio observado{product.cheapestRetailers.length > 1 ? " · Empate" : ""}
+                </p>
+                <p className="mt-2 text-3xl font-semibold text-primary">
+                  {formatPen(product.lowestPriceCents)}
+                </p>
+                <p className="mt-2">{product.cheapestRetailers.join(" y ")}</p>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -78,7 +84,10 @@ export default async function ProductPage({ params }: Props) {
         </h2>
         <ul className="mt-5 space-y-4">
           {product.offers.map((offer) => {
-            const best = offer.currentPriceCents === product.lowestPriceCents;
+            const best =
+              offer.freshness === "fresh" &&
+              offer.available !== false &&
+              offer.currentPriceCents === product.lowestPriceCents;
             const url = retailerProductUrl(offer);
             return (
               <li key={offer.retailerId}>
@@ -95,6 +104,19 @@ export default async function ProductPage({ params }: Props) {
                       </p>
                     )}
                     <ObservedAt date={offer.observedAt} />
+                    {offer.available === false ? (
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        No disponible en la última consulta.
+                      </p>
+                    ) : offer.freshness === "stale" ? (
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Precio pendiente de actualización.
+                      </p>
+                    ) : offer.freshness === "too-stale" ? (
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Último precio registrado · pendiente de actualización.
+                      </p>
+                    ) : null}
                   </div>
                   <div className="sm:text-right">
                     <p className="text-2xl font-semibold">{formatPen(offer.currentPriceCents)}</p>

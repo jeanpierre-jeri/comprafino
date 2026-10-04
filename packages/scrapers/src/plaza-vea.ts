@@ -1,3 +1,4 @@
+import { lookupVtex } from "./targeted.ts";
 import { z } from "zod";
 import { listingSchema, normalizeWhitespace, parsePenCents } from "@comprafino/core";
 import type { NormalizedRetailerListing } from "@comprafino/core";
@@ -98,6 +99,7 @@ export const plazaVeaCatalogUrl =
 export function createPlazaVeaAdapter(fetchPage: typeof fetch = fetch): SearchRetailerAdapter {
   return {
     retailer: "plaza-vea",
+    lookupListing: (known) => lookupVtex(fetchPage, plazaVeaCatalogUrl, known, parsePlazaVeaPage),
     async searchProducts(query, limit) {
       assertRetailerSearch(query, limit);
       const url = new URL(plazaVeaCatalogUrl);

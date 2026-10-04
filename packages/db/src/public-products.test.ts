@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 import {
-  publicProduct,
+  publicProduct as mapPublicProduct,
   productImageUrl,
   retailerProductUrl,
   getCanonicalProductComparison,
@@ -8,6 +8,8 @@ import {
 } from "./public-products.ts";
 import { createDatabase } from "./client.ts";
 
+const now = new Date("2026-10-03T10:00:00Z");
+const publicProduct = (raw: unknown) => mapPublicProduct(raw, now);
 const offer = {
   retailerId: "metro",
   retailerName: "Metro",
@@ -93,4 +95,23 @@ it("blank, short, excessive queries and malformed IDs return without querying Po
   for (const q of ["", " ", "a", "gloria".repeat(30)])
     expect(await searchCanonicalProducts(db, q)).toEqual([]);
   expect(await getCanonicalProductComparison(db, "not-a-uuid")).toBeNull();
+});
+
+it("preserves products with all stale prices and excludes stale or unavailable cheapest candidates", () => {
+  const old = { ...offer, observedAt: "2026-09-30T00:00:00Z", currentPriceCents: 1 };
+  const current = publicProduct({ ...raw, offers: [old, raw.offers[1]] });
+  expect(current.lowestPriceCents).toBe(620);
+  expect(current.cheapestRetailers).toEqual(["Plaza Vea"]);
+  expect(current.offers[0]!.freshness).toBe("too-stale");
+  const stale = publicProduct({
+    ...raw,
+    offers: [old, { ...old, retailerId: "plaza-vea", retailerName: "Plaza Vea" }],
+  });
+  expect(stale.lowestPriceCents).toBeNull();
+  expect(stale.cheapestRetailers).toEqual([]);
+  const unavailable = publicProduct({
+    ...raw,
+    offers: [{ ...offer, available: false }, raw.offers[1]],
+  });
+  expect(unavailable.lowestPriceCents).toBe(620);
 });

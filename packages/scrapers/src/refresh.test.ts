@@ -164,3 +164,31 @@ it("reruns both derived stages for unchanged ingestion and reports zero unnecess
   expect(t.normalize).toHaveBeenCalledTimes(2);
   expect(t.match).toHaveBeenCalledTimes(2);
 });
+
+it("runs targeted refresh after categories and derives exactly once even when categories fail", async () => {
+  const t = tasks();
+  t.ingest.mockRejectedValue(new Error("offline"));
+  const targeted = vi
+    .fn<NonNullable<RefreshTasks["targeted"]>>()
+    .mockResolvedValue({ observed: 1, failures: 0, requests: 1, changed: 0 });
+  const stages: string[] = [];
+  const result = await refreshCatalog({ ...t, targeted }, false, (event) => {
+    if (event.status === "started") stages.push(event.stage);
+  });
+  expect(stages).toEqual(["tottus", "plaza-vea", "metro", "targeted", "normalization", "matching"]);
+  expect(result.status).toBe("failed");
+  expect(t.normalize).toHaveBeenCalledOnce();
+  expect(t.match).toHaveBeenCalledOnce();
+});
+it("reports targeted partial failures while deriving successful observations once; dry-run skips targeted calls", async () => {
+  const t = tasks();
+  const targeted = vi
+    .fn<NonNullable<RefreshTasks["targeted"]>>()
+    .mockResolvedValue({ observed: 1, failures: 1, requests: 2, changed: 0 });
+  expect((await refreshCatalog({ ...t, targeted })).status).toBe("failed");
+  expect(t.normalize).toHaveBeenCalledOnce();
+  expect(t.match).toHaveBeenCalledOnce();
+  targeted.mockClear();
+  await refreshCatalog({ ...t, targeted }, true);
+  expect(targeted).not.toHaveBeenCalled();
+});

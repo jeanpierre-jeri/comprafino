@@ -12,8 +12,12 @@ import { evaluateIndependentAudit } from "./matching-independent.ts";
 import { evaluateMatching } from "./matching-evaluate.ts";
 import { evaluatePairs, persistMatching } from "./matching.ts";
 import type { MatchingSnapshot } from "./matching.ts";
+import type { Acquisition } from "./ingestion.ts";
 import { createIngestionStore, persistListings } from "./ingestion.ts";
-import { getCanonicalProductComparison, searchCanonicalProducts } from "./public-products.ts";
+import {
+  getCanonicalProductComparison as queryComparison,
+  searchCanonicalProducts as querySearch,
+} from "./public-products.ts";
 import { inspectOperations } from "./operations.ts";
 import {
   recordDiscoveryForSearch,
@@ -24,6 +28,18 @@ import {
 } from "./discovery.ts";
 import * as schema from "./schema.ts";
 
+import {
+  knownListings,
+  previewListingRefresh,
+  claimListingRefresh,
+  finishListingRefresh,
+} from "./listing-refresh.ts";
+import { coverageReport } from "./coverage.ts";
+const publicNow = new Date("2026-10-03T09:10:00Z");
+const getCanonicalProductComparison = (...args: Parameters<typeof queryComparison>) =>
+  queryComparison(args[0], args[1], publicNow);
+const searchCanonicalProducts = (...args: Parameters<typeof querySearch>) =>
+  querySearch(args[0], args[1], publicNow);
 // Never load .env or fall back to DATABASE_URL. Every write is confined to a
 // fresh schema; no public tables, retailer locks or live listing data are used.
 const testUrl = process.env.TEST_DATABASE_URL;
@@ -98,7 +114,9 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
   let created = false;
   async function query(text: string, params: string[] = []) {
     const results = await client.transaction([setPath(), client.query(text, params)]);
-    return results[1];
+    const rows = results[1];
+    if (!rows) throw new Error("Missing isolated query result");
+    return rows;
   }
   async function states(externalId: string) {
     return stateSchema.parse(
@@ -180,7 +198,7 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
         ),
       );
     expect(persisted).toEqual([{ current_price_cents: 1290, last_seen_at: listing.observedAt }]);
-  });
+  }, 30_000);
 
   it("keeps unchanged observations idempotent and closes/opens a changed price", async () => {
     const initial = observation("transition", 0);
@@ -650,7 +668,7 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
       autoMatchPrecision: 1,
     });
   }, 30_000);
-  async function seedPublicProduct(prefix: string, title: string) {
+  async function seedPublicProduct(prefix: string, title: string, acquisition?: Acquisition) {
     for (const retailer of ["metro", "plaza-vea"] as const) {
       const value = {
         ...observation(`${prefix}-${retailer}`, 0),
@@ -662,7 +680,7 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
             ? "https://www.metro.pe/milk/p"
             : "https://www.plazavea.com.pe/milk/p",
       };
-      await persistListings(db, retailer, [value]);
+      await persistListings(db, retailer, [value], acquisition);
       await persistCatalogNormalizations(db, await catalogRows(value.externalId));
     }
     const rows = await matchingRows([`${prefix}-metro`, `${prefix}-plaza-vea`]);
@@ -767,7 +785,8 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
     }
     for (const update of ["active=false", "available=false"]) {
       await query(`update retailer_listings set ${update} where id=$1::uuid`, [listingId]);
-      expect(await getCanonicalProductComparison(db, id)).toBeNull();
+      const filtered = await getCanonicalProductComparison(db, id);
+      expect(filtered?.cheapestRetailers.length ?? null).toBe(update === "active=false" ? null : 1);
       await query("update retailer_listings set active=true,available=true where id=$1::uuid", [
         listingId,
       ]);
@@ -908,4 +927,134 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
     await recordDiscoveryForSearch(db, "arroz popular", 0);
     expect(await previewDiscoveryQueries(db, 3)).toEqual([{ query: "arroz popular" }]);
   }, 30_000);
+  it("preserves first acquisition identity and records category coverage without price-state duplication", async () => {
+    await recordDiscoveryForSearch(db, "refresh controlled demand", 0);
+    const demand = (await inspectDiscovery(db)).queries.find(
+      (q) => q.normalizedQuery === "refresh controlled demand",
+    )!;
+    const value = { ...observation("70000001", 0), productId: "70000001" };
+    await persistListings(db, "tottus", [value], { source: "discovery", queryId: demand.id });
+    await persistListings(
+      db,
+      "tottus",
+      [{ ...value, observedAt: observation("unused", 1).observedAt }],
+      { source: "category" },
+    );
+    const listing = (await knownListings(db)).find((row) => row.externalId === value.externalId)!;
+    expect(listing.firstSeenVia).toBe("discovery");
+    expect(listing.lastCategoryObservedAt).toEqual(observation("unused", 1).observedAt);
+    expect(await states(value.externalId)).toHaveLength(1);
+    expect(
+      (
+        await query("select discovery_query_id from retailer_listings where id=$1", [listing.id])
+      )[0],
+    ).toMatchObject({ discovery_query_id: demand.id });
+  }, 30000);
+  it("targeted unchanged observations write zero states; a changed price opens exactly one", async () => {
+    const value = { ...observation("70000002", 0), productId: "70000002" };
+    await persistListings(db, "tottus", [value]);
+    expect(
+      await persistListings(
+        db,
+        "tottus",
+        [{ ...value, observedAt: observation("unused", 1).observedAt }],
+        { source: "targeted" },
+      ),
+    ).toMatchObject({ changed: 0 });
+    expect(
+      await persistListings(
+        db,
+        "tottus",
+        [{ ...value, currentPriceCents: 990, observedAt: observation("unused", 2).observedAt }],
+        { source: "targeted" },
+      ),
+    ).toMatchObject({ changed: 1 });
+    expect(await states(value.externalId)).toHaveLength(2);
+    expect(
+      (await knownListings(db)).find((row) => row.externalId === value.externalId)!
+        .lastCategoryObservedAt,
+    ).toEqual(value.observedAt);
+  }, 30000);
+  it("serializes targeted admission and preserves history/freshness on unavailable or missing observations", async () => {
+    const value = { ...observation("70000003", 0), productId: "70000003" };
+    await persistListings(db, "tottus", [value]);
+    const row = (await knownListings(db)).find((r) => r.externalId === value.externalId)!;
+    const at = observation("unused", 3).observedAt;
+    const claimed = await Promise.all([
+      claimListingRefresh(db, row, at),
+      claimListingRefresh(db, row, at),
+    ]);
+    expect(claimed.filter(Boolean)).toHaveLength(1);
+    await finishListingRefresh(db, row, at, "unavailable");
+    expect(
+      (
+        await query(
+          "select available,last_seen_at,targeted_status from retailer_listings where id=$1",
+          [row.id],
+        )
+      )[0],
+    ).toMatchObject({ available: false, targeted_status: "unavailable" });
+    expect((await knownListings(db)).find((r) => r.id === row.id)!.observedAt).toEqual(
+      value.observedAt,
+    );
+    expect(await states(value.externalId)).toHaveLength(1);
+    const current = (await knownListings(db)).find((r) => r.id === row.id)!;
+    const next = observation("unused", 4).observedAt;
+    expect(await claimListingRefresh(db, current, next)).toBe(true);
+    await persistListings(
+      db,
+      "tottus",
+      [{ ...value, observedAt: observation("unused", 5).observedAt }],
+      { source: "targeted" },
+    );
+    await finishListingRefresh(db, current, next, "unavailable");
+    // A newer successful observation supersedes the older negative result.
+    expect(
+      (await query("select available from retailer_listings where id=$1", [row.id]))[0],
+    ).toMatchObject({ available: null });
+    expect(await states(value.externalId)).toHaveLength(1);
+    const before = await states(value.externalId);
+    await finishListingRefresh(db, current, next, "not-found");
+    expect(await states(value.externalId)).toEqual(before);
+  }, 30000);
+  it("reports demand, category gaps and freshness without writes; retains all-stale product pages", async () => {
+    await recordDiscoveryForSearch(db, "leche gloria 750", 0);
+    await recordDiscoveryForSearch(db, "leche gloria 750", 0);
+    await recordDiscoveryForSearch(db, "leche gloria 750", 0);
+    const demandQuery = (await inspectDiscovery(db)).queries.find(
+      (q) => q.normalizedQuery === "leche gloria 750",
+    )!;
+    const { id, rows } = await seedPublicProduct(
+      "refresh-public",
+      "Leche Gloria Entera Bolsa 750ml",
+      { source: "discovery", queryId: demandQuery.id },
+    );
+    const old = new Date("2026-09-29T09:00:00Z");
+    await query(
+      "update retailer_listings set first_seen_at=$1::timestamptz,last_seen_at=$1::timestamptz where id=$2::uuid or id=$3::uuid",
+      [old.toISOString(), rows[0]!.id, rows[1]!.id],
+    );
+    const product = await getCanonicalProductComparison(db, id);
+    expect(product).not.toBeNull();
+    expect(product!.lowestPriceCents).toBeNull();
+    expect(product!.cheapestRetailers).toEqual([]);
+    const options = { limit: 1, dryRun: true, retailer: undefined, externalId: undefined };
+    const before = await query("select * from retailer_listings order by id");
+    await previewListingRefresh(db, options, publicNow);
+    const report = await coverageReport(db, publicNow);
+    expect(report.tooStale).toBeGreaterThanOrEqual(2);
+    expect(report.demand.find((q) => q.query === "leche gloria 750")).toMatchObject({
+      requests: 3,
+      firstAcquisitionGroups: 1,
+      currentlyMatchingPublicGroups: 1,
+    });
+    expect(report.publicWithoutCategoryObservation).toBeGreaterThanOrEqual(2);
+    expect(
+      report.recurringBrandsAndCategoriesOutsideObservedCoverage.find(
+        (row) => row.brand === "gloria",
+      ),
+    ).toMatchObject({ queries: 1 });
+    expect(report.demand.find((q) => q.query === "refresh controlled demand")?.requests).toBe(1);
+    expect(await query("select * from retailer_listings order by id")).toEqual(before);
+  }, 30000);
 });

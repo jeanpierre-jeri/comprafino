@@ -5,12 +5,20 @@ import type { NormalizedRetailerListing, RetailerId } from "@comprafino/core";
 import { createDatabase } from "./client.ts";
 import { ingestionRuns, retailerListings } from "./schema.ts";
 
+export interface Acquisition {
+  source: "category" | "discovery" | "targeted";
+  queryId?: string;
+}
+
 type Database = ReturnType<typeof createDatabase>;
 /** Entire bounded sample commits atomically. Row lock serializes writers for a retailer. */
 export function persistenceStatements(
   retailer: RetailerId,
   input: readonly NormalizedRetailerListing[],
+  acquisition: Acquisition = { source: "category" },
 ) {
+  if (acquisition.source === "discovery") z.uuid().parse(acquisition.queryId);
+  const origin = acquisition.source === "targeted" ? "unknown" : acquisition.source;
   const listings = input.map((listing) => listingSchema.parse(listing));
   if (listings.some((listing) => listing.retailer !== retailer))
     throw new Error("Mixed retailers in ingestion");
@@ -43,9 +51,10 @@ export function persistenceStatements(
     sql`select id from retailers where id = ${retailer} for update`,
     sql`
       insert into retailer_listings (retailer_id, external_id, product_id, title, url, image_url,
-        current_price_cents, regular_price_cents, currency, price_unit, available, source_brand, source_unit_multiplier, package_text, category, first_seen_at, last_seen_at)
+        current_price_cents, regular_price_cents, currency, price_unit, available, source_brand, source_unit_multiplier, package_text, category, first_seen_at, last_seen_at, first_seen_via, discovery_query_id, last_category_observed_at)
       select retailer_id, external_id, product_id, title, url, image_url, current_price_cents,
-        regular_price_cents, currency, price_unit, available, source_brand, source_unit_multiplier, package_text, category, observed_at, observed_at
+        regular_price_cents, currency, price_unit, available, source_brand, source_unit_multiplier, package_text, category, observed_at, observed_at,
+        ${origin}, ${acquisition.queryId ?? null}::uuid, case when ${acquisition.source}='category' then observed_at else null end
       from jsonb_to_recordset(${payload}::jsonb) as x(retailer_id text, external_id text, product_id text,
         title text, url text, image_url text, current_price_cents integer, regular_price_cents integer,
         currency text, price_unit text, available boolean, source_brand text, source_unit_multiplier numeric, package_text text, category text, observed_at timestamptz)
@@ -54,7 +63,8 @@ export function persistenceStatements(
         current_price_cents = excluded.current_price_cents, regular_price_cents = excluded.regular_price_cents,
         currency = excluded.currency, price_unit = excluded.price_unit, available = excluded.available,
         source_brand = excluded.source_brand, source_unit_multiplier = excluded.source_unit_multiplier,
-        package_text = excluded.package_text, category = excluded.category, last_seen_at = excluded.last_seen_at, active = true
+        package_text = excluded.package_text, category = excluded.category, last_seen_at = excluded.last_seen_at, active = true,
+        last_category_observed_at = coalesce(excluded.last_category_observed_at, retailer_listings.last_category_observed_at)
       where retailer_listings.last_seen_at < excluded.last_seen_at returning id, (xmax=0) as inserted`,
     sql`
       update price_history h set valid_until = l.last_seen_at from retailer_listings l
@@ -73,8 +83,9 @@ export async function persistListings(
   db: Database,
   retailer: RetailerId,
   input: readonly NormalizedRetailerListing[],
+  acquisition: Acquisition = { source: "category" },
 ) {
-  const { persisted, changed } = await persistListingsDetailed(db, retailer, input);
+  const { persisted, changed } = await persistListingsDetailed(db, retailer, input, acquisition);
   return { persisted, changed };
 }
 /** Same atomic ingestion batch, exposing insert counts for discovery metrics. */
@@ -82,9 +93,10 @@ export async function persistListingsDetailed(
   db: Database,
   retailer: RetailerId,
   input: readonly NormalizedRetailerListing[],
+  acquisition: Acquisition = { source: "category" },
 ) {
   if (!input.length) return { persisted: 0, changed: 0, created: 0 };
-  const statements = persistenceStatements(retailer, input);
+  const statements = persistenceStatements(retailer, input, acquisition);
   const results = await db.batch([
     db.execute(statements[0]),
     db.execute(statements[1]),

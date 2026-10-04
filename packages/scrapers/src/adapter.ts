@@ -1,4 +1,5 @@
 import type { NormalizedRetailerListing, RetailerId } from "@comprafino/core";
+import type { TargetedRetailerAdapter } from "./targeted.ts";
 
 export interface RetailerAdapter {
   readonly retailer: RetailerId;
@@ -7,8 +8,8 @@ export interface RetailerAdapter {
   ): Promise<{ listings: NormalizedRetailerListing[]; discovered: number }>;
 }
 
-/** Search reuses the ingestion listing contract, with an independently small bound. */
-export interface SearchRetailerAdapter extends RetailerAdapter {
+/** Search and targeted lookup reuse the ingestion listing contract. */
+export interface SearchRetailerAdapter extends RetailerAdapter, TargetedRetailerAdapter {
   searchProducts(
     query: string,
     limit: number,

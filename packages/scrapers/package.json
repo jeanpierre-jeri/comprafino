@@ -13,7 +13,8 @@
     "scrape:plaza-vea": "node --env-file-if-exists=../../.env --experimental-strip-types src/cli.ts --retailer=plaza-vea",
     "scrape:metro": "node --env-file-if-exists=../../.env --experimental-strip-types src/cli.ts --retailer=metro",
     "refresh:catalog": "node --env-file-if-exists=../../.env --experimental-strip-types src/refresh-cli.ts",
-    "discover:catalog": "node --env-file-if-exists=../../.env --experimental-strip-types src/discovery-cli.ts"
+    "discover:catalog": "node --env-file-if-exists=../../.env --experimental-strip-types src/discovery-cli.ts",
+    "refresh:listings": "node --env-file-if-exists=../../.env --experimental-strip-types src/listing-refresh-cli.ts"
   },
   "dependencies": {
     "@comprafino/core": "workspace:*",

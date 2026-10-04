@@ -3,6 +3,7 @@ import type { RetailerId } from "@comprafino/core";
 
 export interface RefreshTasks {
   ingest(retailer: RetailerId): Promise<{ fetched: number; persisted: number; changed: number }>;
+  targeted?(): Promise<{ observed: number; failures: number; requests: number; changed: number }>;
   normalize(): Promise<{ processed: number; changed: number }>;
   match(): Promise<{ candidates: number; associationsChanged: number; productsChanged: number }>;
 }
@@ -11,7 +12,7 @@ type Outcome<T> =
   | { status: "failed"; error: string }
   | { status: "skipped" };
 export interface RefreshEvent {
-  stage: RetailerId | "normalization" | "matching" | "overall";
+  stage: RetailerId | "targeted" | "normalization" | "matching" | "overall";
   status: "started" | "success" | "failed" | "skipped";
   at: string;
 }
@@ -38,11 +39,33 @@ export async function refreshCatalog(
       event(retailer, "failed");
     }
   }
+  let targeted: Outcome<{ observed: number; failures: number; requests: number; changed: number }> =
+    { status: "skipped" };
+  if (!dryRun && tasks.targeted) {
+    event("targeted", "started");
+    try {
+      targeted = { status: "success", result: await tasks.targeted() };
+    } catch {
+      targeted = {
+        status: "failed",
+        error: "Targeted refresh failed; inspect listing attempt metadata.",
+      };
+    }
+    event(
+      "targeted",
+      targeted.status === "success" && targeted.result.failures > 0 ? "failed" : targeted.status,
+    );
+  }
   let normalization: Outcome<Awaited<ReturnType<RefreshTasks["normalize"]>>> = {
     status: "skipped",
   };
   let matching: Outcome<Awaited<ReturnType<RefreshTasks["match"]>>> = { status: "skipped" };
-  if (!dryRun && retailers.some((r) => r.outcome.status === "success")) {
+  if (
+    !dryRun &&
+    (retailers.some((r) => r.outcome.status === "success") ||
+      (targeted.status === "success" && targeted.result.observed > 0) ||
+      targeted.status === "failed")
+  ) {
     event("normalization", "started");
     try {
       normalization = { status: "success", result: await tasks.normalize() };
@@ -69,12 +92,22 @@ export async function refreshCatalog(
   event("matching", matching.status);
   const status =
     retailers.every((r) => r.outcome.status === "success") &&
+    targeted.status !== "failed" &&
+    !(targeted.status === "success" && targeted.result.failures > 0) &&
     normalization.status !== "failed" &&
     matching.status !== "failed"
       ? "success"
       : "failed";
   event("overall", status);
-  return { dryRun, retailers, normalization, matching, status, durationMs: Date.now() - startedAt };
+  return {
+    dryRun,
+    retailers,
+    targeted,
+    normalization,
+    matching,
+    status,
+    durationMs: Date.now() - startedAt,
+  };
 }
 export function parseRefreshOptions(args: readonly string[]) {
   const options = args.filter((arg) => arg !== "--");

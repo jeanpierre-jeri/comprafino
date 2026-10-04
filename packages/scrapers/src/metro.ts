@@ -1,3 +1,4 @@
+import { lookupVtex } from "./targeted.ts";
 import { z } from "zod";
 import { listingSchema, normalizeWhitespace, parsePenCents } from "@comprafino/core";
 import type { NormalizedRetailerListing } from "@comprafino/core";
@@ -106,6 +107,7 @@ export const metroCatalogUrl = "https://www.metro.pe/api/catalog_system/pub/prod
 export function createMetroAdapter(fetchPage: typeof fetch = fetch): SearchRetailerAdapter {
   return {
     retailer: "metro",
+    lookupListing: (known) => lookupVtex(fetchPage, metroCatalogUrl, known, parseMetroPage),
     async searchProducts(query, limit) {
       assertRetailerSearch(query, limit);
       const url = new URL(metroCatalogUrl);
