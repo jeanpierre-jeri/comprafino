@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { listingSchema, normalizeWhitespace, parsePenCents } from "@comprafino/core";
 import type { NormalizedRetailerListing } from "@comprafino/core";
-import type { RetailerAdapter } from "./adapter.ts";
+import type { SearchRetailerAdapter } from "./adapter.ts";
+import { assertRetailerSearch, fetchVtexSearch } from "./search.ts";
 
 const sourcePage = z.array(
   z.object({
@@ -102,9 +103,20 @@ export function parseMetroPage(raw: unknown, observedAt: Date) {
 
 export const metroCatalogUrl = "https://www.metro.pe/api/catalog_system/pub/products/search";
 
-export function createMetroAdapter(fetchPage: typeof fetch = fetch): RetailerAdapter {
+export function createMetroAdapter(fetchPage: typeof fetch = fetch): SearchRetailerAdapter {
   return {
     retailer: "metro",
+    async searchProducts(query, limit) {
+      assertRetailerSearch(query, limit);
+      const url = new URL(metroCatalogUrl);
+      url.searchParams.set("ft", query);
+      url.searchParams.set("sc", "1");
+      url.searchParams.set("_from", "0");
+      url.searchParams.set("_to", "19");
+      // VTEX expects URI-encoded whitespace, rather than form-style plus separators.
+      url.search = url.search.replaceAll("+", "%20");
+      return fetchVtexSearch(fetchPage, url, parseMetroPage, limit);
+    },
     async fetchListings(limit) {
       if (!Number.isInteger(limit) || limit < 1 || limit > 500)
         throw new Error("Limit must be an integer from 1 to 500");

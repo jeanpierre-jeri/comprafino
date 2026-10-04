@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { after } from "next/server";
 import {
   createDatabase,
   formatPen,
   maximumSearchLength,
   searchCanonicalProducts,
   usefulSearchQuery,
+  discoveryQueryForSearch,
+  recordDiscoveryForSearch,
 } from "@comprafino/db";
 import type { ProductComparison } from "@comprafino/db";
 import { SearchForm } from "../../components/search-form";
@@ -25,9 +28,21 @@ export default async function SearchPage({
   let failed = false;
   if (usefulSearchQuery(query)) {
     try {
-      products = await searchCanonicalProducts(createDatabase(), query);
-    } catch (error) {
-      console.error("Public search database query failed", error);
+      const db = createDatabase();
+      products = await searchCanonicalProducts(db, query);
+      if (discoveryQueryForSearch(query, products.length)) {
+        // Database demand recording only, after the response. Retailer work is
+        // exclusively performed by the scheduled command, never by this route.
+        after(async () => {
+          try {
+            await recordDiscoveryForSearch(db, query, products.length);
+          } catch {
+            console.error("Discovery demand recording failed.");
+          }
+        });
+      }
+    } catch {
+      console.error("Public search database query failed.");
       failed = true;
     }
   }
@@ -46,8 +61,8 @@ export default async function SearchPage({
           <div className="rounded-xl border p-6">
             <h2 className="text-xl font-semibold">No encontramos ese producto todavía.</h2>
             <p className="mt-2 text-muted-foreground">
-              Comparamos un catálogo inicial de Tottus, Plaza Vea y Metro. Prueba con otra marca o
-              producto.
+              Tomamos en cuenta las búsquedas sin resultados para ampliar el catálogo. Prueba con
+              otra marca o producto.
             </p>
           </div>
         ) : (

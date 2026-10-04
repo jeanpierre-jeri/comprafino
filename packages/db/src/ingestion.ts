@@ -1,4 +1,5 @@
 import { desc, eq, sql } from "drizzle-orm";
+import { z } from "zod";
 import { listingSchema } from "@comprafino/core";
 import type { NormalizedRetailerListing, RetailerId } from "@comprafino/core";
 import { createDatabase } from "./client.ts";
@@ -54,7 +55,7 @@ export function persistenceStatements(
         currency = excluded.currency, price_unit = excluded.price_unit, available = excluded.available,
         source_brand = excluded.source_brand, source_unit_multiplier = excluded.source_unit_multiplier,
         package_text = excluded.package_text, category = excluded.category, last_seen_at = excluded.last_seen_at, active = true
-      where retailer_listings.last_seen_at < excluded.last_seen_at returning id`,
+      where retailer_listings.last_seen_at < excluded.last_seen_at returning id, (xmax=0) as inserted`,
     sql`
       update price_history h set valid_until = l.last_seen_at from retailer_listings l
       where h.listing_id = l.id and h.valid_until is null and ${scope}
@@ -73,7 +74,16 @@ export async function persistListings(
   retailer: RetailerId,
   input: readonly NormalizedRetailerListing[],
 ) {
-  if (!input.length) return { persisted: 0, changed: 0 };
+  const { persisted, changed } = await persistListingsDetailed(db, retailer, input);
+  return { persisted, changed };
+}
+/** Same atomic ingestion batch, exposing insert counts for discovery metrics. */
+export async function persistListingsDetailed(
+  db: Database,
+  retailer: RetailerId,
+  input: readonly NormalizedRetailerListing[],
+) {
+  if (!input.length) return { persisted: 0, changed: 0, created: 0 };
   const statements = persistenceStatements(retailer, input);
   const results = await db.batch([
     db.execute(statements[0]),
@@ -81,7 +91,12 @@ export async function persistListings(
     db.execute(statements[2]),
     db.execute(statements[3]),
   ]);
-  return { persisted: results[1].rows.length, changed: results[3].rows.length };
+  const rows = z.array(z.object({ inserted: z.boolean() })).parse(results[1].rows);
+  return {
+    persisted: rows.length,
+    changed: results[3].rows.length,
+    created: rows.filter((r) => r.inserted).length,
+  };
 }
 export function createIngestionStore(db = createDatabase()) {
   return {

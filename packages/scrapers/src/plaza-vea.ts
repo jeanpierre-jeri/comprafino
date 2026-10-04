@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { listingSchema, normalizeWhitespace, parsePenCents } from "@comprafino/core";
 import type { NormalizedRetailerListing } from "@comprafino/core";
-import type { RetailerAdapter } from "./adapter.ts";
+import type { SearchRetailerAdapter } from "./adapter.ts";
+import { assertRetailerSearch, fetchVtexSearch } from "./search.ts";
 
 const sourcePage = z.array(
   z.object({
@@ -94,9 +95,20 @@ export function parsePlazaVeaPage(raw: unknown, observedAt: Date) {
 export const plazaVeaCatalogUrl =
   "https://www.plazavea.com.pe/api/catalog_system/pub/products/search";
 
-export function createPlazaVeaAdapter(fetchPage: typeof fetch = fetch): RetailerAdapter {
+export function createPlazaVeaAdapter(fetchPage: typeof fetch = fetch): SearchRetailerAdapter {
   return {
     retailer: "plaza-vea",
+    async searchProducts(query, limit) {
+      assertRetailerSearch(query, limit);
+      const url = new URL(plazaVeaCatalogUrl);
+      url.searchParams.set("ft", query);
+      url.searchParams.set("sc", "1");
+      url.searchParams.set("_from", "0");
+      url.searchParams.set("_to", "19");
+      // VTEX expects URI-encoded whitespace, rather than form-style plus separators.
+      url.search = url.search.replaceAll("+", "%20");
+      return fetchVtexSearch(fetchPage, url, parsePlazaVeaPage, limit);
+    },
     async fetchListings(limit) {
       if (!Number.isInteger(limit) || limit < 1 || limit > 500)
         throw new Error("Limit must be an integer from 1 to 500");

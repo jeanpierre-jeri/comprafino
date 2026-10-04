@@ -1,6 +1,6 @@
 # Architecture
 
-CompraFino starts serverless first to reduce idle costs and operational work while validating data. This is the intended deployment; the developer has configured Neon, while the web application and scheduled ingestion are not deployed. Bounded Tottus, Plaza Vea and Metro ingestion is implemented:
+CompraFino starts serverless first to reduce idle costs and operational work while validating data. The existing Neon/Vercel/GitHub Actions deployment is complete in the developer-provided Milestones 0–5 baseline. Bounded Tottus, Plaza Vea and Metro ingestion is implemented:
 
 ```mermaid
 flowchart LR
@@ -18,7 +18,7 @@ The homepage is static and requires no database. Public search and product compa
 - `packages/ui`: reusable shadcn components using Base UI, shared Tailwind 4 theme and explicit source scanning. Both shadcn configs use `base-nova`. No domain logic.
 - `packages/core`: pure framework-independent logic, without React, Next.js, browser or database dependencies.
 - `packages/db`: PostgreSQL schema home, reviewed migrations, URL validation and lazy Drizzle clients. Importing does not connect or require credentials. Neon HTTP suits stateless queries and batched transactions; interactive transactions would justify revisiting the driver.
-- `packages/scrapers`: retailer adapters and ingestion orchestration, currently native-fetch Tottus hydration JSON and Plaza Vea/Metro public VTEX JSON. Fetching/parsing is independent of persistence; dry-run never opens a database.
+- `packages/scrapers`: retailer adapters and ingestion orchestration, currently native-fetch Tottus hydration JSON and Plaza Vea/Metro public VTEX JSON. Fetching/parsing is independent of persistence. Ingestion/refresh dry-run never opens a database; discovery dry-run reads database demand without writes or retailer calls.
 
 Current dependency graph: `web → ui, db`; `scrapers → core, db`; `db → core`. Core owns the shared validated listing boundary and exact money normalization. Dedicated workers can replace or supplement GitHub Actions without rewriting framework-independent domain logic. Retailer-specific behavior remains isolated.
 
@@ -61,3 +61,7 @@ The read-only `/dev/matching` Server Component is blocked in production. Standal
 ## Scheduled refresh ownership
 
 `packages/scrapers/src/refresh-cli.ts` wires the existing adapters and DB APIs; `refresh.ts` isolates retailer failures and orders downstream work. GitHub Actions only supplies scheduling/environment/concurrency. Core owns operational freshness thresholds; db reads independent latest attempts/successes; the existing development ingestion page renders them. Failed fetches preserve prior observations through existing atomic persistence. Public queries continue reading persisted canonical offers without dynamic scraping/matching. No new schema, dependency or service is required. See [operations](operations.md) for scope, failure and validation evidence.
+
+## Search-driven discovery ownership
+
+Public zero-result search uses Next.js `after` only for a validated database demand upsert, after the response. Core owns conservative query normalization/limits. DB owns deduplication, atomic counts, a locked UTC daily budget and 24-hour claim cooldown. Scrapers own single-page public text search and the discovery processor, reusing existing ingestion statements and complete normalization/matching APIs. GitHub Actions schedules small batches independently of public requests. `/dev/discovery` provides read-only demand inspection and is blocked in production. Query text never becomes canonical identity; no matcher logic or new infrastructure is introduced. See [discovery](discovery.md) for schema, exact admission/retry policy and validation.

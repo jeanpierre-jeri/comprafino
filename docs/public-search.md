@@ -46,7 +46,7 @@ Responsive search cards and vertically stacked comparison rows work without a wi
 
 Images use existing persisted URLs, selected by lexical retailer ID among valid sources independently of prices. `next/image` permits only the observed Tottus, Plaza Vea and Metro image hosts and their required product-image paths, without custom ports or redirect following. VTEX version query strings remain allowed because observed URLs use them. Missing/failed images show a text fallback; no scraping/processing pipeline is added.
 
-No results: **“No encontramos ese producto todavía.”** The UI explains the limited initial catalog; no fabricated alternative/review candidate is shown. Database failures produce a generic public message; detailed errors stay server-side. Product metadata uses the saved display name. `/dev/ingestion`, `/dev/catalog` and `/dev/matching` remain production-blocked, with their existing browser regression tests retained.
+No results: **“No encontramos ese producto todavía.”** The UI says zero-result demand helps expand coverage, without promising availability. Valid zero-result searches schedule only a database demand upsert after the response; retailer work occurs later in GitHub Actions. No fabricated alternative/review candidate is shown. Database failures produce a generic public message and fixed safe server logs. Product metadata uses the saved display name. `/dev/ingestion`, `/dev/catalog` and `/dev/matching` remain production-blocked, with their existing browser regression tests retained.
 
 ## Real-data verification — October 3, 2026
 
@@ -99,3 +99,7 @@ After local build/browser validation closes Milestone 4, prioritize scheduled co
 ## Milestone 5 operations follow-up
 
 Public search is complete in the current user-provided baseline (`8cd5689`); earlier pending notes above are historical. [Operations](operations.md) now provides offline twice-daily bounded refresh and developer monitoring. Public queries/UI and actual observation timestamps are unchanged. A retailer-level stale message is deferred because a successful bounded attempt does not refresh every retained listing; operational monitoring remains outside the single-batch public query. Last-known-good offers stay visible with their actual timestamps.
+
+## Milestone 6 discovery follow-up
+
+The public search query and canonical eligibility are unchanged. A successful zero-result query meeting the stricter 3–80-character [discovery boundary](discovery.md) schedules a deduplicated demand upsert with Next.js `after`; the response never waits for retailer requests or processing. Existing-result and invalid searches create no demand. `/dev/discovery` adds read-only developer inspection and production-404 smoke coverage. Discovery runs the existing offline matcher and never associates products from query text.

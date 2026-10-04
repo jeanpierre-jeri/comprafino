@@ -1,6 +1,6 @@
 # Catalog refresh and operational freshness
 
-Milestone 5 implements bounded scheduled refresh and developer freshness inspection. Live refresh/idempotency validation is complete. Production build and browser confirmation remain pending because this agent environment cannot bind Turbopack's CSS worker port. Changes must stay staged until fresh local `pnpm build` and `pnpm test:e2e` pass; no deployment or active GitHub schedule is claimed.
+Milestone 5's bounded refresh and operational freshness are complete and deployed in the developer-provided baseline. Historical validation notes below describe that earlier implementation run. Milestone 6 adds a separate [discovery workflow](discovery.md), sharing refresh concurrency and the existing database secret. Its new build/E2E gate and remote activation remain pending.
 
 ## Architecture and coverage
 
@@ -112,3 +112,7 @@ During the first integration run, the existing harness's batch-only search-path 
 Final validation: `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, all **317 unit tests** (18 new), and all **16 PostgreSQL integration tests** (one new) pass. The corrected PostgreSQL suite uses explicit one-off `TEST_DATABASE_URL` injection and drops its isolated schema. A final live read confirms the same history digest and the legitimate second-refresh run IDs, with all three retailers healthy. Fake-task partial-failure testing passes: Plaza Vea fails, Tottus/Metro and downstream stages succeed, and the aggregate status remains failed. Workflow YAML parsed successfully and its required cron/setup/frozen-install/concurrency/secret/command structure was verified; ordinary CI contains no scheduled scrape command.
 
 `pnpm build` fails on the known Turbopack CSS-worker port bind (`Operation not permitted`); the default Next.js configuration is unchanged. `pnpm test:e2e` was attempted but its production web server could not start, and no successful production build exists. Fresh local production build and Chromium E2E confirmation are required before committing. Browser rendering of the changed developer page remains unverified in this environment. Changes are staged with no commit/push or schedule activation. Catalog expansion is the next proposed milestone after that gate and initial scheduled-run verification; do not expand automatically.
+
+## Discovery operations
+
+Run `pnpm discover:catalog -- --dry-run --limit=3` to inspect pending demand without writes or source calls; normal mode removes `--dry-run`. Apply reviewed migration `0003_fair_kylun.sql` before deploying the public search change. Cron `43 0,6,12,18 * * *` uses ten-query batches, shared noncanceling refresh concurrency, a 24-hour per-query claim cooldown and a database-enforced thirty-attempt UTC daily cap. Source failures preserve successful batches and report partial/nonzero failure. `/dev/discovery` is development-only. Complete [discovery documentation](discovery.md) covers privacy, ranking, safe errors, interrupted claims and catalog/freshness bounds. No workflow is triggered by an individual public request.

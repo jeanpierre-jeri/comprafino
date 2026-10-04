@@ -10,8 +10,8 @@ export const refreshCoverage = {
   metro: { dairy: 100 },
 } as const;
 export function combineTottusCoverage(
-  meat = createTottusAdapter(),
-  dairy = createTottusAdapter(undefined, "dairy"),
+  meat: RetailerAdapter = createTottusAdapter(),
+  dairy: RetailerAdapter = createTottusAdapter(undefined, "dairy"),
 ): RetailerAdapter {
   return {
     retailer: "tottus",

@@ -1,0 +1,26 @@
+name: Catalog discovery
+on:
+  schedule:
+    - cron: "43 0,6,12,18 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  # Share refresh's group to keep both full-scope pipelines from overlapping.
+  group: comprafino-catalog-refresh
+  cancel-in-progress: false
+jobs:
+  discovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: pnpm/action-setup@v6.1.0
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: "24"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm discover:catalog -- --limit=10
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

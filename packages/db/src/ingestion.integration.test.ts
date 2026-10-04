@@ -15,6 +15,13 @@ import type { MatchingSnapshot } from "./matching.ts";
 import { createIngestionStore, persistListings } from "./ingestion.ts";
 import { getCanonicalProductComparison, searchCanonicalProducts } from "./public-products.ts";
 import { inspectOperations } from "./operations.ts";
+import {
+  recordDiscoveryForSearch,
+  claimDiscoveryQueries,
+  previewDiscoveryQueries,
+  finishDiscoveryQuery,
+  inspectDiscovery,
+} from "./discovery.ts";
 import * as schema from "./schema.ts";
 
 // Never load .env or fall back to DATABASE_URL. Every write is confined to a
@@ -799,5 +806,106 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
     expect(await searchCanonicalProducts(db, "gloria fresa 120")).toEqual([]);
     expect(await getCanonicalProductComparison(db, randomUUID())).toBeNull();
     expect(await getCanonicalProductComparison(db, "invalid")).toBeNull();
+  }, 30_000);
+  async function resetDiscovery() {
+    await query("delete from discovery_queries");
+    await query("delete from discovery_daily_budget");
+  }
+  it("discovery safely deduplicates concurrent demand and increments counts", async () => {
+    await resetDiscovery();
+    await Promise.all(
+      Array.from({ length: 12 }, (_, i) =>
+        recordDiscoveryForSearch(db, i % 2 ? " arroz  costeño " : "ARROZ COSTEÑO", 0),
+      ),
+    );
+    const { queries } = await inspectDiscovery(db);
+    expect(queries).toHaveLength(1);
+    expect(queries[0]?.normalizedQuery).toBe("arroz costeño");
+    expect(queries[0]?.requestCount).toBe(12);
+    expect(await recordDiscoveryForSearch(db, "aceite primor", 1)).toBe(false);
+    expect(await recordDiscoveryForSearch(db, "??", 0)).toBe(false);
+    expect((await inspectDiscovery(db)).queries).toHaveLength(1);
+  }, 30_000);
+  it("discovery preserves 24h cooldown despite demand, expires at the boundary and rejects stale completion", async () => {
+    await resetDiscovery();
+    await recordDiscoveryForSearch(db, "aceite primor", 0);
+    const [claim] = await claimDiscoveryQueries(db, 1);
+    if (!claim) throw new Error("Expected claim");
+    await finishDiscoveryQuery(db, claim, { status: "no_results", resultCount: 0, error: null });
+    expect((await inspectDiscovery(db)).queries[0]?.status).toBe("no_results");
+    await recordDiscoveryForSearch(db, "ACEITE PRIMOR", 0);
+    expect(await claimDiscoveryQueries(db, 30)).toEqual([]);
+    expect(await previewDiscoveryQueries(db, 30)).toEqual([]);
+    expect((await inspectDiscovery(db)).queries[0]?.requestCount).toBe(2);
+    await query(
+      "update discovery_queries set last_attempted_at=statement_timestamp()-interval '24 hours', next_eligible_at=statement_timestamp() where id=$1",
+      [claim.id],
+    );
+    const [retry] = await claimDiscoveryQueries(db, 1);
+    if (!retry) throw new Error("Expected retry");
+    await finishDiscoveryQuery(db, claim, { status: "completed", resultCount: 1, error: null });
+    expect((await inspectDiscovery(db)).queries[0]?.status).toBe("processing");
+    await finishDiscoveryQuery(db, retry, {
+      status: "failed",
+      resultCount: 0,
+      error: "Retailer discovery failed.",
+    });
+    expect((await inspectDiscovery(db)).queries[0]?.status).toBe("failed");
+  }, 30_000);
+  it("discovery shares the UTC daily cap across concurrent processors and retains prior-day accounting", async () => {
+    await resetDiscovery();
+    await Promise.all(
+      Array.from({ length: 4 }, (_, i) => recordDiscoveryForSearch(db, `arroz ${i}`, 0)),
+    );
+    await query(
+      "insert into discovery_daily_budget(day,processed) values ((statement_timestamp() at time zone 'UTC')::date,29),((statement_timestamp() at time zone 'UTC')::date-1,30)",
+    );
+    const claims = await Promise.all([claimDiscoveryQueries(db, 3), claimDiscoveryQueries(db, 3)]);
+    expect(claims.flat()).toHaveLength(1);
+    expect((await inspectDiscovery(db)).stats.processedToday).toBe(30);
+    expect(await claimDiscoveryQueries(db, 30)).toEqual([]);
+    expect(await previewDiscoveryQueries(db, 30)).toEqual([]);
+    await expect(query("update discovery_daily_budget set processed=31")).rejects.toThrow(
+      /discovery_daily_cap/u,
+    );
+  }, 30_000);
+  it("discovery prioritizes popularity then oldest eligibility and dry-run performs no writes", async () => {
+    await resetDiscovery();
+    await recordDiscoveryForSearch(db, "arroz viejo", 0);
+    await recordDiscoveryForSearch(db, "arroz nuevo", 0);
+    await recordDiscoveryForSearch(db, "arroz popular", 0);
+    await recordDiscoveryForSearch(db, "ARROZ POPULAR", 0);
+    await query(
+      "update discovery_queries set next_eligible_at=statement_timestamp()-interval '2 hours' where normalized_query='arroz viejo'",
+    );
+    const before = await query("select * from discovery_queries order by id");
+    expect(await previewDiscoveryQueries(db, 3)).toEqual([
+      { query: "arroz popular" },
+      { query: "arroz viejo" },
+      { query: "arroz nuevo" },
+    ]);
+    expect(await query("select * from discovery_queries order by id")).toEqual(before);
+    expect(await query("select * from discovery_daily_budget")).toEqual([]);
+    const claims = await claimDiscoveryQueries(db, 3);
+    expect(claims.map((c) => c.query).sort()).toEqual([
+      "arroz nuevo",
+      "arroz popular",
+      "arroz viejo",
+    ]);
+    const popular = claims.find((c) => c.query === "arroz popular");
+    if (!popular) throw new Error("Expected claim");
+    await finishDiscoveryQuery(db, popular, { status: "completed", resultCount: 2, error: null });
+    await query(
+      "update discovery_queries set last_attempted_at=statement_timestamp()-interval '25 hours', next_eligible_at=statement_timestamp()-interval '1 hour' where id=$1",
+      [popular.id],
+    );
+    // No new demand since the successful attempt: keep completed work dormant.
+    await query(
+      "update discovery_queries set first_requested_at=statement_timestamp()-interval '2 days',last_requested_at=statement_timestamp()-interval '2 days' where id=$1",
+      [popular.id],
+    );
+    expect(await previewDiscoveryQueries(db, 3)).toEqual([]);
+    await recordDiscoveryForSearch(db, "arroz popular", 0);
+    expect(await previewDiscoveryQueries(db, 3)).toEqual([{ query: "arroz popular" }]);
   }, 30_000);
 });

@@ -1,6 +1,6 @@
 # Roadmap
 
-Milestones 0–3 are complete in the committed baseline (`9d104b1`). The expanded 351-listing dataset has 28 audited canonical groups; the unchanged matcher achieved 34/34 observed automatic precision in the independent sample. Milestone 4 public search and ordinary-price comparison are implemented and data-tested, pending fresh local production build/browser confirmation. Automated freshness and broader consumer capabilities remain planned.
+Milestones 0–5 are complete and deployed in the developer-provided baseline (`fb9c616`). Milestone 6 implements search-driven catalog discovery, with measured validation and the local build/E2E gate described in [discovery](discovery.md). Historical pending notes in earlier milestone sections refer to their original agent runs.
 
 ## Milestone 0 — Foundation
 
@@ -64,11 +64,15 @@ Implemented: shared local refresh command and no-mutation dry-run, fixed existin
 
 Verified: two real refreshes (85.099s / 45.701s); 350 persisted observations each; one initial new Tottus state within the existing dairy sample, then zero new states; two initial normalization writes, then zero; zero matching writes both times. Retained catalog is 352 rows, with identical complete history digest across the repeat. Deterministic failure/freshness tests and PostgreSQL lifecycle/isolation coverage are included. See [operations](operations.md) for complete evidence and final validation results.
 
-Pending: fresh local `pnpm build` / `pnpm test:e2e` confirmation due to the known Turbopack worker-port restriction. Stage and wait before committing; Milestone 5 is not complete until that gate passes. Remote schedule activation and notification setup also require repository configuration; no deployment is claimed.
+Milestone 5 is complete and deployed in the developer-provided baseline; its original agent build restriction was resolved outside that run.
 
-## Milestone 6 — Bounded catalog expansion (planned)
+## Milestone 6 — Search-driven catalog discovery
 
-After Milestone 5 validation and initial scheduled-run verification, deliberately review additional coverage and measure source/Neon/Actions load, normalization quality and matching precision. Existing bounded scope remains sufficient for operations validation. No expansion is included in Milestone 5 and none should begin automatically.
+Implemented: conservative zero-result demand recording after the response, PostgreSQL deduplication/popularity, 24-hour cooldown, locked thirty-attempt UTC daily budget, bounded public search for all three existing retailers, shared ingestion persistence, unchanged normalization/matching, safe partial/no-result/failure outcomes, read-only developer inspection and six-hour GitHub Actions scheduling. No category crawl, new retailer, matcher rule, dependency or infrastructure is added.
+
+Validation: deterministic unit tests and isolated concurrent PostgreSQL tests, real bounded searches and immediate-repeat cooldown verification. See [discovery](discovery.md) for complete measured results. Pending: fresh local default `pnpm build` and Chromium `pnpm test:e2e` confirmation because of the known agent worker-port restriction. Changes stay staged without a commit until that gate passes; new workflow activation requires publishing the reviewed change.
+
+Next catalog-coverage recommendation: use accumulated demand to review representative new listings and conservative normalization/matching gaps, measure source/downstream workload and intentionally expand refresh coverage for already-discovered products. Review the complete-catalog processing bound before increasing sustained ingestion. Proactive category expansion remains a separate authorized milestone; do not start it automatically.
 
 ## Milestone 7 — Validated unit-price comparison
 

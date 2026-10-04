@@ -11,6 +11,7 @@ import {
   check,
   index,
   foreignKey,
+  date,
 } from "drizzle-orm/pg-core";
 const time = (name: string) => timestamp(name, { withTimezone: true });
 export const retailers = pgTable(
@@ -20,6 +21,54 @@ export const retailers = pgTable(
     name: text("name").notNull(),
   },
   (t) => [check("retailer_identity", sql`${t.id} in ('tottus', 'plaza-vea', 'metro')`)],
+);
+
+export const discoveryQueries = pgTable(
+  "discovery_queries",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    normalizedQuery: text("normalized_query").notNull(),
+    originalQuery: text("original_query").notNull(),
+    firstRequestedAt: time("first_requested_at").notNull().defaultNow(),
+    lastRequestedAt: time("last_requested_at").notNull().defaultNow(),
+    requestCount: integer("request_count").notNull().default(1),
+    lastAttemptedAt: time("last_attempted_at"),
+    lastCompletedAt: time("last_completed_at"),
+    nextEligibleAt: time("next_eligible_at").notNull().defaultNow(),
+    status: text("status").notNull().default("pending"),
+    latestResultCount: integer("latest_result_count").notNull().default(0),
+    error: text("error"),
+  },
+  (t) => [
+    uniqueIndex("discovery_query_identity").on(t.normalizedQuery),
+    index("discovery_eligibility").on(t.nextEligibleAt),
+    check(
+      "discovery_query_lengths",
+      sql`length(${t.normalizedQuery}) between 3 and 80 and length(${t.originalQuery}) between 1 and 240`,
+    ),
+    check(
+      "discovery_counts",
+      sql`${t.requestCount} > 0 and ${t.latestResultCount} between 0 and 30`,
+    ),
+    check(
+      "discovery_status",
+      sql`${t.status} in ('pending','processing','completed','no_results','partial','failed')`,
+    ),
+    check(
+      "discovery_times",
+      sql`${t.lastRequestedAt} >= ${t.firstRequestedAt} and (${t.lastAttemptedAt} is null or ${t.nextEligibleAt} >= ${t.lastAttemptedAt} + interval '24 hours')`,
+    ),
+  ],
+);
+
+/** Durable budget also counts interrupted attempts, independently of query retries. */
+export const discoveryDailyBudget = pgTable(
+  "discovery_daily_budget",
+  {
+    day: date("day").primaryKey(),
+    processed: integer("processed").notNull().default(0),
+  },
+  (t) => [check("discovery_daily_cap", sql`${t.processed} between 0 and 30`)],
 );
 export const retailerListings = pgTable(
   "retailer_listings",

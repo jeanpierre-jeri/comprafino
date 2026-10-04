@@ -2,7 +2,8 @@ import { z } from "zod";
 import { listingSchema, normalizeWhitespace, parsePenCents } from "@comprafino/core";
 import type { NormalizedRetailerListing } from "@comprafino/core";
 
-import type { RetailerAdapter } from "./adapter.ts";
+import type { SearchRetailerAdapter } from "./adapter.ts";
+import { assertRetailerSearch, boundedSearchListings } from "./search.ts";
 const sourceProduct = z.object({
   brand: z.string().trim().min(1).optional(),
   productId: z.string().regex(/^\d+$/u),
@@ -103,10 +104,32 @@ export const tottusCategoryUrls = {
 export function createTottusAdapter(
   fetchPage: typeof fetch = fetch,
   category: keyof typeof tottusCategoryUrls = "meat",
-): RetailerAdapter {
+): SearchRetailerAdapter {
   if (category !== "meat" && category !== "dairy") throw new Error("Unsupported Tottus category");
   return {
     retailer: "tottus",
+    async searchProducts(query, limit) {
+      assertRetailerSearch(query, limit);
+      const url = new URL("https://www.tottus.com.pe/tottus-pe/buscar");
+      url.searchParams.set("Ntt", query);
+      url.searchParams.set("page", "1");
+      const response = await fetchPage(url, {
+        headers: {
+          "User-Agent": "CompraFino/0.1 (bounded public catalog discovery)",
+          Accept: "text/html",
+        },
+        signal: AbortSignal.timeout(30_000),
+        redirect: "error",
+      });
+      if (!response.ok) throw new Error("Tottus search request failed");
+      const parsed = parseTottusPage(await response.text(), new Date());
+      if (parsed.pagination.currentPage !== 1 || parsed.discovered > 48)
+        throw new Error("Unexpected Tottus search page size");
+      return {
+        listings: boundedSearchListings(parsed.listings, limit),
+        discovered: parsed.discovered,
+      };
+    },
     async fetchListings(limit) {
       if (!Number.isInteger(limit) || limit < 1 || limit > 500)
         throw new Error("Limit must be an integer from 1 to 500");

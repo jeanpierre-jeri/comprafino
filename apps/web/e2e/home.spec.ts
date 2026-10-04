@@ -1,5 +1,13 @@
 import { expect, test } from "@playwright/test";
 
+test("developer discovery tooling is blocked in production", async ({ page }) => {
+  const response = await page.goto("/dev/discovery");
+  expect(response?.status()).toBe(404);
+  await expect(page.getByRole("heading", { name: "Developer discovery inspection" })).toHaveCount(
+    0,
+  );
+});
+
 test("homepage offers an accessible product search", async ({ page }) => {
   const response = await page.goto("/");
   expect(response?.status()).toBe(200);
