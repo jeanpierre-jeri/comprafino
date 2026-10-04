@@ -1,11 +1,14 @@
 "use client";
 
+import { Check, ChevronDown } from "lucide-react";
+import type { ReactNode } from "react";
 import { Select } from "@base-ui/react/select";
 import { cn } from "../lib/utils";
 
 export interface SelectOption {
   value: string;
   label: string;
+  icon?: ReactNode;
 }
 
 export function ChoiceSelect({
@@ -40,17 +43,12 @@ export function ChoiceSelect({
           aria-label={label}
           className={cn("choice-trigger", compact && "theme-trigger")}
         >
-          <Select.Value className="whitespace-nowrap" />
+          <span className="inline-flex items-center gap-1.5">
+            {options.find((option) => option.value === value)?.icon}
+            <Select.Value className="whitespace-nowrap" />
+          </span>
           <Select.Icon className="choice-icon">
-            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path
-                d="m4 6 4 4 4-4"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <ChevronDown aria-hidden="true" size={16} strokeWidth={1.5} />
           </Select.Icon>
         </Select.Trigger>
         <Select.Portal>
@@ -64,23 +62,12 @@ export function ChoiceSelect({
               <Select.List className="choice-list">
                 {options.map((option) => (
                   <Select.Item key={option.value} value={option.value} className="choice-option">
-                    <Select.ItemText>{option.label}</Select.ItemText>
+                    <Select.ItemText className="inline-flex items-center gap-2">
+                      {option.icon}
+                      {option.label}
+                    </Select.ItemText>
                     <Select.ItemIndicator className="choice-check">
-                      <svg
-                        aria-hidden="true"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 16 16"
-                        fill="none"
-                      >
-                        <path
-                          d="m3 8 3 3 7-7"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                      <Check aria-hidden="true" size={16} strokeWidth={1.5} />
                     </Select.ItemIndicator>
                   </Select.Item>
                 ))}

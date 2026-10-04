@@ -1,3 +1,4 @@
+import { ArrowRight, ArrowUpRight } from "@comprafino/ui";
 import Link from "next/link";
 import { formatPen, formatUnitPrice } from "@comprafino/db";
 import type { GenericProductOffer, ProductComparison } from "@comprafino/db";
@@ -86,7 +87,11 @@ export function GenericOfferCard({
         </div>
         <a href={offer.url} target="_blank" rel="noopener noreferrer" className="source-link">
           Ver producto en {offer.retailerName}
-          <span aria-hidden="true"> ↗</span>
+          <ArrowUpRight
+            aria-hidden="true"
+            size={14}
+            className="ml-1 inline-block shrink-0 align-middle"
+          />
           <span className="sr-only"> (nueva pestaña)</span>
         </a>
         {offer.canonicalId && (
@@ -167,7 +172,12 @@ export function ExactProductCard({
           )}
         </div>
         <p className="comparison-link">
-          Comparar en {product.retailerCount} supermercados<span aria-hidden="true"> →</span>
+          Comparar en {product.retailerCount} supermercados
+          <ArrowRight
+            aria-hidden="true"
+            size={14}
+            className="ml-1 inline-block shrink-0 align-middle"
+          />
         </p>
       </Link>
       <div className="mt-auto">

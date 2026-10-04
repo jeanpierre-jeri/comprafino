@@ -1,5 +1,6 @@
 "use client";
 
+import { Monitor, Moon, Sun } from "@comprafino/ui";
 import { useSyncExternalStore } from "react";
 import { ChoiceSelect } from "@comprafino/ui/components/select";
 
@@ -52,9 +53,21 @@ export function ThemeControl() {
       label="Tema"
       value={choice}
       options={[
-        { value: "system", label: "Sistema" },
-        { value: "light", label: "Claro" },
-        { value: "dark", label: "Oscuro" },
+        {
+          value: "system",
+          label: "Sistema",
+          icon: <Monitor aria-hidden="true" size={16} strokeWidth={1.6} className="shrink-0" />,
+        },
+        {
+          value: "light",
+          label: "Claro",
+          icon: <Sun aria-hidden="true" size={16} strokeWidth={1.6} className="shrink-0" />,
+        },
+        {
+          value: "dark",
+          label: "Oscuro",
+          icon: <Moon aria-hidden="true" size={16} strokeWidth={1.6} className="shrink-0" />,
+        },
       ]}
       onValueChange={(value) => {
         const next = preference(value);

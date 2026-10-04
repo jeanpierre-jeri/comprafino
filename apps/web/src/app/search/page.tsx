@@ -1,3 +1,4 @@
+import { ArrowRight } from "@comprafino/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { after } from "next/server";
@@ -106,7 +107,11 @@ export default async function SearchPage({
               className="card-link"
             >
               {underlyingCount ? "Quitar filtros" : "Explorar leche"}
-              <span aria-hidden="true"> →</span>
+              <ArrowRight
+                aria-hidden="true"
+                size={14}
+                className="ml-1 inline-block shrink-0 align-middle"
+              />
             </Link>
           </div>
         ) : (

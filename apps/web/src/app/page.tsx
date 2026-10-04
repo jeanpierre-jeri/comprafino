@@ -1,3 +1,4 @@
+import { ArrowRight, ArrowUpRight } from "@comprafino/ui";
 import Link from "next/link";
 import { SearchForm } from "../components/search-form";
 import { PublicShell } from "../components/public-shell";
@@ -42,7 +43,11 @@ export default function Home() {
                     href={`/search?q=${encodeURIComponent(name.toLowerCase())}`}
                   >
                     {name}
-                    <span aria-hidden="true"> ↗</span>
+                    <ArrowUpRight
+                      aria-hidden="true"
+                      size={14}
+                      className="ml-1 inline-block shrink-0 align-middle"
+                    />
                   </Link>
                 </li>
               ))}
@@ -77,7 +82,11 @@ export default function Home() {
                 <p className="mt-1 text-sm text-muted-foreground">{copy}</p>
                 <span className="mt-5 block text-sm font-semibold">
                   {action}
-                  <span aria-hidden="true"> →</span>
+                  <ArrowRight
+                    aria-hidden="true"
+                    size={14}
+                    className="ml-1 inline-block shrink-0 align-middle"
+                  />
                 </span>
               </Link>
             </li>

@@ -36,7 +36,9 @@ test("theme popup supports Space, arrows, Enter, Escape and focus return on mobi
   await trigger.focus();
   await trigger.press("Space");
   await expect(page.getByRole("listbox")).toBeVisible();
+  await expect(page.getByRole("option", { name: "Sistema", exact: true })).toBeFocused();
   await page.keyboard.press("End");
+  await expect(page.getByRole("option", { name: "Oscuro", exact: true })).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(trigger).toHaveText("Oscuro");
   await expect(trigger).toBeFocused();

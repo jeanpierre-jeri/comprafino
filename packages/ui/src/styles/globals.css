@@ -175,7 +175,7 @@
     cursor: wait;
   }
   .theme-trigger {
-    @apply mt-0 w-28 border-transparent bg-transparent text-xs;
+    @apply mt-0 w-28 border-transparent bg-transparent px-2 text-xs;
   }
   .choice-positioner {
     z-index: 60;
