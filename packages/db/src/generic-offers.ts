@@ -2,6 +2,9 @@ import { sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   calculateUnitPrice,
+  classifyProductFamily,
+  resolveProductFamilyQuery,
+  selectFamilyOffers,
   compareUnitPrices,
   genericOfferSort,
   normalizeSearchQuery,
@@ -23,6 +26,7 @@ import {
 export { calculateUnitPrice, formatUnitPrice, genericOfferSort } from "@comprafino/core";
 const rowSchema = z.object({
   listing: catalogRecordSchema,
+  sourceCategory: z.string().nullable().optional(),
   retailerName: z.string().min(1),
   url: z.string(),
   imageUrl: z.string().nullable(),
@@ -42,10 +46,16 @@ export function genericProductOffer(raw: unknown, now = new Date()) {
   const url = retailerProductUrl({ retailerId, url: row.url });
   if (!url || !row.listing.title.trim()) return null;
   const attributes = normalizeCatalogListing(row.listing);
+  const family = classifyProductFamily({
+    title: row.listing.title,
+    retailerId,
+    sourceCategory: row.sourceCategory,
+  });
   const calculation = calculateUnitPrice(
     {
       ...attributes,
       title: row.listing.title,
+      productFamily: family.family,
       currentPriceCents: row.currentPriceCents,
       observedAt: row.observedAt,
       available: row.available,
@@ -56,6 +66,8 @@ export function genericProductOffer(raw: unknown, now = new Date()) {
   return {
     id: row.listing.id,
     title: row.listing.title,
+    family,
+    sourceCategory: row.sourceCategory ?? null,
     retailerId,
     retailerName: row.retailerName,
     brand: attributes.brand,
@@ -120,7 +132,9 @@ export async function searchGenericProductOffers(
 ): Promise<GenericProductOffer[]> {
   if (!usefulSearchQuery(rawQuery)) return [];
   const query = normalizeSearchQuery(rawQuery);
-  const predicates = [...new Set(query.split(" "))].map(
+  const interpretation = resolveProductFamilyQuery(rawQuery);
+  const requiredQuery = interpretation?.remainingQuery ?? query;
+  const predicates = [...new Set(requiredQuery.split(" ").filter(Boolean))].map(
     (token) =>
       sql`exists (select 1 from unnest(string_to_array(identity_text,' ')) word where ${/^\d+$/u.test(token) ? sql`word=${token}` : sql`starts_with(word,${token})`})`,
   );
@@ -129,7 +143,7 @@ export async function searchGenericProductOffers(
     select jsonb_build_object('id',l.id,'retailerId',l.retailer_id,'title',l.title,
       'priceUnit',h.price_unit,'packageText',l.package_text,'sourceBrand',l.source_brand,
       'sourceUnitMultiplier',l.source_unit_multiplier::float8) as listing,
-      r.name as "retailerName", l.url, l.image_url as "imageUrl", h.current_price_cents as "currentPriceCents",
+      l.category as "sourceCategory", r.name as "retailerName", l.url, l.image_url as "imageUrl", h.current_price_cents as "currentPriceCents",
       l.last_seen_at as "observedAt", l.available, n.input_fingerprint as fingerprint, n.normalization_version as version,
       p.id as "canonicalId", coalesce(jsonb_array_length(p.offers),0) as "retailerCount",
       ${searchText(sql`n.normalized_title`)} as title_text,
@@ -142,7 +156,7 @@ export async function searchGenericProductOffers(
     where l.active and l.available is distinct from false and h.currency='PEN'
       and h.price_unit=l.price_unit and h.price_unit in ('UN','KG')
       and l.last_seen_at between ${new Date(now.getTime() - 36 * 60 * 60 * 1000).toISOString()}::timestamptz and ${now.toISOString()}::timestamptz
-  ) select * from generic where ${sql.join(predicates, sql` and `)}
+  ) select * from generic where ${predicates.length ? sql.join(predicates, sql` and `) : sql`true`}
   order by (title_text=${query}) desc, starts_with(title_text,${query}) desc,
     public.similarity(title_text,${query}) desc, title_text collate "C", listing->>'id' limit 1001`),
   ]);
@@ -152,7 +166,10 @@ export async function searchGenericProductOffers(
   const offers = result.rows
     .map((row) => genericProductOffer(row, now))
     .filter((offer) => offer !== null);
-  return limitGenericOffers(offers, genericOfferSort(sort));
+  return limitGenericOffers(
+    interpretation ? selectFamilyOffers(offers, interpretation.family) : offers,
+    genericOfferSort(sort),
+  );
 }
 export async function searchPublicProducts(
   db: ReturnType<typeof createDatabase>,
@@ -164,5 +181,19 @@ export async function searchPublicProducts(
     searchCanonicalProducts(db, query, now),
     searchGenericProductOffers(db, query, sort, now),
   ]);
-  return { products, offers, usefulResultCount: products.length + offers.length };
+  // Exact comparison identity/routes remain unchanged. In a recognized family
+  // search, an incidental ingredient in an exact group is not useful coverage.
+  const interpretation = resolveProductFamilyQuery(query);
+  const relevantProducts = interpretation
+    ? products.filter((product) =>
+        product.offers.some(
+          (offer) => classifyProductFamily({ title: offer.title }).family === interpretation.family,
+        ),
+      )
+    : products;
+  return {
+    products: relevantProducts,
+    offers,
+    usefulResultCount: relevantProducts.length + offers.length,
+  };
 }

@@ -12,7 +12,7 @@ The roadmap aims to help people decide where to buy, when to buy, whether a pric
 
 ## Current status
 
-Milestones 0–7 are complete, committed and pushed in the user-provided baseline (`13cb4ee`). Milestone 8 adds independent retailer options, exact unit prices and URL sorting alongside verified exact-product search. See [generic comparison](docs/generic-comparison.md) for the real-data audit and remaining validation gate. Local build/Chromium E2E confirmation is pending because this agent cannot bind Turbopack's CSS-worker port. See [listing refresh and audit](docs/listing-refresh.md), [discovery](docs/discovery.md) and [operations](docs/operations.md). The homepage requires no database.
+Milestones 0–8 are complete in the user-provided baseline (`1401f97`). Milestone 9 implements bounded staple coverage and deterministic family relevance; its database/data checks pass, while local build/Chromium E2E confirmation is pending under the known agent worker-port restriction. See [staple coverage and audit](docs/staple-coverage.md), [generic comparison](docs/generic-comparison.md) and [operations](docs/operations.md). The homepage requires no database.
 
 ## Initial retailers
 
@@ -147,9 +147,10 @@ pnpm refresh:catalog
 pnpm refresh:catalog -- --dry-run
 pnpm refresh:listings -- --dry-run --limit=50
 pnpm coverage:report
+pnpm audit:staples
 ```
 
-The full pipeline reuses category ingestion, up to 100 eligible known-listing lookups, then one normalization and matching pass. Public offers older than 36 hours cannot win cheapest price; retained historical prices remain labelled. Its GitHub workflow supports manual dispatch and cron `17 11,23 * * *`: 11:17/23:17 UTC, or 06:17/18:17 Peru. Full refresh workflows do not overlap or cancel a running refresh. Failed retailers retain prior data; successful retailers continue, while the command still exits nonzero. `/dev/ingestion` shows distinct latest attempts/successes and healthy (≤18h), delayed (≤30h) or stale (>30h) operational freshness. GitHub schedules can start late; prices remain observed rather than real-time. See [operations](docs/operations.md) for fixed category limits, safe failure behavior, notifications and troubleshooting.
+The full pipeline reuses category ingestion (Tottus meat/dairy plus Plaza Vea/Metro dairy and six bounded staple sources each), up to 100 eligible known-listing lookups, then one normalization and matching pass. New staple sources allow twenty usable listings and two pages each; see [staple coverage](docs/staple-coverage.md). Public offers older than 36 hours cannot win cheapest price; retained historical prices remain labelled. Its GitHub workflow supports manual dispatch and cron `17 11,23 * * *`: 11:17/23:17 UTC, or 06:17/18:17 Peru. Full refresh workflows do not overlap or cancel a running refresh. Failed retailers retain prior data; successful retailers continue, while the command still exits nonzero. `/dev/ingestion` shows distinct latest attempts/successes and healthy (≤18h), delayed (≤30h) or stale (>30h) operational freshness. GitHub schedules can start late; prices remain observed rather than real-time. See [operations](docs/operations.md) for fixed category limits, safe failure behavior, notifications and troubleshooting.
 
 ## Search-driven discovery
 

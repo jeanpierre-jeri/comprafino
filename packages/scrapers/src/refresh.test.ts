@@ -1,7 +1,7 @@
 import { expect, it, vi } from "vitest";
 import { refreshCatalog, parseRefreshOptions } from "./refresh.ts";
 import type { RefreshTasks } from "./refresh.ts";
-import { combineTottusCoverage, refreshCoverage } from "./refresh-adapters.ts";
+import { combineTottusCoverage, combineVtexCoverage, refreshCoverage } from "./refresh-adapters.ts";
 import { ingest } from "./ingestion.ts";
 import type { RetailerAdapter } from "./adapter.ts";
 import type { IngestionStore } from "./ingestion.ts";
@@ -127,8 +127,24 @@ it("freezes validated category limits and persists neither Tottus category on a 
   );
   expect(refreshCoverage).toEqual({
     tottus: { meat: 50, dairy: 100 },
-    "plaza-vea": { dairy: 100 },
-    metro: { dairy: 100 },
+    "plaza-vea": {
+      dairy: 100,
+      "sugar-brown": 20,
+      "sugar-white": 20,
+      pasta: 20,
+      flour: 20,
+      oats: 20,
+      "toilet-paper": 20,
+    },
+    metro: {
+      dairy: 100,
+      "sugar-brown": 20,
+      "sugar-white": 20,
+      pasta: 20,
+      flour: 20,
+      oats: 20,
+      "toilet-paper": 20,
+    },
   });
 });
 it("combines and deduplicates Tottus categories before atomic persistence", async () => {
@@ -191,4 +207,50 @@ it("reports targeted partial failures while deriving successful observations onc
   targeted.mockClear();
   await refreshCatalog({ ...t, targeted }, true);
   expect(targeted).not.toHaveBeenCalled();
+});
+
+it("scheduled staple scopes are bounded, sequential and deduplicated before persistence", async () => {
+  const scopes: string[] = [];
+  const fetchListings = vi
+    .fn<RetailerAdapter["fetchListings"]>()
+    .mockResolvedValue({ listings: [], discovered: 20 });
+  const pause = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
+  const adapter = combineVtexCoverage(
+    "metro",
+    (category) => {
+      scopes.push(category);
+      return { retailer: "metro", fetchListings };
+    },
+    pause,
+  );
+  expect(await adapter.fetchListings(220)).toEqual({ listings: [], discovered: 140 });
+  expect(scopes).toEqual([
+    "dairy",
+    "sugar-brown",
+    "sugar-white",
+    "pasta",
+    "flour",
+    "oats",
+    "toilet-paper",
+  ]);
+  expect(fetchListings.mock.calls.map((c) => c[0])).toEqual([100, 20, 20, 20, 20, 20, 20]);
+  expect(pause).toHaveBeenCalledTimes(6);
+});
+it("a failed staple source prevents an atomic retailer write and further category requests", async () => {
+  const fetchListings = vi
+    .fn<RetailerAdapter["fetchListings"]>()
+    .mockResolvedValueOnce({ listings: [], discovered: 100 })
+    .mockRejectedValueOnce(new Error("restricted"));
+  const adapter = combineVtexCoverage(
+    "plaza-vea",
+    () => ({ retailer: "plaza-vea", fetchListings }),
+    async () => {},
+  );
+  const persist = vi.fn<IngestionStore["persist"]>();
+  const finish = vi.fn<IngestionStore["finish"]>().mockResolvedValue(undefined);
+  await expect(ingest(adapter, 220, { start: async () => "id", persist, finish })).rejects.toThrow(
+    "restricted",
+  );
+  expect(fetchListings).toHaveBeenCalledTimes(2);
+  expect(persist).not.toHaveBeenCalled();
 });

@@ -1,0 +1,363 @@
+[
+  {
+    "brand": "BELL'S",
+    "productId": "99941025",
+    "productName": "Azúcar Rubia BELL'S Bolsa 5Kg",
+    "link": "https://www.plazavea.com.pe/azucar-rubia-bells-bolsa-5kg-20198553/p",
+    "categoryId": "444",
+    "items": [
+      {
+        "itemId": "10033838",
+        "name": "Azúcar Rubia BELL'S Bolsa 5Kg",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/35462624/20198553.jpg?v=639207697346270000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 15.5,
+              "ListPrice": 15.5,
+              "IsAvailable": true,
+              "AvailableQuantity": 677,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "BELL'S",
+    "productId": "99943586",
+    "productName": "Azúcar Rubia BELL'S Bolsa 1Kg",
+    "link": "https://www.plazavea.com.pe/azucar-rubia-bells-bolsa-1kg/p",
+    "categoryId": "444",
+    "Presentación unitarios vitrina": ["Bolsa 1kg"],
+    "items": [
+      {
+        "itemId": "10036026",
+        "name": "Azúcar Rubia BELL'S Bolsa 1Kg",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/423248/20198552.jpg?v=637377101312700000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 3.5,
+              "ListPrice": 3.5,
+              "IsAvailable": true,
+              "AvailableQuantity": 532,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "DULFINA",
+    "productId": "983",
+    "productName": "Azúcar Rubia DULFINA Bolsa 5Kg",
+    "link": "https://www.plazavea.com.pe/azucar-rubia-dulfina-bolsa-5-kg/p",
+    "categoryId": "444",
+    "Presentación unitarios vitrina": ["Bolsa 5Kg"],
+    "items": [
+      {
+        "itemId": "1028",
+        "name": "Azúcar Rubia DULFINA Bolsa 5Kg",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/26947513/20084094.jpg?v=639196593360770000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 18.3,
+              "ListPrice": 20.9,
+              "IsAvailable": true,
+              "AvailableQuantity": 230,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "BELL'S",
+    "productId": "99943587",
+    "productName": "Azúcar Rubia BELL'S Bolsa 2Kg",
+    "link": "https://www.plazavea.com.pe/azucar-rubia-bells-bolsa-2kg-20198548/p",
+    "categoryId": "444",
+    "items": [
+      {
+        "itemId": "10036027",
+        "name": "Azúcar Rubia BELL'S Bolsa 2Kg",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/35408909/20198548.jpg?v=639202467236770000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 6.9,
+              "ListPrice": 6.9,
+              "IsAvailable": true,
+              "AvailableQuantity": 615,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "CARTAVIO",
+    "productId": "60848",
+    "productName": "Azúcar Rubia CARTAVIO Bolsa 5Kg",
+    "link": "https://www.plazavea.com.pe/azucar-rubia-cartavio-bolsa-5kg/p",
+    "categoryId": "444",
+    "Presentación unitarios vitrina": ["Bolsa 5kg"],
+    "items": [
+      {
+        "itemId": "62575",
+        "name": "Azúcar Rubia CARTAVIO Bolsa 5Kg",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/28650078/20184801.jpg?v=639069431200830000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 23.5,
+              "ListPrice": 23.5,
+              "IsAvailable": true,
+              "AvailableQuantity": 341,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "DULFINA",
+    "productId": "1572",
+    "productName": "Azúcar Rubia DULFINA Bolsa 1Kg",
+    "link": "https://www.plazavea.com.pe/azucar-rubia-dulfina-bolsa-1-kg/p",
+    "categoryId": "444",
+    "Presentación unitarios vitrina": ["Bolsa 1Kg"],
+    "items": [
+      {
+        "itemId": "1848",
+        "name": "Azúcar Rubia DULFINA Bolsa 1Kg",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/26947514/20085254.jpg?v=638236224405030000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 4.8,
+              "ListPrice": 4.8,
+              "IsAvailable": true,
+              "AvailableQuantity": 597,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "DULFINA",
+    "productId": "100485362",
+    "productName": "Azúcar Rubia DULFINA Bolsa 2Kg",
+    "link": "https://www.plazavea.com.pe/azucar-rubia-dulfina-bolsa-2kg/p",
+    "categoryId": "444",
+    "Presentación unitarios vitrina": ["Bolsa 2Kg"],
+    "items": [
+      {
+        "itemId": "10691736",
+        "name": "Azúcar Rubia DULFINA Bolsa 2Kg",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/26947928/20283339.jpg?v=638236228494300000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 9.2,
+              "ListPrice": 9.2,
+              "IsAvailable": true,
+              "AvailableQuantity": 277,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "CARTAVIO",
+    "productId": "60863",
+    "productName": "Azúcar Rubia CARTAVIO Bolsa 1Kg",
+    "link": "https://www.plazavea.com.pe/azucar-rubia-cartavio-bolsa-1kg/p",
+    "categoryId": "444",
+    "Presentación unitarios vitrina": ["Bolsa 1kg"],
+    "items": [
+      {
+        "itemId": "62593",
+        "name": "Azúcar Rubia CARTAVIO Bolsa 1Kg",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/28650077/20184796.jpg?v=638411617015600000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 5.1,
+              "ListPrice": 5.1,
+              "IsAvailable": true,
+              "AvailableQuantity": 474,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "SAN JACINTO",
+    "productId": "101189420",
+    "productName": "Azúcar Rubia San Jacinto 25 Kg",
+    "link": "https://www.plazavea.com.pe/azucar-rubia-san-jacinto-25-kg/p",
+    "categoryId": "444",
+    "Presentación unitarios vitrina": ["Saco 25Kg"],
+    "items": [
+      {
+        "itemId": "11565975",
+        "name": "Azúcar Rubia San Jacinto 25 Kg",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/30215166/20211720.jpg?v=638679057950930000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 99.9,
+              "ListPrice": 99.9,
+              "IsAvailable": false,
+              "AvailableQuantity": 0,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "BELL'S",
+    "productId": "101369575",
+    "productName": "Azúcar Rubia BELL'S Caja 60un",
+    "link": "https://www.plazavea.com.pe/azucar-rubia-bells-caja-60un/p",
+    "categoryId": "444",
+    "Presentación unitarios vitrina": ["Caja 60un"],
+    "items": [
+      {
+        "itemId": "11745966",
+        "name": "Azúcar Rubia BELL'S Caja 60un",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/31119001/20426119.jpg?v=638791542013170000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 7.2,
+              "ListPrice": 7.2,
+              "IsAvailable": false,
+              "AvailableQuantity": 0,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "ONZA",
+    "productId": "85923",
+    "productName": "Azúcar Rubia ONZA Light con Stevia Doypack 500g",
+    "link": "https://www.plazavea.com.pe/azucar-rubia-onza-light-con-stevia-doypack-500g/p",
+    "categoryId": "444",
+    "Presentación unitarios vitrina": ["Doypack 500g"],
+    "items": [
+      {
+        "itemId": "90340",
+        "name": "Azúcar Rubia ONZA Light con Stevia Doypack 500g",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/34358344/20192955.jpg?v=639125031864700000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 9.2,
+              "ListPrice": 9.2,
+              "IsAvailable": false,
+              "AvailableQuantity": 0,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

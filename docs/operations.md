@@ -1,12 +1,12 @@
 # Catalog refresh and operational freshness
 
-Milestones 0–6 are complete and deployed in the user-provided baseline `558cb56`. Milestone 7 adds [known listing refresh](listing-refresh.md) between category ingestion and the existing single normalization/matching pass. That document specifies exact lookup mechanisms, budgets, observation freshness, unavailable/missing semantics, public cheapest-price exclusion and the real audit. Milestone 7 awaits local build/E2E confirmation; historical notes below describe earlier runs.
+Milestones 0–8 are complete in the user-provided baseline `1401f97`. Milestone 9 adds twelve bounded permanent staple sources to the existing refresh flow. Implementation/data checks pass; local build/E2E remains the explicit completion gate. See [staple coverage](staple-coverage.md) for live counts, request limits, quantities and before/after relevance. Older validation sections below describe historical runs.
 
 ## Architecture and coverage
 
 ```text
 GitHub Actions → pnpm refresh:catalog
-  → Tottus (meat + dairy), Plaza Vea (dairy/eggs), Metro (dairy), sequentially
+  → Tottus (meat + dairy), Plaza Vea/Metro (dairy + six staple sources each), sequentially
   → up to 100 eligible known-listing targeted lookups
   → existing normalizeCatalog API
   → existing matchCatalog API
@@ -15,7 +15,7 @@ GitHub Actions → pnpm refresh:catalog
 
 The command lives in `packages/scrapers`, reusing `ingest` and the database APIs behind `pnpm normalize:catalog` / `pnpm match:catalog`. Pure operational freshness belongs to core; database inspection belongs to db; `/dev/ingestion` remains a Server Component. No matching or scraping runs during public requests. Normalization rules, matching version/weights/thresholds/candidates and canonical identities are unchanged.
 
-`refresh-adapters.ts` freezes existing validated coverage: Tottus meats at 50 and dairy at 100; Plaza Vea dairy/eggs at 100; Metro dairy at 100. Tottus's historical 151 rows included retained observations beyond the current 50-row meat sample. Both Tottus categories fetch before one deduplicated atomic retailer write. This prevents a failed category from recording a successful full-retailer refresh. Existing adapter request/page caps, conservative pauses and timeouts remain. There are no new categories, retailers, full-catalog crawling or higher limits.
+`refresh-adapters.ts` fixes Tottus meats at 50 and dairy at 100; Plaza Vea and Metro each retain dairy at 100 and add twenty usable listings each for brown sugar, white sugar, long pasta, flour, oats and toilet paper. Maximum 590 usable observations per cycle, deduplicated within retailer. Each new category permits two pages/forty source products maximum; complete paths are fixed in `staple-categories.ts`. Both Tottus categories and all seven scopes per VTEX retailer fetch before the single atomic retailer write. A failed category prevents that retailer batch. Other retailers and targeted lookups retain existing failure isolation. Existing request pauses, timeout and no-retry/access-control policies remain; no full-catalog crawl is added.
 
 Changing source ordering can discover a new item inside an existing bounded sample. Absent historical items remain stored rather than being deleted: 350 fresh observations can coexist with more retained rows. This is not full coverage. Downstream normalization/matching reads the complete current database up to 1000 rows, with an explicit row-count guard that fails rather than silently processing a truncated catalog. Review that bound deliberately before any future expansion.
 
@@ -25,7 +25,7 @@ Changing source ordering can discover a new item inside an existing bounded samp
 
 The stable concurrency group `comprafino-catalog-refresh` and `cancel-in-progress: false` prevent overlapping full refresh workflows without canceling a running refresh. GitHub's default concurrency queue keeps one pending run; another trigger can replace that pending run. This is not a durable queue of every requested execution. Retailer-specific manual workflows retain their own groups; database retailer-row locks and atomic batches remain the safeguards across manual/local writers. The full workflow's concurrency does not serialize arbitrary local processes.
 
-The workflow checks out code, uses the repository-pinned pnpm and Node 24, installs with `--frozen-lockfile`, and passes `${{ secrets.DATABASE_URL }}` only to the refresh command. Its timeout is sixty minutes to accommodate up to 100 sequential targeted requests, each with a thirty-second timeout. It does not apply migrations or run scraping in ordinary CI.
+The workflow checks out code, uses the repository-pinned pnpm and Node 24, installs with `--frozen-lockfile`, and passes `${{ secrets.DATABASE_URL }}` only to the refresh command. Its timeout is 120 minutes to accommodate the complete existing maximum category-page budgets, twelve new sources (two pages each) and up to 100 sequential targeted requests, each with a thirty-second timeout. Measured Milestone 9 full refresh took 71.974 seconds; worst-case budgets are deliberately larger. It does not apply migrations or run scraping in ordinary CI.
 
 Scheduled jobs may begin late or be dropped under GitHub load. They run from the default branch; the workflow must exist there and Actions must be enabled. Public-repository schedules may be disabled after sixty days of inactivity. See [GitHub schedule documentation](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule) and [concurrency documentation](https://docs.github.com/en/actions/concepts/workflows-and-actions/concurrency). Neither the cron nor the freshness policy promises exact or real-time prices.
 
@@ -73,6 +73,9 @@ pnpm scrape:tottus -- --limit=50
 pnpm scrape:tottus -- --category=dairy --limit=100
 pnpm scrape:plaza-vea -- --limit=100
 pnpm scrape:metro -- --limit=100
+pnpm scrape:plaza-vea -- --category=sugar-brown --limit=20
+pnpm scrape:metro -- --category=oats --limit=20
+pnpm audit:staples  # read-only database relevance/source audit
 # Add --dry-run to any retailer command to fetch without persistence
 
 # Repair derived data after reviewing source ingestion
@@ -117,3 +120,7 @@ Final validation: `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, all **317 
 ## Discovery operations
 
 Run `pnpm discover:catalog -- --dry-run --limit=3` to inspect pending demand without writes or source calls; normal mode removes `--dry-run`. Apply reviewed migration `0003_fair_kylun.sql` before deploying the public search change. Cron `43 0,6,12,18 * * *` uses ten-query batches, shared noncanceling refresh concurrency, a 24-hour per-query claim cooldown and a database-enforced thirty-attempt UTC daily cap. Source failures preserve successful batches and report partial/nonzero failure. `/dev/discovery` is development-only. Complete [discovery documentation](discovery.md) covers privacy, ranking, safe errors, interrupted claims and catalog/freshness bounds. No workflow is triggered by an individual public request.
+
+## Milestone 9 measured refresh
+
+The new permanent allowlist added 199 listings (91 Plaza Vea, 108 Metro), giving 735 known listings under the unchanged 1000-row complete-catalog guard. One full scheduled-flow validation succeeded: 150 Tottus, 191 Plaza Vea and 208 Metro observations, one legitimate changed Metro milk price state, zero normalization/matching writes and zero targeted requests because observations were recent. One explicit Metro SKU targeted lookup subsequently succeeded with zero price/derived writes. Source acquisition and derivation-repeat checks preserved price-history integrity. Full evidence and coverage gaps appear in [staple coverage](staple-coverage.md). The cron/concurrency/secret and 100-targeted-request cap remain unchanged; monitor remaining catalog headroom and public growth before adding sources or raising budgets.

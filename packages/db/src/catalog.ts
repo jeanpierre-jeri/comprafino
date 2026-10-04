@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { and, asc, eq, isNull, sql } from "drizzle-orm";
 import {
   calculateUnitPrice,
+  classifyProductFamily,
   catalogInputSchema,
   normalizeCatalogListing,
   normalizationVersion,
@@ -187,6 +188,11 @@ export async function inspectCatalog(db = createDatabase()) {
   );
   return groups.flat().map((row) => ({
     ...row,
+    family: classifyProductFamily({
+      title: row.listing.title,
+      retailerId: retailerIdSchema.parse(row.listing.retailerId),
+      sourceCategory: row.listing.category,
+    }),
     unitPriceCalculation:
       row.price &&
       row.normalization &&
@@ -195,6 +201,11 @@ export async function inspectCatalog(db = createDatabase()) {
         ? calculateUnitPrice({
             ...normalizeCatalogListing(catalogRecord(row.listing)),
             title: row.listing.title,
+            productFamily: classifyProductFamily({
+              title: row.listing.title,
+              retailerId: retailerIdSchema.parse(row.listing.retailerId),
+              sourceCategory: row.listing.category,
+            }).family,
             currentPriceCents: row.price.currentPriceCents,
             observedAt: row.listing.lastSeenAt,
             available: row.listing.available,

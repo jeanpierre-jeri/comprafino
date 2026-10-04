@@ -1,0 +1,642 @@
+[
+  {
+    "brand": "Molitalia",
+    "productId": "2707",
+    "productName": "Spaguetti Molitalia 950g",
+    "link": "https://www.metro.pe/spaguetti-molitalia-950g-2/p",
+    "categoryId": "1000743",
+    "items": [
+      {
+        "itemId": "2709",
+        "name": "Spaguetti Molitalia 950g",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/517010/474323-01-60146.jpg?v=638465529713130000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 4.5,
+              "ListPrice": 5.1,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Molitalia",
+    "productId": "1084412",
+    "productName": "Tallarín Molitalia 950g",
+    "link": "https://www.metro.pe/tallar-n-molitalia-950g-1050101/p",
+    "categoryId": "1000743",
+    "items": [
+      {
+        "itemId": "39322718",
+        "name": "Tallarín Molitalia 950g",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/608373/Tallar-n-Molitalia-950g-1-302716.jpg?v=638944294065800000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 4.5,
+              "ListPrice": 5.1,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Nicolini",
+    "productId": "1074311",
+    "productName": "Twopack Fideo Spaghetti Nicolini 1kg",
+    "link": "https://www.metro.pe/twopack-fideo-spaghetti-nicolini-1kg-1039751/p",
+    "categoryId": "1000743",
+    "items": [
+      {
+        "itemId": "39312613",
+        "name": "Twopack Fideo Spaghetti Nicolini 1kg",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/583024/Twopack-Fideo-Spaghetti-Nicolini-1kg-1-292745.jpg?v=638804325779870000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 8,
+              "ListPrice": 10.4,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Don Vittorio",
+    "productId": "1030154",
+    "productName": "Twopack Fideo Spaghetti Don Vittorio 950g",
+    "link": "https://www.metro.pe/twopack-fideo-spaghetti-don-vittorio-950g-1011432/p",
+    "categoryId": "1000743",
+    "items": [
+      {
+        "itemId": "39269138",
+        "name": "Twopack Fideo Spaghetti Don Vittorio 950g",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/661773/Twopack-Fideo-Spaghetti-Don-Vittorio-950g-1-256175.jpg?v=639234597659970000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 9.9,
+              "ListPrice": 12,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Don Vittorio",
+    "productId": "999875",
+    "productName": "Spaghetti Don Vittorio 950g",
+    "link": "https://www.metro.pe/spaghetti-don-vittorio-950g-962240/p",
+    "categoryId": "1000743",
+    "items": [
+      {
+        "itemId": "39238485",
+        "name": "Spaghetti Don Vittorio 950g",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/642515/962240-01-148873.jpg?v=639123898075130000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 5,
+              "ListPrice": 6.1,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Nicolini",
+    "productId": "2632",
+    "productName": "Cabello de Ángel Nicolini 250g",
+    "link": "https://www.metro.pe/cabello-de-angel-nicolini-250g-26553/p",
+    "categoryId": "1000743",
+    "items": [
+      {
+        "itemId": "2634",
+        "name": "Cabello de Ángel Nicolini 250g",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/585981/26553-01-73943.jpg?v=638820849735600000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 1.5,
+              "ListPrice": 1.7,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Don Vittorio",
+    "productId": "2631",
+    "productName": "Cabello de Ángel Don Vittorio 250g",
+    "link": "https://www.metro.pe/cabello-de-angel-don-vittorio-250g-2/p",
+    "categoryId": "1000743",
+    "items": [
+      {
+        "itemId": "2633",
+        "name": "Cabello de Ángel Don Vittorio 250g",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/239844/25755-01-7516.jpg?v=638173825033070000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 1.8,
+              "ListPrice": 2.1,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Molitalia",
+    "productId": "1084411",
+    "productName": "Linguine Molitalia 950g",
+    "link": "https://www.metro.pe/linguine-molitalia-950g-1050100/p",
+    "categoryId": "1000743",
+    "items": [
+      {
+        "itemId": "39322717",
+        "name": "Linguine Molitalia 950g",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/608372/Linguine-Molitalia-950g-1-302715.jpg?v=638944294062370000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 4.5,
+              "ListPrice": 5.1,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Don Vittorio",
+    "productId": "1030159",
+    "productName": "Twopack Fideo Linguini Grosso Don Vittorio 950g",
+    "link": "https://www.metro.pe/twopack-fideo-linguini-grosso-don-vittorio-950g-1011434/p",
+    "categoryId": "1000743",
+    "items": [
+      {
+        "itemId": "39269143",
+        "name": "Twopack Fideo Linguini Grosso Don Vittorio 950g",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/661775/Twopack-Fideo-Linguini-Grosso-Don-Vittorio-950g-1-256180.jpg?v=639234597676970000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 9.9,
+              "ListPrice": 12,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Don Vittorio",
+    "productId": "1000496",
+    "productName": "Spaghetti Don Vittorio 500g",
+    "link": "https://www.metro.pe/spaghetti-don-vittorio-500g-962239/p",
+    "categoryId": "1000743",
+    "items": [
+      {
+        "itemId": "39239112",
+        "name": "Spaghetti Don Vittorio 500g",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/642516/962239-01-149461.jpg?v=639123898079200000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 3.7,
+              "ListPrice": 3.8,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Nicolini",
+    "productId": "1074305",
+    "productName": "Twopack Fideo Tallarín Nicolini 1kg",
+    "link": "https://www.metro.pe/twopack-fideo-tallarin-nicolini-1kg-1039752/p",
+    "categoryId": "1000743",
+    "items": [
+      {
+        "itemId": "39312607",
+        "name": "Twopack Fideo Tallarín Nicolini 1kg",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/583025/Twopack-Fideo-Tallar-n-Nicolini-1kg-1-292739.jpg?v=638804325783000000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 8,
+              "ListPrice": 10.4,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "La Montanara",
+    "productId": "2681",
+    "productName": "Fussilli de Verduras La Montanara Bolsa 500 g",
+    "link": "https://www.metro.pe/fussilli-de-verduras-la-montanara-bolsa-500-g-2/p",
+    "categoryId": "1000743",
+    "items": [
+      {
+        "itemId": "2683",
+        "name": "Fussilli de Verduras La Montanara Bolsa 500 g",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/239965/frontal-3183.jpg?v=638173825702330000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 7.7,
+              "ListPrice": 7.7,
+              "IsAvailable": true,
+              "AvailableQuantity": 100,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Nicolini",
+    "productId": "1099766",
+    "productName": "Tripack Cabello de Ángel Nicolini 250g",
+    "link": "https://www.metro.pe/tripack-cabello-de-ngel-nicolini-250g-1066400/p",
+    "categoryId": "1000743",
+    "items": [
+      {
+        "itemId": "39337980",
+        "name": "Tripack Cabello de Ángel Nicolini 250g",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/641287/Tripack-Cabello-de-ngel-Nicolini-250g-1-366546.jpg?v=639117093817400000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 3.9,
+              "ListPrice": 5.1,
+              "IsAvailable": true,
+              "AvailableQuantity": 100,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Don Vittorio",
+    "productId": "1082397",
+    "productName": "Twopack Spaghetti Don Vittorio 500g",
+    "link": "https://www.metro.pe/twopack-spaghetti-don-vittorio-500g-1047948/p",
+    "categoryId": "1000743",
+    "items": [
+      {
+        "itemId": "39320698",
+        "name": "Twopack Spaghetti Don Vittorio 500g",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/603032/X2-SPAGUETTI-DON-VITTORIO-X-500-GR-1-300557.jpg?v=638912433645530000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 6.2,
+              "ListPrice": 7.6,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Don Vittorio",
+    "productId": "1030155",
+    "productName": "Twopack Fideo Fettuccini Don Vittorio 950g",
+    "link": "https://www.metro.pe/twopack-fideo-fettuccini-don-vittorio-950g-1011433/p",
+    "categoryId": "1000743",
+    "items": [
+      {
+        "itemId": "39269139",
+        "name": "Twopack Fideo Fettuccini Don Vittorio 950g",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/661774/Twopack-Fideo-Fettuccini-Don-Vittorio-950g-1-256176.jpg?v=639234597672600000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 9.9,
+              "ListPrice": 12,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Cuisine & Co",
+    "productId": "1006886",
+    "productName": "Fideos Cuisine &Co Cabello de Ángel 250g",
+    "link": "https://www.metro.pe/fideos-cuisine-co-cabello-de-angel-250g-2/p",
+    "categoryId": "1000743",
+    "items": [
+      {
+        "itemId": "39245717",
+        "name": "Fideos Cuisine &Co Cabello de Ángel 250g",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/400160/Fideos-Cuisine-Co-Cabello-de-ngel-250g-1-351641473.jpg?v=638181125416100000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 1.6,
+              "ListPrice": 1.6,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Nicolini",
+    "productId": "1000507",
+    "productName": "Fideo Tallarín Delgado Nicolini 500g",
+    "link": "https://www.metro.pe/fideo-tallarin-delgado-nicolini-500g-962249/p",
+    "categoryId": "1000743",
+    "items": [
+      {
+        "itemId": "39239123",
+        "name": "Fideo Tallarín Delgado Nicolini 500g",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/586767/962249-01-149472.jpg?v=638826897777900000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 2.7,
+              "ListPrice": 3.2,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Don Vittorio",
+    "productId": "1000502",
+    "productName": "Fideo Linguini Don Vittorio 500g",
+    "link": "https://www.metro.pe/fideo-linguini-don-vittorio-500g-962243/p",
+    "categoryId": "1000743",
+    "items": [
+      {
+        "itemId": "39239118",
+        "name": "Fideo Linguini Don Vittorio 500g",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/641964/962243-01-149467.jpg?v=639119901712300000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 3.7,
+              "ListPrice": 3.8,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Don Vittorio",
+    "productId": "1000501",
+    "productName": "Fettuccini Don Vittorio 950g",
+    "link": "https://www.metro.pe/fettuccini-don-vittorio-950g-962241/p",
+    "categoryId": "1000743",
+    "items": [
+      {
+        "itemId": "39239117",
+        "name": "Fettuccini Don Vittorio 950g",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/642519/962241-01-149466.jpg?v=639123898091530000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 5,
+              "ListPrice": 6.1,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Molitalia",
+    "productId": "2732",
+    "productName": "Tallarín Molitalia 450g",
+    "link": "https://www.metro.pe/tallarin-molitalia-450g-2/p",
+    "categoryId": "1000743",
+    "items": [
+      {
+        "itemId": "2734",
+        "name": "Tallarín Molitalia 450g",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://metroio.vteximg.com.br/arquivos/ids/517012/3277-01-22538.jpg?v=638465529721370000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "commertialOffer": {
+              "Price": 2.9,
+              "ListPrice": 3.9,
+              "IsAvailable": true,
+              "AvailableQuantity": 99999,
+              "Tax": 0
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

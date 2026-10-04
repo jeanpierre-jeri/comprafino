@@ -14,8 +14,8 @@ async function main() {
   };
   const adapter =
     retailer === "tottus"
-      ? createTottusAdapter(undefined, category ?? "meat")
-      : adapters[retailer]();
+      ? createTottusAdapter(undefined, category === "dairy" ? "dairy" : "meat")
+      : adapters[retailer](undefined, category);
   if (dryRun) {
     const result = await adapter.fetchListings(limit);
     console.log(

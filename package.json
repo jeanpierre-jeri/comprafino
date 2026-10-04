@@ -26,7 +26,8 @@
     "discover:catalog": "pnpm --filter @comprafino/scrapers discover:catalog",
     "refresh:listings": "pnpm --filter @comprafino/scrapers refresh:listings",
     "coverage:report": "pnpm --filter @comprafino/db coverage:report",
-    "audit:unit-prices": "pnpm --filter @comprafino/db audit:unit-prices"
+    "audit:unit-prices": "pnpm --filter @comprafino/db audit:unit-prices",
+    "audit:staples": "pnpm --filter @comprafino/db audit:staples"
   },
   "devDependencies": {
     "oxfmt": "0.71.0",

@@ -118,3 +118,36 @@ it.each([15, 30])("a %i egg tray contains one package", (count) => {
   expect(attrs.packageCount).toBe(1);
   expect(attrs.quantity).toEqual({ value: count, unit: "unit" });
 });
+
+it("withholds canned tuna mass comparison without confusing net and drained weight", () => {
+  const tunaNow = new Date("2026-10-04T16:00:00Z");
+  const result = calculateUnitPrice(
+    {
+      title: "Filete de Atún Florida Lata 140g",
+      currentPriceCents: 650,
+      pricingBasis: "unit",
+      totalQuantity: { value: 140, unit: "g" },
+      issues: [],
+      observedAt: tunaNow,
+    },
+    tunaNow,
+  );
+  expect(result).toEqual({ price: null, reason: "ambiguous-quantity" });
+});
+
+it("withholds the observed one-gram flour source typo without repairing display quantity", () => {
+  expect(
+    calculateUnitPrice(
+      {
+        title: "Harina de Arroz Costeño 1 g",
+        productFamily: "flour",
+        pricingBasis: "unit",
+        totalQuantity: { value: 1, unit: "g" },
+        currentPriceCents: 500,
+        issues: [],
+        observedAt: now,
+      },
+      now,
+    ),
+  ).toEqual({ price: null, reason: "ambiguous-quantity" });
+});

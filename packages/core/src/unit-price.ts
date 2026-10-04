@@ -1,3 +1,4 @@
+import type { ProductFamily } from "./product-family.ts";
 import type { Quantity } from "./catalog.ts";
 import { offerFreshness } from "./listing-refresh.ts";
 import { formatPen } from "./public-products.ts";
@@ -16,6 +17,7 @@ export type UnitPriceInput = {
   totalQuantity: Quantity | null;
   issues: readonly string[];
   title: string;
+  productFamily?: ProductFamily | null;
   observedAt: Date;
   available?: boolean | null;
 };
@@ -40,6 +42,10 @@ export function calculateUnitPrice(input: UnitPriceInput, now = new Date()): Uni
     return unavailable("invalid-price");
   if (input.available === false) return unavailable("unavailable");
   if (offerFreshness(input.observedAt, now) !== "fresh") return unavailable("not-fresh");
+  // Current sources do not distinguish canned tuna net from drained weight.
+  // Keep display quantity, but withhold a generic mass value comparison.
+  if (/\bat[uú]n\b/iu.test(input.title) && input.totalQuantity?.unit === "g")
+    return unavailable("ambiguous-quantity");
   // KG is the source quote, independent of approximate/variable package mass.
   if (input.pricingBasis === "kg")
     return {
@@ -51,6 +57,15 @@ export function calculateUnitPrice(input: UnitPriceInput, now = new Date()): Uni
       },
       reason: null,
     };
+  // Observed retailer typo: 'Harina de Arroz Costeño 1 g'. Keep its
+  // declared quantity for display; do not turn tiny staple packs into S/kg.
+  if (
+    input.totalQuantity?.unit === "g" &&
+    input.totalQuantity.value < 10 &&
+    input.productFamily &&
+    ["rice", "sugar", "flour", "oats", "pasta"].includes(input.productFamily)
+  )
+    return unavailable("ambiguous-quantity");
   // Unknown *pack words are unsafe even when the legacy normalizer defaulted to one.
   const packWords = input.title.toLowerCase().match(/\b[a-z]+pack\b/gu) ?? [];
   if (

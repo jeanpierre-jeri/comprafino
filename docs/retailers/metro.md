@@ -109,3 +109,7 @@ Native fetch reads the existing public VTEX products/search endpoint with `ft`, 
 ## Milestone 7 targeted refresh
 
 [Known listing refresh](../listing-refresh.md) documents the verified exact lookup, shared price mapping, bounded sequential budget, unavailable/missing semantics and live repeat evidence. Category bounds are unchanged. Targeted refresh does not infer category coverage or delete historical data.
+
+## Milestone 9 permanent staple sources
+
+The adapter now accepts the small validated allowlist `dairy`, `sugar-brown`, `sugar-white`, `pasta`, `flour`, `oats`, `toilet-paper`. New sources use full paths from the public tree, at most twenty usable listings/two sequential pages/forty source products, ordinary anonymous seller-1 quotes and the existing source boundary. CLI requests above twenty for these sources fail before network access; dairy retains its prior cap. Terminal VTEX ranges can advertise a full page beyond the smaller total; actual row count is validated against that total. No empty source is treated as successful ingestion. See [staple coverage](../staple-coverage.md) for paths, actual acquisitions, quantity ambiguities and scheduled atomic integration.

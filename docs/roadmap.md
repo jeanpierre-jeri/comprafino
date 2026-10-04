@@ -86,7 +86,15 @@ Future category review should inspect egg demand within existing coverage, then 
 
 Implemented: independent fresh normalized retailer offers alongside unchanged exact groups; bigint rational kg/L/unit prices, direct KG semantics, multipack totals and conservative unavailable reasons; native URL relevance/package/unit sorting with separate dimensions; single-retailer eligibility, trusted provenance, exact-group links and combined zero-result discovery admission; development price inspection and read-only audit command. No matching thresholds, identity rules, dependencies or schema changed.
 
-Verified: 534 eligible offers, 499 calculable / 35 withheld; reviewed 29 eggs, twenty mass staples, fifteen volume offers and direct-KG samples; real huevos/arroz/azúcar/aceite/milk searches. Format/lint/types, 430 unit tests and 28 isolated PostgreSQL tests pass. Default build remains blocked by Turbopack CSS-worker port permissions; Chromium E2E could not start. Staged without commit/push pending the user's local confirmation. See [generic comparison](generic-comparison.md) for architecture, audit and candid keyword/category limitations (no actual packaged sugar/oat/pasta yet). Milestone 8 remains incomplete until that gate passes. No next milestone started.
+Verified: 534 eligible offers, 499 calculable / 35 withheld; reviewed 29 eggs, twenty mass staples, fifteen volume offers and direct-KG samples; real huevos/arroz/azúcar/aceite/milk searches. Format/lint/types, 430 unit tests and 28 isolated PostgreSQL tests pass. The original build/E2E restriction described in [generic comparison](generic-comparison.md) is historical. Milestone 8 is complete in the user-provided baseline `1401f97`. Its audit exposed missing staple coverage and incidental-keyword relevance, addressed below.
+
+## Milestone 9 — Staple-category coverage and generic-search relevance
+
+Implemented: small recomputable ten-family evidence model outside exact identity; validated source-leaf precedence, conservative product nouns and negative evidence; family-aware generic/combined admission with retained brand/size/variant tokens and lexical fallback; twelve bounded permanent PV/Metro category sources; scheduled integration before one derivation pass; source/family developer inspection; tuna net/drained and tiny-staple quantity safeguards, indicative paper-roll explanation; repeatable relevance audit and reviewed regression fixtures. No dependencies, schema/migrations or matcher thresholds changed.
+
+Verified: 199 added listings, 735 total; sugar P@5 0.00→1.00, all ten after-query P@5/P@10 1.00, bounded relevance counts/coverage and limitations recorded in [staple report](staple-coverage.md). Source persistence and original history integrity passed, normalization/matching repeats wrote zero, full scheduled and one-SKU targeted refresh passed. Format/lint/types, 481 unit cases and 33 isolated PostgreSQL cases pass.
+
+Pending: fresh local default build and Chromium E2E confirmation because the agent hit Turbopack's CSS-worker port restriction. Changes stay staged without commit/push; Milestone 9 is not complete until that explicit gate passes. Next recommendation: review observed quantity/source ambiguity and conservative family recall, with catalog/targeted-budget headroom measured first. No later milestone started.
 
 ## Later — Price history
 

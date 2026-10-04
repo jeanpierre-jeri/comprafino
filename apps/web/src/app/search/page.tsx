@@ -147,6 +147,18 @@ export default async function SearchPage({
                 <p className="mt-2 text-sm text-muted-foreground">
                   Compara cantidades y precios. Las marcas, variedades y calidades pueden diferir.
                 </p>
+                {offers.some((offer) => offer.family.family === "toilet_paper") && (
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    El precio por rollo es orientativo: el tamaño y la cantidad de hojas pueden
+                    variar.
+                  </p>
+                )}
+                {offers.some((offer) => offer.family.family === "canned_tuna") && (
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    El peso del atún puede incluir líquido. No mostramos precio por kg sin
+                    distinguir peso neto y escurrido.
+                  </p>
+                )}
                 <form
                   action="/search"
                   method="get"

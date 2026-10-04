@@ -1,0 +1,177 @@
+[
+  {
+    "retailerId": "plaza-vea",
+    "sourceCategory": "444",
+    "title": "Azúcar Rubia BELL'S Bolsa 5Kg",
+    "expected": "sugar",
+    "kind": "observed"
+  },
+  {
+    "retailerId": "metro",
+    "sourceCategory": "1001260",
+    "title": "Azúcar Blanca Metro Bolsa 1 kg",
+    "expected": "sugar",
+    "kind": "observed"
+  },
+  {
+    "retailerId": "metro",
+    "sourceCategory": "1001440",
+    "title": "Bebida de Coco Cuisine & Co Sin Azúcar Añadida Caja 1L",
+    "expected": null,
+    "kind": "observed"
+  },
+  {
+    "retailerId": "tottus",
+    "sourceCategory": "J0102010302",
+    "title": "Bebida Gaseosa Coca Cola Zero Azúcar Botella 600 mL",
+    "expected": null,
+    "kind": "observed"
+  },
+  {
+    "retailerId": "plaza-vea",
+    "sourceCategory": "600",
+    "title": "Aceite Vegetal PRIMOR Premium Botella 900ml",
+    "expected": "cooking_oil",
+    "kind": "observed"
+  },
+  {
+    "retailerId": "tottus",
+    "sourceCategory": "J0101020403",
+    "title": "Filete de Atún Florida en Aceite Vegetal Lata 140 g",
+    "expected": "canned_tuna",
+    "kind": "observed"
+  },
+  {
+    "retailerId": "metro",
+    "sourceCategory": "1001265",
+    "title": "Avena Tradicional Quaker 900g",
+    "expected": "oats",
+    "kind": "observed"
+  },
+  {
+    "retailerId": "plaza-vea",
+    "sourceCategory": "859",
+    "title": "Bebida de Avena Caja 1L",
+    "expected": null,
+    "kind": "synthetic contrast"
+  },
+  {
+    "retailerId": "plaza-vea",
+    "sourceCategory": "1639",
+    "title": "Cereal ANGEL Copos Hechos con Avena Bolsa 380g",
+    "expected": null,
+    "kind": "observed"
+  },
+  {
+    "retailerId": "metro",
+    "sourceCategory": "1001284",
+    "title": "Arroz Extra Costeño 5kg",
+    "expected": "rice",
+    "kind": "observed"
+  },
+  {
+    "retailerId": "plaza-vea",
+    "sourceCategory": "349",
+    "title": "Harina de Arroz COSTEÑO Bolsa 1kg",
+    "expected": "flour",
+    "kind": "observed"
+  },
+  {
+    "retailerId": "plaza-vea",
+    "sourceCategory": "38",
+    "title": "Galleta de Arroz COSTEÑO Pimienta Doypack 150g",
+    "expected": null,
+    "kind": "observed"
+  },
+  {
+    "retailerId": "metro",
+    "sourceCategory": "1001348",
+    "title": "Huevos Pardos Metro 30un",
+    "expected": "eggs",
+    "kind": "observed"
+  },
+  {
+    "retailerId": "metro",
+    "sourceCategory": "1000923",
+    "title": "Organizador Bynd de Huevos",
+    "expected": null,
+    "kind": "observed"
+  },
+  {
+    "retailerId": "metro",
+    "sourceCategory": "1000743",
+    "title": "Linguine Molitalia 950g",
+    "expected": "pasta",
+    "kind": "observed"
+  },
+  {
+    "retailerId": "plaza-vea",
+    "sourceCategory": "454",
+    "title": "Fideos DON VITTORIO Spaghetti Bolsa 500g",
+    "expected": "pasta",
+    "kind": "observed"
+  },
+  {
+    "retailerId": "metro",
+    "sourceCategory": "1000715",
+    "title": "Detergente Líquido Bolívar Active Care 1.9L",
+    "expected": "detergent",
+    "kind": "observed"
+  },
+  {
+    "retailerId": "metro",
+    "sourceCategory": "1912",
+    "title": "Detergente en Polvo Bolívar Cuidado Total 4kg",
+    "expected": "detergent",
+    "kind": "observed"
+  },
+  {
+    "retailerId": "plaza-vea",
+    "sourceCategory": "402",
+    "title": "Papel Higiénico SUAVE Premium Triple Hoja Paquete 12un",
+    "expected": "toilet_paper",
+    "kind": "observed"
+  },
+  {
+    "retailerId": "metro",
+    "sourceCategory": "1000671",
+    "title": "Pack Primor: Aceite Vegetal Premium 900ml + Filete de Atún en Aceite 2un",
+    "expected": null,
+    "kind": "observed"
+  },
+  {
+    "retailerId": null,
+    "sourceCategory": null,
+    "title": "Azúcar blanca Bolsa 1kg",
+    "expected": "sugar",
+    "kind": "synthetic contrast"
+  },
+  {
+    "retailerId": null,
+    "sourceCategory": null,
+    "title": "Arroz cocido con pollo 500g",
+    "expected": null,
+    "kind": "synthetic contrast"
+  },
+  {
+    "retailerId": null,
+    "sourceCategory": null,
+    "title": "Pasta dental 100g",
+    "expected": null,
+    "kind": "synthetic contrast"
+  },
+  {
+    "retailerId": null,
+    "sourceCategory": null,
+    "title": "Aceite corporal 100ml",
+    "expected": null,
+    "kind": "synthetic contrast"
+  },
+  {
+    "retailerId": null,
+    "sourceCategory": null,
+    "title": "Huevos de Pascua chocolate 200g",
+    "expected": null,
+    "kind": "synthetic contrast"
+  }
+]

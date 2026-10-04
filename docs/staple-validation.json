@@ -1,0 +1,1458 @@
+{
+  "categoryRuns": [
+    {
+      "retailer": "plaza-vea",
+      "category": "sugar-brown",
+      "created": 8,
+      "id": "05ed983e-062d-4c90-afc8-f418bd57783c",
+      "fetched": 11,
+      "persisted": 8,
+      "changed": 8,
+      "samples": [
+        {
+          "externalId": "10033838",
+          "title": "Azúcar Rubia BELL'S Bolsa 5Kg",
+          "priceCents": 1550,
+          "sourceCategory": "444"
+        },
+        {
+          "externalId": "10036026",
+          "title": "Azúcar Rubia BELL'S Bolsa 1Kg",
+          "priceCents": 350,
+          "packageText": "Bolsa 1kg",
+          "sourceCategory": "444"
+        },
+        {
+          "externalId": "1028",
+          "title": "Azúcar Rubia DULFINA Bolsa 5Kg",
+          "priceCents": 1830,
+          "packageText": "Bolsa 5Kg",
+          "sourceCategory": "444"
+        },
+        {
+          "externalId": "10036027",
+          "title": "Azúcar Rubia BELL'S Bolsa 2Kg",
+          "priceCents": 690,
+          "sourceCategory": "444"
+        },
+        {
+          "externalId": "62575",
+          "title": "Azúcar Rubia CARTAVIO Bolsa 5Kg",
+          "priceCents": 2350,
+          "packageText": "Bolsa 5kg",
+          "sourceCategory": "444"
+        },
+        {
+          "externalId": "1848",
+          "title": "Azúcar Rubia DULFINA Bolsa 1Kg",
+          "priceCents": 480,
+          "packageText": "Bolsa 1Kg",
+          "sourceCategory": "444"
+        },
+        {
+          "externalId": "10691736",
+          "title": "Azúcar Rubia DULFINA Bolsa 2Kg",
+          "priceCents": 920,
+          "packageText": "Bolsa 2Kg",
+          "sourceCategory": "444"
+        },
+        {
+          "externalId": "62593",
+          "title": "Azúcar Rubia CARTAVIO Bolsa 1Kg",
+          "priceCents": 510,
+          "packageText": "Bolsa 1kg",
+          "sourceCategory": "444"
+        }
+      ]
+    },
+    {
+      "retailer": "plaza-vea",
+      "category": "sugar-white",
+      "created": 3,
+      "id": "6d167986-771e-48e7-a0e6-64a9ccf59702",
+      "fetched": 7,
+      "persisted": 3,
+      "changed": 3,
+      "samples": [
+        {
+          "externalId": "1870",
+          "title": "Azúcar Blanca DULFINA Bolsa 1Kg",
+          "priceCents": 530,
+          "packageText": "Bolsa 1Kg",
+          "sourceCategory": "1625"
+        },
+        {
+          "externalId": "10036029",
+          "title": "Azúcar Blanca BELL'S Bolsa 2Kg",
+          "priceCents": 900,
+          "packageText": "Bolsa 2kg",
+          "sourceCategory": "1625"
+        },
+        {
+          "externalId": "10691735",
+          "title": "Azúcar Blanca DULFINA Bolsa 2Kg",
+          "priceCents": 1020,
+          "packageText": "Bolsa 2Kg",
+          "sourceCategory": "1625"
+        }
+      ]
+    },
+    {
+      "retailer": "plaza-vea",
+      "category": "pasta",
+      "created": 20,
+      "id": "e50eb9af-8abd-4e56-a07c-df6e6ac17474",
+      "fetched": 20,
+      "persisted": 20,
+      "changed": 20,
+      "samples": [
+        {
+          "externalId": "10536673",
+          "title": "Fideos DON VITTORIO Spaghetti Bolsa 950g",
+          "priceCents": 500,
+          "sourceCategory": "454"
+        },
+        {
+          "externalId": "11801241",
+          "title": "Fideos DON VITTORIO Spaghetti Bolsa 500g",
+          "priceCents": 340,
+          "sourceCategory": "454"
+        },
+        {
+          "externalId": "10620458",
+          "title": "Fideos Spaghetti MOLITALIA Bolsa 950g",
+          "priceCents": 450,
+          "packageText": "Bolsa 950g",
+          "sourceCategory": "454"
+        },
+        {
+          "externalId": "28867",
+          "title": "Fideos NICOLINI Spaghetti Bolsa 1Kg",
+          "priceCents": 390,
+          "packageText": "Bolsa 1Kg",
+          "sourceCategory": "454"
+        },
+        {
+          "externalId": "2958",
+          "title": "Fideos DON VITTORIO Cabello de Ángel Bolsa 250g",
+          "priceCents": 200,
+          "sourceCategory": "454"
+        },
+        {
+          "externalId": "11801240",
+          "title": "Fideos DON VITTORIO Fetuccini Bolsa 500g",
+          "priceCents": 340,
+          "sourceCategory": "454"
+        },
+        {
+          "externalId": "10592136",
+          "title": "Fideos DON VITTORIO Linguini Grosso Bolsa 950g",
+          "priceCents": 500,
+          "sourceCategory": "454"
+        },
+        {
+          "externalId": "10592095",
+          "title": "Fideos DON VITTORIO Fettuccini Bolsa 950g",
+          "priceCents": 500,
+          "sourceCategory": "454"
+        },
+        {
+          "externalId": "28855",
+          "title": "Fideos NICOLINI Tallarín Grueso Bolsa 1kg",
+          "priceCents": 390,
+          "packageText": "Bolsa 1Kg",
+          "sourceCategory": "454"
+        },
+        {
+          "externalId": "3176",
+          "title": "Fideos Cabello de Ángel NICOLINI Bolsa 250g",
+          "priceCents": 120,
+          "packageText": "Bolsa 250g",
+          "sourceCategory": "454"
+        },
+        {
+          "externalId": "12101753",
+          "title": "Fideo Tallarín MOLITALIA Bolsa 950g",
+          "priceCents": 450,
+          "packageText": "Bolsa 950g",
+          "sourceCategory": "454"
+        },
+        {
+          "externalId": "11801242",
+          "title": "Fideos DON VITTORIO Linguini Bolsa 500g",
+          "priceCents": 340,
+          "sourceCategory": "454"
+        },
+        {
+          "externalId": "3384",
+          "title": "Fideos Tagliatelle de Huevo LA MONTANARA Bolsa 500g",
+          "priceCents": 770,
+          "packageText": "Bolsa 500g",
+          "sourceCategory": "454"
+        },
+        {
+          "externalId": "3591",
+          "title": "Fideos Cabello de Ángel MOLITALIA Bolsa 250g",
+          "priceCents": 170,
+          "packageText": "Bolsa 250g",
+          "sourceCategory": "454"
+        },
+        {
+          "externalId": "12101754",
+          "title": "Fideo Linguine MOLITALIA Bolsa 950g",
+          "priceCents": 450,
+          "packageText": "Bolsa 950g",
+          "sourceCategory": "454"
+        },
+        {
+          "externalId": "11816506",
+          "title": "Fideos DON VITTORIO Linguini Grosso Bolsa 500g",
+          "priceCents": 340,
+          "sourceCategory": "454"
+        },
+        {
+          "externalId": "11438953",
+          "title": "Fideos Spaghetti BELL'S Bolsa 900g",
+          "priceCents": 390,
+          "sourceCategory": "454"
+        },
+        {
+          "externalId": "10705767",
+          "title": "Fideos Spaghetti MOLITALIA Bolsa 450g",
+          "priceCents": 280,
+          "packageText": "Bolsa 450g",
+          "sourceCategory": "454"
+        },
+        {
+          "externalId": "10104721",
+          "title": "Fideo Cabello de Ángel LAVAGGI Bolsa 250g",
+          "priceCents": 150,
+          "packageText": "Bolsa 250g",
+          "sourceCategory": "454"
+        },
+        {
+          "externalId": "410",
+          "title": "Fideos Spaghetti NICOLINI Bolsa 500g",
+          "priceCents": 270,
+          "packageText": "Bolsa 500g",
+          "sourceCategory": "454"
+        }
+      ]
+    },
+    {
+      "retailer": "plaza-vea",
+      "category": "flour",
+      "created": 20,
+      "id": "76551679-3352-4a9f-8697-edc92d6a27b8",
+      "fetched": 20,
+      "persisted": 20,
+      "changed": 20,
+      "samples": [
+        {
+          "externalId": "11621",
+          "title": "Harina de Trigo Preparada BLANCA FLOR Bolsa 1Kg",
+          "priceCents": 770,
+          "packageText": "Bolsa 1kg",
+          "sourceCategory": "349"
+        },
+        {
+          "externalId": "155",
+          "title": "Harina Sin Preparar FAVORITA Paquete 1kg",
+          "priceCents": 450,
+          "packageText": "Paquete 1kg",
+          "sourceCategory": "349"
+        },
+        {
+          "externalId": "4156",
+          "title": "Chuño UNIVERSAL Bolsa 180g",
+          "priceCents": 380,
+          "packageText": "Bolsa 180g",
+          "sourceCategory": "349"
+        },
+        {
+          "externalId": "4566",
+          "title": "Harina de Maíz Blanco P.A.N. Precocida Bolsa 1Kg",
+          "priceCents": 690,
+          "packageText": "Bolsa 1kg",
+          "sourceCategory": "349"
+        },
+        {
+          "externalId": "4263",
+          "title": "Harina BELL'S De trigo preparada Bolsa 1Kg",
+          "priceCents": 530,
+          "packageText": "Bolsa 1kg",
+          "sourceCategory": "349"
+        },
+        {
+          "externalId": "66",
+          "title": "Harina de Trigo sin Preparar MOLITALIA sin Preparar Bolsa 1kg",
+          "priceCents": 550,
+          "packageText": "Bolsa 1kg",
+          "sourceCategory": "349"
+        },
+        {
+          "externalId": "10060127",
+          "title": "Polvo de Hornear UNIVERSAL Caja 100g",
+          "priceCents": 670,
+          "packageText": "Caja 100g",
+          "sourceCategory": "349"
+        },
+        {
+          "externalId": "31097",
+          "title": "Harina sin Preparar BLANCA FLOR Bolsa 1kg",
+          "priceCents": 690,
+          "packageText": "Bolsa 1kg",
+          "sourceCategory": "349"
+        },
+        {
+          "externalId": "11611",
+          "title": "Harina de Trigo NICOLINI Preparada Bolsa 1Kg",
+          "priceCents": 550,
+          "packageText": "Bolsa 1kg",
+          "sourceCategory": "349"
+        },
+        {
+          "externalId": "3945",
+          "title": "Maicena UNIVERSAL Bolsa 180g",
+          "priceCents": 370,
+          "packageText": "Bolsa 180g",
+          "sourceCategory": "349"
+        },
+        {
+          "externalId": "4063",
+          "title": "Maicena DURYEA Caja 500g",
+          "priceCents": 1150,
+          "packageText": "Caja 500g",
+          "sourceCategory": "349"
+        },
+        {
+          "externalId": "4251",
+          "title": "Polvo para Hornear UNIVERSAL Sobre 25g",
+          "priceCents": 190,
+          "packageText": "Sobre 25g",
+          "sourceCategory": "349"
+        },
+        {
+          "externalId": "157",
+          "title": "Harina MOLITALIA Preparada Bolsa 1kg",
+          "priceCents": 690,
+          "packageText": "Bolsa 1kg",
+          "sourceCategory": "349"
+        },
+        {
+          "externalId": "10761948",
+          "title": "Harina Integral GRANO DE ORO Bolsa 1Kg",
+          "priceCents": 670,
+          "packageText": "Bolsa 1Kg",
+          "sourceCategory": "349"
+        },
+        {
+          "externalId": "10498345",
+          "title": "Harina sin Preparar MOLITALIA Bolsa 180g",
+          "priceCents": 120,
+          "packageText": "Bolsa 180g",
+          "sourceCategory": "349"
+        },
+        {
+          "externalId": "10107929",
+          "title": "Harina de Avena MI TIERRA Sin Gluten Bolsa 400g",
+          "priceCents": 1180,
+          "packageText": "Bolsa 400g",
+          "sourceCategory": "349"
+        },
+        {
+          "externalId": "10019869",
+          "title": "Fécula de Yuca UNIVERSAL Sobre 180g",
+          "priceCents": 350,
+          "packageText": "Sobre 180g",
+          "sourceCategory": "349"
+        },
+        {
+          "externalId": "42998",
+          "title": "Chuño BELL'S Bolsa 170g",
+          "priceCents": 340,
+          "packageText": "Bolsa 170g",
+          "sourceCategory": "349"
+        },
+        {
+          "externalId": "4068",
+          "title": "Harina de Trigo sin Preparar BELL'S Bolsa 1Kg",
+          "priceCents": 390,
+          "packageText": "Bolsa 1kg",
+          "sourceCategory": "349"
+        },
+        {
+          "externalId": "4261",
+          "title": "Maicena DURYEA Caja 100g",
+          "priceCents": 300,
+          "packageText": "Caja 100g",
+          "sourceCategory": "349"
+        }
+      ]
+    },
+    {
+      "retailer": "plaza-vea",
+      "category": "oats",
+      "created": 20,
+      "id": "58d049d6-aab1-46ad-80b8-ed72f1142edf",
+      "fetched": 20,
+      "persisted": 20,
+      "changed": 20,
+      "samples": [
+        {
+          "externalId": "10237660",
+          "title": "Avena QUAKER Tradicional Bolsa 900g",
+          "priceCents": 1120,
+          "packageText": "Bolsa 900g",
+          "sourceCategory": "1639"
+        },
+        {
+          "externalId": "10536667",
+          "title": "Avena Clásica 3 OSITOS Premium Bolsa 900g",
+          "priceCents": 990,
+          "packageText": "Bolsa 900g",
+          "sourceCategory": "1639"
+        },
+        {
+          "externalId": "11425585",
+          "title": "Avena BELL'S Bolsa 1Kg",
+          "priceCents": 890,
+          "packageText": "Bolsa 1Kg",
+          "sourceCategory": "1639"
+        },
+        {
+          "externalId": "10585190",
+          "title": "Quinua Avena 3 OSITOS Bolsa 900g",
+          "priceCents": 990,
+          "packageText": "Bolsa 900g",
+          "sourceCategory": "1639"
+        },
+        {
+          "externalId": "10536700",
+          "title": "Avena Integral GRANO DE ORO Bolsa 500g",
+          "priceCents": 550,
+          "packageText": "Bolsa 500g",
+          "sourceCategory": "1639"
+        },
+        {
+          "externalId": "10109648",
+          "title": "Avena QUAKER Tradicional Bolsa 500g",
+          "priceCents": 650,
+          "packageText": "Bolsa 500g",
+          "sourceCategory": "1639"
+        },
+        {
+          "externalId": "10033460",
+          "title": "Avena GRANO DE ORO Bolsa 1Kg",
+          "priceCents": 1050,
+          "packageText": "Bolsa 1kg",
+          "sourceCategory": "1639"
+        },
+        {
+          "externalId": "12433218",
+          "title": "Avena Clásica 3 OSITOS Bolsa 100g",
+          "priceCents": 120,
+          "packageText": "Bolsa 100g",
+          "sourceCategory": "1639"
+        },
+        {
+          "externalId": "11868202",
+          "title": "Cereal ANGEL Copos Hechos con Avena Bolsa 380g",
+          "priceCents": 1050,
+          "packageText": "Blíster 380g",
+          "sourceCategory": "1639"
+        },
+        {
+          "externalId": "11139823",
+          "title": "Avena QUAKER Con Quinua Bolsa 850g",
+          "priceCents": 1450,
+          "packageText": "Bolsa 850g",
+          "sourceCategory": "1639"
+        },
+        {
+          "externalId": "10918127",
+          "title": "Avena Clásica 3 OSITOS Bolsa 500g",
+          "priceCents": 490,
+          "packageText": "Bolsa 500g",
+          "sourceCategory": "1639"
+        },
+        {
+          "externalId": "10018187",
+          "title": "Avena Integral MI TIERRA sin Gluten Bolsa 400g",
+          "priceCents": 1000,
+          "packageText": "Bolsa 400g",
+          "sourceCategory": "1639"
+        },
+        {
+          "externalId": "74068",
+          "title": "Avena con Manzana SANTA CATALINA Bolsa 150g",
+          "priceCents": 550,
+          "packageText": "Bolsa 150g",
+          "sourceCategory": "1639"
+        },
+        {
+          "externalId": "3454",
+          "title": "Kiwicha Avena GRANO DE ORO Hojuelas Precocidas Bolsa 370g",
+          "priceCents": 450,
+          "packageText": "Bolsa 370g",
+          "sourceCategory": "1639"
+        },
+        {
+          "externalId": "3241",
+          "title": "Avena QUAKER Tradicional Chocolate Bolsa 290g",
+          "priceCents": 850,
+          "packageText": "Bolsa 290g",
+          "sourceCategory": "1639"
+        },
+        {
+          "externalId": "11618582",
+          "title": "Avena SANTA CATALINA Duopack Bolsa 900g",
+          "priceCents": 1870,
+          "packageText": "Pack 2un",
+          "sourceCategory": "1639"
+        },
+        {
+          "externalId": "11497789",
+          "title": "Pack Avena QUAKER Tradicional Bolsa 900g x2un",
+          "priceCents": 2290,
+          "sourceCategory": "1727"
+        },
+        {
+          "externalId": "11243448",
+          "title": "Avena con Hojuela sin Gluten LA PURITA Frasco 1.5Kg",
+          "priceCents": 2810,
+          "packageText": "Pote 1.5Kg",
+          "sourceCategory": "1639"
+        },
+        {
+          "externalId": "11067715",
+          "title": "Avena QUAKER Con Chía y Algarrobo Bolsa 330g",
+          "priceCents": 850,
+          "packageText": "Bolsa 330g",
+          "sourceCategory": "1639"
+        },
+        {
+          "externalId": "10672500",
+          "title": "Avena Natural SANTA CATALINA Bolsa 900g",
+          "priceCents": 960,
+          "packageText": "Bolsa 900g",
+          "sourceCategory": "1639"
+        }
+      ]
+    },
+    {
+      "retailer": "plaza-vea",
+      "category": "toilet-paper",
+      "created": 20,
+      "id": "a4421c16-5060-4e7e-827d-4f3350212005",
+      "fetched": 20,
+      "persisted": 20,
+      "changed": 20,
+      "samples": [
+        {
+          "externalId": "19958",
+          "title": "Papel Higiénico SUAVE Resistemax Doble Hoja Paquete 40un",
+          "priceCents": 2290,
+          "packageText": "Paquete 40un",
+          "sourceCategory": "402"
+        },
+        {
+          "externalId": "53635",
+          "title": "Papel Higiénico ELITE Clásico Doble Hoja Paquete 40un",
+          "priceCents": 1690,
+          "packageText": "Paquete 40un",
+          "sourceCategory": "402"
+        },
+        {
+          "externalId": "10635160",
+          "title": "Papel Higiénico SUAVE Premium Triple Hoja Paquete 12un",
+          "priceCents": 1890,
+          "packageText": "Paquete 12un",
+          "sourceCategory": "402"
+        },
+        {
+          "externalId": "51048",
+          "title": "Papel Higiénico HIGIENOL Doble Hoja 40mts Paquete 24un",
+          "priceCents": 3890,
+          "packageText": "Paquete 24un",
+          "sourceCategory": "402"
+        },
+        {
+          "externalId": "12325982",
+          "title": "Papel Higiénico SUAVE RindeMax Doble Hoja Paquete 16un",
+          "priceCents": 2190,
+          "packageText": "Bolsa 16un",
+          "sourceCategory": "402"
+        },
+        {
+          "externalId": "12005739",
+          "title": "Papel Higiénico ELITE XL Resistente 45mts Paquete 12un",
+          "priceCents": 1990,
+          "packageText": "Bolsa 12un",
+          "sourceCategory": "402"
+        },
+        {
+          "externalId": "10016995",
+          "title": "Papel Higienico Doble Hoja PARACAS Gold Negro Paquete 24un",
+          "priceCents": 4490,
+          "packageText": "Paquete 24un",
+          "sourceCategory": "402"
+        },
+        {
+          "externalId": "87623",
+          "title": "Papel Higiénico SUAVE Esencias Doble Hoja 65 metros Paquete 8un",
+          "priceCents": 2290,
+          "packageText": "Paquete 8un",
+          "sourceCategory": "402"
+        },
+        {
+          "externalId": "46156",
+          "title": "Papel Higiénico SUAVE Cuidado Completo Paquete 40un",
+          "priceCents": 3390,
+          "packageText": "Paquete 40un",
+          "sourceCategory": "402"
+        },
+        {
+          "externalId": "42832",
+          "title": "Papel Higiénico PARACAS Black Doble Hoja Paquete 12un",
+          "priceCents": 1990,
+          "packageText": "Paquete 12un",
+          "sourceCategory": "402"
+        },
+        {
+          "externalId": "11819735",
+          "title": "Papel Higiénico SUAVE Cuidado Completo Doble Hoja 50 metros Paquete 12un",
+          "priceCents": 2690,
+          "packageText": "Paquete 12un",
+          "sourceCategory": "402"
+        },
+        {
+          "externalId": "10216850",
+          "title": "Papel Higiénico HIGIENOL Doble Hoja 40mts Paquete 12un",
+          "priceCents": 1890,
+          "packageText": "Paquete 12un",
+          "sourceCategory": "402"
+        },
+        {
+          "externalId": "10117857",
+          "title": "Pack Papel Higiénico SUAVE Esencias Doble Hoja Paquete 32un + Toalla de Papel Reutilizable SCOTT Duramax 52H",
+          "priceCents": 3490,
+          "sourceCategory": "1717"
+        },
+        {
+          "externalId": "83785",
+          "title": "Papel Higiénico SUAVE Premium Triple Hoja Paquete 24un",
+          "priceCents": 3190,
+          "packageText": "Paquete 24un",
+          "sourceCategory": "402"
+        },
+        {
+          "externalId": "26948",
+          "title": "Papel Higiénico ELITE Suave y Resistente Doble Hoja Paquete 40un",
+          "priceCents": 3590,
+          "packageText": "Paquete 40un",
+          "sourceCategory": "402"
+        },
+        {
+          "externalId": "12444848",
+          "title": "Papel Higiénico ELITE Ultra Suave 65Mts Paquete 12un",
+          "priceCents": 3850,
+          "packageText": "Bolsa 12un",
+          "sourceCategory": "402"
+        },
+        {
+          "externalId": "11762353",
+          "title": "Papel Higiénico ELITE Ultra Suave 65mts Paquete 8un",
+          "priceCents": 2700,
+          "packageText": "Paquete 8un",
+          "sourceCategory": "402"
+        },
+        {
+          "externalId": "29118",
+          "title": "Papel Higiénico SUAVE Esencias Doble Hoja Paquete 32un",
+          "priceCents": 3790,
+          "packageText": "Paquete 32un",
+          "sourceCategory": "402"
+        },
+        {
+          "externalId": "12505116",
+          "title": "Papel Higiénico Premium ELITE Soft Triple Hoja Paquete 12un",
+          "priceCents": 1890,
+          "packageText": "Paquete 12un",
+          "sourceCategory": "402"
+        },
+        {
+          "externalId": "12320279",
+          "title": "Papel Higiénico SUAVE RindeMax Doble Hoja Paquete 12un",
+          "priceCents": 2050,
+          "packageText": "Bolsa 12un",
+          "sourceCategory": "402"
+        }
+      ]
+    },
+    {
+      "retailer": "metro",
+      "category": "sugar-brown",
+      "created": 19,
+      "id": "1cf77f44-7417-4d99-8b2f-06130046d58c",
+      "fetched": 19,
+      "persisted": 19,
+      "changed": 19,
+      "samples": [
+        {
+          "externalId": "37360",
+          "title": "Azúcar Rubia Máxima Bolsa 5 kg",
+          "priceCents": 1440,
+          "sourceCategory": "1001259"
+        },
+        {
+          "externalId": "31809",
+          "title": "Azúcar Rubia Metro 5kg",
+          "priceCents": 1550,
+          "sourceCategory": "1001259"
+        },
+        {
+          "externalId": "51207",
+          "title": "Azúcar Rubia Metro Bolsa 2 Kg",
+          "priceCents": 690,
+          "sourceCategory": "1001259"
+        },
+        {
+          "externalId": "39214",
+          "title": "Azúcar Rubia Máxima 1kg",
+          "priceCents": 350,
+          "sourceCategory": "1001259"
+        },
+        {
+          "externalId": "31772",
+          "title": "Azúcar Rubia Metro 1kg",
+          "priceCents": 380,
+          "sourceCategory": "1001259"
+        },
+        {
+          "externalId": "23673",
+          "title": "Azúcar Rubia Paramonga Bolsa 5 kg",
+          "priceCents": 2190,
+          "sourceCategory": "1001259"
+        },
+        {
+          "externalId": "39135619",
+          "title": "Azúcar Rubia Dulfina Bolsa 5 kg",
+          "priceCents": 2090,
+          "sourceCategory": "1001259"
+        },
+        {
+          "externalId": "7094",
+          "title": "Azúcar Rubia Dulfina Bolsa 2 kg",
+          "priceCents": 920,
+          "sourceCategory": "1001259"
+        },
+        {
+          "externalId": "7090",
+          "title": "Azúcar Rubia Dulfina Bolsa 1 kg",
+          "priceCents": 490,
+          "sourceCategory": "1001259"
+        },
+        {
+          "externalId": "7087",
+          "title": "Azúcar Rubia Paramonga 1kg",
+          "priceCents": 500,
+          "sourceCategory": "1001259"
+        },
+        {
+          "externalId": "39192935",
+          "title": "Panela Orgánica Cuisine & Co 1kg",
+          "priceCents": 1490,
+          "sourceCategory": "1001259"
+        },
+        {
+          "externalId": "39272433",
+          "title": "Panela Paramonga 500g",
+          "priceCents": 820,
+          "sourceCategory": "1001259"
+        },
+        {
+          "externalId": "39270473",
+          "title": "Panela Granulada Chuncho Superfoods 500g",
+          "priceCents": 820,
+          "sourceCategory": "1001259"
+        },
+        {
+          "externalId": "39233307",
+          "title": "Azúcar de Coco Cuisine & Co 450g",
+          "priceCents": 2490,
+          "sourceCategory": "1001259"
+        },
+        {
+          "externalId": "39174540",
+          "title": "Azúcar Rubia Cuisine & Co 5kg",
+          "priceCents": 1690,
+          "sourceCategory": "1001259"
+        },
+        {
+          "externalId": "39174539",
+          "title": "Azúcar Rubia Cuisine & Co 1kg",
+          "priceCents": 420,
+          "sourceCategory": "1001259"
+        },
+        {
+          "externalId": "39256498",
+          "title": "Panela Orgánica Onza 500g",
+          "priceCents": 1050,
+          "sourceCategory": "1001259"
+        },
+        {
+          "externalId": "39165206",
+          "title": "Azúcar Rubia Con Stevia Cuisine&Co Doypack 500g",
+          "priceCents": 650,
+          "sourceCategory": "1001259"
+        },
+        {
+          "externalId": "7098",
+          "title": "Panela Orgánica de Piura Cuisine & Co 350g",
+          "priceCents": 890,
+          "sourceCategory": "1001259"
+        }
+      ]
+    },
+    {
+      "retailer": "metro",
+      "category": "sugar-white",
+      "created": 9,
+      "id": "f770232e-9b3d-4036-85c4-972f602e785a",
+      "fetched": 9,
+      "persisted": 9,
+      "changed": 9,
+      "samples": [
+        {
+          "externalId": "51208",
+          "title": "Azúcar Blanca Metro Bolsa 2 Kg",
+          "priceCents": 900,
+          "sourceCategory": "1001260"
+        },
+        {
+          "externalId": "31814",
+          "title": "Azúcar Blanca Metro Bolsa 5 kg",
+          "priceCents": 2250,
+          "sourceCategory": "1001260"
+        },
+        {
+          "externalId": "31813",
+          "title": "Azúcar Blanca Metro Bolsa 1 kg",
+          "priceCents": 460,
+          "sourceCategory": "1001260"
+        },
+        {
+          "externalId": "7095",
+          "title": "Azúcar Blanca Refinada Dulfina Bolsa 2 kg",
+          "priceCents": 1020,
+          "sourceCategory": "1001260"
+        },
+        {
+          "externalId": "7091",
+          "title": "Azúcar Blanca Dulfina Bolsa1 kg",
+          "priceCents": 560,
+          "sourceCategory": "1001260"
+        },
+        {
+          "externalId": "39174542",
+          "title": "Azúcar Blanca Cuisine & Co 5kg",
+          "priceCents": 2390,
+          "sourceCategory": "1001260"
+        },
+        {
+          "externalId": "39174541",
+          "title": "Azúcar Blanca Cuisine & Co 1kg",
+          "priceCents": 490,
+          "sourceCategory": "1001260"
+        },
+        {
+          "externalId": "7080",
+          "title": "Azúcar Blanca Paramonga Bolsa 1 kg",
+          "priceCents": 560,
+          "sourceCategory": "1001260"
+        },
+        {
+          "externalId": "39165205",
+          "title": "Azúcar Blanca Con Stevia Cuisine&Co Doypack 500g",
+          "priceCents": 690,
+          "sourceCategory": "1001260"
+        }
+      ]
+    },
+    {
+      "retailer": "metro",
+      "category": "pasta",
+      "created": 20,
+      "id": "f291a95a-6aca-4782-a48e-688c83dd5f25",
+      "fetched": 20,
+      "persisted": 20,
+      "changed": 20,
+      "samples": [
+        {
+          "externalId": "2709",
+          "title": "Spaguetti Molitalia 950g",
+          "priceCents": 450,
+          "sourceCategory": "1000743"
+        },
+        {
+          "externalId": "39322718",
+          "title": "Tallarín Molitalia 950g",
+          "priceCents": 450,
+          "sourceCategory": "1000743"
+        },
+        {
+          "externalId": "39312613",
+          "title": "Twopack Fideo Spaghetti Nicolini 1kg",
+          "priceCents": 800,
+          "sourceCategory": "1000743"
+        },
+        {
+          "externalId": "39269138",
+          "title": "Twopack Fideo Spaghetti Don Vittorio 950g",
+          "priceCents": 990,
+          "sourceCategory": "1000743"
+        },
+        {
+          "externalId": "39238485",
+          "title": "Spaghetti Don Vittorio 950g",
+          "priceCents": 500,
+          "sourceCategory": "1000743"
+        },
+        {
+          "externalId": "2634",
+          "title": "Cabello de Ángel Nicolini 250g",
+          "priceCents": 150,
+          "sourceCategory": "1000743"
+        },
+        {
+          "externalId": "2633",
+          "title": "Cabello de Ángel Don Vittorio 250g",
+          "priceCents": 180,
+          "sourceCategory": "1000743"
+        },
+        {
+          "externalId": "39322717",
+          "title": "Linguine Molitalia 950g",
+          "priceCents": 450,
+          "sourceCategory": "1000743"
+        },
+        {
+          "externalId": "39269143",
+          "title": "Twopack Fideo Linguini Grosso Don Vittorio 950g",
+          "priceCents": 990,
+          "sourceCategory": "1000743"
+        },
+        {
+          "externalId": "39239112",
+          "title": "Spaghetti Don Vittorio 500g",
+          "priceCents": 370,
+          "sourceCategory": "1000743"
+        },
+        {
+          "externalId": "39312607",
+          "title": "Twopack Fideo Tallarín Nicolini 1kg",
+          "priceCents": 800,
+          "sourceCategory": "1000743"
+        },
+        {
+          "externalId": "2683",
+          "title": "Fussilli de Verduras La Montanara Bolsa 500 g",
+          "priceCents": 770,
+          "sourceCategory": "1000743"
+        },
+        {
+          "externalId": "39337980",
+          "title": "Tripack Cabello de Ángel Nicolini 250g",
+          "priceCents": 390,
+          "sourceCategory": "1000743"
+        },
+        {
+          "externalId": "39320698",
+          "title": "Twopack Spaghetti Don Vittorio 500g",
+          "priceCents": 620,
+          "sourceCategory": "1000743"
+        },
+        {
+          "externalId": "39269139",
+          "title": "Twopack Fideo Fettuccini Don Vittorio 950g",
+          "priceCents": 990,
+          "sourceCategory": "1000743"
+        },
+        {
+          "externalId": "39245717",
+          "title": "Fideos Cuisine &Co Cabello de Ángel 250g",
+          "priceCents": 160,
+          "sourceCategory": "1000743"
+        },
+        {
+          "externalId": "39239123",
+          "title": "Fideo Tallarín Delgado Nicolini 500g",
+          "priceCents": 270,
+          "sourceCategory": "1000743"
+        },
+        {
+          "externalId": "39239118",
+          "title": "Fideo Linguini Don Vittorio 500g",
+          "priceCents": 370,
+          "sourceCategory": "1000743"
+        },
+        {
+          "externalId": "39239117",
+          "title": "Fettuccini Don Vittorio 950g",
+          "priceCents": 500,
+          "sourceCategory": "1000743"
+        },
+        {
+          "externalId": "2734",
+          "title": "Tallarín Molitalia 450g",
+          "priceCents": 290,
+          "sourceCategory": "1000743"
+        }
+      ]
+    },
+    {
+      "retailer": "metro",
+      "category": "flour",
+      "created": 20,
+      "id": "5362946c-4b58-49fc-b745-ec02640501bf",
+      "fetched": 20,
+      "persisted": 20,
+      "changed": 20,
+      "samples": [
+        {
+          "externalId": "12781",
+          "title": "Harina Sin Preparar Favorita 1kg",
+          "priceCents": 450,
+          "sourceCategory": "1000766"
+        },
+        {
+          "externalId": "9186",
+          "title": "Harina Preparada Blanca Flor 1kg",
+          "priceCents": 770,
+          "sourceCategory": "1000766"
+        },
+        {
+          "externalId": "39257824",
+          "title": "Harina de Trigo Preparada Nicolini 1kg",
+          "priceCents": 550,
+          "sourceCategory": "1000766"
+        },
+        {
+          "externalId": "39164957",
+          "title": "Harina de Avena sin Gluten Mi Tierra Bolsa 400 g",
+          "priceCents": 1090,
+          "sourceCategory": "1000766"
+        },
+        {
+          "externalId": "39137394",
+          "title": "Harina Sin Preparar Blanca Flor 1kg",
+          "priceCents": 690,
+          "sourceCategory": "1000766"
+        },
+        {
+          "externalId": "13643",
+          "title": "Harina de Maiz Blanco Precocida P.A.N Contenido 1 kg",
+          "priceCents": 790,
+          "sourceCategory": "1000766"
+        },
+        {
+          "externalId": "9970",
+          "title": "Harina Sin Preparar Molitalia 1kg",
+          "priceCents": 740,
+          "sourceCategory": "1000766"
+        },
+        {
+          "externalId": "9969",
+          "title": "Harina Preparada Molitalia 1kg",
+          "priceCents": 770,
+          "sourceCategory": "1000766"
+        },
+        {
+          "externalId": "39278514",
+          "title": "Harina Preparada Cuisine & Co 1kg",
+          "priceCents": 690,
+          "sourceCategory": "1000766"
+        },
+        {
+          "externalId": "39254987",
+          "title": "Harina de Arroz Costeño 1 g",
+          "priceCents": 920,
+          "sourceCategory": "1000766"
+        },
+        {
+          "externalId": "26139",
+          "title": "Harina Instantánea 7 Semillas Peru Inka 400g",
+          "priceCents": 1250,
+          "sourceCategory": "1000766"
+        },
+        {
+          "externalId": "39342319",
+          "title": "Harina Preparada Molitalia 500g",
+          "priceCents": 420,
+          "sourceCategory": "1000766"
+        },
+        {
+          "externalId": "39256653",
+          "title": "Harina de Maíz Amarillo P.A.N 1kg",
+          "priceCents": 820,
+          "sourceCategory": "1000766"
+        },
+        {
+          "externalId": "39190478",
+          "title": "Harina de Avena Integral Marimiel 300 g",
+          "priceCents": 1490,
+          "sourceCategory": "1000766"
+        },
+        {
+          "externalId": "10280",
+          "title": "Harina de Trigo Integral Doypack 1 kg",
+          "priceCents": 1390,
+          "sourceCategory": "1000766"
+        },
+        {
+          "externalId": "39278506",
+          "title": "Harina Sin Preparar Cuisine & Co 1kg",
+          "priceCents": 690,
+          "sourceCategory": "1000766"
+        },
+        {
+          "externalId": "39237908",
+          "title": "Harina de Coco Orgánico Cuisine & Co 350g",
+          "priceCents": 1490,
+          "sourceCategory": "1000766"
+        },
+        {
+          "externalId": "39171986",
+          "title": "Harina de Almendras Marimiel Doypack 200 g",
+          "priceCents": 3890,
+          "sourceCategory": "1000766"
+        },
+        {
+          "externalId": "23241",
+          "title": "Harina Sin Preparar Nicolini 1kg",
+          "priceCents": 610,
+          "sourceCategory": "1000766"
+        },
+        {
+          "externalId": "15371",
+          "title": "Harina de Quinua Renacer Bolsa 500 g",
+          "priceCents": 3190,
+          "sourceCategory": "1000766"
+        }
+      ]
+    },
+    {
+      "retailer": "metro",
+      "category": "oats",
+      "created": 20,
+      "id": "d7678326-9cd9-42d4-9802-d18ac73b3e47",
+      "fetched": 20,
+      "persisted": 20,
+      "changed": 20,
+      "samples": [
+        {
+          "externalId": "1707",
+          "title": "Avena Tradicional Quaker 900g",
+          "priceCents": 1350,
+          "sourceCategory": "1001265"
+        },
+        {
+          "externalId": "39160200",
+          "title": "Avena Tradicional Cuisine & Co 1kg",
+          "priceCents": 990,
+          "sourceCategory": "1001265"
+        },
+        {
+          "externalId": "1710",
+          "title": "Avena Precocida 3 Ositos 900g",
+          "priceCents": 990,
+          "sourceCategory": "1001265"
+        },
+        {
+          "externalId": "39312640",
+          "title": "Avena Integral Grano Oro 1kg",
+          "priceCents": 1000,
+          "sourceCategory": "1001265"
+        },
+        {
+          "externalId": "39176281",
+          "title": "Quinua Avena 3 Ositos 900g",
+          "priceCents": 1360,
+          "sourceCategory": "1001265"
+        },
+        {
+          "externalId": "39192363",
+          "title": "Avena Integral en Hojuelas Grano de Oro 500g",
+          "priceCents": 550,
+          "sourceCategory": "1001265"
+        },
+        {
+          "externalId": "39189076",
+          "title": "Avena Tradicional Quaker 500g",
+          "priceCents": 880,
+          "sourceCategory": "1001265"
+        },
+        {
+          "externalId": "39160197",
+          "title": "Avena Quinua Cuisine & Co 300g",
+          "priceCents": 390,
+          "sourceCategory": "1001265"
+        },
+        {
+          "externalId": "1689",
+          "title": "Avena Precocida 3 Ositos 500g",
+          "priceCents": 930,
+          "sourceCategory": "1001265"
+        },
+        {
+          "externalId": "39320681",
+          "title": "Pack Quaker 850g: Avena con Quinua + Avena con Maca",
+          "priceCents": 2290,
+          "sourceCategory": "1001265"
+        },
+        {
+          "externalId": "39314656",
+          "title": "Avena con Chía Cuisine & Co 300g",
+          "priceCents": 390,
+          "sourceCategory": "1001265"
+        },
+        {
+          "externalId": "39277036",
+          "title": "Twopack Avena Quaker Tradicional 900g",
+          "priceCents": 2290,
+          "sourceCategory": "1001265"
+        },
+        {
+          "externalId": "39264735",
+          "title": "Avena con Quinua Quaker 850g",
+          "priceCents": 1490,
+          "sourceCategory": "1001265"
+        },
+        {
+          "externalId": "39192362",
+          "title": "Avena Grano de Oro 500g",
+          "priceCents": 590,
+          "sourceCategory": "1001265"
+        },
+        {
+          "externalId": "39160199",
+          "title": "Avena Maca Cuisine & Co 300g",
+          "priceCents": 390,
+          "sourceCategory": "1001265"
+        },
+        {
+          "externalId": "48112",
+          "title": "Avena Natural Santa Catalina 900g",
+          "priceCents": 950,
+          "sourceCategory": "1001265"
+        },
+        {
+          "externalId": "11944",
+          "title": "Avena Precocida 3 Ositos Chocolate 180g",
+          "priceCents": 540,
+          "sourceCategory": "1001265"
+        },
+        {
+          "externalId": "1714",
+          "title": "Avena Cereal Andino 270 g",
+          "priceCents": 640,
+          "sourceCategory": "1001265"
+        },
+        {
+          "externalId": "1701",
+          "title": "Avena Instantánea Quaker 350g",
+          "priceCents": 940,
+          "sourceCategory": "1001265"
+        },
+        {
+          "externalId": "1694",
+          "title": "Avena con Quinua Quaker 330g",
+          "priceCents": 890,
+          "sourceCategory": "1001265"
+        }
+      ]
+    },
+    {
+      "retailer": "metro",
+      "category": "toilet-paper",
+      "created": 20,
+      "id": "216138a6-dd18-409f-a394-cd5d0f7d389a",
+      "fetched": 20,
+      "persisted": 20,
+      "changed": 20,
+      "samples": [
+        {
+          "externalId": "39144877",
+          "title": "Papel Higiénico Doble Hoja Suave Resistemax 40un",
+          "priceCents": 2050,
+          "sourceCategory": "1001196"
+        },
+        {
+          "externalId": "34799",
+          "title": "Papel Higiénico Doble Hoja Elite Cuidado Clásico 40un",
+          "priceCents": 2050,
+          "sourceCategory": "1001196"
+        },
+        {
+          "externalId": "39175277",
+          "title": "Papel Higiénico Doble Hoja Paracas Paquete 4 unid",
+          "priceCents": 750,
+          "sourceCategory": "1001196"
+        },
+        {
+          "externalId": "39321237",
+          "title": "Papel Higiénico Elite Resistente XL 12un",
+          "priceCents": 2090,
+          "sourceCategory": "1001196"
+        },
+        {
+          "externalId": "39281504",
+          "title": "Papel Higiénico Paracas Doble Hoja 18un",
+          "priceCents": 3590,
+          "sourceCategory": "1001196"
+        },
+        {
+          "externalId": "39148637",
+          "title": "Papel Higiénico Triple Hoja Suave Premium 24un",
+          "priceCents": 3750,
+          "sourceCategory": "1001196"
+        },
+        {
+          "externalId": "50050",
+          "title": "Papel Higiénico Suave Cuidado Completo 40un",
+          "priceCents": 3290,
+          "sourceCategory": "1001196"
+        },
+        {
+          "externalId": "39337867",
+          "title": "Papel Higiénico Suave Rindemax 24un",
+          "priceCents": 3890,
+          "sourceCategory": "1001196"
+        },
+        {
+          "externalId": "39189797",
+          "title": "Papel Higiénico Doble Hoja Higienol 12un.",
+          "priceCents": 2250,
+          "sourceCategory": "1001196"
+        },
+        {
+          "externalId": "40069",
+          "title": "Papel Higiénico Doble Hoja Suave Esencias Elegance 32un",
+          "priceCents": 3790,
+          "sourceCategory": "1001196"
+        },
+        {
+          "externalId": "34798",
+          "title": "Papel Higiénico Doble Hoja Elite Soft Max 40un.",
+          "priceCents": 3490,
+          "sourceCategory": "1001196"
+        },
+        {
+          "externalId": "29420",
+          "title": "Papel Higiénico Doble Hoja Elite Ultra 8un.",
+          "priceCents": 2750,
+          "sourceCategory": "1001196"
+        },
+        {
+          "externalId": "39336530",
+          "title": "Papel Higiénico Suave Rindemax 12un",
+          "priceCents": 2050,
+          "sourceCategory": "1001196"
+        },
+        {
+          "externalId": "39237109",
+          "title": "Papel Higiénico Doble Hoja Noble Premium 4un",
+          "priceCents": 790,
+          "sourceCategory": "1001196"
+        },
+        {
+          "externalId": "39174175",
+          "title": "Papel Higiénico Doble Hoja Suave Cuidado Completo 48un",
+          "priceCents": 4290,
+          "sourceCategory": "1001196"
+        },
+        {
+          "externalId": "39340492",
+          "title": "Papel Higiénico Elite Ultra Suave 65m 12un",
+          "priceCents": 3850,
+          "sourceCategory": "1001196"
+        },
+        {
+          "externalId": "39340486",
+          "title": "Papel Higiénico Elite Premium Soft 20m 12un",
+          "priceCents": 1890,
+          "sourceCategory": "1001196"
+        },
+        {
+          "externalId": "39340480",
+          "title": "Papel Higiénico Elite Premium Soft 20m 24un",
+          "priceCents": 3250,
+          "sourceCategory": "1001196"
+        },
+        {
+          "externalId": "39315587",
+          "title": "Papel Higiénico Suave Cuidado Completo 12un",
+          "priceCents": 2800,
+          "sourceCategory": "1001196"
+        },
+        {
+          "externalId": "39307792",
+          "title": "Papel Higiénico Triple Hoja Family Care 24un",
+          "priceCents": 2090,
+          "sourceCategory": "1001196"
+        }
+      ]
+    }
+  ],
+  "derivation": {
+    "history": [
+      {
+        "states": 761,
+        "digest": "783ca566a1eed1d1167b25e9c034a144"
+      }
+    ],
+    "after": [
+      {
+        "states": 761,
+        "digest": "783ca566a1eed1d1167b25e9c034a144"
+      }
+    ],
+    "firstNormalization": {
+      "changed": 199,
+      "unchanged": 536,
+      "stale": 0
+    },
+    "firstMatching": {
+      "productsCreated": 16,
+      "productsUpdated": 0,
+      "linksCreated": 32,
+      "linksRemoved": 0,
+      "productsRemoved": 0,
+      "stale": false
+    },
+    "repeatNormalization": {
+      "changed": 0,
+      "unchanged": 735,
+      "stale": 0
+    },
+    "repeatMatching": {
+      "productsCreated": 0,
+      "productsUpdated": 0,
+      "linksCreated": 0,
+      "linksRemoved": 0,
+      "productsRemoved": 0,
+      "stale": false
+    }
+  },
+  "sourceCheck": {
+    "checked": 199,
+    "integrity": true,
+    "originalHistory": [
+      {
+        "states": 562,
+        "digest": "67d84270b55e58dfa3c4b9ab6af89a41"
+      }
+    ]
+  }
+}

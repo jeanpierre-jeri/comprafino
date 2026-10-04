@@ -1,3 +1,5 @@
+import { vtexCategories } from "./staple-categories.ts";
+import type { VtexCategory } from "./staple-categories.ts";
 import { lookupVtex } from "./targeted.ts";
 import { z } from "zod";
 import { listingSchema, normalizeWhitespace, parsePenCents } from "@comprafino/core";
@@ -96,7 +98,12 @@ export function parsePlazaVeaPage(raw: unknown, observedAt: Date) {
 export const plazaVeaCatalogUrl =
   "https://www.plazavea.com.pe/api/catalog_system/pub/products/search";
 
-export function createPlazaVeaAdapter(fetchPage: typeof fetch = fetch): SearchRetailerAdapter {
+export function createPlazaVeaAdapter(
+  fetchPage: typeof fetch = fetch,
+  category: VtexCategory = "dairy",
+): SearchRetailerAdapter {
+  if (!Object.hasOwn(vtexCategories["plaza-vea"], category))
+    throw new Error("Unsupported PlazaVea category");
   return {
     retailer: "plaza-vea",
     lookupListing: (known) => lookupVtex(fetchPage, plazaVeaCatalogUrl, known, parsePlazaVeaPage),
@@ -114,14 +121,17 @@ export function createPlazaVeaAdapter(fetchPage: typeof fetch = fetch): SearchRe
     async fetchListings(limit) {
       if (!Number.isInteger(limit) || limit < 1 || limit > 500)
         throw new Error("Limit must be an integer from 1 to 500");
+      if (category !== "dairy" && limit > 20)
+        throw new Error("Limit must be at most 20 for staple categories");
+      const maxPages = category === "dairy" ? 25 : 2;
       const listings = new Map<string, NormalizedRetailerListing>();
       let discovered = 0;
       // Bound source coverage too: at most 500 products / 25 sequential pages.
-      for (let from = 0, page = 0; from < 500 && page < 25 && listings.size < limit; page++) {
+      for (let from = 0, page = 0; from < 500 && page < maxPages && listings.size < limit; page++) {
         if (page > 0) await new Promise<void>((resolve) => setTimeout(resolve, 1000));
         const to = Math.min(from + 19, 499);
         const url = new URL(plazaVeaCatalogUrl);
-        url.searchParams.set("fq", "C:/845/");
+        url.searchParams.set("fq", `C:/${vtexCategories["plaza-vea"][category]}/`);
         url.searchParams.set("sc", "1");
         url.searchParams.set("_from", String(from));
         url.searchParams.set("_to", String(to));
@@ -145,12 +155,13 @@ export function createPlazaVeaAdapter(fetchPage: typeof fetch = fetch): SearchRe
           start !== from ||
           end < start ||
           end > to ||
-          total <= end
+          total <= start ||
+          (total <= end && end !== to)
         )
           throw new Error("Plaza Vea pagination did not advance or returned an invalid range");
         const raw: unknown = await response.json();
         const parsed = parsePlazaVeaPage(raw, new Date());
-        if (parsed.discovered !== end - start + 1)
+        if (parsed.discovered !== Math.min(end + 1, total) - start)
           throw new Error("Plaza Vea pagination range does not match product count");
         discovered += parsed.discovered;
         for (const listing of parsed.listings) {

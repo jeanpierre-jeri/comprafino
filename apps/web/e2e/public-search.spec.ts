@@ -110,3 +110,28 @@ test.describe("generic persisted offers (explicit DATABASE_URL)", () => {
     );
   });
 });
+
+test.describe("staple persisted relevance (explicit DATABASE_URL)", () => {
+  test.skip(!process.env.DATABASE_URL, "Requires the refreshed persisted staple catalog");
+  test("sugar has packaged staples and a specific oil brand stays specific", async ({ page }) => {
+    await page.goto("/search?q=az%C3%BAcar");
+    const cards = page
+      .getByRole("region", { name: "Opciones en supermercados" })
+      .locator("article[data-offer-id]");
+    await expect(cards.first()).toBeVisible();
+    const titles = await cards.getByRole("heading").allTextContents();
+    expect(titles.length).toBeGreaterThanOrEqual(10);
+    expect(titles.slice(0, 10).every((title) => /^azúcar /iu.test(title))).toBe(true);
+    expect(titles.some((title) => /sin azúcar/iu.test(title))).toBe(false);
+    await page.goto("/search?q=aceite+primor");
+    const oil = page
+      .getByRole("region", { name: "Opciones en supermercados" })
+      .locator("article[data-offer-id]");
+    await expect(oil.first()).toBeVisible();
+    expect(
+      (await oil.getByRole("heading").allTextContents()).every(
+        (title) => /aceite/iu.test(title) && /primor/iu.test(title) && !/atún/iu.test(title),
+      ),
+    ).toBe(true);
+  });
+});

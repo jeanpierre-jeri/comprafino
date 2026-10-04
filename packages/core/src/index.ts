@@ -12,3 +12,5 @@ export * from "./discovery.ts";
 
 export * from "./listing-refresh.ts";
 export * from "./unit-price.ts";
+
+export * from "./product-family.ts";

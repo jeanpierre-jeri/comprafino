@@ -47,6 +47,8 @@ export default async function CatalogPage() {
                   "Retailer",
                   "Raw title",
                   "Normalized title",
+                  "Product family (origin / evidence)",
+                  "Source category",
                   "Brand (origin)",
                   "Quantity",
                   "Packages",
@@ -63,37 +65,46 @@ export default async function CatalogPage() {
               </tr>
             </thead>
             <tbody>
-              {rows.map(({ listing, normalization: a, stale, price, unitPriceCalculation }) => (
-                <tr key={listing.id}>
-                  <td>{listing.retailerId}</td>
-                  <td>{listing.title}</td>
-                  <td>{a?.normalizedTitle ?? "—"}</td>
-                  <td>{a?.brand ? `${a.brand} (${a.brandSource})` : "—"}</td>
-                  <td>{a?.quantityValue ? `${a.quantityValue} ${a.quantityUnit}` : "—"}</td>
-                  <td>{a?.packageCount ?? "—"}</td>
-                  <td>
-                    {a?.totalQuantityValue ? `${a.totalQuantityValue} ${a.totalQuantityUnit}` : "—"}
-                  </td>
-                  <td>{a?.pricingBasis ?? "—"}</td>
-                  <td>
-                    {price ? `${formatPen(price.currentPriceCents)} / ${price.priceUnit}` : "—"}
-                  </td>
-                  <td>
-                    {unitPriceCalculation?.price
-                      ? formatUnitPrice(unitPriceCalculation.price)
-                      : (unitPriceCalculation?.reason ?? "Missing / stale normalization or price")}
-                  </td>
-                  <td>{a ? (a.soldByWeight ? "Yes" : "No") : "—"}</td>
-                  <td>{listing.packageText ?? "—"}</td>
-                  <td>
-                    {!a
-                      ? "Not normalized"
-                      : stale
-                        ? "Stale"
-                        : `v${a.normalizationVersion} ${a.issues.join(", ")}`}
-                  </td>
-                </tr>
-              ))}
+              {rows.map(
+                ({ listing, normalization: a, stale, price, unitPriceCalculation, family }) => (
+                  <tr key={listing.id}>
+                    <td>{listing.retailerId}</td>
+                    <td>{listing.title}</td>
+                    <td>{a?.normalizedTitle ?? "—"}</td>
+                    <td>
+                      {family.family ?? "—"} ({family.origin ?? "unknown"}: {family.evidence})
+                    </td>
+                    <td>{listing.category ?? "—"}</td>
+                    <td>{a?.brand ? `${a.brand} (${a.brandSource})` : "—"}</td>
+                    <td>{a?.quantityValue ? `${a.quantityValue} ${a.quantityUnit}` : "—"}</td>
+                    <td>{a?.packageCount ?? "—"}</td>
+                    <td>
+                      {a?.totalQuantityValue
+                        ? `${a.totalQuantityValue} ${a.totalQuantityUnit}`
+                        : "—"}
+                    </td>
+                    <td>{a?.pricingBasis ?? "—"}</td>
+                    <td>
+                      {price ? `${formatPen(price.currentPriceCents)} / ${price.priceUnit}` : "—"}
+                    </td>
+                    <td>
+                      {unitPriceCalculation?.price
+                        ? formatUnitPrice(unitPriceCalculation.price)
+                        : (unitPriceCalculation?.reason ??
+                          "Missing / stale normalization or price")}
+                    </td>
+                    <td>{a ? (a.soldByWeight ? "Yes" : "No") : "—"}</td>
+                    <td>{listing.packageText ?? "—"}</td>
+                    <td>
+                      {!a
+                        ? "Not normalized"
+                        : stale
+                          ? "Stale"
+                          : `v${a.normalizationVersion} ${a.issues.join(", ")}`}
+                    </td>
+                  </tr>
+                ),
+              )}
             </tbody>
           </table>
         </div>

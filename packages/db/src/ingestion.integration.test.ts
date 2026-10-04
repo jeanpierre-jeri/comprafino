@@ -675,6 +675,116 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
     await persistCatalogNormalizations(db, await catalogRows(value.externalId));
     return (await catalogRows(value.externalId))[0]!;
   }
+  it("family search excludes properties and mismatches while preserving brand and size tokens", async () => {
+    const sugar = await seedGeneric("Azúcar Blanca Auditfamily Bolsa 1kg", 650);
+    const large = await seedGeneric("Azúcar Rubia Auditfamily Bolsa 5kg", 2800);
+    await seedGeneric("Gaseosa Auditfamily sin Azúcar Botella 1L", 100);
+    await seedGeneric("Azúcar Otramarca Bolsa 1kg", 500);
+    expect(
+      (await searchGenericProductOffers(db, "azucar auditfamily", "relevance", publicNow)).map(
+        (o) => o.id,
+      ),
+    ).toEqual([sugar.id, large.id]);
+    expect(
+      (await searchGenericProductOffers(db, "azúcar auditfamily 1kg", "relevance", publicNow)).map(
+        (o) => o.id,
+      ),
+    ).toEqual([sugar.id]);
+    expect(
+      await searchGenericProductOffers(db, "azúcar marcadesconocida 5kg", "relevance", publicNow),
+    ).toEqual([]);
+    expect(
+      await searchGenericProductOffers(db, "auditfamily", "relevance", publicNow),
+    ).toHaveLength(3);
+    expect(
+      (await searchGenericProductOffers(db, "azúcar auditfamily", "total-price", publicNow)).map(
+        (o) => o.id,
+      ),
+    ).toEqual([sugar.id, large.id]);
+    expect(
+      (await searchGenericProductOffers(db, "azúcar auditfamily", "unit-price", publicNow)).map(
+        (o) => o.id,
+      ),
+    ).toEqual([large.id, sugar.id]);
+  }, 30000);
+  it("current source-category evidence precedes title fallback without changing exact normalization", async () => {
+    const fallback = await seedGeneric("Arroz Auditcategory 1kg", 500);
+    const structured = await seedGeneric("Grano Auditcategory 1kg", 600);
+    await query("update retailer_listings set category='J0101010203' where id=$1", [structured.id]);
+    const historyBefore = await query(
+      "select id,current_price_cents,valid_from,valid_until from price_history where listing_id=$1",
+      [structured.id],
+    );
+    const normalizedBefore = await query(
+      "select * from listing_normalizations where listing_id=$1",
+      [structured.id],
+    );
+    const offers = await searchGenericProductOffers(
+      db,
+      "arroz auditcategory",
+      "relevance",
+      publicNow,
+    );
+    expect(offers.map((o) => o.id)).toEqual([structured.id, fallback.id]);
+    expect(offers[0]!.family).toMatchObject({ family: "rice", origin: "source-category" });
+    await query("update retailer_listings set category='J0101070507' where id=$1", [structured.id]);
+    expect(
+      (await searchGenericProductOffers(db, "arroz auditcategory", "relevance", publicNow)).map(
+        (o) => o.id,
+      ),
+    ).toEqual([fallback.id]);
+    expect(
+      await query("select * from listing_normalizations where listing_id=$1", [structured.id]),
+    ).toEqual(normalizedBefore);
+    expect(
+      await query(
+        "select id,current_price_cents,valid_from,valid_until from price_history where listing_id=$1",
+        [structured.id],
+      ),
+    ).toEqual(historyBefore);
+  }, 30000);
+  it("family searches retain fresh-price eligibility and separate detergent unit dimensions", async () => {
+    const fresh = await seedGeneric("Aceite Vegetal Auditoil 1L", 1000);
+    const old = await seedGeneric("Aceite Vegetal Auditoil 500ml", 1);
+    await seedGeneric("Filete de Atún Auditoil en Aceite Lata 140g", 1);
+    await query(
+      "update retailer_listings set last_seen_at=last_seen_at-interval '40 hours',first_seen_at=first_seen_at-interval '40 hours' where id=$1",
+      [old.id],
+    );
+    expect(
+      (await searchGenericProductOffers(db, "aceite auditoil", "unit-price", publicNow)).map(
+        (o) => o.id,
+      ),
+    ).toEqual([fresh.id]);
+    await seedGeneric("Detergente Auditdetergent Polvo 1kg", 1000);
+    await seedGeneric("Detergente Auditdetergent Líquido 1L", 500);
+    expect(
+      (
+        await searchGenericProductOffers(db, "detergente auditdetergent", "unit-price", publicNow)
+      ).map((o) => o.unitPrice!.dimension),
+    ).toEqual(["mass", "volume"]);
+    const tuna = await seedGeneric("Filete de Atún Audittuna Lata 140g", 500);
+    const result = await searchGenericProductOffers(db, "atun audittuna", "unit-price", publicNow);
+    expect(result.map((o) => o.id)).toEqual([tuna.id]);
+    expect(result[0]!.unitPriceUnavailableReason).toBe("ambiguous-quantity");
+  }, 30000);
+  it("covered staple queries suppress discovery; a missing brand/size still records the complete demand", async () => {
+    await seedGeneric("Harina Auditcoverage 1kg", 500);
+    const covered = await searchPublicProducts(db, "harina auditcoverage", "relevance", publicNow);
+    expect(covered.offers).toHaveLength(1);
+    expect(
+      await recordDiscoveryForSearch(db, "harina auditcoverage", covered.usefulResultCount),
+    ).toBe(false);
+    const specific = "harina marcadesconocida 5kg";
+    const empty = await searchPublicProducts(db, specific, "relevance", publicNow);
+    expect(empty.usefulResultCount).toBe(0);
+    expect(await recordDiscoveryForSearch(db, specific, empty.usefulResultCount)).toBe(true);
+    expect(
+      await query("select normalized_query from discovery_queries where normalized_query=$1", [
+        specific,
+      ]),
+    ).toEqual([{ normalized_query: specific }]);
+  }, 30000);
   it("generic search includes independent one-store offers, uses open prices and sorts before limiting", async () => {
     const small = await seedGeneric("Huevos Auditgeneric Bandeja 15un", 990);
     const large = await seedGeneric("Huevos Auditgeneric Bandeja 30un", 1790);
@@ -791,6 +901,27 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
       );
     return { id: links[0]!.id, rows };
   }
+  it("incidental canonical groups do not suppress genuine staple demand; their exact route still works", async () => {
+    const drink = await seedPublicProduct(
+      "canonical-property",
+      "Gaseosa Gloria sin Azúcar Auditcanonical 1L",
+    );
+    expect((await querySearch(db, "azúcar auditcanonical", publicNow)).map((p) => p.id)).toContain(
+      drink.id,
+    );
+    const result = await searchPublicProducts(db, "azúcar auditcanonical", "relevance", publicNow);
+    expect(result.usefulResultCount).toBe(0);
+    expect(await queryComparison(db, drink.id, publicNow)).not.toBeNull();
+    expect(
+      await recordDiscoveryForSearch(db, "azúcar auditcanonical", result.usefulResultCount),
+    ).toBe(true);
+    const paste = await seedGeneric("Pasta Dental Auditpaste 100g", 500);
+    expect(
+      (await searchGenericProductOffers(db, "pasta dental auditpaste", "relevance", publicNow)).map(
+        (o) => o.id,
+      ),
+    ).toEqual([paste.id]);
+  }, 30000);
   it("searches trusted groups with normalized terms, deterministic ranking and variant preservation", async () => {
     const whole = await seedPublicProduct("public-whole", "Leche UHT Gloria Entera Caja 946ml");
     const generic = await searchGenericProductOffers(
