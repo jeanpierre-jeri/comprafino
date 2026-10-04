@@ -87,3 +87,7 @@ After local confirmation, the next milestone should address measured search rele
 ## Milestone 9 follow-up
 
 Milestone 8 is complete in the user-provided baseline `1401f97`; its original pending notes above are historical. Generic search now uses deterministic family evidence and bounded permanent staple coverage, preserving specific query tokens and existing sort/eligibility behavior. Incidental exact groups no longer count as family coverage. Tuna mass prices are withheld without verified net/drained semantics; an observed 1 g flour typo is also withheld while display quantity remains. See [staple coverage](staple-coverage.md) for the new before/after audit, tests, known quantity/recall limits and current Milestone 9 build/E2E gate.
+
+## Milestone 10 follow-up
+
+Current comparison policy and audited quantities are in [quantity quality](quantity-quality.md); current operating counts, request budgets and headroom are in [catalog budget](catalog-budget.md). Comparison bases now separate approximate rolls from physical item counts, and all semantically unresolved tuna unit prices are withheld. Persisted normalization version 1, canonical matcher rules and existing source/refresh limits remain unchanged. Earlier milestone validation notes are historical; Milestones 0–9 are complete in the user-provided baseline `d8858b3`.

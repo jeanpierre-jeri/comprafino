@@ -1,0 +1,1964 @@
+{
+  "observedDatePeru": "2026-10-04",
+  "publicRequests": 29,
+  "method": "21 sequential one-page public search requests (five retained products each), five exact current VTEX tuna SKU requests, three current Tottus tuna PDP requests. One-second pauses, no ingestion or retries. Broad VTEX tuna searches returned pet food and are excluded from tuna conclusions. Search snapshots are raw public quantities, not catalog additions.",
+  "searchAndExactSkuSamples": [
+    {
+      "retailer": "plaza-vea",
+      "query": "atun",
+      "products": [
+        {
+          "productId": "101442446",
+          "title": "Alimento para Gato CHURU Atún con Vieira Pouch 56g",
+          "specifications": {
+            "Tamaño del producto (peso)": ["Muy pequeño"],
+            "Presentación unitarios vitrina": ["Bolsa 4un"],
+            "Formato Mascotas": ["Alimento húmedo"],
+            "Tamaño De La Raza": ["Todas las razas"]
+          },
+          "items": [
+            {
+              "itemId": "11818523",
+              "name": "Alimento para Gato CHURU Atún con Vieira Pouch 56g",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "101442444",
+          "title": "Alimento para Gato CHURU Atún con Salmón Pouch 56g",
+          "specifications": {
+            "Tamaño del producto (peso)": ["Muy pequeño"],
+            "CantidadBiPrecioMK": ["4"],
+            "Presentación unitarios vitrina": ["Bolsa 4un"],
+            "Formato Mascotas": ["Alimento húmedo"],
+            "Tamaño De La Raza": ["Todas las razas"]
+          },
+          "items": [
+            {
+              "itemId": "11818521",
+              "name": "Alimento para Gato CHURU Atún con Salmón Pouch 56g",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "101442445",
+          "title": "Alimento para Gato CHURU Atún Pouch 56g",
+          "specifications": {
+            "Tamaño del producto (peso)": ["Muy pequeño"],
+            "CantidadBiPrecioMK": ["4"],
+            "Presentación unitarios vitrina": ["Bolsa 4un"],
+            "Formato Mascotas": ["Alimento húmedo"],
+            "Tamaño De La Raza": ["Todas las razas"]
+          },
+          "items": [
+            {
+              "itemId": "11818522",
+              "name": "Alimento para Gato CHURU Atún Pouch 56g",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "101554039",
+          "title": "Cama de gato con diseño cueva Gatuna + cojin",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "11929687",
+              "name": "Cama de gato con diseño cueva Gatuna + cojin",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "10908",
+          "title": "Porciones de Atún Congelado",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "10054",
+              "name": "Porciones de Atún Congelado",
+              "measurementUnit": "kg",
+              "unitMultiplier": 0.15,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "retailer": "plaza-vea",
+      "query": "papel higienico",
+      "products": [
+        {
+          "productId": "52583",
+          "title": "Papel Higiénico ELITE Clásico Doble Hoja Paquete 40un",
+          "specifications": {
+            "Presentación unitarios vitrina": ["Paquete 40un"],
+            "Contenido Empaque Ecommerce": ["40"]
+          },
+          "items": [
+            {
+              "itemId": "53635",
+              "name": "Papel Higiénico ELITE Clásico Doble Hoja Paquete 40un",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "8226",
+          "title": "Papel Higiénico SUAVE Cuidado Completo Paquete 24un",
+          "specifications": {
+            "Presentación unitarios vitrina": ["Paquete 24un"]
+          },
+          "items": [
+            {
+              "itemId": "7660",
+              "name": "Papel Higiénico SUAVE Cuidado Completo Paquete 24un",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "79851",
+          "title": "Papel Higiénico SUAVE Premium Triple Hoja Paquete 24un",
+          "specifications": {
+            "Presentación unitarios vitrina": ["Paquete 24un"]
+          },
+          "items": [
+            {
+              "itemId": "83785",
+              "name": "Papel Higiénico SUAVE Premium Triple Hoja Paquete 24un",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "101176766",
+          "title": "Papel Higiénico BALANZÉ BASICOS Azul 40M Paquete 24un",
+          "specifications": {
+            "Presentación unitarios vitrina": ["Paquete 24un"],
+            "Contenido Empaque Ecommerce": ["24"],
+            "Presentación/Empaque": ["Paquete"],
+            "Doble Hoja": ["Sí"],
+            "Metros Totales": ["40 por rollo"],
+            "Tamaño De La Hoja": ["110 mm x 90 mm"]
+          },
+          "items": [
+            {
+              "itemId": "11553170",
+              "name": "Papel Higiénico BALANZÉ BASICOS Azul 40M Paquete 24un",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "20001",
+          "title": "Papel Higiénico SUAVE Resistemax Doble Hoja Paquete 40un",
+          "specifications": {
+            "Presentación unitarios vitrina": ["Paquete 40un"],
+            "Presentación/Empaque": ["Paquete"],
+            "Doble Hoja": ["Sí"],
+            "Metros Totales": ["16.38m"]
+          },
+          "items": [
+            {
+              "itemId": "19958",
+              "name": "Papel Higiénico SUAVE Resistemax Doble Hoja Paquete 40un",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "retailer": "plaza-vea",
+      "query": "detergente polvo",
+      "products": [
+        {
+          "productId": "100117504",
+          "title": "Pack Detergente en Polvo ARIEL Pro Cuidado 4 kg x 2un",
+          "specifications": {
+            "Presentación unitarios vitrina": ["Pack 2un"]
+          },
+          "items": [
+            {
+              "itemId": "10212086",
+              "name": "Pack Detergente en Polvo ARIEL Pro Cuidado 4 kg x 2un",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "100117505",
+          "title": "Pack Detergente en Polvo ARIEL con un Toque de Downy para Ropa Blanca y de Color Bolsa 4kg x 2un",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "10212087",
+              "name": "Pack Detergente en Polvo ARIEL con un Toque de Downy para Ropa Blanca y de Color Bolsa 4kg x 2un",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "101178461",
+          "title": "Detergente en Polvo OPAL Antibacterial Bolsa 4Kg",
+          "specifications": {
+            "Presentación unitarios vitrina": ["Bolsa 4Kg"],
+            "Contenido Empaque Ecommerce": ["4"],
+            "Presentación/Empaque": ["Bolsa"],
+            "Contenido Neto": ["4kg"]
+          },
+          "items": [
+            {
+              "itemId": "11554915",
+              "name": "Detergente en Polvo OPAL Antibacterial Bolsa 4Kg",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "101143197",
+          "title": "Detergente en Polvo OPAL Blancos Bolsa 4Kg",
+          "specifications": {
+            "Presentación unitarios vitrina": ["Bolsa 4Kg"],
+            "Contenido Empaque Ecommerce": ["4"],
+            "Presentación/Empaque": ["Bolsa"],
+            "Contenido Neto": ["4kg"]
+          },
+          "items": [
+            {
+              "itemId": "11519341",
+              "name": "Detergente en Polvo OPAL Blancos Bolsa 4Kg",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "101838457",
+          "title": "Detergente en Polvo OXICLEAN Quitamancha Pote 803g",
+          "specifications": {
+            "Presentación unitarios vitrina": ["Pote 803g"],
+            "Contenido Empaque Ecommerce": ["803"],
+            "Presentación/Empaque": ["Pote"],
+            "Contenido Neto": ["803G"]
+          },
+          "items": [
+            {
+              "itemId": "12198997",
+              "name": "Detergente en Polvo OXICLEAN Quitamancha Pote 803g",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "retailer": "plaza-vea",
+      "query": "detergente liquido",
+      "products": [
+        {
+          "productId": "100816706",
+          "title": "Pack Detergente Líquido ARIEL Pro Cuidado 3L x 2un",
+          "specifications": {
+            "Presentación unitarios vitrina": ["Pack 2un"]
+          },
+          "items": [
+            {
+              "itemId": "11112512",
+              "name": "Pack Detergente Líquido ARIEL Pro Cuidado 3L x 2un",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "23689",
+          "title": "Detergente Líquido Concentrado ARIEL Limpieza Profunda Frasco 3L",
+          "specifications": {
+            "CantidadBiPrecioMK": ["2"],
+            "Presentación unitarios vitrina": ["Frasco 3L"],
+            "Contenido Empaque Ecommerce": ["3"],
+            "Presentación/Empaque": ["Galonera"],
+            "Unidades Por Paquete": ["1"],
+            "Contenido Neto": ["3L"]
+          },
+          "items": [
+            {
+              "itemId": "23640",
+              "name": "Detergente Líquido Concentrado ARIEL Limpieza Profunda Frasco 3L",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "23783",
+          "title": "Detergente Líquido ARIEL Limpieza Profunda para Ropa 3 en 1 Bolsa 1.2L",
+          "specifications": {
+            "CantidadBiPrecioMK": ["2"],
+            "Presentación unitarios vitrina": ["Bolsa 1.2L"],
+            "Unidades Por Paquete": ["1"],
+            "Contenido Neto": ["1.2L"]
+          },
+          "items": [
+            {
+              "itemId": "23735",
+              "name": "Detergente Líquido ARIEL Limpieza Profunda para Ropa 3 en 1 Bolsa 1.2L",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "101111808",
+          "title": "Detergente Líquido ARIEL Limpieza Profunda para Ropa 3 en 1 Botella 3.7L",
+          "specifications": {
+            "CantidadBiPrecioMK": ["2"],
+            "Presentación unitarios vitrina": ["Botella 3.7L"],
+            "Contenido Empaque Ecommerce": ["3.7"],
+            "Presentación/Empaque": ["Bolsa"],
+            "Contenido Neto": ["3700"]
+          },
+          "items": [
+            {
+              "itemId": "11483508",
+              "name": "Detergente Líquido ARIEL Limpieza Profunda para Ropa 3 en 1 Botella 3.7L",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "101251102",
+          "title": "Pack Detergente líquido ARIEL Concentrado Galonera 3000ml + Suavizante DOWNY Floral Botella 2600ml",
+          "specifications": {
+            "Presentación unitarios vitrina": ["Pack 2un"]
+          },
+          "items": [
+            {
+              "itemId": "11627920",
+              "name": "Pack Detergente líquido ARIEL Concentrado Galonera 3000ml + Suavizante DOWNY Floral Botella 2600ml",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "retailer": "plaza-vea",
+      "query": "arroz",
+      "products": [
+        {
+          "productId": "100772586",
+          "title": "Arroz Extra GRAN CHALAN Añejo Bolsa 5Kg",
+          "specifications": {
+            "CantidadBiPrecioMK": ["4"],
+            "Presentación unitarios vitrina": ["Bolsa 5Kg"],
+            "Contenido Empaque Ecommerce": ["5"],
+            "Presentación/Empaque": ["Bolsa"],
+            "Peso Neto (G)": ["5000"]
+          },
+          "items": [
+            {
+              "itemId": "11045217",
+              "name": "Arroz Extra GRAN CHALAN Añejo Bolsa 5Kg",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "18219",
+          "title": "Olla Arrocera THOMAS 2.8L TH37PF Plateado",
+          "specifications": {
+            "Tamaño del producto (peso)": ["Pequeño"]
+          },
+          "items": [
+            {
+              "itemId": "18135",
+              "name": "Olla Arrocera THOMAS 2.8L TH37PF Plateado",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "100035425",
+          "title": "Ensalada Italiana HOME CHEF Bandeja 1un",
+          "specifications": {
+            "Presentación unitarios vitrina": ["Bandeja 1un"]
+          },
+          "items": [
+            {
+              "itemId": "10124023",
+              "name": "Ensalada Italiana HOME CHEF Bandeja 1un",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "18244",
+          "title": "Olla Arrocera BLACK+DECKER 22 Tazas RC5225-CL Blanco",
+          "specifications": {
+            "Tamaño del producto (peso)": ["Pequeño"]
+          },
+          "items": [
+            {
+              "itemId": "18164",
+              "name": "Olla Arrocera BLACK+DECKER 22 Tazas RC5225-CL Blanco",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "101219548",
+          "title": "Olla Arrocera THOMAS 1.8L TH-35PF Gris",
+          "specifications": {
+            "Tamaño del producto (peso)": ["Pequeño"]
+          },
+          "items": [
+            {
+              "itemId": "11596543",
+              "name": "Olla Arrocera THOMAS 1.8L TH-35PF Gris",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "retailer": "plaza-vea",
+      "query": "azucar",
+      "products": [
+        {
+          "productId": "45649",
+          "title": "Azucarero DECO HOME Porcelana Blanco",
+          "specifications": {
+            "Tamaño del producto (peso)": ["Muy pequeño"],
+            "Cantidad De Piezas": ["1"]
+          },
+          "items": [
+            {
+              "itemId": "45679",
+              "name": "Azucarero DECO HOME Porcelana Blanco",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "5630",
+          "title": "Gaseosa COCA COLA sin Azúcar 2Pack Botella 1.5L",
+          "specifications": {
+            "Presentación unitarios vitrina": ["Paquete 2un"],
+            "Contenido Empaque Ecommerce": ["2"],
+            "Volumen Neto": ["1.5L"]
+          },
+          "items": [
+            {
+              "itemId": "5568",
+              "name": "Gaseosa COCA COLA sin Azúcar 2Pack Botella 1.5L",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "25233",
+          "title": "Gaseosa INCA KOLA sin Azúcar Botella 1.5L Paquete 2un",
+          "specifications": {
+            "Presentación unitarios vitrina": ["Paquete 2un"],
+            "Contenido Empaque Ecommerce": ["2"],
+            "Volumen Neto": ["1.5L"]
+          },
+          "items": [
+            {
+              "itemId": "25173",
+              "name": "Gaseosa INCA KOLA sin Azúcar Botella 1.5L Paquete 2un",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "102313347",
+          "title": "Pack Desodorante para Mujer en Spray LADY SPEED STICK Pro5 Paquete 2un + Jabón en Barra PALMOLIVE Avena y Azúcar Pack 3x110g",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "12568435",
+              "name": "Pack Desodorante para Mujer en Spray LADY SPEED STICK Pro5 Paquete 2un + Jabón en Barra PALMOLIVE Avena y Azúcar Pack 3x110g",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "102313344",
+          "title": "Pack Desodorante para Mujer LADY SPEED STICK 24/7 Floral Fresh Gel 65g + Jabón en Barra PALMOLIVE Avena y Azúcar Pack 3x110g",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "12568431",
+              "name": "Pack Desodorante para Mujer LADY SPEED STICK 24/7 Floral Fresh Gel 65g + Jabón en Barra PALMOLIVE Avena y Azúcar Pack 3x110g",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "retailer": "plaza-vea",
+      "query": "aceite",
+      "products": [
+        {
+          "productId": "100425975",
+          "title": "Aceite Vegetal PRIMOR Premium Botella 900ml",
+          "specifications": {
+            "CantidadBiPrecioMK": ["3"],
+            "CantidadTriPrecioMK": ["12"],
+            "Presentación unitarios vitrina": ["Botella 900ml"],
+            "Presentación/Empaque": ["Botella"],
+            "Contenido Neto": ["900ml"]
+          },
+          "items": [
+            {
+              "itemId": "10614795",
+              "name": "Aceite Vegetal PRIMOR Premium Botella 900ml",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "101978434",
+          "title": "EOS CASHMERE ACEITE DE AFEITAR 6 OZ / 180 ML | VANILLA CASHMERE",
+          "specifications": {
+            "Contenido": ["Productos EOS"]
+          },
+          "items": [
+            {
+              "itemId": "12323507",
+              "name": "EOS CASHMERE ACEITE DE AFEITAR 6 OZ / 180 ML | VANILLA CASHMERE",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "100592164",
+          "title": "Aceite de Ducha Eucerin PH5",
+          "specifications": {
+            "Contenido": ["Aceite de Ducha Eucerin PH5"]
+          },
+          "items": [
+            {
+              "itemId": "10839282",
+              "name": "Aceite de Ducha Eucerin PH5",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "100209415",
+          "title": "Aceite de Ducha Eucerin Atopi Control - Frasco 400 ML",
+          "specifications": {
+            "Contenido": ["400 ml"]
+          },
+          "items": [
+            {
+              "itemId": "10331711",
+              "name": "Aceite de Ducha Eucerin Atopi Control - Frasco 400 ML",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "102029787",
+          "title": "Cubridor de Aceite DECO HOME",
+          "specifications": {
+            "Tamaño del producto (peso)": ["Muy pequeño"]
+          },
+          "items": [
+            {
+              "itemId": "12369326",
+              "name": "Cubridor de Aceite DECO HOME",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "retailer": "metro",
+      "query": "atun",
+      "products": [
+        {
+          "productId": "13245",
+          "title": "Filete de Atún Primor 140g",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "13257",
+              "name": "Filete de Atún Primor 140g",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "989512",
+          "title": "Grated de Atún Campomar 160g",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39228060",
+              "name": "Grated de Atún Campomar 160g",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "1062144",
+          "title": "Galletas Gnawlers Atún&zapallo",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39300482",
+              "name": "Galletas Gnawlers Atún&zapallo",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "1086506",
+          "title": "Carnitas Cream Sabor Atún 4un",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39324788",
+              "name": "Carnitas Cream Sabor Atún 4un",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "1074307",
+          "title": "Twopack Filete de Atún Primor 140g",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39312609",
+              "name": "Twopack Filete de Atún Primor 140g",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "retailer": "metro",
+      "query": "papel higienico",
+      "products": [
+        {
+          "productId": "1097658",
+          "title": "Papel Higiénico Suave Rindemax 24un",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39337867",
+              "name": "Papel Higiénico Suave Rindemax 24un",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "64269",
+          "title": "Papel Higiénico Suave Resistemax 40un",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39144877",
+              "name": "Papel Higiénico Doble Hoja Suave Resistemax 40un",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "1097659",
+          "title": "Papel Higiénico Suave Rindemax 12un",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39336530",
+              "name": "Papel Higiénico Suave Rindemax 12un",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "1038796",
+          "title": "Papel Higiénico Máxima 190m 4un",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39278922",
+              "name": "Papel Higiénico Máxima 190m 4un",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "949612",
+          "title": "Papel Higiénico Doble Hoja Higienol 12un.",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39189797",
+              "name": "Papel Higiénico Doble Hoja Higienol 12un.",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "retailer": "metro",
+      "query": "detergente polvo",
+      "products": [
+        {
+          "productId": "1009917",
+          "title": "Detergente en Polvo Sapolio 13.5kg",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39249329",
+              "name": "Detergente en Polvo Sapolio 13.5kg",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "1077287",
+          "title": "Detergente en Polvo Ace 1.7kg",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39315581",
+              "name": "Detergente en Polvo Ace 1.7kg",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "1105073",
+          "title": "Pack Bolívar: Detergente Polvo 2.4kg + Suavizante Floral 800ml",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39344774",
+              "name": "Pack Bolívar: Detergente Polvo 2.4kg + Suavizante Floral 800ml",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "1166",
+          "title": "Detergente en Polvo Opal Ultra 2.4kg",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "1166",
+              "name": "Detergente en Polvo Opal Ultra 2.4kg",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "1035006",
+          "title": "Detergente en Polvo Opal Ultra 5.6kg",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39273908",
+              "name": "Detergente en Polvo Opal Ultra 5.6kg",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "retailer": "metro",
+      "query": "detergente liquido",
+      "products": [
+        {
+          "productId": "1031252",
+          "title": "Detergente Líquido MAS Color 1.83L",
+          "specifications": {
+            "Contenido": ["1.83l"],
+            "Presentación": ["Frasco"]
+          },
+          "items": [
+            {
+              "itemId": "39270223",
+              "name": "Detergente Líquido MAS Color 1.83L",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "1031254",
+          "title": "Detergente Líquido MAS Color 3L",
+          "specifications": {
+            "Contenido": ["3l"],
+            "Presentación": ["Botella"]
+          },
+          "items": [
+            {
+              "itemId": "39270225",
+              "name": "Detergente Líquido MAS Color 3L",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "1031253",
+          "title": "Detergente Líquido MAS Color 830ml",
+          "specifications": {
+            "Contenido": ["830ml"],
+            "Presentación": ["Doypack"]
+          },
+          "items": [
+            {
+              "itemId": "39270224",
+              "name": "Detergente Líquido MAS Color 830ml",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "553091",
+          "title": "Detergente Líquido Woolite Bebé 900ml",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39151004",
+              "name": "Detergente Líquido Woolite Bebé 900ml",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "1095580",
+          "title": "Detergente Líquido Persil Universal 830ml",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39333809",
+              "name": "Detergente Líquido Persil Universal 830ml",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "retailer": "metro",
+      "query": "arroz",
+      "products": [
+        {
+          "productId": "972175",
+          "title": "1/4 Pollo Rostizado + Papas Fritas + Arroz Chaufa + Gaseosa Sin Azúcar 300ml",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39210952",
+              "name": "1/4 Pollo Rostizado + Papas Fritas + Arroz Chaufa + Gaseosa Sin Azúcar 300ml",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "34266",
+          "title": "Arroz Extra Metro 5kg",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "34191",
+              "name": "Arroz Extra Metro 5kg",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "1077700",
+          "title": "Arroz Costeño Extra 3kg",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39316002",
+              "name": "Arroz Costeño Extra 3kg",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "1070752",
+          "title": "Arroz Pacasmayo Extra 5kg",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39309079",
+              "name": "Arroz Pacasmayo Extra 5kg",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "1017133",
+          "title": "Arroz Integral Vallenorte 750g",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39256727",
+              "name": "Arroz Integral Vallenorte 750g",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "retailer": "metro",
+      "query": "azucar",
+      "products": [
+        {
+          "productId": "1015031",
+          "title": "Pollo Rostizado Sin Papas + Gaseosa Inca Kola Sin Azúcar 1.5L",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39254625",
+              "name": "Pollo Rostizado Sin Papas + Gaseosa Inca Kola Sin Azúcar 1.5L",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "1015087",
+          "title": "Pollo Rostizado + Papas Fritas + Gaseosa Inca Kola Sin Azúcar 1.5L",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39254681",
+              "name": "Pollo Rostizado + Papas Fritas + Gaseosa Inca Kola Sin Azúcar 1.5L",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "1100271",
+          "title": "Pollo Rostizado + Papas Fritas 2un + Gaseosa Inca Kola Sin Azúcar 1.5L",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39338595",
+              "name": "Pollo Rostizado + Papas Fritas 2un + Gaseosa Inca Kola Sin Azúcar 1.5L",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "1015014",
+          "title": "2 Pollo Rostizado + 2un Papas Fritas + Gaseosa Inca Kola Sin Azúcar 1.5L",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39254608",
+              "name": "2 Pollo Rostizado + 2un Papas Fritas + Gaseosa Inca Kola Sin Azúcar 1.5L",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "1015016",
+          "title": "Pollo Rostizado + Papas Fritas + Ensalada + Gaseosa Inca Kola Sin Azúcar 1.5L",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39254610",
+              "name": "Pollo Rostizado + Papas Fritas + Ensalada + Gaseosa Inca Kola Sin Azúcar 1.5L",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "retailer": "metro",
+      "query": "aceite",
+      "products": [
+        {
+          "productId": "1022939",
+          "title": "Mezcla de Aceite de Canola con Aceite de Oliva Borges 1L",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39261889",
+              "name": "Mezcla de Aceite de Canola con Aceite de Oliva Borges 1L",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "1022938",
+          "title": "Mezcla de Aceite de Girasol con Aceite de Oliva Borges 1L",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39261888",
+              "name": "Mezcla de Aceite de Girasol con Aceite de Oliva Borges 1L",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "1064309",
+          "title": "Aceite Vegetal Metro 5L",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39302641",
+              "name": "ACEITE VEGETAL METRO X 5L",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "1043347",
+          "title": "Aceite Vegetal Máxima 900ml",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39283647",
+              "name": "Aceite Vegetal Máxima 900ml",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        },
+        {
+          "productId": "53600",
+          "title": "Aceite Vegetal Máxima 900ml",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39135918",
+              "name": "Aceite Vegetal Máxima 900ml",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0,
+              "attributes": {
+                "Videos": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "retailer": "tottus",
+      "query": "atun",
+      "products": [
+        {
+          "skuId": "120623059",
+          "productId": "120623057",
+          "displayName": "Trozos de Atún Tottus en Aceite Sixpack Lata 140 g",
+          "measurements": {
+            "format": "Sixpack Lata 140 g",
+            "unit": "UN"
+          },
+          "brand": "TOTTUS"
+        },
+        {
+          "skuId": "120622971",
+          "productId": "120622970",
+          "displayName": "Filete de Atún Tottus en Agua Lata 140 g",
+          "measurements": {
+            "format": "Lata 140 g",
+            "unit": "UN"
+          },
+          "brand": "TOTTUS"
+        },
+        {
+          "skuId": "120623063",
+          "productId": "120623062",
+          "displayName": "Trozos de Atún Tottus en Aceite Lata 140 g",
+          "measurements": {
+            "format": "Lata 140 g  ",
+            "unit": "UN"
+          },
+          "brand": "TOTTUS"
+        },
+        {
+          "skuId": "115878271",
+          "productId": "115878270",
+          "displayName": "Trozos de Atún en Aceite Primor Lata 140 g",
+          "measurements": {
+            "format": "Lata 140 g",
+            "unit": "UN"
+          },
+          "brand": "PRIMOR"
+        },
+        {
+          "skuId": "120622968",
+          "productId": "120622965",
+          "displayName": "Filete de Atún Tottus en Aceite Lata 140 g",
+          "measurements": {
+            "format": "Lata 140 g",
+            "unit": "UN"
+          },
+          "brand": "TOTTUS"
+        }
+      ]
+    },
+    {
+      "retailer": "tottus",
+      "query": "papel higienico",
+      "products": [
+        {
+          "skuId": "113705762",
+          "productId": "113705761",
+          "displayName": "Papel Higiénico Elite Clásico Doble Hoja Empaque 40 Und",
+          "measurements": {
+            "format": "Empaque 40 Und",
+            "unit": "UN"
+          },
+          "brand": "ELITE"
+        },
+        {
+          "skuId": "113707319",
+          "productId": "113707318",
+          "displayName": "Papel Higiénico Suave Resiste Max Empaque 40 Und",
+          "measurements": {
+            "format": "Empaque 40 Und",
+            "unit": "UN"
+          },
+          "brand": "SUAVE"
+        },
+        {
+          "skuId": "150346610",
+          "productId": "150346609",
+          "displayName": "Papel Higiénico Suave RindeMax 40 Metros Empaque 18 Und",
+          "measurements": {
+            "format": "Empaque 18 Und",
+            "unit": "UN"
+          },
+          "brand": "SUAVE"
+        },
+        {
+          "skuId": "113706645",
+          "productId": "113706644",
+          "displayName": "Papel Higiénico Suave Cuidado Completo Doble Hoja Empaque 40 Und",
+          "measurements": {
+            "format": "Empaque 40 Und",
+            "unit": "UN"
+          },
+          "brand": "SUAVE"
+        },
+        {
+          "skuId": "153087938",
+          "productId": "153087936",
+          "displayName": "Papel Higiénico Suave Rindemax Empaque 24 Und",
+          "measurements": {
+            "format": "Empaque 24 Und",
+            "unit": "UN"
+          },
+          "brand": "SUAVE"
+        }
+      ]
+    },
+    {
+      "retailer": "tottus",
+      "query": "detergente polvo",
+      "products": [
+        {
+          "skuId": "130519779",
+          "productId": "130519777",
+          "displayName": "Detergente en Polvo Bolívar Cuidado Total Bolsa 730 g",
+          "measurements": {
+            "format": "Bolsa 730 g",
+            "unit": "UN"
+          },
+          "brand": "BOLIVAR"
+        },
+        {
+          "skuId": "130519789",
+          "productId": "130519787",
+          "displayName": "Detergente en Polvo Bolivar Cuidado Suavidad Bolsa 730 g",
+          "measurements": {
+            "format": "Bolsa 730 g",
+            "unit": "UN"
+          },
+          "brand": "BOLIVAR"
+        },
+        {
+          "skuId": "135790740",
+          "productId": "135790739",
+          "displayName": "Detergente en Polvo Opal Ultra Bolsa 5.6 Kg",
+          "measurements": {
+            "format": "Bolsa 5.6 Kg",
+            "unit": "UN"
+          },
+          "brand": "OPAL"
+        },
+        {
+          "skuId": "143890134",
+          "productId": "143890133",
+          "displayName": "Detergente en Polvo Marsella Jazmín y Rosas Bolsa 2 Kg",
+          "measurements": {
+            "format": "Bolsa 2 Kg",
+            "unit": "UN"
+          },
+          "brand": "MARSELLA"
+        },
+        {
+          "skuId": "142281541",
+          "productId": "142281540",
+          "displayName": "Detergente en Polvo Marsella Lavanda y Rosas Bolsa 4 Kg",
+          "measurements": {
+            "format": "Bolsa 4 Kg",
+            "unit": "UN"
+          },
+          "brand": "MARSELLA"
+        }
+      ]
+    },
+    {
+      "retailer": "tottus",
+      "query": "detergente liquido",
+      "products": [
+        {
+          "skuId": "150470023",
+          "productId": "150470021",
+          "displayName": "Detergente Líquido Floral Fluye Bolívar Botella 5 L",
+          "measurements": {
+            "format": "Botella 5 L",
+            "unit": "UN"
+          },
+          "brand": "BOLIVAR"
+        },
+        {
+          "skuId": "137217481",
+          "productId": "137217475",
+          "displayName": "Detergente Líquido Bolívar Cuidado Total Botella 1.9 L",
+          "measurements": {
+            "format": "Botella 1.9 L",
+            "unit": "UN"
+          },
+          "brand": "BOLIVAR"
+        },
+        {
+          "skuId": "147325014",
+          "productId": "147325013",
+          "displayName": "Detergente Líquido Xplend Ultra Doypack 3 L",
+          "measurements": {
+            "format": "Doypack 3 L",
+            "unit": "UN"
+          },
+          "brand": "XPLEND"
+        },
+        {
+          "skuId": "147324784",
+          "productId": "147324783",
+          "displayName": "Detergente Líquido Xplend Ultra Botella 4 L",
+          "measurements": {
+            "format": "Botella 4 L",
+            "unit": "UN"
+          },
+          "brand": "XPLEND"
+        },
+        {
+          "skuId": "113707154",
+          "productId": "113707152",
+          "displayName": "Jabón Líquido Skip Doypack 3 L",
+          "measurements": {
+            "format": "Doypack 3 L",
+            "unit": "UN"
+          },
+          "brand": "SKIP"
+        }
+      ]
+    },
+    {
+      "retailer": "tottus",
+      "query": "arroz",
+      "products": [
+        {
+          "skuId": "113707061",
+          "productId": "113707060",
+          "displayName": "Arroz Faraón Extra Bolsa 5 Kg",
+          "measurements": {
+            "format": "Bolsa 5 kg",
+            "unit": "UN"
+          },
+          "brand": "FARAON"
+        },
+        {
+          "skuId": "113707307",
+          "productId": "113707306",
+          "displayName": "Arroz Extra Costeño Bolsa 5 Kg",
+          "measurements": {
+            "format": "Bolsa 5 Kg",
+            "unit": "UN"
+          },
+          "brand": "COSTENO"
+        },
+        {
+          "skuId": "113706046",
+          "productId": "113706045",
+          "displayName": "Arroz Extra Tottus Bolsa 5 Kg",
+          "measurements": {
+            "format": "Bolsa 5 Kg",
+            "unit": "UN"
+          },
+          "brand": "TOTTUS"
+        },
+        {
+          "skuId": "124763716",
+          "productId": "124763714",
+          "displayName": "Arroz Costeño Extra Añejo Bolsa 5 Kg",
+          "measurements": {
+            "format": "Bolsa 5 Kg",
+            "unit": "UN"
+          },
+          "brand": "COSTENO"
+        },
+        {
+          "skuId": "121520512",
+          "productId": "121520510",
+          "displayName": "Arroz Faraón Extra Añejo Premium Bolsa 10 Kg",
+          "measurements": {
+            "format": "Bolsa 10 Kg",
+            "unit": "UN"
+          },
+          "brand": "FARAON"
+        }
+      ]
+    },
+    {
+      "retailer": "tottus",
+      "query": "azucar",
+      "products": [
+        {
+          "skuId": "113705556",
+          "productId": "113705555",
+          "displayName": "Azúcar Rubia Tottus Bolsa 5 Kg",
+          "measurements": {
+            "format": "Bolsa 5 Kg",
+            "unit": "UN"
+          },
+          "brand": "TOTTUS"
+        },
+        {
+          "skuId": "113705635",
+          "productId": "113705634",
+          "displayName": "Azúcar Rubia Tottus Bolsa 1 Kg",
+          "measurements": {
+            "format": "Bolsa 1 Kg",
+            "unit": "UN"
+          },
+          "brand": "TOTTUS"
+        },
+        {
+          "skuId": "113706934",
+          "productId": "113706932",
+          "displayName": "Azúcar Rubia Tottus Bolsa 2 Kg",
+          "measurements": {
+            "format": "Bolsa 2 Kg",
+            "unit": "UN"
+          },
+          "brand": "TOTTUS"
+        },
+        {
+          "skuId": "137930667",
+          "productId": "137930666",
+          "displayName": "Azúcar Rubia Manuelita Bolsa 5 Kg",
+          "measurements": {
+            "format": "Bolsa 5 Kg",
+            "unit": "UN"
+          },
+          "brand": "MANUELITA"
+        },
+        {
+          "skuId": "114518766",
+          "productId": "114518765",
+          "displayName": "Azúcar Rubia Dulfina Bolsa 5 Kg",
+          "measurements": {
+            "format": "Bolsa 5 Kg",
+            "unit": "UN"
+          },
+          "brand": "DULFINA"
+        }
+      ]
+    },
+    {
+      "retailer": "tottus",
+      "query": "aceite",
+      "products": [
+        {
+          "skuId": "113706603",
+          "productId": "113706602",
+          "displayName": "Aceite Vegetal Primor Premium Botella 900 mL",
+          "measurements": {
+            "format": "Botella 900 mL  ",
+            "unit": "UN"
+          },
+          "brand": "PRIMOR"
+        },
+        {
+          "skuId": "115776532",
+          "productId": "115776531",
+          "displayName": "Aceite Vegetal Tottus Botella 900 mL",
+          "measurements": {
+            "format": "Botella 900 mL  ",
+            "unit": "UN"
+          },
+          "brand": "TOTTUS"
+        },
+        {
+          "skuId": "119580636",
+          "productId": "119580635",
+          "displayName": "Aceite Vegetal Primor Clásico Botella 1.8 L",
+          "measurements": {
+            "format": "Botella 1.8 L",
+            "unit": "UN"
+          },
+          "brand": "PRIMOR"
+        },
+        {
+          "skuId": "113706446",
+          "productId": "113706444",
+          "displayName": "Aceite Vegetal Primor Clásico Botella 900 mL",
+          "measurements": {
+            "format": "Botella 900 mL",
+            "unit": "UN"
+          },
+          "brand": "PRIMOR"
+        },
+        {
+          "skuId": "115267789",
+          "productId": "115267788",
+          "displayName": "Aceite Vegetal Soya Sao Botella 900 mL",
+          "measurements": {
+            "format": "Botella 900 mL",
+            "unit": "UN"
+          },
+          "brand": "SAO"
+        }
+      ]
+    },
+    {
+      "retailer": "plaza-vea",
+      "query": "current-tuna-sku:10732106",
+      "products": [
+        {
+          "productId": "100512179",
+          "title": "Filete de Atún PRIMOR en Aceite Vegetal Lata 140g",
+          "specifications": {
+            "Presentación unitarios vitrina": ["Lata 140g"],
+            "Presentación/Empaque": ["Lata"],
+            "Contenido Neto": ["140g"]
+          },
+          "items": [
+            {
+              "itemId": "10732106",
+              "name": "Filete de Atún PRIMOR en Aceite Vegetal Lata 140g",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0
+            }
+          ],
+          "description": ""
+        }
+      ]
+    },
+    {
+      "retailer": "plaza-vea",
+      "query": "current-tuna-sku:10672468",
+      "products": [
+        {
+          "productId": "100470721",
+          "title": "Trozos de Atún PRIMOR en Aceite Vegetal Lata 140g",
+          "specifications": {
+            "Presentación unitarios vitrina": ["Lata 140g"],
+            "Presentación/Empaque": ["Lata"],
+            "Contenido Neto": ["140g"]
+          },
+          "items": [
+            {
+              "itemId": "10672468",
+              "name": "Trozos de Atún PRIMOR en Aceite Vegetal Lata 140g",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0
+            }
+          ],
+          "description": ""
+        }
+      ]
+    },
+    {
+      "retailer": "metro",
+      "query": "current-tuna-sku:39326010",
+      "products": [
+        {
+          "productId": "1087751",
+          "title": "Pack Primor: Aceite Vegetal Premium 900ml + Filete de Atún en Aceite 2un",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39326010",
+              "name": "Pack Primor: Aceite Vegetal Premium 900ml + Filete de Atún en Aceite 2un",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0
+            }
+          ],
+          "description": "  Contiene:   Aceite Vegetal Primor Premium 900ml  Filete de Atún en Aceite Primor 140g - 2 unidades "
+        }
+      ]
+    },
+    {
+      "retailer": "metro",
+      "query": "current-tuna-sku:39326007",
+      "products": [
+        {
+          "productId": "1087748",
+          "title": "Pack Primor: Aceite Vegetal Premium 900ml + Trozos de Atún en Aceite 2un",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39326007",
+              "name": "Pack Primor: Aceite Vegetal Premium 900ml + Trozos de Atún en Aceite 2un",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0
+            }
+          ],
+          "description": "  Contiene:   Aceite Vegetal Primor Premium 900ml  Trozos de Atún en Aceite Primor 140g - 2 unidades "
+        }
+      ]
+    },
+    {
+      "retailer": "metro",
+      "query": "current-tuna-sku:39316517",
+      "products": [
+        {
+          "productId": "1078218",
+          "title": "Sixpack Trozos de Atún en Aceite Vegetal Primor 140g",
+          "specifications": {},
+          "items": [
+            {
+              "itemId": "39316517",
+              "name": "Sixpack Trozos de Atún en Aceite Vegetal Primor 140g",
+              "measurementUnit": "un",
+              "unitMultiplier": 1.0
+            }
+          ],
+          "description": " Cantidad: 6 unidades de 140 gramos  Trozos de atún  En aceite vegetal Primor "
+        }
+      ]
+    }
+  ],
+  "currentTottusTunaProductPages": [
+    {
+      "title": "Filete de Atún Florida en Agua y Sal Lata 140 g",
+      "attributes": {
+        "specifications": [
+          {
+            "id": "Contenido",
+            "name": "Contenido",
+            "value": "Lata 140 g"
+          },
+          {
+            "id": "formato",
+            "name": "formato",
+            "value": "Lata 140 g"
+          }
+        ]
+      },
+      "variants": [
+        {
+          "name": "Filete de Atún Florida en Agua y Sal Lata 140 g",
+          "attributes": {
+            "measurement": {
+              "formato": "Lata 140 g",
+              "unidad-de-medida": "UN",
+              "maximo-de-compra": 12
+            },
+            "quantityRelatedSpecifications": [
+              {
+                "id": "formato",
+                "name": "formato",
+                "value": "Lata 140 g"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "Trozos de Atún Florida Aceite Vegetal Lata 140 g",
+      "attributes": {
+        "specifications": [
+          {
+            "id": "Contenido",
+            "name": "Contenido",
+            "value": "Lata 140 g"
+          },
+          {
+            "id": "formato",
+            "name": "formato",
+            "value": "Lata 140 g"
+          }
+        ]
+      },
+      "variants": [
+        {
+          "name": "Trozos de Atún Florida Aceite Vegetal Lata 140 g",
+          "attributes": {
+            "measurement": {
+              "formato": "Lata 140 g",
+              "unidad-de-medida": "UN",
+              "maximo-de-compra": 9
+            },
+            "quantityRelatedSpecifications": [
+              {
+                "id": "Contenido",
+                "name": "Contenido",
+                "value": "Lata 140 g"
+              },
+              {
+                "id": "formato",
+                "name": "formato",
+                "value": "Lata 140 g"
+              },
+              {
+                "id": "Informacion_adicional",
+                "name": "Información adicional",
+                "value": "El tamaño de la porción es 56 gramos. Los valores porcentuales están basados en una dieta de 2000 calorías por día. Todos los valores son aproximados."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "Filete de Atún Florida en Aceite de Girasol Pack 3 Und",
+      "attributes": {
+        "specifications": [
+          {
+            "id": "2926_presentacion",
+            "name": "Presentación",
+            "value": "Pack"
+          },
+          {
+            "id": "Contenido",
+            "name": "Contenido",
+            "value": "3 Und"
+          },
+          {
+            "id": "formato",
+            "name": "formato",
+            "value": "Pack 3 Und"
+          }
+        ]
+      },
+      "variants": [
+        {
+          "name": "Filete de Atún Florida en Aceite de Girasol Pack 3 Und",
+          "attributes": {
+            "measurement": {
+              "formato": "Pack 3 Und",
+              "unidad-de-medida": "UN",
+              "maximo-de-compra": 12
+            },
+            "quantityRelatedSpecifications": [
+              {
+                "id": "Contenido",
+                "name": "Contenido",
+                "value": "3 Und"
+              },
+              {
+                "id": "formato",
+                "name": "formato",
+                "value": "Pack 3 Und"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

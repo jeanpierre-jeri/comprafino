@@ -1,0 +1,372 @@
+{
+  "observedAt": "2026-10-04T17:43:00.376Z",
+  "rowCounts": {
+    "retailer_listings": 736,
+    "listing_normalizations": 736,
+    "canonical_products": 57,
+    "canonical_product_listings": 127,
+    "price_history": 763,
+    "ingestion_runs": 45,
+    "discovery_queries": 14,
+    "discovery_daily_budget": 1
+  },
+  "coverage": {
+    "knownListings": 736,
+    "publicOffers": 127,
+    "stalePublic": 0,
+    "selectedTargeted": 0
+  },
+  "matching": {
+    "processed": 736,
+    "candidates": 8853,
+    "persistedWrites": null,
+    "note": "Read-only candidate generation; last matching writes are not stored."
+  },
+  "database": {
+    "databaseBytes": 10788864,
+    "visibleConnections": 11
+  },
+  "largestRelations": [
+    {
+      "name": "retailer_listings",
+      "totalBytes": 696320,
+      "tableBytes": 450560,
+      "indexBytes": 204800
+    },
+    {
+      "name": "listing_normalizations",
+      "totalBytes": 319488,
+      "tableBytes": 180224,
+      "indexBytes": 98304
+    },
+    {
+      "name": "price_history",
+      "totalBytes": 278528,
+      "tableBytes": 73728,
+      "indexBytes": 172032
+    },
+    {
+      "name": "canonical_product_listings",
+      "totalBytes": 106496,
+      "tableBytes": 40960,
+      "indexBytes": 32768
+    },
+    {
+      "name": "discovery_queries",
+      "totalBytes": 65536,
+      "tableBytes": 8192,
+      "indexBytes": 49152
+    },
+    {
+      "name": "ingestion_runs",
+      "totalBytes": 49152,
+      "tableBytes": 8192,
+      "indexBytes": 32768
+    },
+    {
+      "name": "canonical_products",
+      "totalBytes": 32768,
+      "tableBytes": 8192,
+      "indexBytes": 16384
+    },
+    {
+      "name": "retailers",
+      "totalBytes": 32768,
+      "tableBytes": 8192,
+      "indexBytes": 16384
+    },
+    {
+      "name": "discovery_daily_budget",
+      "totalBytes": 24576,
+      "tableBytes": 8192,
+      "indexBytes": 16384
+    }
+  ],
+  "history": {
+    "states": 763,
+    "open": 736,
+    "digest": "7fb5f1a0abaf405c98dee46fc13eb7a7",
+    "firstState": "2026-10-03T17:45:11.644Z",
+    "statesLast7Days": 763,
+    "changesLast7Days": 27
+  },
+  "recentIngestion": [
+    {
+      "retailer": "metro",
+      "status": "success",
+      "startedAt": "2026-10-04T17:32:10.742Z",
+      "durationSeconds": 22.698476,
+      "fetched": 208,
+      "persisted": 208,
+      "changed": 0
+    },
+    {
+      "retailer": "plaza-vea",
+      "status": "success",
+      "startedAt": "2026-10-04T17:31:52.587Z",
+      "durationSeconds": 17.486707,
+      "fetched": 198,
+      "persisted": 191,
+      "changed": 1
+    },
+    {
+      "retailer": "tottus",
+      "status": "success",
+      "startedAt": "2026-10-04T17:31:41.700Z",
+      "durationSeconds": 10.205984,
+      "fetched": 243,
+      "persisted": 150,
+      "changed": 0
+    },
+    {
+      "retailer": "metro",
+      "status": "success",
+      "startedAt": "2026-10-04T17:08:26.621Z",
+      "durationSeconds": 6.632331,
+      "fetched": 100,
+      "persisted": 100,
+      "changed": 0
+    },
+    {
+      "retailer": "plaza-vea",
+      "status": "success",
+      "startedAt": "2026-10-04T17:08:19.297Z",
+      "durationSeconds": 7.244903,
+      "fetched": 100,
+      "persisted": 100,
+      "changed": 0
+    },
+    {
+      "retailer": "tottus",
+      "status": "success",
+      "startedAt": "2026-10-04T17:08:10.675Z",
+      "durationSeconds": 8.534836,
+      "fetched": 243,
+      "persisted": 150,
+      "changed": 0
+    },
+    {
+      "retailer": "metro",
+      "status": "success",
+      "startedAt": "2026-10-04T16:50:32.707Z",
+      "durationSeconds": 15.99133,
+      "fetched": 208,
+      "persisted": 208,
+      "changed": 1
+    },
+    {
+      "retailer": "plaza-vea",
+      "status": "success",
+      "startedAt": "2026-10-04T16:50:17.042Z",
+      "durationSeconds": 15.382269,
+      "fetched": 198,
+      "persisted": 191,
+      "changed": 0
+    },
+    {
+      "retailer": "tottus",
+      "status": "success",
+      "startedAt": "2026-10-04T16:50:06.416Z",
+      "durationSeconds": 10.272068,
+      "fetched": 243,
+      "persisted": 150,
+      "changed": 0
+    },
+    {
+      "retailer": "metro",
+      "status": "success",
+      "startedAt": "2026-10-04T16:46:41.244Z",
+      "durationSeconds": 0.609037,
+      "fetched": 20,
+      "persisted": 20,
+      "changed": 20
+    },
+    {
+      "retailer": "metro",
+      "status": "success",
+      "startedAt": "2026-10-04T16:46:39.036Z",
+      "durationSeconds": 0.666706,
+      "fetched": 20,
+      "persisted": 20,
+      "changed": 20
+    },
+    {
+      "retailer": "metro",
+      "status": "success",
+      "startedAt": "2026-10-04T16:46:36.860Z",
+      "durationSeconds": 0.589393,
+      "fetched": 20,
+      "persisted": 20,
+      "changed": 20
+    },
+    {
+      "retailer": "metro",
+      "status": "success",
+      "startedAt": "2026-10-04T16:46:34.018Z",
+      "durationSeconds": 0.739215,
+      "fetched": 20,
+      "persisted": 20,
+      "changed": 20
+    },
+    {
+      "retailer": "metro",
+      "status": "success",
+      "startedAt": "2026-10-04T16:46:30.406Z",
+      "durationSeconds": 0.392975,
+      "fetched": 9,
+      "persisted": 9,
+      "changed": 9
+    },
+    {
+      "retailer": "metro",
+      "status": "success",
+      "startedAt": "2026-10-04T16:46:28.086Z",
+      "durationSeconds": 0.629359,
+      "fetched": 19,
+      "persisted": 19,
+      "changed": 19
+    }
+  ],
+  "demand": {
+    "queries": 14,
+    "lifetimeSearchRequests": 33,
+    "pending": 1,
+    "processing": 3,
+    "firstDemand": "2026-10-04T01:37:20.466Z",
+    "reservedQueryAttempts": 13,
+    "reservedAttemptsTodayUTC": 13
+  },
+  "refresh": {
+    "categorySources": 16,
+    "usableCategoryObservationCap": 590,
+    "targetedRequestCap": 100,
+    "recentMeasurement": {
+      "durationMs": 76503,
+      "targeted": {
+        "status": "success",
+        "result": {
+          "requests": 0
+        }
+      },
+      "dryRun": false,
+      "retailers": [
+        {
+          "retailer": "tottus",
+          "outcome": {
+            "status": "success",
+            "result": {
+              "id": "2ef486c1-884e-46fe-9b22-35b88b90a1ea",
+              "fetched": 243,
+              "persisted": 150,
+              "changed": 0
+            }
+          }
+        },
+        {
+          "retailer": "plaza-vea",
+          "outcome": {
+            "status": "success",
+            "result": {
+              "id": "9f9e5bf0-26c1-49f7-b5b7-96e746320252",
+              "fetched": 198,
+              "persisted": 191,
+              "changed": 1
+            }
+          }
+        },
+        {
+          "retailer": "metro",
+          "outcome": {
+            "status": "success",
+            "result": {
+              "id": "c2e63ca3-b969-4537-bbe7-63120a34ee46",
+              "fetched": 208,
+              "persisted": 208,
+              "changed": 0
+            }
+          }
+        }
+      ],
+      "normalization": {
+        "status": "success",
+        "result": {
+          "processed": 736,
+          "changed": 1
+        }
+      },
+      "matching": {
+        "status": "success",
+        "result": {
+          "candidates": 8853,
+          "associationsChanged": 0,
+          "productsChanged": 0
+        }
+      },
+      "status": "success",
+      "observedAt": "2026-10-04T17:32:57.708Z",
+      "categoryRequests": {
+        "tottus": 5,
+        "plaza-vea": 11,
+        "metro": 11
+      },
+      "stageDurationSeconds": {
+        "tottus": 11.312,
+        "plaza-vea": 18.155,
+        "metro": 23.277,
+        "targeted": 0.723,
+        "normalization": 2.657,
+        "matching": 20.378
+      }
+    }
+  },
+  "schedule": {
+    "refreshCron": "17 11,23 * * *",
+    "discoveryCron": "43 0,6,12,18 * * *",
+    "refreshRunsPerDay": 2,
+    "discoveryRunsPerDay": 4
+  },
+  "requests": {
+    "categoryTypicalEstimate": 27,
+    "categoryHardCap": 98,
+    "targetedSelectedNow": 0,
+    "targetedPerRunCap": 100,
+    "discoveryPerRunCap": 30,
+    "discoveryPerDayCap": 90,
+    "totalScheduledDailyCap": 486,
+    "note": "Category estimate: Tottus 2+3 pages; VTEX dairy 5 pages and six one-page staples each. Actual source availability affects pages. Discovery caps are 10 queries/run, 30/day, three retailers. Audit/manual calls excluded."
+  },
+  "actions": {
+    "refreshCommandMinutesPerDay": 2.5501,
+    "refreshCommandMinutesPer30Days": 76.503,
+    "discoveryCommandMinutes": null,
+    "note": "Workflow runtime also includes checkout/setup/install/queue overhead. No GitHub APIs queried; billing and plan quotas are not inferred."
+  },
+  "growth": {
+    "monthlyHistoryChanges": null,
+    "note": "Catalog recently bootstrapped; last-seven-day counts include acquisition. A stable multi-day change rate is needed before monthly extrapolation.",
+    "categoryIngestionRunsPer30Days": 180,
+    "additionalRunsDependOnManualIngestion": true,
+    "discoveryDailyBudgetRowsPer30Days": 30,
+    "discoveryQueries": "Deduplicated; growth depends on new unique demand. Discovery and targeted persistence do not create ingestion_runs."
+  },
+  "scenarios": [
+    {
+      "listings": 1472,
+      "matchingCandidateEstimate": 35412,
+      "derivationLinearFactor": 2,
+      "currentGuardExceeded": true,
+      "storageAtSameCompositionFactor": 2,
+      "requestsWithUnchangedBounds": "unchanged; coverage latency rises",
+      "note": "Quadratic candidate estimate assumes unchanged brand/retailer composition. Whole DB size is not linear because fixed overhead/history differ."
+    },
+    {
+      "listings": 1500,
+      "matchingCandidateEstimate": 36772,
+      "derivationLinearFactor": 2.0380434782608696,
+      "currentGuardExceeded": true,
+      "storageAtSameCompositionFactor": 2.0380434782608696,
+      "requestsWithUnchangedBounds": "unchanged; coverage latency rises",
+      "note": "Quadratic candidate estimate assumes unchanged brand/retailer composition. Whole DB size is not linear because fixed overhead/history differ."
+    }
+  ]
+}

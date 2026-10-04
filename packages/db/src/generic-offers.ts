@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   calculateUnitPrice,
+  unitPriceBases,
   classifyProductFamily,
   resolveProductFamilyQuery,
   selectFamilyOffers,
@@ -13,7 +14,7 @@ import {
   retailerIdSchema,
   usefulSearchQuery,
 } from "@comprafino/core";
-import type { GenericOfferSort, UnitPriceDimension } from "@comprafino/core";
+import type { GenericOfferSort } from "@comprafino/core";
 import type { createDatabase } from "./client.ts";
 import { catalogFingerprint, catalogRecordSchema } from "./catalog.ts";
 import {
@@ -23,7 +24,13 @@ import {
   searchCanonicalProducts,
   searchText,
 } from "./public-products.ts";
-export { calculateUnitPrice, formatUnitPrice, genericOfferSort } from "@comprafino/core";
+export {
+  calculateUnitPrice,
+  formatUnitPrice,
+  genericOfferSort,
+  unitPriceBases,
+  unitPriceBasisLabel,
+} from "@comprafino/core";
 const rowSchema = z.object({
   listing: catalogRecordSchema,
   sourceCategory: z.string().nullable().optional(),
@@ -86,7 +93,7 @@ export function genericProductOffer(raw: unknown, now = new Date()) {
   };
 }
 export type GenericProductOffer = NonNullable<ReturnType<typeof genericProductOffer>>;
-const dimensions: UnitPriceDimension[] = ["mass", "volume", "count"];
+
 export function sortGenericOffers(offers: readonly GenericProductOffer[], sort: GenericOfferSort) {
   // SQL order is relevance; stable sorting retains it as the tie-breaker.
   return [...offers].sort((a, b) => {
@@ -100,7 +107,7 @@ export function sortGenericOffers(offers: readonly GenericProductOffer[], sort: 
     if (sort !== "unit-price") return 0;
     if (!a.unitPrice || !b.unitPrice) return Number(!a.unitPrice) - Number(!b.unitPrice);
     return (
-      dimensions.indexOf(a.unitPrice.dimension) - dimensions.indexOf(b.unitPrice.dimension) ||
+      unitPriceBases.indexOf(a.unitPrice.basis) - unitPriceBases.indexOf(b.unitPrice.basis) ||
       compareUnitPrices(a.unitPrice, b.unitPrice)
     );
   });
@@ -110,12 +117,12 @@ export function sortGenericOffers(offers: readonly GenericProductOffer[], sort: 
 export function limitGenericOffers(offers: readonly GenericProductOffer[], sort: GenericOfferSort) {
   const sorted = sortGenericOffers(offers, sort);
   if (sort !== "unit-price" || sorted.length <= 30) return sorted.slice(0, 30);
-  const groups = [...new Set(sorted.map((o) => o.unitPrice?.dimension ?? "unknown"))];
+  const groups = [...new Set(sorted.map((o) => o.unitPrice?.basis ?? "unknown"))];
   const quota = Math.floor(30 / groups.length);
   const selected = new Set<GenericProductOffer>();
   for (const group of groups)
     for (const offer of sorted
-      .filter((o) => (o.unitPrice?.dimension ?? "unknown") === group)
+      .filter((o) => (o.unitPrice?.basis ?? "unknown") === group)
       .slice(0, quota))
       selected.add(offer);
   for (const offer of sorted) {

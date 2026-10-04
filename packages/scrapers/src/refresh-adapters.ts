@@ -71,10 +71,24 @@ export function combineVtexCoverage(
     },
   };
 }
-export function createRefreshAdapters() {
+export function createRefreshAdapters(fetchPage: typeof fetch = fetch) {
   return {
-    tottus: { adapter: combineTottusCoverage(), limit: 150 },
-    "plaza-vea": { adapter: combineVtexCoverage("plaza-vea"), limit: 220 },
-    metro: { adapter: combineVtexCoverage("metro"), limit: 220 },
+    tottus: {
+      adapter: combineTottusCoverage(
+        createTottusAdapter(fetchPage),
+        createTottusAdapter(fetchPage, "dairy"),
+      ),
+      limit: 150,
+    },
+    "plaza-vea": {
+      adapter: combineVtexCoverage("plaza-vea", (category) =>
+        createPlazaVeaAdapter(fetchPage, category),
+      ),
+      limit: 220,
+    },
+    metro: {
+      adapter: combineVtexCoverage("metro", (category) => createMetroAdapter(fetchPage, category)),
+      limit: 220,
+    },
   };
 }

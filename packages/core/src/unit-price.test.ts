@@ -132,7 +132,7 @@ it("withholds canned tuna mass comparison without confusing net and drained weig
     },
     tunaNow,
   );
-  expect(result).toEqual({ price: null, reason: "ambiguous-quantity" });
+  expect(result).toEqual({ price: null, reason: "ambiguous-semantics" });
 });
 
 it("withholds the observed one-gram flour source typo without repairing display quantity", () => {
@@ -150,4 +150,61 @@ it("withholds the observed one-gram flour source typo without repairing display 
       now,
     ),
   ).toEqual({ price: null, reason: "ambiguous-quantity" });
+});
+
+it.each([
+  "Atún Lata 170 g",
+  "Atún Peso neto 170 g",
+  "Atún Peso escurrido 120 g",
+  "Atún Peso neto 170 g Peso escurrido 120 g",
+  "Filete de Atún Pack 3 Und",
+])("withholds inconsistent tuna content semantics: %s", (title) => {
+  const attrs = normalizeCatalogListing({ title, priceUnit: "UN" });
+  expect(calculateUnitPrice({ ...input, ...attrs, title }, now)).toEqual({
+    price: null,
+    reason: "ambiguous-semantics",
+  });
+});
+it.each([
+  "Papel Higiénico 12un",
+  "Papel Higiénico 65m 12un",
+  "Papel Higiénico Doble Hoja 12un",
+  "Papel Higiénico 200 hojas por rollo 12un",
+])("keeps coarse roll comparison explicit: %s", (title) => {
+  const attrs = normalizeCatalogListing({ title, priceUnit: "UN" });
+  const result = calculateUnitPrice({ ...input, ...attrs, title, currentPriceCents: 1440 }, now);
+  expect(result.price).toMatchObject({ basis: "roll", quality: "approximate", denominator: 12n });
+  expect(formatUnitPrice(result.price!)).toBe("S/ 1.20 / rollo");
+  expect(() =>
+    compareUnitPrices(result.price!, price({ totalQuantity: { value: 12, unit: "unit" } })),
+  ).toThrow("Incompatible");
+});
+it.each([
+  ["Detergente polvo 800 g", "mass", 800n],
+  ["Detergente líquido Doypack 3 L", "volume", 3000n],
+  ["Detergente cápsulas 20 unidades", "item-count", 20n],
+  ["Detergente líquido 3 x 800 ml", "volume", 2400n],
+])("uses the correct detergent dimension for %s", (title, basis, denominator) => {
+  const attrs = normalizeCatalogListing({ title, priceUnit: "UN" });
+  expect(calculateUnitPrice({ ...input, ...attrs, title }, now).price).toMatchObject({
+    basis,
+    denominator,
+    quality: "strong",
+  });
+});
+it("distinguishes conflicting dimensions from missing or ambiguous content", () => {
+  const title = "Detergente 800 g 3 L";
+  const attrs = normalizeCatalogListing({ title, priceUnit: "UN" });
+  expect(calculateUnitPrice({ ...input, ...attrs, title }, now).reason).toBe(
+    "conflicting-dimensions",
+  );
+  expect(
+    calculateUnitPrice(
+      { ...input, title: "Detergente Pack 3 unidades", totalQuantity: { value: 3, unit: "unit" } },
+      now,
+    ).reason,
+  ).toBe("ambiguous-semantics");
+  expect(
+    calculateUnitPrice({ ...input, title: "Papel Higiénico 65m", totalQuantity: null }, now).reason,
+  ).toBe("missing-quantity");
 });

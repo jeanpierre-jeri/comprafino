@@ -100,6 +100,8 @@ it("bounded unit mode reserves room for every dimension and retains unknown offe
       numerator: 100n,
       denominator: 1n,
       dimension: "mass" as const,
+      basis: "mass" as const,
+      quality: "strong" as const,
       displayUnit: "kg" as const,
     },
   };
@@ -109,6 +111,8 @@ it("bounded unit mode reserves room for every dimension and retains unknown offe
       numerator: 100n,
       denominator: 1n,
       dimension: "volume" as const,
+      basis: "volume" as const,
+      quality: "strong" as const,
       displayUnit: "l" as const,
     },
   };
@@ -121,4 +125,22 @@ it("bounded unit mode reserves room for every dimension and retains unknown offe
   expect(results).toContain(base);
   expect(results).toContain(volume);
   expect(results.at(-1)).toBe(unknown);
+});
+
+it("sorts approximate rolls separately from physical item counts, reserving both blocks", () => {
+  const egg = genericProductOffer(raw, now)!;
+  const paperListing = { ...listing, title: "Papel Higiénico Elite 65m 12un" };
+  const paper = genericProductOffer(
+    {
+      ...raw,
+      listing: paperListing,
+      fingerprint: catalogFingerprint(paperListing),
+      currentPriceCents: 1,
+    },
+    now,
+  )!;
+  expect(paper.unitPrice).toMatchObject({ basis: "roll", quality: "approximate" });
+  expect(sortGenericOffers([paper, egg], "unit-price")).toEqual([egg, paper]);
+  const many = Array.from({ length: 40 }, (_, i) => ({ ...egg, id: String(i) }));
+  expect(limitGenericOffers([...many, paper], "unit-price")).toContain(paper);
 });

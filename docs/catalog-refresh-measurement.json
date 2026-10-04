@@ -1,0 +1,83 @@
+{
+  "dryRun": false,
+  "retailers": [
+    {
+      "retailer": "tottus",
+      "outcome": {
+        "status": "success",
+        "result": {
+          "id": "2ef486c1-884e-46fe-9b22-35b88b90a1ea",
+          "fetched": 243,
+          "persisted": 150,
+          "changed": 0
+        }
+      }
+    },
+    {
+      "retailer": "plaza-vea",
+      "outcome": {
+        "status": "success",
+        "result": {
+          "id": "9f9e5bf0-26c1-49f7-b5b7-96e746320252",
+          "fetched": 198,
+          "persisted": 191,
+          "changed": 1
+        }
+      }
+    },
+    {
+      "retailer": "metro",
+      "outcome": {
+        "status": "success",
+        "result": {
+          "id": "c2e63ca3-b969-4537-bbe7-63120a34ee46",
+          "fetched": 208,
+          "persisted": 208,
+          "changed": 0
+        }
+      }
+    }
+  ],
+  "targeted": {
+    "status": "success",
+    "result": {
+      "requests": 0,
+      "results": [],
+      "changed": 0,
+      "observed": 0,
+      "failures": 0,
+      "status": "success"
+    }
+  },
+  "normalization": {
+    "status": "success",
+    "result": {
+      "processed": 736,
+      "changed": 1
+    }
+  },
+  "matching": {
+    "status": "success",
+    "result": {
+      "candidates": 8853,
+      "associationsChanged": 0,
+      "productsChanged": 0
+    }
+  },
+  "status": "success",
+  "durationMs": 76503,
+  "observedAt": "2026-10-04T17:32:57.708Z",
+  "categoryRequests": {
+    "tottus": 5,
+    "plaza-vea": 11,
+    "metro": 11
+  },
+  "stageDurationSeconds": {
+    "tottus": 11.312,
+    "plaza-vea": 18.155,
+    "metro": 23.277,
+    "targeted": 0.723,
+    "normalization": 2.657,
+    "matching": 20.378
+  }
+}

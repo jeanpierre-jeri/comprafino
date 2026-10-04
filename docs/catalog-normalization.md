@@ -128,3 +128,7 @@ Milestone 3 should start by re-ingesting representative listings to capture stru
 ## Milestone 3 follow-up
 
 The pending commit/build notes above record the historical Milestone 2 agent run; normalization is complete in the current committed baseline `3abd9f9`. Milestone 3 refreshed the existing three bounded ingestion samples to capture source brands, reran normalization and confirmed zero-write repeats. There are now 151 listings, all with identified brands, 102 mass/volume quantities, five count quantities, 115 package counts, 35 weighted listings, eight diagnostic rows and nine unresolved rows. The new Tottus listing came from ordinary bounded source ordering, without category expansion. See [catalog matching](catalog-matching.md) for current coverage, canonical identity, evaluation and pending Milestone 3 validation.
+
+## Milestone 10 follow-up
+
+Current comparison policy and audited quantities are in [quantity quality](quantity-quality.md); current operating counts, request budgets and headroom are in [catalog budget](catalog-budget.md). Comparison bases now separate approximate rolls from physical item counts, and all semantically unresolved tuna unit prices are withheld. Persisted normalization version 1, canonical matcher rules and existing source/refresh limits remain unchanged. Earlier milestone validation notes are historical; Milestones 0–9 are complete in the user-provided baseline `d8858b3`.

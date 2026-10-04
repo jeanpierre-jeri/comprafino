@@ -1,0 +1,44 @@
+{
+  "fullRefresh": "catalog-refresh-measurement.json",
+  "normalizationFirstRepeat": {
+    "changed": 0,
+    "unchanged": 736,
+    "stale": 0
+  },
+  "normalizationSecondRepeat": {
+    "changed": 0,
+    "unchanged": 736,
+    "stale": 0
+  },
+  "targetedRegression": {
+    "requests": 1,
+    "results": [
+      {
+        "retailer": "metro",
+        "externalId": "427",
+        "status": "observed",
+        "priceStates": 0
+      }
+    ],
+    "changed": 0,
+    "observed": 1,
+    "failures": 0,
+    "status": "success",
+    "normalization": "success",
+    "matching": "success",
+    "normalizationWrites": 0,
+    "matchingWrites": 0
+  },
+  "historyDigestAfterFullRefreshAndAfterAllRegressions": "7fb5f1a0abaf405c98dee46fc13eb7a7",
+  "unitTests": 499,
+  "postgresqlTests": 34,
+  "format": "passed",
+  "lint": "passed",
+  "typecheck": "passed",
+  "build": "blocked: Turbopack CSS-worker binding to a port: Operation not permitted",
+  "e2e": "blocked: production web server could not start after failed build",
+  "normalizationVersion": 1,
+  "matchingRuleChanges": false,
+  "commit": null,
+  "milestoneComplete": false
+}

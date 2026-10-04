@@ -1,6 +1,6 @@
 # Catalog refresh and operational freshness
 
-Milestones 0–8 are complete in the user-provided baseline `1401f97`. Milestone 9 adds twelve bounded permanent staple sources to the existing refresh flow. Implementation/data checks pass; local build/E2E remains the explicit completion gate. See [staple coverage](staple-coverage.md) for live counts, request limits, quantities and before/after relevance. Older validation sections below describe historical runs.
+Milestones 0–9 are complete in the user-provided baseline `d8858b3`. Milestone 10 adds comparison-quality safeguards and read-only [catalog budgeting](catalog-budget.md); local build/E2E remains its explicit completion gate. Earlier validation sections below are historical. The sixteen category sources, schedules and limits are unchanged.
 
 ## Architecture and coverage
 
@@ -124,3 +124,7 @@ Run `pnpm discover:catalog -- --dry-run --limit=3` to inspect pending demand wit
 ## Milestone 9 measured refresh
 
 The new permanent allowlist added 199 listings (91 Plaza Vea, 108 Metro), giving 735 known listings under the unchanged 1000-row complete-catalog guard. One full scheduled-flow validation succeeded: 150 Tottus, 191 Plaza Vea and 208 Metro observations, one legitimate changed Metro milk price state, zero normalization/matching writes and zero targeted requests because observations were recent. One explicit Metro SKU targeted lookup subsequently succeeded with zero price/derived writes. Source acquisition and derivation-repeat checks preserved price-history integrity. Full evidence and coverage gaps appear in [staple coverage](staple-coverage.md). The cron/concurrency/secret and 100-targeted-request cap remain unchanged; monitor remaining catalog headroom and public growth before adding sources or raising budgets.
+
+## Milestone 10 quality and budget
+
+`pnpm audit:quantity-quality` reports strong physical/item comparisons, approximate rolls and withheld reasons; `pnpm catalog:budget` reports DB counts/sizes, candidate count, workflow cadence, current targeted selection and category request bounds. Both are read-only and require root `DATABASE_URL`. Full-refresh CLI summaries now include actual attempted category request counts per retailer, without URLs/credentials. Recorded full-refresh timing in `docs/catalog-refresh-measurement.json` is local timestamped evidence; PostgreSQL ingestion durations alone do not establish full workflow duration. Exact matching, schedules, source/request caps and history persistence are unchanged. See [quantity policies](quantity-quality.md) and [measured headroom](catalog-budget.md).

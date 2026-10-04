@@ -8,6 +8,8 @@ import {
   searchPublicProducts,
   genericOfferSort,
   formatUnitPrice,
+  unitPriceBases,
+  unitPriceBasisLabel,
   usefulSearchQuery,
   discoveryQueryForSearch,
   recordDiscoveryForSearch,
@@ -174,7 +176,7 @@ export default async function SearchPage({
                   >
                     <option value="relevance">Relevancia</option>
                     <option value="total-price">Menor precio</option>
-                    <option value="unit-price">Mejor precio por unidad</option>
+                    <option value="unit-price">Precio por unidad comparable</option>
                   </select>
                   <button type="submit" className="rounded-lg border px-4 py-2">
                     Aplicar
@@ -184,7 +186,7 @@ export default async function SearchPage({
                   {offers.length === 30 ? "Hasta 30" : offers.length} ofertas para «{query}»
                 </p>
                 {(sort === "unit-price"
-                  ? ["mass", "volume", "count", "unknown"]
+                  ? [...unitPriceBases, "unknown"]
                   : sort === "total-price"
                     ? ["package", "direct"]
                     : ["all"]
@@ -196,23 +198,21 @@ export default async function SearchPage({
                         ? offer.pricingBasis === "unit"
                         : group === "direct"
                           ? offer.pricingBasis === "kg"
-                          : (offer.unitPrice?.dimension ?? "unknown") === group),
+                          : (offer.unitPrice?.basis ?? "unknown") === group),
                   );
                   if (!members.length) return null;
                   const label =
-                    group === "mass"
-                      ? "Precio por kg"
-                      : group === "volume"
-                        ? "Precio por litro"
-                        : group === "count"
-                          ? "Precio por unidad"
-                          : group === "unknown"
-                            ? "Otras opciones sin precio por unidad"
-                            : group === "direct"
-                              ? "Precios por kg"
-                              : group === "package"
-                                ? "Precio del paquete"
-                                : null;
+                    group === "mass" ||
+                    group === "volume" ||
+                    group === "item-count" ||
+                    group === "roll" ||
+                    group === "unknown"
+                      ? unitPriceBasisLabel(group)
+                      : group === "direct"
+                        ? "Precios por kg"
+                        : group === "package"
+                          ? "Precio del paquete"
+                          : null;
                   return (
                     <div key={group} className="mb-6">
                       {label && <h3 className="mb-3 font-semibold">{label}</h3>}
@@ -247,7 +247,12 @@ export default async function SearchPage({
                                 {offer.pricingBasis === "kg" ? " / kg" : ""}
                               </p>
                               {offer.unitPrice && offer.pricingBasis !== "kg" && (
-                                <p className="mt-1 text-sm">{formatUnitPrice(offer.unitPrice)}</p>
+                                <p className="mt-1 text-sm">
+                                  {formatUnitPrice(offer.unitPrice)}
+                                  {offer.unitPrice.quality === "approximate"
+                                    ? " · orientativo"
+                                    : ""}
+                                </p>
                               )}
                               <ObservedAt date={offer.observedAt} />
                               <a

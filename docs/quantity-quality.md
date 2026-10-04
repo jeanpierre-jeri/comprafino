@@ -1,0 +1,59 @@
+# Quantity and source quality — Milestone 10
+
+Audited October 4, 2026 (America/Lima), starting from clean commit `d8858b3`. Milestones 0–9 are complete in the user-provided baseline. This milestone is implemented; fresh local production build and Chromium confirmation remain required before commit. No subsequent milestone is started.
+
+## Real source audit
+
+[Sanitized raw source evidence](quantity-source-audit.json) retains 110 product samples plus three current Tottus tuna product pages. Twenty-one sequential public search requests retain five products each across tuna, paper, powder detergent, liquid detergent, rice, sugar and oil for each retailer. Five additional exact current VTEX tuna SKU requests inspect two Plaza Vea cans and three Metro results (two bundles and one six-pack). Three current Tottus tuna PDP requests inspect complete measurement/specification fields. Total: **29 public requests**, separated from refresh/targeted measurement. One-second pauses, no ingestion, retries or access-control bypass. Broad VTEX tuna searches returned pet food: those records are retained as source evidence but excluded from canned-tuna conclusions. This is a bounded audit, not catalog-wide source completeness.
+
+| Retailer  | Tuna                                                                                                                                                                                                                                                                                    | Toilet paper                                                                                                                                                                                                                                                 | Detergent / controls                                                                                                                                                                                                                  |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tottus    | Search declares `Lata 140 g` / six-pack. Three current Florida PDPs declare `Contenido` and `formato` as 140 g or `3 Und`. None distinguishes net/drained. One has a **56 g nutritional serving**; that is not package content.                                                         | Five products expose `Empaque … Und`; some titles include metres and ply. Search measurement has pack count, without structured sheets or verified metres per roll. No current normalized paper-family offers from this retailer.                            | Five powder and five liquid source products declare g/kg versus ml/L in measurement format. Doypack identifies packaging. Rice/sugar/oil controls retain exact declared masses/volumes.                                               |
+| Plaza Vea | Both current Primor cans expose **structured `Contenido Neto: 140g`**, agreeing with title/presentation. No drained quantity in those records. Earlier normalization audits established that this field can conflict for other categories; no global specification trust is introduced. | Five source samples expose unit presentations. A Balanzé record says `Metros Totales: 40 por rollo`; Suave says `16.38m` without a consistent per-roll/pack declaration. Others omit it. Ply and sheet dimensions occur, but no reliable shared sheet count. | Powder/liquid presentation text carries content. Liquid/refill metadata cannot convert mass to volume. Five controls per rice/sugar/oil source also audited; arbitrary nutritional/specification numbers are not promoted to content. |
+| Metro     | Current Primor six-pack description declares six units of 140 g, without net/drained roles. Two current tuna/oil bundles declare separate ingredients/content; no combined denominator.                                                                                                 | Five samples include 12/24/40 units, and a `190m 4un` title, without consistent structured roll-length/sheet-count fields. Titles expose double/triple ply and XL variants.                                                                                  | Five powder and five liquid source products; liquid MAS Color exposes `Contenido: 1.83l/3l/830ml` and bottle/Doypack presentations. Powder/softener bundles have incompatible contents. Declared mass and volume stay separate.       |
+
+No pods were observed in these sampled sources or current detergent-family offers. Pod tests are explicitly synthetic boundary tests. Approximate Tottus meat, Metro Twopack liquid, rice-flour `1 g`, count-only tuna packs, and mixed bundles remain useful ambiguous cases in the persisted catalog/raw listing metadata. Source unit multiplier `1` is a sale offering, not a roll/can count.
+
+## Semantic decisions
+
+Use the smallest comparison concept: `UnitPrice.basis` (`mass`, `volume`, `item-count`, `roll`) and `quality` (`strong`, `approximate`). No giant quantity ontology or unsupported sheet/length denominator is introduced. These are recomputed **comparison attributes**, separate from persisted exact-match normalization.
+
+- **Tuna policy C:** withhold all current tuna unit prices, including count-only can packs. Plaza Vea establishes net weight for two cans, but the other sources do not establish a consistent cross-retailer net/drained role. Neither automatic drained-content selection nor a global net-weight assumption is justified. Titles mentioning drained weight are withheld too. Both net/drained values may remain in raw display text; neither becomes a comparable denominator. Existing normalized declared quantity remains available for package display.
+- **Paper policy C:** reliable normalized contained counts mean rolls within this family. Display `S/ … / rollo · orientativo`; keep the roll-size warning. Both 20m and 65m rolls can have approximate shopping signals, but the UI does not claim equal physical content or a best-value winner. No sheet count is inferred from “doble/triple hoja,” Jumbo or XL; no sheet/length price is calculated.
+- **Detergent:** powder uses S/kg, liquid/refill uses S/L; never convert by assumed density, doses, washes or marketing claims. Existing reliable multipliers produce package totals. Reliable pod/capsule count can use S/unit; other detergent count-only offerings are withheld. Unknown Twopack and mixed detergent/softener bundles remain withheld. No overall cross-dimension detergent winner.
+- **Controls:** egg counts, exact rice/sugar mass and oil volume retain existing arithmetic. Direct source KG quotes remain physical prices regardless of estimated package mass.
+
+Unavailable reasons distinguish missing quantity, ambiguous quantity, ambiguous semantics, conflicting mass/volume dimensions, invalid quantity/price and stale/unavailable offers. Existing freshness gates apply before comparison eligibility. “Strong” means a usable denominator, not identical brand, effectiveness, egg size or quality.
+
+## Sorting and UI
+
+Use exact bigint rational cross-products within compatible basis and quality. The comparator rejects incompatible dimension, basis or quality. Sort blocks are kg → L → item-count → approximate rolls → unavailable. The thirty-card quota reserves room for each present basis, including unknowns; roll prices cannot consume an egg-count block. The UI groups these same bases and labels the roll block as orientative. Relevance/package sorting and exact canonical comparison remain unchanged. Two decimal places are display rounding only.
+
+## Real quantity audit
+
+Run `pnpm audit:quantity-quality` with root `DATABASE_URL`. It makes no retailer calls or writes, checks normalization fingerprints/version, and reports the complete active catalog under the existing 1000-row guard. [Final measured evidence](quantity-quality-audit.json) is timestamped; these are full family counts, not the thirty-card search slice.
+
+| Family                  |  Offers |  Strong | Approximate | Withheld |
+| ----------------------- | ------: | ------: | ----------: | -------: |
+| Tuna                    |      13 |       0 |           0 |       13 |
+| Toilet paper            |      39 |       0 |          38 |        1 |
+| Detergent               |      24 |      23 |           0 |        1 |
+| Eggs                    |      29 |      29 |           0 |        0 |
+| Rice                    |      31 |      31 |           0 |        0 |
+| Oil                     |      27 |      25 |           0 |        2 |
+| Sugar                   |      39 |      38 |           0 |        1 |
+| Complete active catalog | **736** | **636** |      **38** |   **62** |
+
+Strong comparisons split into **493 mass + 112 volume = 605 physical**, and **31 item counts**. Withheld: 46 ambiguous quantity, 15 ambiguous semantics, one missing quantity. Freshness/normalization failures are zero at this snapshot; the command reports them if they occur later.
+
+Tuna retailer coverage: Tottus 10/10 withheld, PV 2/2 withheld, Metro 1/1 withheld. Paper: PV 19/19 approximate; Metro 19/20 approximate with the `4 unid` unresolved; Tottus zero current offers. Detergent: Tottus 9/9, PV 8/8 and Metro 6/7 strong; Metro Twopack 3L remains withheld. Examples and reasons per family/retailer are retained in the JSON report. Eggs/rice/oil coverage is unchanged from the baseline. Two count-only tuna prices previously admitted are now withheld.
+
+Representative examples: Florida `Lata 140 g` and `Pack 3 Und` both withhold; Metro Elite `65m 12un` is approximate per roll; Plaza Vea Bolívar `Doypack 3L` is strong per litre; Tottus Ace `Bolsa 5.8 Kg` is strong per kg; egg `Bandeja 30un` remains per physical egg.
+
+## Persistence and validation
+
+No schema/migration, source metadata overwrite, normalization rule/version change, matcher threshold/version change, dependency or infrastructure. Normalization remains **version 1**; comparison-only attributes do not participate in exact identity or fingerprints. No migration/reprocessing is required for this change. Two optional validation normalization passes each report **0 changed, 736 unchanged, 0 stale**. Full post-refresh history digest remains `7fb5f1a0abaf405c98dee46fc13eb7a7` across both passes and the one-SKU targeted regression. Matching writes are zero.
+
+Added tests cover conservative net-only/drained-only/both/unspecified/count-only tuna rejection, roll-count/length/sheet-title coarse semantics, incompatibility with egg count, powder/liquid/pods/multipacks, dimension-conflict diagnostics, exact basis sorting and quota reservation, and PostgreSQL history/normalization preservation. Unobserved drained/sheet/pod syntax is synthetic safety coverage, not claimed source support. Existing normalization, matching, decimal arithmetic and egg/rice/oil regressions remain.
+
+Formatting, lint, strict typecheck, **499 unit tests** and **34 isolated PostgreSQL tests** pass. Fresh `pnpm build` hits Turbopack's known CSS-worker port bind restriction; `pnpm test:e2e` cannot start its production server. Next.js config is unchanged. Stage and wait for local fresh build/Chromium confirmation; no commit/push yet. Milestone 10 is pending that validation gate.

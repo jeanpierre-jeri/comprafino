@@ -766,7 +766,7 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
     const tuna = await seedGeneric("Filete de Atún Audittuna Lata 140g", 500);
     const result = await searchGenericProductOffers(db, "atun audittuna", "unit-price", publicNow);
     expect(result.map((o) => o.id)).toEqual([tuna.id]);
-    expect(result[0]!.unitPriceUnavailableReason).toBe("ambiguous-quantity");
+    expect(result[0]!.unitPriceUnavailableReason).toBe("ambiguous-semantics");
   }, 30000);
   it("covered staple queries suppress discovery; a missing brand/size still records the complete demand", async () => {
     await seedGeneric("Harina Auditcoverage 1kg", 500);
@@ -821,6 +821,31 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
     expect(unitLimited).toHaveLength(30);
     expect(unitLimited.some((o) => o.unitPrice?.dimension === "volume")).toBe(true);
     expect(unitLimited.at(-1)!.unitPrice).toBeNull();
+  }, 30000);
+  it("keeps coarse roll prices separate and withholds tuna without changing history or normalization", async () => {
+    const egg = await seedGeneric("Huevos Auditquality 12un", 1200);
+    const paper = await seedGeneric("Papel Higiénico Auditquality 65m 12un", 600);
+    const tuna = await seedGeneric("Filete de Atún Auditquality Pack 3 Und", 900);
+    const before = await query(
+      "select * from price_history where listing_id in($1::uuid,$2::uuid,$3::uuid) order by id",
+      [egg.id, paper.id, tuna.id],
+    );
+    const offers = await searchGenericProductOffers(db, "auditquality", "unit-price", publicNow);
+    expect(offers.map((o) => o.id)).toEqual([egg.id, paper.id, tuna.id]);
+    expect(offers[0]!.unitPrice).toMatchObject({ basis: "item-count", quality: "strong" });
+    expect(offers[1]!.unitPrice).toMatchObject({ basis: "roll", quality: "approximate" });
+    expect(offers[2]!.unitPriceUnavailableReason).toBe("ambiguous-semantics");
+    expect(await persistCatalogNormalizations(db, [egg, paper, tuna])).toEqual({
+      changed: 0,
+      unchanged: 3,
+      stale: 0,
+    });
+    expect(
+      await query(
+        "select * from price_history where listing_id in($1::uuid,$2::uuid,$3::uuid) order by id",
+        [egg.id, paper.id, tuna.id],
+      ),
+    ).toEqual(before);
   }, 30000);
   it("generic public eligibility rejects stale, unavailable, inactive, unnormalized and changed inputs", async () => {
     const rows = await Promise.all(

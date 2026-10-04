@@ -17,7 +17,15 @@ try {
   // Validate configuration before making requests. Dry run never opens the DB.
   const db = dryRun ? null : createDatabase();
   const store = db ? createIngestionStore(db) : null;
-  const adapters = createRefreshAdapters();
+  const categoryRequests = { tottus: 0, "plaza-vea": 0, metro: 0 };
+  const measuredFetch: typeof fetch = (input, init) => {
+    const hostname = new URL(input instanceof Request ? input.url : input).hostname;
+    if (hostname === "www.tottus.com.pe") categoryRequests.tottus++;
+    else if (hostname === "www.plazavea.com.pe") categoryRequests["plaza-vea"]++;
+    else if (hostname === "www.metro.pe") categoryRequests.metro++;
+    return fetch(input, init);
+  };
+  const adapters = createRefreshAdapters(measuredFetch);
   const summary = await refreshCatalog(
     {
       async ingest(retailer) {
@@ -61,7 +69,9 @@ try {
     dryRun,
     (event) => console.log(JSON.stringify(event)),
   );
-  console.log(JSON.stringify(summary, null, 2));
+  console.log(
+    JSON.stringify({ ...summary, observedAt: new Date().toISOString(), categoryRequests }, null, 2),
+  );
   if (summary.status === "failed") process.exitCode = 1;
 } catch {
   console.error(

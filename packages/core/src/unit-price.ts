@@ -1,3 +1,4 @@
+import { classifyProductFamily } from "./product-family.ts";
 import type { ProductFamily } from "./product-family.ts";
 import type { Quantity } from "./catalog.ts";
 import { offerFreshness } from "./listing-refresh.ts";
@@ -5,11 +6,24 @@ import { formatPen } from "./public-products.ts";
 
 export type UnitPriceDimension = "mass" | "volume" | "count";
 /** Exact rational cents per kg, litre or unit. Never sort rounded display values. */
+export const unitPriceBases = ["mass", "volume", "item-count", "roll"] as const;
+export type UnitPriceBasis = (typeof unitPriceBases)[number];
+export function unitPriceBasisLabel(basis: UnitPriceBasis | "unknown"): string {
+  return {
+    mass: "Precio por kg",
+    volume: "Precio por litro",
+    "item-count": "Precio por unidad",
+    roll: "Precio por rollo · orientativo",
+    unknown: "Otras opciones sin precio por unidad",
+  }[basis];
+}
 export type UnitPrice = {
+  basis: UnitPriceBasis;
+  quality: "strong" | "approximate";
   numerator: bigint;
   denominator: bigint;
   dimension: UnitPriceDimension;
-  displayUnit: "kg" | "l" | "unit";
+  displayUnit: "kg" | "l" | "unit" | "roll";
 };
 export type UnitPriceInput = {
   currentPriceCents: number;
@@ -17,6 +31,7 @@ export type UnitPriceInput = {
   totalQuantity: Quantity | null;
   issues: readonly string[];
   title: string;
+  sourcePackageDescription?: string | null;
   productFamily?: ProductFamily | null;
   observedAt: Date;
   available?: boolean | null;
@@ -30,6 +45,8 @@ export type UnitPriceResult =
         | "not-fresh"
         | "unavailable"
         | "ambiguous-quantity"
+        | "ambiguous-semantics"
+        | "conflicting-dimensions"
         | "missing-quantity"
         | "invalid-quantity";
     };
@@ -42,10 +59,21 @@ export function calculateUnitPrice(input: UnitPriceInput, now = new Date()): Uni
     return unavailable("invalid-price");
   if (input.available === false) return unavailable("unavailable");
   if (offerFreshness(input.observedAt, now) !== "fresh") return unavailable("not-fresh");
-  // Current sources do not distinguish canned tuna net from drained weight.
-  // Keep display quantity, but withhold a generic mass value comparison.
-  if (/\bat[uú]n\b/iu.test(input.title) && input.totalQuantity?.unit === "g")
-    return unavailable("ambiguous-quantity");
+  const family = input.productFamily ?? classifyProductFamily({ title: input.title }).family;
+  const text = `${input.title} ${input.sourcePackageDescription ?? ""}`
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase();
+  // The audited sources do not establish consistent net/drained semantics.
+  // Count-only cans also fail to establish comparable content.
+  if (family === "canned_tuna" || /\batun\b/u.test(text)) return unavailable("ambiguous-semantics");
+  if (/\b(?:escurrid[oa]|drenad[oa])\b/u.test(text)) return unavailable("ambiguous-semantics");
+  if (
+    input.issues.includes("ambiguous-quantity") &&
+    /\d\s*(?:kg|g)\b/u.test(text) &&
+    /\d\s*(?:ml|l)\b/u.test(text)
+  )
+    return unavailable("conflicting-dimensions");
   // KG is the source quote, independent of approximate/variable package mass.
   if (input.pricingBasis === "kg")
     return {
@@ -53,6 +81,8 @@ export function calculateUnitPrice(input: UnitPriceInput, now = new Date()): Uni
         numerator: BigInt(input.currentPriceCents),
         denominator: 1n,
         dimension: "mass",
+        basis: "mass",
+        quality: "strong",
         displayUnit: "kg",
       },
       reason: null,
@@ -77,25 +107,32 @@ export function calculateUnitPrice(input: UnitPriceInput, now = new Date()): Uni
   if (!q) return unavailable("missing-quantity");
   if (!Number.isSafeInteger(q.value) || q.value <= 0 || !["g", "ml", "unit"].includes(q.unit))
     return unavailable("invalid-quantity");
+  const paper = family === "toilet_paper";
+  if (paper && q.unit !== "unit") return unavailable("ambiguous-semantics");
+  if (family === "detergent" && q.unit === "unit" && !/\b(?:pods?|capsulas?)\b/u.test(text))
+    return unavailable("ambiguous-semantics");
   return {
     price: {
       numerator: BigInt(input.currentPriceCents) * (q.unit === "unit" ? 1n : 1000n),
       denominator: BigInt(q.value),
+      basis: q.unit === "g" ? "mass" : q.unit === "ml" ? "volume" : paper ? "roll" : "item-count",
+      quality: paper ? "approximate" : "strong",
       dimension: q.unit === "g" ? "mass" : q.unit === "ml" ? "volume" : "count",
-      displayUnit: q.unit === "g" ? "kg" : q.unit === "ml" ? "l" : "unit",
+      displayUnit: q.unit === "g" ? "kg" : q.unit === "ml" ? "l" : paper ? "roll" : "unit",
     },
     reason: null,
   };
 }
 export function compareUnitPrices(a: UnitPrice, b: UnitPrice): number {
-  if (a.dimension !== b.dimension) throw new Error("Incompatible unit-price dimensions");
+  if (a.dimension !== b.dimension || a.basis !== b.basis || a.quality !== b.quality)
+    throw new Error("Incompatible unit-price dimensions");
   const difference = a.numerator * b.denominator - b.numerator * a.denominator;
   return difference < 0n ? -1 : difference > 0n ? 1 : 0;
 }
 export function formatUnitPrice(price: UnitPrice): string {
   const cents = (price.numerator * 2n + price.denominator) / (price.denominator * 2n);
   if (cents > BigInt(Number.MAX_SAFE_INTEGER)) throw new Error("Unit price exceeds display range");
-  return `${formatPen(Number(cents))} / ${price.displayUnit === "l" ? "L" : price.displayUnit === "unit" ? "unidad" : "kg"}`;
+  return `${formatPen(Number(cents))} / ${price.displayUnit === "l" ? "L" : price.displayUnit === "unit" ? "unidad" : price.displayUnit === "roll" ? "rollo" : "kg"}`;
 }
 export type GenericOfferSort = "relevance" | "total-price" | "unit-price";
 export function genericOfferSort(value: unknown): GenericOfferSort {

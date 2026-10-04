@@ -18,7 +18,8 @@
     "match:audit": "node --env-file-if-exists=../../.env --experimental-strip-types src/matching-independent-cli.ts",
     "coverage:report": "node --env-file-if-exists=../../.env --experimental-strip-types src/coverage-cli.ts",
     "audit:unit-prices": "node --env-file-if-exists=../../.env --experimental-strip-types src/unit-price-audit-cli.ts",
-    "audit:staples": "node --env-file-if-exists=../../.env --experimental-strip-types src/staple-audit-cli.ts"
+    "audit:staples": "node --env-file-if-exists=../../.env --experimental-strip-types src/staple-audit-cli.ts",
+    "audit:quantity-quality": "node --env-file-if-exists=../../.env --experimental-strip-types src/quantity-quality-cli.ts"
   },
   "dependencies": {
     "@comprafino/core": "workspace:*",

@@ -94,7 +94,17 @@ Implemented: small recomputable ten-family evidence model outside exact identity
 
 Verified: 199 added listings, 735 total; sugar P@5 0.00→1.00, all ten after-query P@5/P@10 1.00, bounded relevance counts/coverage and limitations recorded in [staple report](staple-coverage.md). Source persistence and original history integrity passed, normalization/matching repeats wrote zero, full scheduled and one-SKU targeted refresh passed. Format/lint/types, 481 unit cases and 33 isolated PostgreSQL cases pass.
 
-Pending: fresh local default build and Chromium E2E confirmation because the agent hit Turbopack's CSS-worker port restriction. Changes stay staged without commit/push; Milestone 9 is not complete until that explicit gate passes. Next recommendation: review observed quantity/source ambiguity and conservative family recall, with catalog/targeted-budget headroom measured first. No later milestone started.
+Milestone 9 is complete in the user-provided baseline `d8858b3`; its earlier agent build/E2E notes in the staple report are historical.
+
+## Milestone 10 — Quantity/source quality and catalog operating budget
+
+Implemented: explicit comparison basis and strong/approximate quality, conservative tuna content/count rejection, separate approximate roll grouping and display, detergent dimension safety, source audit, complete-catalog quantity audit, and local/DB operating budget command with actual workflow cadence and category request counts. Exact normalization remains version 1 and matcher rules/thresholds remain unchanged. No migrations, dependencies, new retailers, permanent categories or infrastructure.
+
+Verified: 736 listings, 127 public exact offers / 57 groups, 763 history states; 605 strong physical + 31 strong item-count + 38 approximate roll comparisons, 62 withheld. Full refresh 76.503s / 27 category requests / zero targeted, 8,853 candidates / zero matching writes. Two normalization repeats and one targeted lookup wrote zero and preserved history. Format/lint/types, 499 unit tests and 34 isolated PostgreSQL tests pass. See [quantity quality](quantity-quality.md) and [catalog budget](catalog-budget.md) for source evidence, safety policies, unavailable metrics and projections.
+
+Pending: fresh local `pnpm build` and Chromium `pnpm test:e2e` confirmation after the known Turbopack CSS-worker port restriction. Changes are staged without commit/push until that explicit gate; Milestone 10 is not complete yet.
+
+Recommend reviewing the 1000-listing guard and validating small Tottus sources before future bounded expansion. The first price-history UX should show ordinary observed changes/timestamps/gaps on exact product detail pages; no later milestone is started.
 
 ## Later — Price history
 

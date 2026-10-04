@@ -77,3 +77,7 @@ Core owns bigint rational unit-price calculation, incompatible dimensions and di
 ## Staple family relevance ownership
 
 Core classifies small observed product families from current source leaf evidence and conservative nouns/negative descriptors, independently of exact identity. DB recomputes these attributes per eligible generic offer and combines them with PostgreSQL token/trigram order before sort/limit. No family column, migration or normalization-version/matcher change is needed. Combined family queries also gate incidental canonical cards without changing canonical detail routes. Scrapers own retailer-specific complete category allowlists and fixed per-pair bounds; scheduled refresh fetches them before the existing single derivation pass. The developer catalog displays source category/family/origin/evidence. See [staple coverage](staple-coverage.md) for audit, refresh budgets and limitations.
+
+### Quantity quality and operational reporting
+
+Core comparison output has explicit mass/volume/item-count/approximate-roll bases and quality. These are separate from persisted exact-match normalization (version 1) and do not enter matching identity. DB owns read-only catalog/size/candidate metrics; the scraper developer CLI combines them with local category/workflow configuration and optional recorded refresh evidence. This preserves the existing dependency graph. No telemetry service, schema, source expansion or new infrastructure is introduced; see [quantity quality](quantity-quality.md) and [catalog budget](catalog-budget.md).
