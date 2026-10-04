@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { parseHistoryRange } from "@comprafino/core";
+import { PriceHistory } from "../../../components/price-history";
 import { cache } from "react";
 import { connection } from "next/server";
 import { notFound } from "next/navigation";
@@ -43,7 +45,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 export default async function ProductPage({ params, searchParams }: Props) {
-  const filters = searchFilters(await searchParams);
+  const query = await searchParams;
+  const filters = searchFilters(query);
+  const range = parseHistoryRange(query.range);
   const { product, failed } = await loadProduct((await params).id, filters.priceMode);
   if (failed)
     return (
@@ -178,6 +182,11 @@ export default async function ProductPage({ params, searchParams }: Props) {
           })}
         </ul>
       </section>
+      <PriceHistory
+        productId={product.id}
+        range={range}
+        benefits={filters.priceMode === "benefits"}
+      />
       <PriceNotice />
     </PublicShell>
   );

@@ -15,3 +15,5 @@ export * from "./generic-offers.ts";
 export * from "./catalog-budget.ts";
 
 export * from "./conditional-pricing.ts";
+
+export * from "./price-history.ts";

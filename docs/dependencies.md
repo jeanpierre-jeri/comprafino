@@ -14,18 +14,19 @@ Stable exact versions are pinned. Runtime ownership follows use; root owns repos
 
 ## @comprafino/web
 
-| Dependency             | Version       | Kind            | Purpose                             |
-| ---------------------- | ------------- | --------------- | ----------------------------------- |
-| `next`                 | `16.3.8`      | dependencies    | App Router and production web build |
-| `react`                | `19.3.0`      | dependencies    | React rendering / UI peer           |
-| `react-dom`            | `19.3.0`      | dependencies    | DOM rendering / Base UI peer        |
-| `@comprafino/ui`       | `workspace:*` | dependencies    | shared button and theme             |
-| `tailwindcss`          | `4.3.3`       | devDependencies | Tailwind 4 CSS compilation          |
-| `@tailwindcss/postcss` | `4.3.3`       | devDependencies | Next PostCSS integration            |
-| `@types/node`          | `24.19.1`     | devDependencies | Node 24 API types                   |
-| `@types/react`         | `19.3.0`      | devDependencies | React types                         |
-| `@types/react-dom`     | `19.3.0`      | devDependencies | React DOM types                     |
-| `@playwright/test`     | `1.63.0`      | devDependencies | application Chromium E2E testing    |
+| Dependency             | Version       | Kind            | Purpose                                |
+| ---------------------- | ------------- | --------------- | -------------------------------------- |
+| `next`                 | `16.3.8`      | dependencies    | App Router and production web build    |
+| `react`                | `19.3.0`      | dependencies    | React rendering / UI peer              |
+| `react-dom`            | `19.3.0`      | dependencies    | DOM rendering / Base UI peer           |
+| `@comprafino/core`     | `workspace:*` | dependencies    | pure history ranges and PEN formatting |
+| `@comprafino/ui`       | `workspace:*` | dependencies    | shared button and theme                |
+| `tailwindcss`          | `4.3.3`       | devDependencies | Tailwind 4 CSS compilation             |
+| `@tailwindcss/postcss` | `4.3.3`       | devDependencies | Next PostCSS integration               |
+| `@types/node`          | `24.19.1`     | devDependencies | Node 24 API types                      |
+| `@types/react`         | `19.3.0`      | devDependencies | React types                            |
+| `@types/react-dom`     | `19.3.0`      | devDependencies | React DOM types                        |
+| `@playwright/test`     | `1.63.0`      | devDependencies | application Chromium E2E testing       |
 
 ## @comprafino/core
 
@@ -82,3 +83,7 @@ Milestone 1A also adds `@comprafino/db` (`workspace:*`) to web for developer ins
 ## Matching database extension
 
 Milestone 3 adds no npm packages. The reviewed canonical migration enables PostgreSQL `pg_trgm` in public for deterministic `similarity()` over generated candidate pairs. No external search service or trigram index is justified by the current bounded batch query. Integration databases require this extension before isolated-schema tests; the tests do not create/drop shared public extensions.
+
+## Public price history
+
+Milestone 13 adds exact `recharts@3.10.1` to shared UI for the requested historical event chart. The minimal shared ChartContainer comes from the official [shadcn base-nova registry](https://ui.shadcn.com/r/styles/base-nova/chart.json), adapted to CSS theme variables and strict types; unused tooltip/legend wrappers are omitted. Recharts v3 supplies responsive SVG, tooltips and marker shapes. Web imports these primitives through shared UI and gains `@comprafino/core` (`workspace:*`) for pure history helpers. No other chart library or infrastructure is added.

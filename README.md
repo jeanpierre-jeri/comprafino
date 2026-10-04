@@ -12,7 +12,7 @@ The roadmap aims to help people decide where to buy, when to buy, whether a pric
 
 ## Current status
 
-Milestones 0–11 are complete in the provided baseline (`6c3a52f`). Milestone 12 refines the public home, search, cards and comparison pages with a shared visual system and intentional mobile layouts. Its focused second design iteration, custom Select menus and light/dark themes are accepted following user visual review. See [UI polish](docs/ui-polish.md) for the design, manual audit and validation, [conditional pricing](docs/conditional-pricing.md) for separate CMR semantics and [search UX](docs/search-ux.md) for URL controls. The homepage remains database-independent. Price-history UX is planned for Milestone 13.
+Milestones 0–11 are complete in the provided baseline (`6c3a52f`). Milestone 12 refines the public home, search, cards and comparison pages with a shared visual system and intentional mobile layouts. Its focused second design iteration, custom Select menus and light/dark themes are accepted following user visual review. See [UI polish](docs/ui-polish.md) for the design, manual audit and validation, [conditional pricing](docs/conditional-pricing.md) for separate CMR semantics and [search UX](docs/search-ux.md) for URL controls. The homepage remains database-independent. Milestone 13 implements ordinary-price history on exact-product pages; the user confirmed the local production build and general E2E run passed, while history-specific Chromium and visual acceptance remain pending. See [price history](docs/price-history.md).
 
 ## Initial retailers
 
@@ -46,7 +46,7 @@ packages/ui/       Shared shadcn Base UI components, utilities and Tailwind them
 docs/             Architecture, roadmap and dependency inventory
 ```
 
-Internal dependencies: `web → ui, db`; `scrapers → core, db`; `db → core`. Library workspaces export typed source and are compiled by their consumer; they do not need artificial build scripts. The core package has no React, Next.js, database or browser dependency.
+Internal dependencies: `web → ui, db, core`; `scrapers → core, db`; `db → core`. Library workspaces export typed source and are compiled by their consumer; they do not need artificial build scripts. The core package has no React, Next.js, database or browser dependency.
 
 ## Local development
 
@@ -233,3 +233,15 @@ Comparison bases distinguish physical kg/L and item counts from approximate pape
 Apply reviewed migration `0005_redundant_deadpool.sql` using `pnpm db:migrate` before deploying Milestone 11 readers and ingestion together. Existing Tottus category/search/targeted acquisition now confirms explicit CMR prices separately from ordinary history. Plaza Vea/Metro teaser discounts remain excluded. Existing scrape/refresh commands and request bounds are unchanged; no new environment variables or dependencies.
 
 Search supports immediate sorting, retailer selection, optional kg/L/item/approximate-roll basis and `priceMode=benefits`. Defaults omit URL parameters; browser back/forward restores them. Ordinary prices still determine default winners, and filtered emptiness never creates discovery demand when underlying catalog results exist. See [conditional pricing](docs/conditional-pricing.md) and [search UX](docs/search-ux.md).
+
+## Ordinary price history
+
+Exact product pages support `?range=7d`, `30d` and `90d` (initial default 7 days, based on the young live catalog). Summaries use ordinary state intervals; disconnected chart markers never invent daily observations. CMR remains separate.
+
+```sh
+pnpm audit:price-history
+# After a successful production build; explicit isolated-schema test opt-in:
+TEST_DATABASE_URL=... pnpm test:e2e:history
+```
+
+The history browser runner creates and removes a random schema, checks isolation, seeds controlled fixtures there and launches only the history spec. It passes a validated `COMPRAFINO_E2E_SCHEMA` to its child web server to scope every Neon HTTP batch/direct query transaction. Do not set that test-only override in deployment or normal development. No test URL fallback or automatic `.env` loading is provided. Interrupted runners may leave their random schema. The ordinary `pnpm test:e2e` smoke suite remains unchanged; the fixture-only cases skip clearly without the runner. Details and validation evidence: [price history](docs/price-history.md).

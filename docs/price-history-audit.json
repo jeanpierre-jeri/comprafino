@@ -1,0 +1,2010 @@
+{
+  "auditedAt": "2026-10-04T20:17:05.033Z",
+  "depth": {
+    "states": 763,
+    "listings": 736,
+    "oldest": "2026-10-03T17:45:11.644Z",
+    "newest": "2026-10-04T17:32:09.070Z",
+    "open": 736
+  },
+  "counts": {
+    "ordinary_changes": 1,
+    "other_state_changes": 26,
+    "widely_spaced_state_starts": 0,
+    "single_state_listings": 709
+  },
+  "representativeChanges": [
+    {
+      "title": "Leche Deslactosada Danlac Light Botella 900ml",
+      "retailer_id": "metro",
+      "external_id": "39254015",
+      "prior_price": 900,
+      "current_price_cents": 750,
+      "valid_from": "2026-10-04T16:50:34.991Z",
+      "canonical_product_id": null
+    }
+  ],
+  "gapEvidence": "Only state starts and latest listing observation survive; actual historical coverage/gaps cannot be reconstructed. Widely spaced starts are not verified gaps.",
+  "products": [
+    {
+      "id": "157d7678-aa71-832c-bf8d-dd6885a89e42",
+      "displayName": "Leche UHT GLORIA Zero Lacto Bolsa 800ml",
+      "states": 4,
+      "ranges": [
+        {
+          "range": "7d",
+          "retailers": [
+            {
+              "retailer": "Metro",
+              "lastObservedAt": "2026-10-03T23:33:20.601Z",
+              "currentOfferCents": 520,
+              "states": [
+                {
+                  "priceCents": 520,
+                  "validFrom": "2026-10-03T22:28:41.298Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 520,
+              "minimumPriceCents": 520,
+              "maximumPriceCents": 520,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791066521298,
+                  "priceCents": 520,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791070400601,
+                  "priceCents": 520,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Plaza Vea",
+              "lastObservedAt": "2026-10-04T17:31:56.665Z",
+              "currentOfferCents": 510,
+              "states": [
+                {
+                  "priceCents": 510,
+                  "validFrom": "2026-10-03T18:16:34.120Z",
+                  "validUntil": "2026-10-03T21:53:06.789Z",
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                },
+                {
+                  "priceCents": 510,
+                  "validFrom": "2026-10-03T21:53:06.789Z",
+                  "validUntil": null,
+                  "previousPriceCents": 510,
+                  "previousValidUntil": "2026-10-03T21:53:06.789Z"
+                }
+              ],
+              "currentPriceCents": 510,
+              "minimumPriceCents": 510,
+              "maximumPriceCents": 510,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791051394120,
+                  "priceCents": 510,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791064386789,
+                  "priceCents": 510,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135116665,
+                  "priceCents": 510,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Tottus",
+              "lastObservedAt": "2026-10-04T02:40:10.743Z",
+              "currentOfferCents": 510,
+              "states": [
+                {
+                  "priceCents": 510,
+                  "validFrom": "2026-10-04T02:40:10.743Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 510,
+              "minimumPriceCents": 510,
+              "maximumPriceCents": 510,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791081610743,
+                  "priceCents": 510,
+                  "kind": "state-start"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "range": "30d",
+          "retailers": [
+            {
+              "retailer": "Metro",
+              "lastObservedAt": "2026-10-03T23:33:20.601Z",
+              "currentOfferCents": 520,
+              "states": [
+                {
+                  "priceCents": 520,
+                  "validFrom": "2026-10-03T22:28:41.298Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 520,
+              "minimumPriceCents": 520,
+              "maximumPriceCents": 520,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791066521298,
+                  "priceCents": 520,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791070400601,
+                  "priceCents": 520,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Plaza Vea",
+              "lastObservedAt": "2026-10-04T17:31:56.665Z",
+              "currentOfferCents": 510,
+              "states": [
+                {
+                  "priceCents": 510,
+                  "validFrom": "2026-10-03T18:16:34.120Z",
+                  "validUntil": "2026-10-03T21:53:06.789Z",
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                },
+                {
+                  "priceCents": 510,
+                  "validFrom": "2026-10-03T21:53:06.789Z",
+                  "validUntil": null,
+                  "previousPriceCents": 510,
+                  "previousValidUntil": "2026-10-03T21:53:06.789Z"
+                }
+              ],
+              "currentPriceCents": 510,
+              "minimumPriceCents": 510,
+              "maximumPriceCents": 510,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791051394120,
+                  "priceCents": 510,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791064386789,
+                  "priceCents": 510,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135116665,
+                  "priceCents": 510,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Tottus",
+              "lastObservedAt": "2026-10-04T02:40:10.743Z",
+              "currentOfferCents": 510,
+              "states": [
+                {
+                  "priceCents": 510,
+                  "validFrom": "2026-10-04T02:40:10.743Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 510,
+              "minimumPriceCents": 510,
+              "maximumPriceCents": 510,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791081610743,
+                  "priceCents": 510,
+                  "kind": "state-start"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "range": "90d",
+          "retailers": [
+            {
+              "retailer": "Metro",
+              "lastObservedAt": "2026-10-03T23:33:20.601Z",
+              "currentOfferCents": 520,
+              "states": [
+                {
+                  "priceCents": 520,
+                  "validFrom": "2026-10-03T22:28:41.298Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 520,
+              "minimumPriceCents": 520,
+              "maximumPriceCents": 520,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791066521298,
+                  "priceCents": 520,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791070400601,
+                  "priceCents": 520,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Plaza Vea",
+              "lastObservedAt": "2026-10-04T17:31:56.665Z",
+              "currentOfferCents": 510,
+              "states": [
+                {
+                  "priceCents": 510,
+                  "validFrom": "2026-10-03T18:16:34.120Z",
+                  "validUntil": "2026-10-03T21:53:06.789Z",
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                },
+                {
+                  "priceCents": 510,
+                  "validFrom": "2026-10-03T21:53:06.789Z",
+                  "validUntil": null,
+                  "previousPriceCents": 510,
+                  "previousValidUntil": "2026-10-03T21:53:06.789Z"
+                }
+              ],
+              "currentPriceCents": 510,
+              "minimumPriceCents": 510,
+              "maximumPriceCents": 510,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791051394120,
+                  "priceCents": 510,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791064386789,
+                  "priceCents": 510,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135116665,
+                  "priceCents": 510,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Tottus",
+              "lastObservedAt": "2026-10-04T02:40:10.743Z",
+              "currentOfferCents": 510,
+              "states": [
+                {
+                  "priceCents": 510,
+                  "validFrom": "2026-10-04T02:40:10.743Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 510,
+              "minimumPriceCents": 510,
+              "maximumPriceCents": 510,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791081610743,
+                  "priceCents": 510,
+                  "kind": "state-start"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "36b44e42-3f15-8ac8-a66d-2f5153cdb339",
+      "displayName": "Leche UHT GLORIA Zero Lacto Caja 946ml Paquete 3un",
+      "states": 4,
+      "ranges": [
+        {
+          "range": "7d",
+          "retailers": [
+            {
+              "retailer": "Metro",
+              "lastObservedAt": "2026-10-04T17:32:11.946Z",
+              "currentOfferCents": 1620,
+              "states": [
+                {
+                  "priceCents": 1620,
+                  "validFrom": "2026-10-03T19:03:12.103Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1620,
+              "minimumPriceCents": 1620,
+              "maximumPriceCents": 1620,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791054192103,
+                  "priceCents": 1620,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135131946,
+                  "priceCents": 1620,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Plaza Vea",
+              "lastObservedAt": "2026-10-04T17:31:53.495Z",
+              "currentOfferCents": 1650,
+              "states": [
+                {
+                  "priceCents": 1650,
+                  "validFrom": "2026-10-03T18:16:30.198Z",
+                  "validUntil": "2026-10-03T21:53:03.808Z",
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                },
+                {
+                  "priceCents": 1650,
+                  "validFrom": "2026-10-03T21:53:03.808Z",
+                  "validUntil": null,
+                  "previousPriceCents": 1650,
+                  "previousValidUntil": "2026-10-03T21:53:03.808Z"
+                }
+              ],
+              "currentPriceCents": 1650,
+              "minimumPriceCents": 1650,
+              "maximumPriceCents": 1650,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791051390198,
+                  "priceCents": 1650,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791064383808,
+                  "priceCents": 1650,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135113495,
+                  "priceCents": 1650,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Tottus",
+              "lastObservedAt": "2026-10-04T18:16:54.733Z",
+              "currentOfferCents": 1610,
+              "states": [
+                {
+                  "priceCents": 1610,
+                  "validFrom": "2026-10-03T22:29:51.489Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1610,
+              "minimumPriceCents": 1610,
+              "maximumPriceCents": 1610,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791066591489,
+                  "priceCents": 1610,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791137814733,
+                  "priceCents": 1610,
+                  "kind": "latest-observation"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "range": "30d",
+          "retailers": [
+            {
+              "retailer": "Metro",
+              "lastObservedAt": "2026-10-04T17:32:11.946Z",
+              "currentOfferCents": 1620,
+              "states": [
+                {
+                  "priceCents": 1620,
+                  "validFrom": "2026-10-03T19:03:12.103Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1620,
+              "minimumPriceCents": 1620,
+              "maximumPriceCents": 1620,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791054192103,
+                  "priceCents": 1620,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135131946,
+                  "priceCents": 1620,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Plaza Vea",
+              "lastObservedAt": "2026-10-04T17:31:53.495Z",
+              "currentOfferCents": 1650,
+              "states": [
+                {
+                  "priceCents": 1650,
+                  "validFrom": "2026-10-03T18:16:30.198Z",
+                  "validUntil": "2026-10-03T21:53:03.808Z",
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                },
+                {
+                  "priceCents": 1650,
+                  "validFrom": "2026-10-03T21:53:03.808Z",
+                  "validUntil": null,
+                  "previousPriceCents": 1650,
+                  "previousValidUntil": "2026-10-03T21:53:03.808Z"
+                }
+              ],
+              "currentPriceCents": 1650,
+              "minimumPriceCents": 1650,
+              "maximumPriceCents": 1650,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791051390198,
+                  "priceCents": 1650,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791064383808,
+                  "priceCents": 1650,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135113495,
+                  "priceCents": 1650,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Tottus",
+              "lastObservedAt": "2026-10-04T18:16:54.733Z",
+              "currentOfferCents": 1610,
+              "states": [
+                {
+                  "priceCents": 1610,
+                  "validFrom": "2026-10-03T22:29:51.489Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1610,
+              "minimumPriceCents": 1610,
+              "maximumPriceCents": 1610,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791066591489,
+                  "priceCents": 1610,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791137814733,
+                  "priceCents": 1610,
+                  "kind": "latest-observation"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "range": "90d",
+          "retailers": [
+            {
+              "retailer": "Metro",
+              "lastObservedAt": "2026-10-04T17:32:11.946Z",
+              "currentOfferCents": 1620,
+              "states": [
+                {
+                  "priceCents": 1620,
+                  "validFrom": "2026-10-03T19:03:12.103Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1620,
+              "minimumPriceCents": 1620,
+              "maximumPriceCents": 1620,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791054192103,
+                  "priceCents": 1620,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135131946,
+                  "priceCents": 1620,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Plaza Vea",
+              "lastObservedAt": "2026-10-04T17:31:53.495Z",
+              "currentOfferCents": 1650,
+              "states": [
+                {
+                  "priceCents": 1650,
+                  "validFrom": "2026-10-03T18:16:30.198Z",
+                  "validUntil": "2026-10-03T21:53:03.808Z",
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                },
+                {
+                  "priceCents": 1650,
+                  "validFrom": "2026-10-03T21:53:03.808Z",
+                  "validUntil": null,
+                  "previousPriceCents": 1650,
+                  "previousValidUntil": "2026-10-03T21:53:03.808Z"
+                }
+              ],
+              "currentPriceCents": 1650,
+              "minimumPriceCents": 1650,
+              "maximumPriceCents": 1650,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791051390198,
+                  "priceCents": 1650,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791064383808,
+                  "priceCents": 1650,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135113495,
+                  "priceCents": 1650,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Tottus",
+              "lastObservedAt": "2026-10-04T18:16:54.733Z",
+              "currentOfferCents": 1610,
+              "states": [
+                {
+                  "priceCents": 1610,
+                  "validFrom": "2026-10-03T22:29:51.489Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1610,
+              "minimumPriceCents": 1610,
+              "maximumPriceCents": 1610,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791066591489,
+                  "priceCents": 1610,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791137814733,
+                  "priceCents": 1610,
+                  "kind": "latest-observation"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4cf1e951-c626-8948-86da-b54020a18727",
+      "displayName": "Tripack Leche UHT Gloria Light Caja 946ml",
+      "states": 4,
+      "ranges": [
+        {
+          "range": "7d",
+          "retailers": [
+            {
+              "retailer": "Metro",
+              "lastObservedAt": "2026-10-04T17:32:11.946Z",
+              "currentOfferCents": 1620,
+              "states": [
+                {
+                  "priceCents": 1620,
+                  "validFrom": "2026-10-03T19:03:12.103Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1620,
+              "minimumPriceCents": 1620,
+              "maximumPriceCents": 1620,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791054192103,
+                  "priceCents": 1620,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135131946,
+                  "priceCents": 1620,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Plaza Vea",
+              "lastObservedAt": "2026-10-04T17:31:54.836Z",
+              "currentOfferCents": 1650,
+              "states": [
+                {
+                  "priceCents": 1650,
+                  "validFrom": "2026-10-03T18:16:32.619Z",
+                  "validUntil": "2026-10-03T21:53:05.184Z",
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                },
+                {
+                  "priceCents": 1650,
+                  "validFrom": "2026-10-03T21:53:05.184Z",
+                  "validUntil": null,
+                  "previousPriceCents": 1650,
+                  "previousValidUntil": "2026-10-03T21:53:05.184Z"
+                }
+              ],
+              "currentPriceCents": 1650,
+              "minimumPriceCents": 1650,
+              "maximumPriceCents": 1650,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791051392619,
+                  "priceCents": 1650,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791064385184,
+                  "priceCents": 1650,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135114836,
+                  "priceCents": 1650,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Tottus",
+              "lastObservedAt": "2026-10-04T18:16:54.733Z",
+              "currentOfferCents": 1610,
+              "states": [
+                {
+                  "priceCents": 1610,
+                  "validFrom": "2026-10-03T22:29:51.489Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1610,
+              "minimumPriceCents": 1610,
+              "maximumPriceCents": 1610,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791066591489,
+                  "priceCents": 1610,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791137814733,
+                  "priceCents": 1610,
+                  "kind": "latest-observation"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "range": "30d",
+          "retailers": [
+            {
+              "retailer": "Metro",
+              "lastObservedAt": "2026-10-04T17:32:11.946Z",
+              "currentOfferCents": 1620,
+              "states": [
+                {
+                  "priceCents": 1620,
+                  "validFrom": "2026-10-03T19:03:12.103Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1620,
+              "minimumPriceCents": 1620,
+              "maximumPriceCents": 1620,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791054192103,
+                  "priceCents": 1620,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135131946,
+                  "priceCents": 1620,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Plaza Vea",
+              "lastObservedAt": "2026-10-04T17:31:54.836Z",
+              "currentOfferCents": 1650,
+              "states": [
+                {
+                  "priceCents": 1650,
+                  "validFrom": "2026-10-03T18:16:32.619Z",
+                  "validUntil": "2026-10-03T21:53:05.184Z",
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                },
+                {
+                  "priceCents": 1650,
+                  "validFrom": "2026-10-03T21:53:05.184Z",
+                  "validUntil": null,
+                  "previousPriceCents": 1650,
+                  "previousValidUntil": "2026-10-03T21:53:05.184Z"
+                }
+              ],
+              "currentPriceCents": 1650,
+              "minimumPriceCents": 1650,
+              "maximumPriceCents": 1650,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791051392619,
+                  "priceCents": 1650,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791064385184,
+                  "priceCents": 1650,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135114836,
+                  "priceCents": 1650,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Tottus",
+              "lastObservedAt": "2026-10-04T18:16:54.733Z",
+              "currentOfferCents": 1610,
+              "states": [
+                {
+                  "priceCents": 1610,
+                  "validFrom": "2026-10-03T22:29:51.489Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1610,
+              "minimumPriceCents": 1610,
+              "maximumPriceCents": 1610,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791066591489,
+                  "priceCents": 1610,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791137814733,
+                  "priceCents": 1610,
+                  "kind": "latest-observation"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "range": "90d",
+          "retailers": [
+            {
+              "retailer": "Metro",
+              "lastObservedAt": "2026-10-04T17:32:11.946Z",
+              "currentOfferCents": 1620,
+              "states": [
+                {
+                  "priceCents": 1620,
+                  "validFrom": "2026-10-03T19:03:12.103Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1620,
+              "minimumPriceCents": 1620,
+              "maximumPriceCents": 1620,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791054192103,
+                  "priceCents": 1620,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135131946,
+                  "priceCents": 1620,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Plaza Vea",
+              "lastObservedAt": "2026-10-04T17:31:54.836Z",
+              "currentOfferCents": 1650,
+              "states": [
+                {
+                  "priceCents": 1650,
+                  "validFrom": "2026-10-03T18:16:32.619Z",
+                  "validUntil": "2026-10-03T21:53:05.184Z",
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                },
+                {
+                  "priceCents": 1650,
+                  "validFrom": "2026-10-03T21:53:05.184Z",
+                  "validUntil": null,
+                  "previousPriceCents": 1650,
+                  "previousValidUntil": "2026-10-03T21:53:05.184Z"
+                }
+              ],
+              "currentPriceCents": 1650,
+              "minimumPriceCents": 1650,
+              "maximumPriceCents": 1650,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791051392619,
+                  "priceCents": 1650,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791064385184,
+                  "priceCents": 1650,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135114836,
+                  "priceCents": 1650,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Tottus",
+              "lastObservedAt": "2026-10-04T18:16:54.733Z",
+              "currentOfferCents": 1610,
+              "states": [
+                {
+                  "priceCents": 1610,
+                  "validFrom": "2026-10-03T22:29:51.489Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1610,
+              "minimumPriceCents": 1610,
+              "maximumPriceCents": 1610,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791066591489,
+                  "priceCents": 1610,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791137814733,
+                  "priceCents": 1610,
+                  "kind": "latest-observation"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "69c3625d-2d3e-8624-b483-2323e108f94b",
+      "displayName": "Tripack Leche Entera UHT Gloria Caja 946ml",
+      "states": 4,
+      "ranges": [
+        {
+          "range": "7d",
+          "retailers": [
+            {
+              "retailer": "Metro",
+              "lastObservedAt": "2026-10-04T17:32:11.946Z",
+              "currentOfferCents": 1590,
+              "states": [
+                {
+                  "priceCents": 1590,
+                  "validFrom": "2026-10-03T19:03:12.103Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1590,
+              "minimumPriceCents": 1590,
+              "maximumPriceCents": 1590,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791054192103,
+                  "priceCents": 1590,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135131946,
+                  "priceCents": 1590,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Plaza Vea",
+              "lastObservedAt": "2026-10-04T17:31:54.836Z",
+              "currentOfferCents": 1620,
+              "states": [
+                {
+                  "priceCents": 1620,
+                  "validFrom": "2026-10-03T18:16:30.198Z",
+                  "validUntil": "2026-10-03T21:53:03.808Z",
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                },
+                {
+                  "priceCents": 1620,
+                  "validFrom": "2026-10-03T21:53:03.808Z",
+                  "validUntil": null,
+                  "previousPriceCents": 1620,
+                  "previousValidUntil": "2026-10-03T21:53:03.808Z"
+                }
+              ],
+              "currentPriceCents": 1620,
+              "minimumPriceCents": 1620,
+              "maximumPriceCents": 1620,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791051390198,
+                  "priceCents": 1620,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791064383808,
+                  "priceCents": 1620,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135114836,
+                  "priceCents": 1620,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Tottus",
+              "lastObservedAt": "2026-10-04T18:16:54.733Z",
+              "currentOfferCents": 1610,
+              "states": [
+                {
+                  "priceCents": 1610,
+                  "validFrom": "2026-10-03T22:29:51.489Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1610,
+              "minimumPriceCents": 1610,
+              "maximumPriceCents": 1610,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791066591489,
+                  "priceCents": 1610,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791137814733,
+                  "priceCents": 1610,
+                  "kind": "latest-observation"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "range": "30d",
+          "retailers": [
+            {
+              "retailer": "Metro",
+              "lastObservedAt": "2026-10-04T17:32:11.946Z",
+              "currentOfferCents": 1590,
+              "states": [
+                {
+                  "priceCents": 1590,
+                  "validFrom": "2026-10-03T19:03:12.103Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1590,
+              "minimumPriceCents": 1590,
+              "maximumPriceCents": 1590,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791054192103,
+                  "priceCents": 1590,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135131946,
+                  "priceCents": 1590,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Plaza Vea",
+              "lastObservedAt": "2026-10-04T17:31:54.836Z",
+              "currentOfferCents": 1620,
+              "states": [
+                {
+                  "priceCents": 1620,
+                  "validFrom": "2026-10-03T18:16:30.198Z",
+                  "validUntil": "2026-10-03T21:53:03.808Z",
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                },
+                {
+                  "priceCents": 1620,
+                  "validFrom": "2026-10-03T21:53:03.808Z",
+                  "validUntil": null,
+                  "previousPriceCents": 1620,
+                  "previousValidUntil": "2026-10-03T21:53:03.808Z"
+                }
+              ],
+              "currentPriceCents": 1620,
+              "minimumPriceCents": 1620,
+              "maximumPriceCents": 1620,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791051390198,
+                  "priceCents": 1620,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791064383808,
+                  "priceCents": 1620,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135114836,
+                  "priceCents": 1620,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Tottus",
+              "lastObservedAt": "2026-10-04T18:16:54.733Z",
+              "currentOfferCents": 1610,
+              "states": [
+                {
+                  "priceCents": 1610,
+                  "validFrom": "2026-10-03T22:29:51.489Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1610,
+              "minimumPriceCents": 1610,
+              "maximumPriceCents": 1610,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791066591489,
+                  "priceCents": 1610,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791137814733,
+                  "priceCents": 1610,
+                  "kind": "latest-observation"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "range": "90d",
+          "retailers": [
+            {
+              "retailer": "Metro",
+              "lastObservedAt": "2026-10-04T17:32:11.946Z",
+              "currentOfferCents": 1590,
+              "states": [
+                {
+                  "priceCents": 1590,
+                  "validFrom": "2026-10-03T19:03:12.103Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1590,
+              "minimumPriceCents": 1590,
+              "maximumPriceCents": 1590,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791054192103,
+                  "priceCents": 1590,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135131946,
+                  "priceCents": 1590,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Plaza Vea",
+              "lastObservedAt": "2026-10-04T17:31:54.836Z",
+              "currentOfferCents": 1620,
+              "states": [
+                {
+                  "priceCents": 1620,
+                  "validFrom": "2026-10-03T18:16:30.198Z",
+                  "validUntil": "2026-10-03T21:53:03.808Z",
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                },
+                {
+                  "priceCents": 1620,
+                  "validFrom": "2026-10-03T21:53:03.808Z",
+                  "validUntil": null,
+                  "previousPriceCents": 1620,
+                  "previousValidUntil": "2026-10-03T21:53:03.808Z"
+                }
+              ],
+              "currentPriceCents": 1620,
+              "minimumPriceCents": 1620,
+              "maximumPriceCents": 1620,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791051390198,
+                  "priceCents": 1620,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791064383808,
+                  "priceCents": 1620,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135114836,
+                  "priceCents": 1620,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Tottus",
+              "lastObservedAt": "2026-10-04T18:16:54.733Z",
+              "currentOfferCents": 1610,
+              "states": [
+                {
+                  "priceCents": 1610,
+                  "validFrom": "2026-10-03T22:29:51.489Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1610,
+              "minimumPriceCents": 1610,
+              "maximumPriceCents": 1610,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791066591489,
+                  "priceCents": 1610,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791137814733,
+                  "priceCents": 1610,
+                  "kind": "latest-observation"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "898b8c56-fc13-89ca-9369-7860882dc6bd",
+      "displayName": "Sixpack Mezcla Láctea Ideal Cremosita Lata 390g",
+      "states": 4,
+      "ranges": [
+        {
+          "range": "7d",
+          "retailers": [
+            {
+              "retailer": "Metro",
+              "lastObservedAt": "2026-10-04T17:32:13.383Z",
+              "currentOfferCents": 2290,
+              "states": [
+                {
+                  "priceCents": 2290,
+                  "validFrom": "2026-10-03T19:03:13.393Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 2290,
+              "minimumPriceCents": 2290,
+              "maximumPriceCents": 2290,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791054193393,
+                  "priceCents": 2290,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135133383,
+                  "priceCents": 2290,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Plaza Vea",
+              "lastObservedAt": "2026-10-04T17:31:54.836Z",
+              "currentOfferCents": 2350,
+              "states": [
+                {
+                  "priceCents": 2350,
+                  "validFrom": "2026-10-03T18:16:32.619Z",
+                  "validUntil": "2026-10-03T21:53:05.184Z",
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                },
+                {
+                  "priceCents": 2350,
+                  "validFrom": "2026-10-03T21:53:05.184Z",
+                  "validUntil": null,
+                  "previousPriceCents": 2350,
+                  "previousValidUntil": "2026-10-03T21:53:05.184Z"
+                }
+              ],
+              "currentPriceCents": 2350,
+              "minimumPriceCents": 2350,
+              "maximumPriceCents": 2350,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791051392619,
+                  "priceCents": 2350,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791064385184,
+                  "priceCents": 2350,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135114836,
+                  "priceCents": 2350,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Tottus",
+              "lastObservedAt": "2026-10-04T18:16:54.733Z",
+              "currentOfferCents": 2350,
+              "states": [
+                {
+                  "priceCents": 2350,
+                  "validFrom": "2026-10-03T22:29:51.489Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 2350,
+              "minimumPriceCents": 2350,
+              "maximumPriceCents": 2350,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791066591489,
+                  "priceCents": 2350,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791137814733,
+                  "priceCents": 2350,
+                  "kind": "latest-observation"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "range": "30d",
+          "retailers": [
+            {
+              "retailer": "Metro",
+              "lastObservedAt": "2026-10-04T17:32:13.383Z",
+              "currentOfferCents": 2290,
+              "states": [
+                {
+                  "priceCents": 2290,
+                  "validFrom": "2026-10-03T19:03:13.393Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 2290,
+              "minimumPriceCents": 2290,
+              "maximumPriceCents": 2290,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791054193393,
+                  "priceCents": 2290,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135133383,
+                  "priceCents": 2290,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Plaza Vea",
+              "lastObservedAt": "2026-10-04T17:31:54.836Z",
+              "currentOfferCents": 2350,
+              "states": [
+                {
+                  "priceCents": 2350,
+                  "validFrom": "2026-10-03T18:16:32.619Z",
+                  "validUntil": "2026-10-03T21:53:05.184Z",
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                },
+                {
+                  "priceCents": 2350,
+                  "validFrom": "2026-10-03T21:53:05.184Z",
+                  "validUntil": null,
+                  "previousPriceCents": 2350,
+                  "previousValidUntil": "2026-10-03T21:53:05.184Z"
+                }
+              ],
+              "currentPriceCents": 2350,
+              "minimumPriceCents": 2350,
+              "maximumPriceCents": 2350,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791051392619,
+                  "priceCents": 2350,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791064385184,
+                  "priceCents": 2350,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135114836,
+                  "priceCents": 2350,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Tottus",
+              "lastObservedAt": "2026-10-04T18:16:54.733Z",
+              "currentOfferCents": 2350,
+              "states": [
+                {
+                  "priceCents": 2350,
+                  "validFrom": "2026-10-03T22:29:51.489Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 2350,
+              "minimumPriceCents": 2350,
+              "maximumPriceCents": 2350,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791066591489,
+                  "priceCents": 2350,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791137814733,
+                  "priceCents": 2350,
+                  "kind": "latest-observation"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "range": "90d",
+          "retailers": [
+            {
+              "retailer": "Metro",
+              "lastObservedAt": "2026-10-04T17:32:13.383Z",
+              "currentOfferCents": 2290,
+              "states": [
+                {
+                  "priceCents": 2290,
+                  "validFrom": "2026-10-03T19:03:13.393Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 2290,
+              "minimumPriceCents": 2290,
+              "maximumPriceCents": 2290,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791054193393,
+                  "priceCents": 2290,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135133383,
+                  "priceCents": 2290,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Plaza Vea",
+              "lastObservedAt": "2026-10-04T17:31:54.836Z",
+              "currentOfferCents": 2350,
+              "states": [
+                {
+                  "priceCents": 2350,
+                  "validFrom": "2026-10-03T18:16:32.619Z",
+                  "validUntil": "2026-10-03T21:53:05.184Z",
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                },
+                {
+                  "priceCents": 2350,
+                  "validFrom": "2026-10-03T21:53:05.184Z",
+                  "validUntil": null,
+                  "previousPriceCents": 2350,
+                  "previousValidUntil": "2026-10-03T21:53:05.184Z"
+                }
+              ],
+              "currentPriceCents": 2350,
+              "minimumPriceCents": 2350,
+              "maximumPriceCents": 2350,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791051392619,
+                  "priceCents": 2350,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791064385184,
+                  "priceCents": 2350,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135114836,
+                  "priceCents": 2350,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Tottus",
+              "lastObservedAt": "2026-10-04T18:16:54.733Z",
+              "currentOfferCents": 2350,
+              "states": [
+                {
+                  "priceCents": 2350,
+                  "validFrom": "2026-10-03T22:29:51.489Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 2350,
+              "minimumPriceCents": 2350,
+              "maximumPriceCents": 2350,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791066591489,
+                  "priceCents": 2350,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791137814733,
+                  "priceCents": 2350,
+                  "kind": "latest-observation"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "05c25031-29a8-8ee6-9dff-129036aa42c9",
+      "displayName": "Huevos Pardos LA CALERA Paquete 30un",
+      "states": 2,
+      "ranges": [
+        {
+          "range": "7d",
+          "retailers": [
+            {
+              "retailer": "Plaza Vea",
+              "lastObservedAt": "2026-10-04T17:31:53.495Z",
+              "currentOfferCents": 1790,
+              "states": [
+                {
+                  "priceCents": 1790,
+                  "validFrom": "2026-10-03T18:16:30.198Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1790,
+              "minimumPriceCents": 1790,
+              "maximumPriceCents": 1790,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791051390198,
+                  "priceCents": 1790,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135113495,
+                  "priceCents": 1790,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Tottus",
+              "lastObservedAt": "2026-10-04T02:41:38.606Z",
+              "currentOfferCents": 1790,
+              "states": [
+                {
+                  "priceCents": 1790,
+                  "validFrom": "2026-10-04T02:40:32.217Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1790,
+              "minimumPriceCents": 1790,
+              "maximumPriceCents": 1790,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791081632217,
+                  "priceCents": 1790,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791081698606,
+                  "priceCents": 1790,
+                  "kind": "latest-observation"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "range": "30d",
+          "retailers": [
+            {
+              "retailer": "Plaza Vea",
+              "lastObservedAt": "2026-10-04T17:31:53.495Z",
+              "currentOfferCents": 1790,
+              "states": [
+                {
+                  "priceCents": 1790,
+                  "validFrom": "2026-10-03T18:16:30.198Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1790,
+              "minimumPriceCents": 1790,
+              "maximumPriceCents": 1790,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791051390198,
+                  "priceCents": 1790,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135113495,
+                  "priceCents": 1790,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Tottus",
+              "lastObservedAt": "2026-10-04T02:41:38.606Z",
+              "currentOfferCents": 1790,
+              "states": [
+                {
+                  "priceCents": 1790,
+                  "validFrom": "2026-10-04T02:40:32.217Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1790,
+              "minimumPriceCents": 1790,
+              "maximumPriceCents": 1790,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791081632217,
+                  "priceCents": 1790,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791081698606,
+                  "priceCents": 1790,
+                  "kind": "latest-observation"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "range": "90d",
+          "retailers": [
+            {
+              "retailer": "Plaza Vea",
+              "lastObservedAt": "2026-10-04T17:31:53.495Z",
+              "currentOfferCents": 1790,
+              "states": [
+                {
+                  "priceCents": 1790,
+                  "validFrom": "2026-10-03T18:16:30.198Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1790,
+              "minimumPriceCents": 1790,
+              "maximumPriceCents": 1790,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791051390198,
+                  "priceCents": 1790,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791135113495,
+                  "priceCents": 1790,
+                  "kind": "latest-observation"
+                }
+              ]
+            },
+            {
+              "retailer": "Tottus",
+              "lastObservedAt": "2026-10-04T02:41:38.606Z",
+              "currentOfferCents": 1790,
+              "states": [
+                {
+                  "priceCents": 1790,
+                  "validFrom": "2026-10-04T02:40:32.217Z",
+                  "validUntil": null,
+                  "previousPriceCents": null,
+                  "previousValidUntil": null
+                }
+              ],
+              "currentPriceCents": 1790,
+              "minimumPriceCents": 1790,
+              "maximumPriceCents": 1790,
+              "differenceCents": 0,
+              "changeCount": 0,
+              "lastChange": null,
+              "status": "insufficient",
+              "points": [
+                {
+                  "at": 1791081632217,
+                  "priceCents": 1790,
+                  "kind": "state-start"
+                },
+                {
+                  "at": 1791081698606,
+                  "priceCents": 1790,
+                  "kind": "latest-observation"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

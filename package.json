@@ -29,7 +29,9 @@
     "audit:unit-prices": "pnpm --filter @comprafino/db audit:unit-prices",
     "audit:staples": "pnpm --filter @comprafino/db audit:staples",
     "catalog:budget": "pnpm --filter @comprafino/scrapers catalog:budget",
-    "audit:quantity-quality": "pnpm --filter @comprafino/db audit:quantity-quality"
+    "audit:quantity-quality": "pnpm --filter @comprafino/db audit:quantity-quality",
+    "audit:price-history": "pnpm --filter @comprafino/db audit:price-history",
+    "test:e2e:history": "pnpm --filter @comprafino/db test:e2e:history"
   },
   "devDependencies": {
     "oxfmt": "0.71.0",

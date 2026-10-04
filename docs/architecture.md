@@ -20,7 +20,7 @@ The homepage is static and requires no database. Public search and product compa
 - `packages/db`: PostgreSQL schema home, reviewed migrations, URL validation and lazy Drizzle clients. Importing does not connect or require credentials. Neon HTTP suits stateless queries and batched transactions; interactive transactions would justify revisiting the driver.
 - `packages/scrapers`: retailer adapters and ingestion orchestration, currently native-fetch Tottus hydration JSON and Plaza Vea/Metro public VTEX JSON. Fetching/parsing is independent of persistence. Ingestion/refresh dry-run never opens a database; discovery dry-run reads database demand without writes or retailer calls.
 
-Current dependency graph: `web → ui, db`; `scrapers → core, db`; `db → core`. Core owns the shared validated listing boundary and exact money normalization. Dedicated workers can replace or supplement GitHub Actions without rewriting framework-independent domain logic. Retailer-specific behavior remains isolated.
+Current dependency graph: `web → ui, db, core`; `scrapers → core, db`; `db → core`. Core owns the shared validated listing boundary and exact money normalization. Dedicated workers can replace or supplement GitHub Actions without rewriting framework-independent domain logic. Retailer-specific behavior remains isolated.
 
 ## Package and task management
 
@@ -85,3 +85,7 @@ Core comparison output has explicit mass/volume/item-count/approximate-roll base
 ## Conditional pricing and URL controls
 
 Core owns validated concrete conditional offers, CMR identity, validity/freshness eligibility, potential-benefit ranking and URL filter parsing. DB owns a separate current `retailer_listing_offers` model, synchronized inside accepted listing upserts under the existing retailer lock. Unchanged offer states reuse atomically verified listing freshness without offer-row rewrites; ordinary history remains independent. Retailer adapters interpret only evidence-backed source amounts. The web toolbar immediately navigates URL filters while results remain server-rendered; discovery uses the unfiltered query count. See [conditional pricing](conditional-pricing.md) and [search UX](search-ux.md).
+
+## Public ordinary price history
+
+Core owns range parsing, half-open state intersection, ordinary transitions and summary metrics. DB owns one canonical/range-scoped query sharing public exact-product eligibility. The product Server Component loads summaries below current offers; a Client Component renders disconnected Recharts event markers and retailer toggles. Recorded state starts and the latest listing verification are the only plotted timestamps. Historical observation coverage is unavailable. See [price history](price-history.md) for semantics and pending validation. No migration or ordinary-history writes were introduced.

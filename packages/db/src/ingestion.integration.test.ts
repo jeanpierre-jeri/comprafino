@@ -4,6 +4,7 @@ import { neon, NeonQueryPromise } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
+import { getCanonicalProductPriceHistory } from "./price-history.ts";
 import { searchFilters } from "@comprafino/core";
 import { normalizeCatalogListing } from "@comprafino/core";
 import type { NormalizedRetailerListing } from "@comprafino/core";
@@ -523,6 +524,107 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
     const pairs = await evaluatePairs(db, [[rows[0]!, rows[1]!]]);
     return { rows, pairs };
   }
+  it("queries range-clipped ordinary history for multiple verified retailers, excluding CMR and unlinked rows", async () => {
+    const { rows, pairs } = await seedMatch("history-query");
+    await persistMatching(db, rows, pairs);
+    const links = z
+      .array(z.object({ canonical_product_id: z.uuid() }))
+      .parse(
+        await query(
+          "select canonical_product_id from canonical_product_listings where listing_id=$1",
+          [rows[0]!.id],
+        ),
+      );
+    const id = links[0]!.canonical_product_id;
+    const base = {
+      ...observation("history-query-metro", 0, 1290),
+      retailer: "metro" as const,
+      title: "Leche Gloria Entera Caja 946ml",
+      sourceBrand: "Gloria",
+    };
+    await persistListings(db, "metro", [
+      {
+        ...base,
+        currentPriceCents: 1190,
+        observedAt: new Date("2026-10-13T09:00:00Z"),
+        conditionalOffers: [
+          {
+            programKey: "cmr",
+            conditionType: "payment_card",
+            conditionLabel: "Requiere tarjeta CMR",
+            priceCents: 900,
+            observedAt: new Date("2026-10-13T09:00:00Z"),
+          },
+        ],
+      },
+    ]);
+    await persistListings(db, "metro", [
+      {
+        ...base,
+        currentPriceCents: 1190,
+        observedAt: new Date("2026-10-14T09:00:00Z"),
+        conditionalOffers: [
+          {
+            programKey: "cmr",
+            conditionType: "payment_card",
+            conditionLabel: "Requiere tarjeta CMR",
+            priceCents: 900,
+            observedAt: new Date("2026-10-14T09:00:00Z"),
+          },
+        ],
+      },
+    ]);
+    await persistListings(db, "metro", [
+      { ...base, externalId: "history-unmatched", currentPriceCents: 1 },
+    ]);
+    const history = await getCanonicalProductPriceHistory(db, id, {
+      range: "7d",
+      now: new Date("2026-10-15T09:00:00Z"),
+    });
+    expect(history?.retailers).toHaveLength(2);
+    const metro = history!.retailers.find((r) => r.retailerId === "metro")!;
+    expect(metro.summary).toMatchObject({
+      currentPriceCents: 1190,
+      minimumPriceCents: 1190,
+      maximumPriceCents: 1290,
+      changeCount: 1,
+      differenceCents: -100,
+      lastChange: { fromCents: 1290, toCents: 1190 },
+    });
+    expect(metro.states).toHaveLength(2);
+    expect(
+      await query("select price_cents from retailer_listing_offers where listing_id=$1", [
+        rows.find((r) => r.retailer === "metro")!.id,
+      ]),
+    ).toEqual([{ price_cents: 900 }]);
+    expect(metro.states.map((state) => state.priceCents)).not.toContain(900);
+    expect(metro.states[0]?.validFrom).toEqual(base.observedAt);
+    expect(metro.states[1]?.validUntil).toBeNull();
+    expect(metro.summary.points.map((p) => p.priceCents)).toEqual([1190, 1190]);
+    expect(history!.retailers.find((r) => r.retailerId === "plaza-vea")?.summary.status).toBe(
+      "empty",
+    );
+    const narrow = await getCanonicalProductPriceHistory(db, id, {
+      range: "7d",
+      now: new Date("2026-10-20T09:00:00Z"),
+    });
+    expect(narrow!.retailers.find((r) => r.retailerId === "metro")?.states).toHaveLength(1);
+    expect(
+      narrow!.retailers.find((r) => r.retailerId === "metro")?.summary.lastChange,
+    ).toMatchObject({ fromCents: 1290, toCents: 1190 });
+    expect(await getCanonicalProductPriceHistory(db, "malformed")).toBeNull();
+    expect(await getCanonicalProductPriceHistory(db, randomUUID())).toBeNull();
+    await query("update canonical_product_listings set confidence=0.85 where listing_id=$1", [
+      rows[0]!.id,
+    ]);
+    expect(await getCanonicalProductPriceHistory(db, id)).toBeNull();
+    await query(
+      "update canonical_product_listings set method='manual',confidence=1 where listing_id=$1",
+      [rows[0]!.id],
+    );
+    expect(await getCanonicalProductPriceHistory(db, id)).toBeNull();
+  }, 30000);
+
   it("creates canonical links with real pg_trgm, idempotent concurrent reruns and SQL constraints", async () => {
     const { rows, pairs } = await seedMatch("matching");
     expect(pairs[0]!.result).toMatchObject({ decision: "auto_match", similarity: 1 });

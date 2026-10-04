@@ -2,7 +2,7 @@
 
 import { ChoiceSelect } from "@comprafino/ui/components/select";
 import { useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { searchFilters, searchFilterQuery } from "@comprafino/db/search-filters";
 import type { SearchFilters } from "@comprafino/db/search-filters";
 
@@ -18,13 +18,17 @@ export function SearchControls({
   comparisonPath?: string;
 }) {
   const router = useRouter();
+  const currentParams = useSearchParams();
   const [pending, startTransition] = useTransition();
   function change(key: string, value: string) {
     const next = searchFilters({ ...filters, [key]: value });
+    const historyRange = currentParams.get("range");
     const suffix = comparisonPath
       ? next.priceMode === "benefits"
-        ? "?priceMode=benefits"
-        : ""
+        ? `?priceMode=benefits${historyRange ? `&range=${encodeURIComponent(historyRange)}` : ""}`
+        : historyRange
+          ? `?range=${encodeURIComponent(historyRange)}`
+          : ""
       : `?${searchFilterQuery(query, next)}`;
     startTransition(() =>
       router.push(`${comparisonPath ?? "/search"}${suffix}`, { scroll: false }),

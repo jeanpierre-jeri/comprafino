@@ -17,3 +17,5 @@ export * from "./product-family.ts";
 
 export * from "./conditional-pricing.ts";
 export * from "./search-filters.ts";
+
+export * from "./price-history.ts";
