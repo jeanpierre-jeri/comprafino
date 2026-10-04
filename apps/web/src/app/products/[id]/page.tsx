@@ -19,7 +19,10 @@ const loadProduct = cache(async (id: string) => {
   if (!isPublicProductId(id)) return { product: null, failed: false };
   await connection();
   try {
-    return { product: await getCanonicalProductComparison(createDatabase(), id), failed: false };
+    return {
+      product: await getCanonicalProductComparison(createDatabase(), id),
+      failed: false,
+    };
   } catch (error) {
     console.error("Public comparison database query failed", error);
     return { product: null, failed: true };
@@ -54,6 +57,7 @@ export default async function ProductPage({ params }: Props) {
           key={product.imageUrl ?? product.id}
           src={product.imageUrl}
           name={product.displayName}
+          loading="eager"
         />
         <div>
           <p className="text-sm text-muted-foreground">{product.brand}</p>
@@ -67,7 +71,8 @@ export default async function ProductPage({ params }: Props) {
             ) : (
               <>
                 <p className="text-sm font-medium">
-                  Mejor precio observado{product.cheapestRetailers.length > 1 ? " · Empate" : ""}
+                  Mejor precio observado
+                  {product.cheapestRetailers.length > 1 ? " · Empate" : ""}
                 </p>
                 <p className="mt-2 text-3xl font-semibold text-primary">
                   {formatPen(product.lowestPriceCents)}

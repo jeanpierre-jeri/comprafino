@@ -18,7 +18,9 @@ import { PriceNotice, PublicDataError, PublicShell } from "../../components/publ
 import { ProductImage } from "../../components/product-image";
 import { ObservedAt, packageSummary } from "../../components/product-info";
 
-export const metadata: Metadata = { title: "Buscar productos y precios | CompraFino" };
+export const metadata: Metadata = {
+  title: "Buscar productos y precios | CompraFino",
+};
 export default async function SearchPage({
   searchParams,
 }: {
@@ -80,14 +82,18 @@ export default async function SearchPage({
                   {products.length === 20 ? "Hasta 20" : products.length} productos para «{query}»
                 </p>
                 <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  {products.map((product) => (
+                  {products.map((product, index) => (
                     <li key={product.id}>
                       <article className="h-full rounded-2xl border p-5">
                         <Link
                           href={`/products/${product.id}`}
                           className="group block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
                         >
-                          <ProductImage src={product.imageUrl} name={product.displayName} />
+                          <ProductImage
+                            src={product.imageUrl}
+                            name={product.displayName}
+                            loading={index === 0 ? "eager" : "lazy"}
+                          />
                           <p className="mt-4 text-sm text-muted-foreground">{product.brand}</p>
                           <h2 className="mt-1 text-lg font-semibold group-hover:text-primary">
                             {product.displayName}
@@ -205,7 +211,11 @@ export default async function SearchPage({
                               data-offer-id={offer.id}
                               className="h-full rounded-2xl border p-5"
                             >
-                              <ProductImage src={offer.imageUrl} name={offer.title} />
+                              <ProductImage
+                                src={offer.imageUrl}
+                                name={offer.title}
+                                loading="eager"
+                              />
                               {offer.brand && (
                                 <p className="mt-4 text-sm text-muted-foreground">{offer.brand}</p>
                               )}
