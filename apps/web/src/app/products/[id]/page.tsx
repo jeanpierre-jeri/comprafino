@@ -13,7 +13,7 @@ import {
 } from "@comprafino/db";
 import { SearchControls } from "../../../components/search-controls";
 import { ProductImage } from "../../../components/product-image";
-import { ObservedAt, packageSummary } from "../../../components/product-info";
+import { ObservedAt, packageSummary, RetailerBadge } from "../../../components/product-info";
 import { PriceNotice, PublicDataError, PublicShell } from "../../../components/public-shell";
 
 // React cache deduplicates metadata/page reads within this request only.
@@ -55,10 +55,13 @@ export default async function ProductPage({ params, searchParams }: Props) {
   if (!product) notFound();
   return (
     <PublicShell>
-      <Link href="/search" className="text-sm text-primary underline">
+      <Link
+        href="/search"
+        className="text-sm font-medium text-primary underline underline-offset-4"
+      >
         Buscar otro producto
       </Link>
-      <div className="mt-7 grid items-start gap-8 sm:grid-cols-[256px_1fr]">
+      <div className="detail-hero">
         <ProductImage
           key={product.imageUrl ?? product.id}
           src={product.imageUrl}
@@ -66,12 +69,13 @@ export default async function ProductPage({ params, searchParams }: Props) {
           loading="eager"
         />
         <div>
-          <p className="text-sm text-muted-foreground">{product.brand}</p>
+          <p className="eyebrow">El mismo producto, tienda por tienda</p>
+          <p className="mt-4 text-sm text-muted-foreground">{product.brand}</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
             {product.displayName}
           </h1>
           <p className="mt-4 text-muted-foreground">{packageSummary(product)}</p>
-          <div className="mt-6 rounded-xl bg-primary/5 p-5">
+          <div className="mt-6 rounded-2xl border border-primary/15 bg-primary/5 p-5">
             {product.lowestPriceCents === null ? (
               <p className="text-sm text-muted-foreground">Estamos actualizando este producto.</p>
             ) : (
@@ -80,7 +84,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
                   Mejor precio para todos
                   {product.cheapestRetailers.length > 1 ? " · Empate" : ""}
                 </p>
-                <p className="mt-2 text-3xl font-semibold text-primary">
+                <p className="mt-2 text-4xl font-semibold tracking-tight text-primary tabular-nums">
                   {formatPen(product.lowestPriceCents)}
                 </p>
                 <p className="mt-2">{product.cheapestRetailers.join(" y ")}</p>
@@ -93,7 +97,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
       {filters.priceMode === "benefits" &&
         product.lowestBenefit &&
         product.lowestBenefit.priceCents < (product.lowestPriceCents ?? Infinity) && (
-          <aside className="mt-4 rounded-xl border p-4">
+          <aside className="benefit-surface mt-4">
             <p className="text-sm font-medium">Precio más bajo con beneficio</p>
             <p className="mt-1 text-xl font-semibold">
               {formatPen(product.lowestBenefit.priceCents)} con CMR
@@ -105,7 +109,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
           </aside>
         )}
       <section className="mt-8" aria-labelledby="offers-title">
-        <h2 id="offers-title" className="text-xl font-semibold">
+        <h2 id="offers-title" className="text-2xl font-semibold tracking-tight">
           Compara en {product.retailerCount} supermercados
         </h2>
         <ul className="mt-5 space-y-4">
@@ -118,10 +122,12 @@ export default async function ProductPage({ params, searchParams }: Props) {
             return (
               <li key={offer.retailerId}>
                 <article
-                  className={`flex flex-col gap-5 rounded-xl border p-5 sm:flex-row sm:items-center sm:justify-between ${best ? "border-primary/40 bg-primary/5" : ""}`}
+                  className={`comparison-row flex flex-col gap-5 rounded-2xl border p-5 sm:flex-row sm:items-center sm:justify-between ${best ? "border-primary/30 bg-primary/5" : "bg-white"}`}
                 >
                   <div>
-                    <h3 className="text-lg font-semibold">{offer.retailerName}</h3>
+                    <h3>
+                      <RetailerBadge id={offer.retailerId} name={offer.retailerName} />
+                    </h3>
                     {best && (
                       <p className="mt-1 text-sm font-medium text-primary">
                         {product.cheapestRetailers.length > 1
@@ -145,7 +151,9 @@ export default async function ProductPage({ params, searchParams }: Props) {
                     ) : null}
                   </div>
                   <div className="sm:text-right">
-                    <p className="text-2xl font-semibold">{formatPen(offer.currentPriceCents)}</p>
+                    <p className="text-3xl font-semibold tracking-tight tabular-nums">
+                      {formatPen(offer.currentPriceCents)}
+                    </p>
                     <p className="text-xs text-muted-foreground">Precio online para todos</p>
                     {offer.regularPriceCents !== null && (
                       <p className="mt-1 text-sm text-muted-foreground">
@@ -153,18 +161,13 @@ export default async function ProductPage({ params, searchParams }: Props) {
                       </p>
                     )}
                     {offer.conditionalOffers.map((benefit) => (
-                      <div key={benefit.programKey} className="mt-3 rounded-lg bg-muted p-3">
+                      <div key={benefit.programKey} className="benefit-surface">
                         <p className="font-semibold">{formatPen(benefit.priceCents)} con CMR</p>
                         <p className="text-xs">{benefit.conditionLabel}</p>
                       </div>
                     ))}
                     {url && (
-                      <a
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-3 inline-block rounded text-sm font-medium text-primary underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-                      >
+                      <a href={url} target="_blank" rel="noopener noreferrer" className="card-link">
                         Ver producto en {offer.retailerName}
                         <span className="sr-only"> (abre una nueva pestaña)</span>
                       </a>

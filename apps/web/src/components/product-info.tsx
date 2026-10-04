@@ -13,8 +13,16 @@ export function ObservedAt({ date }: { date: Date }) {
     timeZone: "America/Lima",
   }).format(date);
   return (
-    <p className="mt-2 text-sm text-muted-foreground">
+    <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
       Observado <time dateTime={date.toISOString()}>{label}</time> (Perú)
     </p>
+  );
+}
+
+export function RetailerBadge({ id, name }: { id: string; name: string }) {
+  return (
+    <span className="retailer-badge" data-retailer={id}>
+      {name}
+    </span>
   );
 }

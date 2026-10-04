@@ -1,6 +1,6 @@
 # Conditional pricing — Milestone 11
 
-Implementation is in progress against clean baseline `f2505e7`. Production build, Chromium E2E and desktop/mobile visual confirmation remain pending because Turbopack cannot bind its CSS worker port in this sandbox. No price-history UI or accounts are included.
+Milestone 11 is complete in the provided baseline `6c3a52f`; its original agent build restrictions are historical. Milestone 12 refines presentation only; see [UI polish](ui-polish.md). No price-history UI or accounts are included.
 
 ## Ordinary and conditional prices
 
@@ -40,8 +40,8 @@ Search cards keep the ordinary amount visible and show “Con CMR: S/ …” wit
 
 See [search UX](search-ux.md) for immediate URL filtering and [validation](milestone-11-validation.md) for measured checks and remaining gates.
 
-## Limitations and Milestone 12 recommendation
+## Limitations and Milestone 13 recommendation
 
 No promotion engine for 2x1/3x2, second-unit arithmetic, quantities, bundles, coupons, bank weekdays, percentage discount stacking or inferred card/loyalty programs. No new retailer, source category, dependency, queue, cache, analytics or other infrastructure. Anonymous context/location uncertainty remains.
 
-For Milestone 12, start by auditing ordinary history interval integrity and observation gaps, then consider a compact exact-product history table with retailer, quote basis, state-start and last-verification context. Decide conditional historical capture separately; current offer rows cannot reconstruct past CMR prices. Do not connect ordinary and CMR points into one series or infer historical observations from today's freshness. That work is a recommendation only.
+For Milestone 13, start by auditing ordinary history interval integrity and observation gaps, then consider a compact exact-product history table with retailer, quote basis, state-start and last-verification context. Decide conditional historical capture separately; current offer rows cannot reconstruct past CMR prices. Do not connect ordinary and CMR points into one series or infer historical observations from today's freshness. That work is a recommendation only.

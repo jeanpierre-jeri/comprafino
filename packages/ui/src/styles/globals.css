@@ -16,18 +16,26 @@
   --color-input: var(--border);
   --color-ring: var(--primary);
   --radius-md: 0.5rem;
-  --font-sans: Arial, Helvetica, sans-serif;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.5rem;
+  --shadow-soft: 0 4px 24px -8px rgb(24 57 46 / 12%);
+  --font-sans: "Segoe UI", Arial, Helvetica, sans-serif;
 }
 
 :root {
-  --background: #faf9f6;
+  --background: #f8f9f5;
   --foreground: #18392e;
   --primary: #236144;
   --primary-foreground: #ffffff;
-  --secondary: #eeeee6;
+  --secondary: #edf2e9;
   --muted-foreground: #596b60;
   --destructive: #b42318;
-  --border: #d5dbd1;
+  --border: #dce3d8;
+  --surface: #ffffff;
+  --surface-tint: #eef4e9;
+  --benefit: #f8f3e8;
 }
 
 @layer base {
@@ -37,5 +45,135 @@
   }
   * {
     border-color: var(--border);
+  }
+  :where(a, button, input, select):focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 4px;
+  }
+  :where(h1, h2, h3, p) {
+    overflow-wrap: anywhere;
+  }
+  ::selection {
+    background: #dcebd5;
+  }
+}
+
+@layer components {
+  .eyebrow {
+    @apply text-xs font-semibold tracking-widest text-primary;
+  }
+  .home-hero {
+    @apply grid items-center gap-4 rounded-3xl border p-5 sm:gap-8 sm:p-10 lg:grid-cols-[1fr_0.95fr] lg:gap-12 lg:p-12;
+    background:
+      radial-gradient(ellipse at top right, #e1edd8, transparent 65%), var(--surface-tint);
+  }
+  .search-surface {
+    @apply min-w-0 rounded-2xl border bg-white p-5 shadow-soft sm:p-7;
+  }
+  .search-chip {
+    @apply inline-flex min-h-10 items-center gap-2 rounded-full border bg-background px-4 text-sm font-medium transition-colors hover:border-primary/40 hover:bg-secondary;
+  }
+  .retailer-strip {
+    @apply my-8 flex flex-col justify-between gap-5 rounded-2xl bg-secondary p-5 sm:my-10 sm:flex-row sm:items-center sm:p-6;
+  }
+  .retailer-badge {
+    @apply inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold;
+  }
+  .retailer-badge[data-retailer="tottus"] {
+    background: #edf5e7;
+    color: #335d20;
+    border-color: #dce9d1;
+  }
+  .retailer-badge[data-retailer="plaza-vea"] {
+    background: #fff1ea;
+    color: #993717;
+    border-color: #f1dfd3;
+  }
+  .retailer-badge[data-retailer="metro"] {
+    background: #fff6d9;
+    color: #665014;
+    border-color: #ebdfb8;
+  }
+  .comparison-badge {
+    @apply inline-flex rounded-full bg-secondary px-3 py-1 text-xs font-medium text-primary;
+  }
+  .search-heading {
+    @apply grid items-center gap-4 rounded-3xl border bg-secondary/60 p-5 sm:p-7 lg:grid-cols-[1fr_1.1fr] lg:gap-12;
+  }
+  .filter-surface {
+    @apply my-5 rounded-2xl border bg-white p-4 sm:p-5;
+  }
+  .filter-surface fieldset:disabled {
+    opacity: 0.65;
+  }
+  .empty-surface {
+    @apply rounded-3xl border bg-white p-6 sm:p-9;
+  }
+  .empty-surface p {
+    @apply max-w-xl leading-relaxed;
+  }
+  .exact-section {
+    @apply rounded-3xl border bg-secondary/50 p-4 sm:p-6;
+  }
+  .product-card {
+    @apply flex h-full min-w-0 flex-col rounded-2xl border bg-white p-4 shadow-soft sm:p-5;
+    transition:
+      border-color 160ms,
+      box-shadow 160ms;
+  }
+  .product-card:hover,
+  .product-card:focus-within {
+    border-color: #a6bda1;
+    box-shadow: 0 8px 28px -10px rgb(24 57 46 / 18%);
+  }
+  .product-summary {
+    @apply grid grid-cols-[112px_minmax(0,1fr)] items-start gap-4 sm:grid-cols-1;
+  }
+  .product-image {
+    border: 1px solid #edf0e9;
+  }
+  .card-price {
+    @apply mt-5 border-t pt-4;
+  }
+  .unit-price {
+    @apply mt-3 text-sm font-medium text-primary;
+  }
+  .benefit-surface {
+    @apply mt-3 rounded-xl border p-3;
+    background: var(--benefit);
+    border-color: #ebe2cf;
+  }
+  .card-footer {
+    @apply mt-auto pt-1;
+  }
+  .card-link {
+    @apply mt-4 inline-flex min-h-10 items-center justify-center gap-1 rounded-xl border border-primary/15 bg-primary/5 px-3 py-2 text-sm font-semibold text-primary transition-colors hover:border-primary/40 hover:bg-primary/10;
+  }
+  .detail-hero {
+    @apply mt-6 grid items-start gap-6 rounded-3xl border bg-white p-5 shadow-soft sm:grid-cols-[256px_minmax(0,1fr)] sm:gap-8 sm:p-8;
+  }
+  .comparison-row {
+    @apply shadow-soft;
+  }
+  .price-notice {
+    @apply mt-8 rounded-2xl border bg-secondary/50 p-5 text-xs leading-relaxed text-muted-foreground;
+  }
+  .skip-link {
+    @apply fixed top-2 left-4 z-50 -translate-y-20 rounded-xl bg-white px-4 py-3 font-medium shadow-soft focus:translate-y-0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+    animation-duration: 0s !important;
+  }
+}
+
+@media (min-width: 640px) {
+  .product-summary > :last-child {
+    min-height: 7.5rem;
   }
 }

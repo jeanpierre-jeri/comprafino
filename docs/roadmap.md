@@ -1,6 +1,6 @@
 # Roadmap
 
-Milestones 0–10 are complete in the user-provided task baseline (`f2505e7`). Historical pending notes below refer to earlier agent runs. Milestone 11 is implemented/data-validated with local production build, Chromium E2E and visual confirmation pending.
+Milestones 0–11 are complete in the user-provided task baseline (`6c3a52f`). Historical pending notes below refer to earlier agent runs. Milestone 12 is public visual polish; price-history UX moves to Milestone 13.
 
 ## Milestone 0 — Foundation
 
@@ -112,11 +112,17 @@ Implemented: evidence-backed Tottus concrete CMR prices, separate current-offer 
 
 Live validation: seven CMR products; two bounded dairy ingestions each 51 fetched / 48 persisted / zero ordinary changes. All 763 ordinary history states retain the same complete digest; all seven offer revisions remain unchanged on repeat. Normalization reports zero writes across 736 listings. Standard Gloria six-pack minimum is S/ 21.50 at Plaza Vea; benefits mode can choose S/ 20.90 requiring CMR at Tottus, whose ordinary price remains S/ 21.90. See [pricing semantics](conditional-pricing.md), [search UX](search-ux.md) and [validation report](milestone-11-validation.md).
 
-Pending: local default production build, Chromium E2E and desktop/390px manual audit after the documented sandbox worker-port failure. Stage and wait before the requested commit; no push or next milestone.
+Milestone 11 is complete in the user-provided baseline `6c3a52f`. The pending notes in its original validation report are historical.
 
-## Milestone 12 — Price-history UX (planned)
+## Milestone 12 — Public visual polish and product-experience refinement
 
-Store and visualize meaningful price changes. Avoid redundant unchanged observations while preserving freshness information.
+Implemented: composed sage home hero and search surface, starter links and short how-it-helps section, retailer strip, distinct exact/generic search sections, native responsive toolbar, reusable Server Component cards, stronger ordinary-price hierarchy, secondary CMR surfaces, framed images and quieter freshness, product comparison hero/retailer rows, shared colors/radii/shadows, skip link and focus/reduced-motion support. No dependencies, backend expansion, model/migration changes or price-history UI.
+
+Milestone 12 is complete: format/lint/types, 511 unit tests, 36 isolated PostgreSQL tests, the fresh default production build and all 14 Chromium E2E tests pass. Real desktop/390px review and additional overflow/focus checks pass. See [UI polish](ui-polish.md) for acceptance and limitations.
+
+## Milestone 13 — Price-history UX (planned)
+
+Review ordinary price-state intervals and observation gaps before a compact exact-product history view. Preserve retailer, quote basis and freshness context; decide conditional history capture separately. Current CMR offers cannot reconstruct past benefit prices. Do not begin this milestone automatically.
 
 ## Later — Promotions
 

@@ -30,12 +30,12 @@ export function SearchControls({
     );
   }
   const controlClass =
-    "mt-1 w-full min-w-0 rounded-lg border bg-background px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-primary";
+    "mt-2 h-11 w-full min-w-0 rounded-xl border bg-white px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
   return (
-    <div className="my-5 rounded-xl border bg-muted/30 p-3" aria-busy={pending}>
+    <div className="filter-surface" aria-busy={pending}>
       <fieldset
         disabled={pending}
-        className={`grid gap-3 ${comparisonPath ? "" : "grid-cols-2 lg:grid-cols-4"}`}
+        className={`grid gap-3 ${comparisonPath ? "sm:max-w-sm" : `grid-cols-1 min-[380px]:grid-cols-2 ${units.length > 1 || filters.unit ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}`}
       >
         <legend className="sr-only">Filtros de precios</legend>
         {!comparisonPath && (
@@ -56,6 +56,7 @@ export function SearchControls({
             <label className="min-w-0 text-xs font-medium">
               Supermercado
               <select
+                aria-label="Supermercado"
                 value={filters.retailer ?? ""}
                 onChange={(e) => change("retailer", e.target.value)}
                 className={controlClass}
@@ -70,6 +71,7 @@ export function SearchControls({
               <label className="min-w-0 text-xs font-medium">
                 Comparar por
                 <select
+                  aria-label="Comparar por"
                   value={filters.unit ?? ""}
                   onChange={(e) => change("unit", e.target.value)}
                   className={controlClass}
@@ -91,9 +93,12 @@ export function SearchControls({
             )}
           </>
         )}
-        <label className="min-w-0 text-xs font-medium">
+        <label
+          className={`min-w-0 text-xs font-medium ${!comparisonPath && units.length <= 1 && !filters.unit ? "min-[380px]:col-span-2 lg:col-span-1" : ""}`}
+        >
           Precios
           <select
+            aria-label="Precios"
             value={filters.priceMode}
             onChange={(e) => change("priceMode", e.target.value)}
             className={controlClass}
@@ -103,12 +108,12 @@ export function SearchControls({
           </select>
         </label>
       </fieldset>
-      <output className="mt-2 text-xs text-muted-foreground">
+      <output className="mt-3 block text-xs leading-relaxed text-muted-foreground">
         {pending
           ? "Actualizando resultados…"
           : filters.priceMode === "benefits"
             ? "Incluye ofertas que requieren tarjeta CMR. Verifica la condición antes de comprar."
-            : "Los precios para todos determinan el orden. Los beneficios se muestran por separado."}
+            : "Ordenamos por precios para todos. Los beneficios aparecen por separado."}
       </output>
     </div>
   );

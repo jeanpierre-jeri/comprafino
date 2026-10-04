@@ -14,20 +14,20 @@ export function ProductImage({ src, name, loading, compact = false }: Props) {
   const [failed, setFailed] = useState(false);
   return (
     <div
-      className={`relative flex w-full items-center justify-center rounded-xl bg-white p-4 ${compact ? "h-36" : "aspect-square"}`}
+      className={`product-image relative flex w-full items-center justify-center rounded-2xl bg-white ${compact ? "h-28 sm:h-44" : "aspect-square max-h-52 sm:max-h-none"}`}
     >
       {src && !failed ? (
         <Image
           src={src}
           alt={name}
           fill
-          sizes="(max-width: 640px) 80vw, 256px"
-          className="object-contain p-4"
+          sizes={compact ? "(max-width: 640px) 112px, 320px" : "(max-width: 640px) 90vw, 288px"}
+          className="object-contain p-3 sm:p-5"
           onError={() => setFailed(true)}
           loading={loading}
         />
       ) : (
-        <span className="p-4 text-center text-sm text-muted-foreground">Imagen no disponible</span>
+        <span className="p-2 text-center text-xs text-muted-foreground">Imagen no disponible</span>
       )}
     </div>
   );

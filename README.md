@@ -12,7 +12,7 @@ The roadmap aims to help people decide where to buy, when to buy, whether a pric
 
 ## Current status
 
-Milestones 0–10 are complete in the user-provided baseline (`f2505e7`). Milestone 11 adds separate current Tottus CMR offers and immediate URL-driven search filters. Implementation/data checks are being validated; local production build, Chromium E2E and visual confirmation remain pending under the known worker-port restriction. See [conditional pricing](docs/conditional-pricing.md), [search UX](docs/search-ux.md), [validation](docs/milestone-11-validation.md), [quantity quality](docs/quantity-quality.md) and [catalog budget](docs/catalog-budget.md). The homepage requires no database.
+Milestones 0–11 are complete in the provided baseline (`6c3a52f`). Milestone 12 refines the public home, search, cards and comparison pages with a shared visual system and intentional mobile layouts. See [UI polish](docs/ui-polish.md) for the design, manual audit and validation, [conditional pricing](docs/conditional-pricing.md) for separate CMR semantics and [search UX](docs/search-ux.md) for URL controls. The homepage remains database-independent. Price-history UX is planned for Milestone 13.
 
 ## Initial retailers
 

@@ -3,11 +3,9 @@ import Link from "next/link";
 import { after } from "next/server";
 import {
   createDatabase,
-  formatPen,
   maximumSearchLength,
   searchPublicProducts,
   searchFilters,
-  formatUnitPrice,
   unitPriceBases,
   unitPriceBasisLabel,
   usefulSearchQuery,
@@ -18,8 +16,7 @@ import type { ProductComparison, GenericProductOffer } from "@comprafino/db";
 import { SearchControls } from "../../components/search-controls";
 import { SearchForm } from "../../components/search-form";
 import { PriceNotice, PublicDataError, PublicShell } from "../../components/public-shell";
-import { ProductImage } from "../../components/product-image";
-import { ObservedAt, packageSummary } from "../../components/product-info";
+import { ExactProductCard, GenericOfferCard } from "../../components/offer-card";
 
 export const metadata: Metadata = {
   title: "Buscar productos y precios | CompraFino",
@@ -64,8 +61,18 @@ export default async function SearchPage({
   }
   return (
     <PublicShell>
-      <h1 className="mb-6 text-3xl font-semibold tracking-tight">Encuentra y compara</h1>
-      <SearchForm query={query.slice(0, maximumSearchLength)} />
+      <div className="search-heading">
+        <div>
+          <p className="eyebrow">Precios con contexto</p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+            Encuentra y compara
+          </h1>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+            Compara opciones para tu próxima compra.
+          </p>
+        </div>
+        <SearchForm query={query.slice(0, maximumSearchLength)} />
+      </div>
       {usefulSearchQuery(query) && !failed && (
         <SearchControls query={query} filters={filters} units={units} />
       )}
@@ -73,11 +80,11 @@ export default async function SearchPage({
         {failed ? (
           <PublicDataError />
         ) : !usefulSearchQuery(query) ? (
-          <p className="rounded-xl border p-6">
+          <p className="empty-surface">
             Escribe entre 2 y {maximumSearchLength} caracteres para buscar un producto.
           </p>
         ) : !products.length && !offers.length ? (
-          <div className="rounded-xl border p-6">
+          <div className="empty-surface">
             <h2 className="text-xl font-semibold">
               {underlyingCount
                 ? "No hay opciones con estos filtros."
@@ -88,95 +95,38 @@ export default async function SearchPage({
                 ? "Prueba otro supermercado o selecciona todas las medidas."
                 : "Tomamos en cuenta las búsquedas sin resultados para ampliar el catálogo. Prueba con otra marca o producto."}
             </p>
+            <Link
+              href={underlyingCount ? `/search?q=${encodeURIComponent(query)}` : "/search?q=leche"}
+              className="card-link"
+            >
+              {underlyingCount ? "Quitar filtros" : "Explorar leche"}
+              <span aria-hidden="true"> →</span>
+            </Link>
           </div>
         ) : (
           <>
             {products.length > 0 && (
-              <section aria-label="Comparaciones del mismo producto">
-                <h2 className="mb-4 text-xl font-semibold">Compara el mismo producto</h2>
-                <p className="mb-5 text-sm text-muted-foreground">
+              <section className="exact-section" aria-label="Comparaciones del mismo producto">
+                <h2 className="text-2xl font-semibold tracking-tight">Compara el mismo producto</h2>
+                <p className="mt-2 mb-5 text-sm text-muted-foreground">
                   {products.length === 20 ? "Hasta 20" : products.length} productos para «{query}»
                 </p>
                 <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                   {products.map((product, index) => (
                     <li key={product.id}>
-                      <article className="h-full rounded-2xl border p-4 shadow-sm">
-                        <Link
-                          href={`/products/${product.id}${filters.priceMode === "benefits" ? "?priceMode=benefits" : ""}`}
-                          className="group block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-                        >
-                          <ProductImage
-                            compact
-                            src={product.imageUrl}
-                            name={product.displayName}
-                            loading={index === 0 ? "eager" : "lazy"}
-                          />
-                          <p className="mt-4 text-sm text-muted-foreground">{product.brand}</p>
-                          <h2 className="mt-1 text-lg font-semibold group-hover:text-primary">
-                            {product.displayName}
-                          </h2>
-                          <p className="mt-2 text-sm text-muted-foreground">
-                            {packageSummary(product)}
-                          </p>
-                          {product.lowestPriceCents === null ? (
-                            <p className="mt-5 text-sm text-muted-foreground">
-                              Estamos actualizando este producto.
-                            </p>
-                          ) : (
-                            <>
-                              <p className="mt-5 text-sm">
-                                Desde{" "}
-                                <strong className="text-2xl text-primary">
-                                  {formatPen(
-                                    filters.priceMode === "benefits"
-                                      ? (product.bestRanking?.priceCents ??
-                                          product.lowestPriceCents)
-                                      : product.lowestPriceCents,
-                                  )}
-                                </strong>
-                              </p>
-                              <p className="mt-1 text-sm">
-                                {(filters.priceMode === "benefits"
-                                  ? (product.bestRanking?.retailers ?? product.cheapestRetailers)
-                                  : product.cheapestRetailers
-                                ).join(" y ")}
-                                {filters.priceMode === "benefits" &&
-                                  product.bestRanking?.conditions.map((condition) => (
-                                    <span className="block font-medium" key={condition}>
-                                      {condition}
-                                    </span>
-                                  ))}
-                              </p>
-                            </>
-                          )}
-                          <p className="mt-2 text-sm text-muted-foreground">
-                            {product.retailerCount} supermercados · Ver comparación
-                          </p>
-                        </Link>
-                        {product.offers
-                          .filter(
-                            (offer) =>
-                              offer.freshness === "fresh" &&
-                              offer.available !== false &&
-                              (filters.priceMode === "benefits"
-                                ? offer.ranking.priceCents === product.bestRanking?.priceCents
-                                : offer.currentPriceCents === product.lowestPriceCents),
-                          )
-                          .map((offer) => (
-                            <div key={offer.retailerId}>
-                              <span className="sr-only">{offer.retailerName}: </span>
-                              <ObservedAt date={offer.observedAt} />
-                            </div>
-                          ))}
-                      </article>
+                      <ExactProductCard
+                        product={product}
+                        benefits={filters.priceMode === "benefits"}
+                        eager={index === 0}
+                      />
                     </li>
                   ))}
                 </ul>
               </section>
             )}
             {offers.length > 0 && (
-              <section className="mt-8" aria-label="Opciones en supermercados">
-                <h2 className="text-xl font-semibold">Opciones en supermercados</h2>
+              <section className="mt-10" aria-label="Opciones en supermercados">
+                <h2 className="text-2xl font-semibold tracking-tight">Opciones en supermercados</h2>
                 <p className="mt-2 text-sm text-muted-foreground">
                   Compara cantidades y precios. Las marcas, variedades y calidades pueden diferir.
                 </p>
@@ -192,7 +142,7 @@ export default async function SearchPage({
                     distinguir peso neto y escurrido.
                   </p>
                 )}
-                <p className="mb-4 text-sm text-muted-foreground">
+                <p className="mt-2 mb-5 text-sm text-muted-foreground">
                   {offers.length === 30 ? "Hasta 30" : offers.length} ofertas para «{query}»
                 </p>
                 {(sort === "unit-price"
@@ -229,79 +179,10 @@ export default async function SearchPage({
                       <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                         {members.map((offer) => (
                           <li key={offer.id}>
-                            <article
-                              data-offer-id={offer.id}
-                              className="h-full rounded-2xl border p-4 shadow-sm"
-                            >
-                              <ProductImage
-                                compact
-                                src={offer.imageUrl}
-                                name={offer.title}
-                                loading="lazy"
-                              />
-                              {offer.brand && (
-                                <p className="mt-4 text-sm text-muted-foreground">{offer.brand}</p>
-                              )}
-                              <h3 className="mt-1 text-lg font-semibold">{offer.title}</h3>
-                              {offer.quantity && offer.packageCount && (
-                                <p className="mt-2 text-sm text-muted-foreground">
-                                  {packageSummary({
-                                    quantityValue: offer.quantity.value,
-                                    quantityUnit: offer.quantity.unit,
-                                    packageCount: offer.packageCount,
-                                  })}
-                                </p>
-                              )}
-                              <p className="mt-3">{offer.retailerName}</p>
-                              <p className="mt-2 text-2xl font-semibold text-primary">
-                                {formatPen(offer.currentPriceCents)}
-                                {offer.pricingBasis === "kg" ? " / kg" : ""}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                Precio online para todos
-                              </p>
-                              {offer.regularPriceCents !== null && (
-                                <p className="text-xs text-muted-foreground">
-                                  Antes <s>{formatPen(offer.regularPriceCents)}</s>
-                                </p>
-                              )}
-                              {offer.unitPrice && offer.pricingBasis !== "kg" && (
-                                <p className="mt-1 text-sm">
-                                  {formatUnitPrice(offer.unitPrice)}
-                                  {offer.ranking.condition ? " · con CMR" : ""}
-                                  {offer.unitPrice.quality === "approximate"
-                                    ? " · orientativo"
-                                    : ""}
-                                </p>
-                              )}
-                              {offer.conditionalOffers.map((benefit) => (
-                                <p
-                                  key={benefit.programKey}
-                                  className="mt-2 rounded-lg bg-muted px-3 py-2 text-sm"
-                                >
-                                  <strong>Con CMR: {formatPen(benefit.priceCents)}</strong>
-                                  {offer.pricingBasis === "kg" ? " / kg" : ""}
-                                  <span className="block text-xs">{benefit.conditionLabel}</span>
-                                </p>
-                              ))}
-                              <ObservedAt date={offer.observedAt} />
-                              <a
-                                href={offer.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="mt-4 block text-sm underline"
-                              >
-                                Ver producto en {offer.retailerName} (nueva pestaña)
-                              </a>
-                              {offer.canonicalId && (
-                                <Link
-                                  href={`/products/${offer.canonicalId}${filters.priceMode === "benefits" ? "?priceMode=benefits" : ""}`}
-                                  className="mt-3 block text-sm underline"
-                                >
-                                  Comparar este producto en {offer.retailerCount} supermercados
-                                </Link>
-                              )}
-                            </article>
+                            <GenericOfferCard
+                              offer={offer}
+                              benefits={filters.priceMode === "benefits"}
+                            />
                           </li>
                         ))}
                       </ul>
