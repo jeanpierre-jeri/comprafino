@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { neon } from "@neondatabase/serverless";
+import { neon, NeonQueryPromise } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
@@ -12,8 +12,9 @@ import { evaluateIndependentAudit } from "./matching-independent.ts";
 import { evaluateMatching } from "./matching-evaluate.ts";
 import { evaluatePairs, persistMatching } from "./matching.ts";
 import type { MatchingSnapshot } from "./matching.ts";
-import { persistListings } from "./ingestion.ts";
+import { createIngestionStore, persistListings } from "./ingestion.ts";
 import { getCanonicalProductComparison, searchCanonicalProducts } from "./public-products.ts";
+import { inspectOperations } from "./operations.ts";
 import * as schema from "./schema.ts";
 
 // Never load .env or fall back to DATABASE_URL. Every write is confined to a
@@ -54,9 +55,27 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
   );
   const setPath = () => client.query("select set_config('search_path', $1, true)", [schemaName]);
   // Keep persistListings and Drizzle's real batch transaction intact. The only
-  // test adapter sets a transaction-local search_path before that same batch.
+  // test adapter sets a transaction-local search_path before batches AND single
+  // Drizzle queries (run start/finish must never fall through to public).
   const scopedClient = new Proxy(client, {
     get(target, property, receiver) {
+      if (property === "query") {
+        return (...args: Parameters<typeof client.query>) => {
+          const nativeQuery = target.query(...args);
+          // Preserve Neon's lazy query object for batch(), but scope direct await.
+          return new NeonQueryPromise<boolean, boolean, unknown>(
+            async () => {
+              const results = await client.transaction(
+                [setPath(), target.query(args[0], args[1])],
+                args[2],
+              );
+              return results[1];
+            },
+            nativeQuery.queryData,
+            nativeQuery.opts,
+          );
+        };
+      }
       if (property !== "transaction") return Reflect.get(target, property, receiver);
       return async (
         queries: Parameters<typeof client.transaction>[0],
@@ -110,6 +129,51 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
     // Only the random schema successfully created by this suite can be dropped.
     if (created) await client.query(`drop schema ${quotedSchema} cascade`);
   }, 30_000);
+
+  it("distinguishes latest attempt from success and preserves last-good price on failure", async () => {
+    const store = createIngestionStore(db);
+    const first = await store.start("metro");
+    const listing = { ...observation("operations-last-good", 0), retailer: "metro" as const };
+    await store.persist("metro", [listing]);
+    await store.finish(first, { status: "success", fetched: 1, persisted: 1, changed: 1 });
+    const before = await states(listing.externalId);
+    const failed = await store.start("metro");
+    // Explicit times make ordering deterministic, independent of DB clock resolution.
+    await query("update ingestion_runs set started_at=$1 where id=$2", [
+      "2026-10-03T10:00:00Z",
+      first,
+    ]);
+    await query("update ingestion_runs set started_at=$1 where id=$2", [
+      "2026-10-03T11:00:00Z",
+      failed,
+    ]);
+    await store.finish(failed, {
+      status: "failed",
+      fetched: 0,
+      persisted: 0,
+      changed: 0,
+      error: "postgres://secret@internal/db",
+    });
+    const operations = await inspectOperations(db, new Date("2026-10-04T11:00:00Z"));
+    const metro = operations.find((r) => r.retailer === "metro");
+    expect(metro).toMatchObject({
+      latestAttempt: { id: failed, status: "failed" },
+      latestSuccess: { id: first, status: "success" },
+      freshness: "delayed",
+      ageHours: 25,
+    });
+    expect(JSON.stringify(operations)).not.toContain("secret");
+    expect(await states(listing.externalId)).toEqual(before);
+    const persisted = z
+      .array(z.object({ current_price_cents: z.number().int(), last_seen_at: z.coerce.date() }))
+      .parse(
+        await query(
+          "select current_price_cents,last_seen_at from retailer_listings where external_id=$1",
+          [listing.externalId],
+        ),
+      );
+    expect(persisted).toEqual([{ current_price_cents: 1290, last_seen_at: listing.observedAt }]);
+  });
 
   it("keeps unchanged observations idempotent and closes/opens a changed price", async () => {
     const initial = observation("transition", 0);

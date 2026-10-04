@@ -32,7 +32,7 @@ TypeScript remains authoritative; type-aware Oxlint supplements it. Oxfmt is the
 
 The first generated migration creates `retailers`, `retailer_listings`, `price_history` and `ingestion_runs`, including retailer seeds. Add reviewed tables to `packages/db/src/schema.ts`, generate migrations, review and commit SQL/metadata, then apply explicitly with a validated URL. CLI-only dotenv loads root `.env`; deployed clients receive platform environment variables. Migrations never run during app build or startup.
 
-Vercel, Neon and scheduled GitHub Actions are intended deployment choices. The Tottus, Plaza Vea and Metro workflows are manual only and require a `DATABASE_URL` secret. No ingestion schedule exists. Validate free-tier quotas against measured workloads and provider terms when deploying.
+Vercel, Neon and scheduled GitHub Actions are intended deployment choices. The Tottus, Plaza Vea and Metro workflows are manual only and require a `DATABASE_URL` secret. The full catalog workflow now supports twice-daily bounded refresh; activation requires the workflow on the default branch, Actions enabled and the existing secret. No active remote schedule is claimed by local implementation. See [operations](operations.md). Validate free-tier quotas against measured workloads and provider terms when deploying.
 
 ## Deferred choices
 
@@ -57,3 +57,7 @@ Core owns deterministic title/brand/content normalization, independent of retail
 Core owns deterministic candidate blocks, compatibility, evidence decisions and complete-link grouping. Database code computes pg_trgm similarity for bounded candidate pairs and persists canonical products/versioned automatic links using the existing retailer-lock convention. Guarded snapshots prevent stale assignment; PostgreSQL primary/unique/composite foreign keys enforce one canonical per listing and one listing per retailer/group. Manual links and incomplete group scopes block automatic recomputation. Raw listings, normalization and price history remain intact.
 
 The read-only `/dev/matching` Server Component is blocked in production. Standalone `pnpm match:catalog` and `pnpm match:evaluate` use root database configuration; dry-run never writes. The pg_trgm extension is migration-managed; no dedicated search infrastructure or npm dependency was added. See [catalog matching](catalog-matching.md) for model, provisional thresholds, bounded real metrics and remaining validation/audit gaps.
+
+## Scheduled refresh ownership
+
+`packages/scrapers/src/refresh-cli.ts` wires the existing adapters and DB APIs; `refresh.ts` isolates retailer failures and orders downstream work. GitHub Actions only supplies scheduling/environment/concurrency. Core owns operational freshness thresholds; db reads independent latest attempts/successes; the existing development ingestion page renders them. Failed fetches preserve prior observations through existing atomic persistence. Public queries continue reading persisted canonical offers without dynamic scraping/matching. No new schema, dependency or service is required. See [operations](operations.md) for scope, failure and validation evidence.

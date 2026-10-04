@@ -1,3 +1,4 @@
+import { safeIngestionError } from "@comprafino/core";
 import type { NormalizedRetailerListing, RetailerId } from "@comprafino/core";
 import type { RetailerAdapter } from "./adapter.ts";
 export interface IngestionStore {
@@ -35,7 +36,7 @@ export async function ingest(adapter: RetailerAdapter, limit: number, store: Ing
       fetched,
       persisted,
       changed,
-      error: "Ingestion failed; inspect CLI stage and source availability.",
+      error: safeIngestionError,
     });
     throw error;
   }

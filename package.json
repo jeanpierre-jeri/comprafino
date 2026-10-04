@@ -21,7 +21,8 @@
     "normalize:catalog": "pnpm --filter @comprafino/db normalize:catalog",
     "match:catalog": "pnpm --filter @comprafino/db match:catalog",
     "match:evaluate": "pnpm --filter @comprafino/db match:evaluate",
-    "match:audit": "pnpm --filter @comprafino/db match:audit"
+    "match:audit": "pnpm --filter @comprafino/db match:audit",
+    "refresh:catalog": "pnpm --filter @comprafino/scrapers refresh:catalog"
   },
   "devDependencies": {
     "oxfmt": "0.71.0",

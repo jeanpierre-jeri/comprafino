@@ -95,3 +95,7 @@ Use `PLAYWRIGHT_BROWSERS_PATH="$PWD/.tools/browsers"` if reusing the bootstrap C
 This is an intentionally small dairy-focused verified subset, not the entire supermarket catalog. Coverage/recall, source descriptions and stable IDs inherit the conservative offline matcher limitations. Matching/normalization must be rerun after source identity changes. There is no public review queue, manual curation, live matching, unit-price recommendation, promotion engine, history chart, account, alert, scheduled ingestion or analytics. Existing developer tools remain internal.
 
 After local build/browser validation closes Milestone 4, prioritize scheduled conservative ingestion and observation-freshness operations, including failure monitoring and a deliberate normalization/matching refresh policy. Automated freshness is needed before making stronger public freshness promises. Do not start that milestone automatically.
+
+## Milestone 5 operations follow-up
+
+Public search is complete in the current user-provided baseline (`8cd5689`); earlier pending notes above are historical. [Operations](operations.md) now provides offline twice-daily bounded refresh and developer monitoring. Public queries/UI and actual observation timestamps are unchanged. A retailer-level stale message is deferred because a successful bounded attempt does not refresh every retained listing; operational monitoring remains outside the single-batch public query. Last-known-good offers stay visible with their actual timestamps.

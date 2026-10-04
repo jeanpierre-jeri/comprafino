@@ -12,7 +12,7 @@ The roadmap aims to help people decide where to buy, when to buy, whether a pric
 
 ## Current status
 
-Milestones 0–3 are complete in the committed baseline (`9d104b1` matching). The independently audited bounded dataset has 351 normalized listings, 28 verified groups and 65 retailer associations. Milestone 4 implements public GET search and ordinary-price comparisons over these groups; database/unit validation passes, while fresh local production build/E2E confirmation is pending because of the agent's known Turbopack worker-port restriction. See [public search](docs/public-search.md), [catalog matching](docs/catalog-matching.md) and the [independent audit](docs/catalog-matching-audit.md). The homepage still requires no database.
+Milestones 0–4 are complete in the user-provided baseline (`8cd5689` public search). Milestone 5 implements scheduled bounded refresh and retailer operational freshness. Two real refreshes succeeded; the repeat created zero unnecessary price-history, normalization or matching writes. Current retained catalog: 352 listings, with the existing verified canonical associations. Fresh local production build/E2E confirmation is pending because of the agent's known Turbopack worker-port restriction. No deployment or active schedule is claimed. See [operations](docs/operations.md), [public search](docs/public-search.md) and the historical [independent audit](docs/catalog-matching-audit.md). The homepage still requires no database.
 
 ## Initial retailers
 
@@ -20,7 +20,7 @@ Milestones 0–3 are complete in the committed baseline (`9d104b1` matching). Th
 
 ## Architecture
 
-Serverless first: Next.js is intended to run on Vercel, PostgreSQL on Neon, and future scheduled ingestion on GitHub Actions. There is no always-on API server or worker. The developer has configured Neon; the web application and scheduled ingestion have not been deployed. See [architecture](docs/architecture.md).
+Serverless first: Next.js is intended to run on Vercel, PostgreSQL on Neon, and scheduled ingestion on GitHub Actions. There is no always-on API server or worker. The developer has configured Neon; the web application and scheduled ingestion have not been deployed. See [architecture](docs/architecture.md).
 
 ## Technology
 
@@ -42,7 +42,7 @@ packages/core/     Framework-independent pure logic and unit tests
 packages/db/       Lazy Drizzle/Neon client, schema home, environment validation, migration configs
 packages/scrapers/ Retailer public-data adapters, fixtures and bounded ingestion CLI
 packages/ui/       Shared shadcn Base UI components, utilities and Tailwind theme
-.github/workflows/ Credential-free CI and manual bounded retailer ingestion
+.github/workflows/ Credential-free CI, manual ingestion and twice-daily catalog refresh
 docs/             Architecture, roadmap and dependency inventory
 ```
 
@@ -140,24 +140,34 @@ pnpm match:audit
 
 These commands use root `.env`/`DATABASE_URL`, without retailer requests. Matching uses exact brands/content, hard incompatibilities, PostgreSQL trigram similarity and conservative variant gates. Repeats with unchanged input perform zero canonical writes; dry-run writes nothing. A scope splitting an existing group, containing manual links or reading stale normalization refuses persistence. `/dev/matching` provides read-only development inspection and returns 404 in production. See [catalog matching](docs/catalog-matching.md) for scoring, schema, evaluation, audit gaps and limitations.
 
+## Scheduled catalog refresh
+
+```sh
+pnpm refresh:catalog
+pnpm refresh:catalog -- --dry-run
+```
+
+The full pipeline reuses ingestion, normalization and matching. Its GitHub workflow supports manual dispatch and cron `17 11,23 * * *`: 11:17/23:17 UTC, or 06:17/18:17 Peru. Full refresh workflows do not overlap or cancel a running refresh. Failed retailers retain prior data; successful retailers continue, while the command still exits nonzero. `/dev/ingestion` shows distinct latest attempts/successes and healthy (≤18h), delayed (≤30h) or stale (>30h) operational freshness. GitHub schedules can start late; prices remain observed rather than real-time. See [operations](docs/operations.md) for fixed category limits, safe failure behavior, notifications and troubleshooting.
+
 ## Scripts
 
-| Command                             | Purpose                                                              |
-| ----------------------------------- | -------------------------------------------------------------------- |
-| `pnpm dev`                          | Start the web development server directly through pnpm               |
-| `pnpm build`                        | Build production application through Turbo                           |
-| `pnpm lint` / `pnpm lint:fix`       | Type-aware Oxlint checks / fixes                                     |
-| `pnpm format` / `pnpm format:check` | Oxfmt formatting / verification                                      |
-| `pnpm typecheck`                    | Generate Next types and run `tsc --noEmit` for every workspace       |
-| `pnpm test`                         | Vitest tests in core, database and scraper packages                  |
-| `pnpm test:integration`             | Isolated-schema PostgreSQL tests; explicit `TEST_DATABASE_URL`       |
-| `pnpm test:e2e`                     | Chromium smoke test against a production server (build first)        |
-| `pnpm db:generate`                  | Generate reviewed migrations from the schema                         |
-| `pnpm normalize:catalog`            | Normalize bounded existing listings; requires `DATABASE_URL`         |
-| `pnpm match:catalog`                | Match bounded fresh normalized listings; optional dry-run            |
-| `pnpm match:evaluate`               | Evaluate the 66 reviewed real pairs with PostgreSQL similarity       |
-| `pnpm match:audit`                  | Evaluate 105 independently reviewed pairs, separate from calibration |
-| `pnpm db:migrate`                   | Apply migrations; requires `DATABASE_URL`                            |
+| Command                             | Purpose                                                                  |
+| ----------------------------------- | ------------------------------------------------------------------------ |
+| `pnpm dev`                          | Start the web development server directly through pnpm                   |
+| `pnpm build`                        | Build production application through Turbo                               |
+| `pnpm lint` / `pnpm lint:fix`       | Type-aware Oxlint checks / fixes                                         |
+| `pnpm format` / `pnpm format:check` | Oxfmt formatting / verification                                          |
+| `pnpm typecheck`                    | Generate Next types and run `tsc --noEmit` for every workspace           |
+| `pnpm test`                         | Vitest tests in core, database and scraper packages                      |
+| `pnpm test:integration`             | Isolated-schema PostgreSQL tests; explicit `TEST_DATABASE_URL`           |
+| `pnpm test:e2e`                     | Chromium smoke test against a production server (build first)            |
+| `pnpm refresh:catalog`              | Refresh validated retailer scopes, normalize and match; optional dry-run |
+| `pnpm db:generate`                  | Generate reviewed migrations from the schema                             |
+| `pnpm normalize:catalog`            | Normalize bounded existing listings; requires `DATABASE_URL`             |
+| `pnpm match:catalog`                | Match bounded fresh normalized listings; optional dry-run                |
+| `pnpm match:evaluate`               | Evaluate the 66 reviewed real pairs with PostgreSQL similarity           |
+| `pnpm match:audit`                  | Evaluate 105 independently reviewed pairs, separate from calibration     |
+| `pnpm db:migrate`                   | Apply migrations; requires `DATABASE_URL`                                |
 
 Turbo caches builds, type checks and unit tests. The root development command starts the single web server directly through pnpm, avoiding Turbo's child-process output interaction with pnpm 12's Node.js fallback launcher. Development is uncached. Repository lint/format run once from the root. Only workspaces with actual tasks declare them.
 

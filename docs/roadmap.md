@@ -56,40 +56,48 @@ Implemented: functional homepage GET form, `/search?q=...`, `/products/[id]`, Po
 
 Verified: five real search queries and five comparison query results against independent PostgreSQL reads; 28 public groups / 65 offers in the observed catalog, 299 unit tests and 15 isolated PostgreSQL tests passing. Format/lint/strict types pass. Added credential-free browser states and optional persisted-catalog mobile comparison flows; production developer-tool blocking tests remain.
 
-Pending: default production build is blocked in the agent environment by the known Turbopack CSS-worker port restriction, including elevated execution. E2E cannot start without a build. Stage changes and request fresh local build/browser confirmation before committing; do not claim complete yet. Browser/manual rendered-page validation remains pending. See [public search](public-search.md).
+Complete in the user-provided Milestone 5 baseline, committed at `8cd5689`. Previous build/E2E notes in [public search](public-search.md) describe historical agent validation.
 
-## Next milestone — Data freshness operations
+## Milestone 5 — Scheduled catalog refresh, freshness and operational reliability
 
-Recommended after Milestone 4 validation: conservative scheduled ingestion, observation/failure monitoring, and an explicit offline normalization/matching refresh policy. No automation is implemented by Milestone 4.
+Implemented: shared local refresh command and no-mutation dry-run, fixed existing bounded retailer/category coverage, twice-daily GitHub Actions schedule/manual dispatch, noncanceling full-refresh concurrency, isolated retailer failures with last-known-good data, existing atomic normalization/matching APIs, safe operational summaries/nonzero failures, distinct latest-attempt/latest-success reads, centralized 18/30-hour thresholds and production-blocked `/dev/ingestion` operations view. No schema/migration, dependency, retailer/category expansion, public redesign or matching changes.
 
-## Milestone 5 — Validated unit-price comparison
+Verified: two real refreshes (85.099s / 45.701s); 350 persisted observations each; one initial new Tottus state within the existing dairy sample, then zero new states; two initial normalization writes, then zero; zero matching writes both times. Retained catalog is 352 rows, with identical complete history digest across the repeat. Deterministic failure/freshness tests and PostgreSQL lifecycle/isolation coverage are included. See [operations](operations.md) for complete evidence and final validation results.
+
+Pending: fresh local `pnpm build` / `pnpm test:e2e` confirmation due to the known Turbopack worker-port restriction. Stage and wait before committing; Milestone 5 is not complete until that gate passes. Remote schedule activation and notification setup also require repository configuration; no deployment is claimed.
+
+## Milestone 6 — Bounded catalog expansion (planned)
+
+After Milestone 5 validation and initial scheduled-run verification, deliberately review additional coverage and measure source/Neon/Actions load, normalization quality and matching precision. Existing bounded scope remains sufficient for operations validation. No expansion is included in Milestone 5 and none should begin automatically.
+
+## Milestone 7 — Validated unit-price comparison
 
 Ordinary prices for exact variants are implemented in Milestone 4. Generalized price-per-unit comparisons across packaged, counted and weighted products remain a separate validation task.
 
-## Milestone 6 — Price history
+## Milestone 8 — Price history
 
 Store and visualize meaningful price changes. Avoid redundant unchanged observations while preserving freshness information.
 
-## Milestone 7 — Promotions
+## Milestone 9 — Promotions
 
 Model percentage discounts, 2x1, second-unit discounts, quantity discounts, date ranges, specific weekdays, payment requirements and membership requirements. Test effective prices and eligibility.
 
-## Milestone 8 — Buy now or wait
+## Milestone 10 — Buy now or wait
 
 Use current/historical prices, confirmed future promotions and clearly labelled historical patterns. Never present unconfirmed future prices as facts.
 
-## Milestone 9 — Shopping lists
+## Milestone 11 — Shopping lists
 
 Allow users to assemble full grocery baskets, using the simplest adequate state/persistence approach.
 
-## Milestone 10 — Basket optimization
+## Milestone 12 — Basket optimization
 
 Compare one-store purchases and two-store combinations, delivery/travel costs where applicable and user preferences. Test explicit constraints.
 
-## Milestone 11 — Accounts and alerts
+## Milestone 13 — Accounts and alerts
 
 Add authentication only when user-specific lists, preferences or alerts justify it.
 
-## Milestone 12 — Scale only as needed
+## Milestone 14 — Scale only as needed
 
 Potential options, not guaranteed requirements: TanStack Query, TanStack Form, shadcn Chart/Recharts, Cheerio, browser Playwright, Upstash, Inngest, dedicated workers and a dedicated search engine. Introduce each only for demonstrated requirements or measured workloads.

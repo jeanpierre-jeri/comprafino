@@ -1,4 +1,4 @@
-import { inspectIngestion } from "@comprafino/db";
+import { inspectIngestion, inspectOperations, freshnessHours } from "@comprafino/db";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 export const metadata = {
@@ -20,8 +20,9 @@ export default async function IngestionPage() {
     );
   }
   let data: Awaited<ReturnType<typeof inspectIngestion>>;
+  let operations: Awaited<ReturnType<typeof inspectOperations>>;
   try {
-    data = await inspectIngestion();
+    [data, operations] = await Promise.all([inspectIngestion(), inspectOperations()]);
   } catch {
     return (
       <main className="p-8">
@@ -33,6 +34,33 @@ export default async function IngestionPage() {
   return (
     <main className="mx-auto max-w-5xl space-y-6 p-8">
       <h1 className="text-2xl font-semibold">Developer ingestion inspection</h1>
+      <section className="space-y-4">
+        <h2 className="text-xl">Retailer operations</h2>
+        <p>
+          Healthy ≤ {freshnessHours.healthy} hours · delayed ≤ {freshnessHours.delayed} hours ·
+          stale &gt; {freshnessHours.delayed} hours. Times in Peru.
+        </p>
+        {operations.map((operation) => (
+          <article key={operation.retailer}>
+            <h3 className="font-semibold">{operation.retailer}</h3>
+            <p>
+              Freshness: {operation.freshness} · latest attempt:{" "}
+              {operation.latestAttemptStatus ?? "none"}
+            </p>
+            <p>Latest attempt: {formatTime(operation.latestAttempt?.startedAt)}</p>
+            <p>
+              Latest success: {formatTime(operation.latestSuccess?.startedAt)} · age:{" "}
+              {operation.ageHours === null ? "unknown" : `${operation.ageHours.toFixed(1)} hours`}
+            </p>
+            <p>
+              Discovered: {operation.latestAttempt?.listingsFetched ?? "—"} · persisted:{" "}
+              {operation.latestAttempt?.listingsPersisted ?? "—"} · new price states:{" "}
+              {operation.latestAttempt?.listingsChanged ?? "—"}
+            </p>
+            {operation.latestFailure ? <p>Latest failure: {operation.latestFailure}</p> : null}
+          </article>
+        ))}
+      </section>
       <section>
         <h2 className="text-xl">Latest ingestion runs</h2>
         {data.runs.length === 0 ? (
@@ -44,7 +72,9 @@ export default async function IngestionPage() {
                 {run.retailerId} · {run.status} · {run.listingsFetched} discovered ·{" "}
                 {run.listingsPersisted} persisted · {run.listingsChanged} new price states ·{" "}
                 {run.startedAt.toISOString()}
-                {run.error ? ` · ${run.error}` : ""}
+                {run.status === "failed"
+                  ? " · Ingestion failed; inspect CLI stage and source availability."
+                  : ""}
               </li>
             ))}
           </ul>
@@ -89,4 +119,14 @@ export default async function IngestionPage() {
       </section>
     </main>
   );
+}
+
+function formatTime(value: Date | undefined) {
+  return value
+    ? new Intl.DateTimeFormat("es-PE", {
+        dateStyle: "medium",
+        timeStyle: "short",
+        timeZone: "America/Lima",
+      }).format(value)
+    : "none";
 }
