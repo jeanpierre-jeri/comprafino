@@ -57,6 +57,7 @@ test.describe("persisted public catalog (explicit DATABASE_URL)", () => {
     ).toBeVisible();
     for (const offer of product!.offers) {
       const row = page
+        .getByRole("region", { name: `Compara en ${product!.retailerCount} supermercados` })
         .getByRole("article")
         .filter({ has: page.getByRole("heading", { name: offer.retailerName, exact: true }) });
       await expect(
@@ -207,10 +208,16 @@ test.describe("immediate filters and CMR (explicit DATABASE_URL)", () => {
     expect(product, "At least one freshly ingested exact CMR product is required").toBeDefined();
     await page.goto(`/products/${product!.id}`);
     const row = page
+      .getByRole("region", { name: /^Compara en \d+ supermercados$/u })
       .getByRole("article")
       .filter({ has: page.getByRole("heading", { name: "Tottus", exact: true }) });
     const offer = product!.offers.find((o) => o.retailerId === "tottus")!;
     await expect(row.getByText(formatPen(offer.currentPriceCents), { exact: true })).toBeVisible();
+    if (offer.regularPriceCents === null) {
+      await expect(row.locator("s")).toHaveCount(0);
+    } else {
+      await expect(row.locator("s")).toHaveText(formatPen(offer.regularPriceCents));
+    }
     await expect(
       row.getByText(`${formatPen(offer.conditionalOffers[0]!.priceCents)} con CMR`, {
         exact: true,

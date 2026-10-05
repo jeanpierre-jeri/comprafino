@@ -3,7 +3,7 @@ import type { Page } from "@playwright/test";
 
 async function holdNavigation(
   page: Page,
-  pathname: string,
+  pathname: string | RegExp,
   query?: string,
   includePrefetch = false,
 ) {
@@ -18,7 +18,7 @@ async function holdNavigation(
     const url = new URL(request.url());
     const headers = request.headers();
     if (
-      url.pathname === pathname &&
+      (typeof pathname === "string" ? url.pathname === pathname : pathname.test(url.pathname)) &&
       (query === undefined || url.searchParams.get("q") === query) &&
       headers.rsc === "1" &&
       (includePrefetch || !headers["next-router-prefetch"])
@@ -157,13 +157,15 @@ test("exact comparison cards immediately respond while detail data is delayed", 
   page,
 }) => {
   test.skip(!process.env.DATABASE_URL, "Requires the explicitly configured persisted catalog");
+  // The destination is only known after search renders. Hold every product RSC
+  // request, including Link prefetches, before any card can populate the router cache.
+  const held = await holdNavigation(page, /^\/products\/[^/]+$/u, undefined, true);
   await page.goto("/search?q=gloria+946");
   const card = page.locator(".exact-card a.navigation-link").first();
   await expect(card).toBeVisible();
   const href = await card.getAttribute("href");
   if (!href) throw new Error("Comparison URL missing");
   const pathname = new URL(href, page.url()).pathname;
-  const held = await holdNavigation(page, pathname);
   try {
     await card.click();
     await expect(
@@ -180,11 +182,13 @@ test("exact comparison cards immediately respond while detail data is delayed", 
         link.click();
       }
     }, href);
+    await expect.poll(held.count).toBeGreaterThan(0);
   } finally {
     held.release();
   }
   await expect(page).toHaveURL(new RegExp(pathname, "u"));
   await expect(page.locator("#offers-title")).toBeVisible();
+  await page.unrouteAll({ behavior: "wait" });
   await page.goBack();
   await expect(card).toHaveAttribute("aria-busy", "false");
 });
