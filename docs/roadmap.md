@@ -152,9 +152,11 @@ Implemented: contextual generic versus preselected exact creation, consistent se
 
 See [shopping lists](shopping-list.md) and [substitution compatibility](substitution-compatibility.md) for family policies, current-catalog audit, tests and limitations. Unit and PostgreSQL tests pass. The user confirmed fresh local `pnpm build` and `pnpm test:e2e` passed, reviewed the final UX, and accepted Milestone 15.1. Generic persistence now normalizes safe retailer/brand searches through the substitution profile while retaining unsupported semantic variants. The earlier agent worker-port restriction is historical; Next configuration is unchanged. Commit authorized; do not push automatically or begin Milestone 16.
 
-## Milestone 16 — Basket optimization (planned)
+## Milestone 16 — Current basket optimization
 
-Compare one-store purchases and two-store combinations, delivery/travel costs where applicable and user preferences. Test explicit constraints. Reuse conservative substitution compatibility and explicit normalized-quantity/package-count semantics; broad search relevance cannot authorize substitution. Do not begin automatically. No basket optimizer or temporal prediction is implemented in Milestone 15.1.
+Implemented: complete/partial current baskets using at most one, two and three supermarkets, exact enumeration of seven retailer subsets, global safe preferred alternatives, strict isolation, actual store counts, marginal savings only between complete tiers, grouped purchases and conservative default selection. Reuses Milestone 15.1 substitution/quantity/pricing safeguards and a single bounded read-only catalog snapshot. No schema/dependency changes, travel/delivery fees or temporal recommendations.
+
+Format/lint/types, 623 unit tests, 47 PostgreSQL integration tests and timing validation pass. The user’s local production build and standard Chromium smoke run succeeded (21 passed / 29 expected skips); the corrected isolated shopping/basket Chromium run passes all 22 cases, including five basket scenarios. The earlier agent CSS worker-port restriction is historical. See [basket optimization](basket-optimization.md) for scope, measurements and the E2E follow-up. Work remains staged and uncommitted.
 
 ## Later — Accounts and alerts
 

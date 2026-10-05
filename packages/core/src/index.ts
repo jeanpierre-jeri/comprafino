@@ -26,3 +26,4 @@ export * from "./shopping-list.ts";
 export * from "./substitution-compatibility.ts";
 
 export * from "./shopping-creation.ts";
+export * from "./basket-optimization.ts";

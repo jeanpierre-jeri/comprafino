@@ -171,25 +171,8 @@ export async function searchGenericProductOffers(
   );
   const [result] = await db.batch([
     db.execute(sql`${eligibleProducts}, generic as (
-    select jsonb_build_object('id',l.id,'retailerId',l.retailer_id,'title',l.title,
-      'priceUnit',h.price_unit,'packageText',l.package_text,'sourceBrand',l.source_brand,
-      'sourceUnitMultiplier',l.source_unit_multiplier::float8) as listing,
-      l.category as "sourceCategory", r.name as "retailerName", l.url, l.image_url as "imageUrl", h.current_price_cents as "currentPriceCents", h.regular_price_cents as "regularPriceCents",
-      ${listingOffers(sql`l.id`, sql`l.last_seen_at`)} as "conditionalOffers",
-      l.last_seen_at as "observedAt", l.available, n.input_fingerprint as fingerprint, n.normalization_version as version,
-      p.id as "canonicalId", coalesce(jsonb_array_length(p.offers),0) as "retailerCount",
-      ${searchText(sql`n.normalized_title`)} as title_text,
-      ${searchText(sql`n.normalized_title || ' ' || coalesce(n.brand,'')`)} as identity_text
-    from retailer_listings l join retailers r on r.id=l.retailer_id
-    join listing_normalizations n on n.listing_id=l.id
-    join price_history h on h.listing_id=l.id and h.valid_until is null
-    left join canonical_product_listings a on a.listing_id=l.id
-    left join products p on p.id=a.canonical_product_id
-    where l.active and l.available is distinct from false and h.currency='PEN'
-      and h.price_unit=l.price_unit and h.price_unit in ('UN','KG')
-      and ${canonicalId ? sql`p.id=${canonicalId}::uuid` : sql`true`}
-      and l.last_seen_at between ${new Date(now.getTime() - 36 * 60 * 60 * 1000).toISOString()}::timestamptz and ${now.toISOString()}::timestamptz
-  ) select * from generic where ${predicates.length ? sql.join(predicates, sql` and `) : sql`true`}
+    ${currentGenericOfferRows(now)}
+  ) select * from generic where ${canonicalId ? sql`"canonicalId"=${canonicalId}::uuid` : sql`true`} and ${predicates.length ? sql.join(predicates, sql` and `) : sql`true`}
   order by (title_text=${query}) desc, starts_with(title_text,${query}) desc,
     public.similarity(title_text,${query}) desc, title_text collate "C", listing->>'id' limit 1001`),
   ]);
@@ -282,4 +265,26 @@ export function getCanonicalCurrentProductOffers(
     true,
     id,
   );
+}
+
+/** Shared current normalized listing boundary, also used by basket snapshots. */
+export function currentGenericOfferRows(now: Date) {
+  return sql`    select jsonb_build_object('id',l.id,'retailerId',l.retailer_id,'title',l.title,
+      'priceUnit',h.price_unit,'packageText',l.package_text,'sourceBrand',l.source_brand,
+      'sourceUnitMultiplier',l.source_unit_multiplier::float8) as listing,
+      l.category as "sourceCategory", r.name as "retailerName", l.url, l.image_url as "imageUrl", h.current_price_cents as "currentPriceCents", h.regular_price_cents as "regularPriceCents",
+      ${listingOffers(sql`l.id`, sql`l.last_seen_at`)} as "conditionalOffers",
+      l.last_seen_at as "observedAt", l.available, n.input_fingerprint as fingerprint, n.normalization_version as version,
+      p.id as "canonicalId", coalesce(jsonb_array_length(p.offers),0) as "retailerCount",
+      ${searchText(sql`n.normalized_title`)} as title_text,
+      ${searchText(sql`n.normalized_title || ' ' || coalesce(n.brand,'')`)} as identity_text
+    from retailer_listings l join retailers r on r.id=l.retailer_id
+    join listing_normalizations n on n.listing_id=l.id
+    join price_history h on h.listing_id=l.id and h.valid_until is null
+    left join canonical_product_listings a on a.listing_id=l.id
+    left join products p on p.id=a.canonical_product_id
+    where l.active and l.available is distinct from false and h.currency='PEN'
+      and h.price_unit=l.price_unit and h.price_unit in ('UN','KG')
+      and l.last_seen_at between ${new Date(now.getTime() - 36 * 60 * 60 * 1000).toISOString()}::timestamptz and ${now.toISOString()}::timestamptz
+`;
 }

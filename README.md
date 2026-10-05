@@ -8,7 +8,7 @@ Supermarket pricing in Peru is fragmented across retailers. Promotions can depen
 
 ## Vision
 
-The roadmap aims to help people decide where to buy, when to buy, whether a price is good, and how to optimize an entire shopping basket. These capabilities are **planned**, not available today.
+CompraFino compares current prices, shows ordinary price history and stores shopping needs in this browser. Milestone 16 adds current basket comparisons across up to three supermarkets, validated by local production build and Chromium tests. Purchase-timing recommendations remain planned.
 
 ## Current status
 
@@ -222,7 +222,7 @@ For a future Vercel project, select this monorepo, set Root Directory to `apps/w
 
 ## Roadmap
 
-Milestone 4 public search and package-price comparison are implemented over verified groups, pending fresh local production build/E2E confirmation. Scheduled ingestion/freshness operations, generalized unit-price comparison, history, promotions, buying guidance, shopping lists and basket optimization remain future work. See the [roadmap](docs/roadmap.md).
+Public search, verified product comparison, unit-price comparison, concrete CMR benefits, ordinary history/observation coverage and browser-local shopping lists are implemented through the accepted Milestone 15.1 baseline. Milestone 16 basket optimization is implemented and validated by local production build/Chromium tests; timing guidance remains future work. See the [roadmap](docs/roadmap.md).
 
 TanStack Form, TanStack Query and shadcn Chart/Recharts are intended options for future complexity, not current dependencies. Redis, queues, external search, AI, dedicated workers and browser scraping are also deferred.
 
@@ -254,4 +254,4 @@ Stop it with `pnpm test:db:down`. See [local testing](docs/local-testing.md).
 
 ## Recurring shopping list
 
-`/list` saves generic needs, preferred products or strict canonical products in this browser, with unit/kg/L quantities and weekly/biweekly/monthly frequency. Search/detail pages provide add dialogs; current ordinary/CMR options are evaluated independently per need. There is no account, server list persistence or whole-basket/timing optimizer. See [shopping-list behavior, current-data audit and pending local build/browser validation](docs/shopping-list.md). Run the read-only `pnpm audit:shopping-list` with root `.env`/`DATABASE_URL`, and `pnpm test:e2e:list:local` after a successful production build for isolated shopping-list browser fixtures.
+`/list` saves generic needs, preferred products or strict canonical products in this browser, with unit/kg/L quantities and weekly/biweekly/monthly frequency. Search/detail pages provide add dialogs; current ordinary/CMR options share the Milestone 15.1 safe-substitution boundary. Milestone 16 compares complete/partial baskets using at most one, two and three supermarkets, with actual retailer counts, grouped purchases and marginal savings. There is no account, server list persistence or timing optimizer. See [basket optimization and validation](docs/basket-optimization.md). See [shopping-list behavior, current-data audit and validation](docs/shopping-list.md). Run the read-only `pnpm audit:shopping-list` with root `.env`/`DATABASE_URL`, and `pnpm test:e2e:list:local` after a successful production build for isolated shopping-list browser fixtures.

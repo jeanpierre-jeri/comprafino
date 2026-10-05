@@ -1,14 +1,29 @@
+import { sql } from "drizzle-orm";
+import { z } from "zod";
 import {
   evaluateShoppingListItem,
+  evaluateShoppingFulfillment,
+  basketOptionSchema,
+  optimizeBasket,
   getSubstitutionProfile,
   searchFilters,
   shoppingQueryForTitle,
   shoppingMarketQuery,
 } from "@comprafino/core";
-import type { PriceMode, ShoppingCandidate, ShoppingListItem } from "@comprafino/core";
+import type {
+  PriceMode,
+  ShoppingCandidate,
+  ShoppingListItem,
+  ShoppingList,
+} from "@comprafino/core";
 import type { createDatabase } from "./client.ts";
-import { searchGenericProductOffers, getCanonicalCurrentProductOffers } from "./generic-offers.ts";
-import { getCanonicalProductComparison } from "./public-products.ts";
+import {
+  searchGenericProductOffers,
+  getCanonicalCurrentProductOffers,
+  currentGenericOfferRows,
+  genericProductOffer,
+} from "./generic-offers.ts";
+import { getCanonicalProductComparison, eligibleProducts } from "./public-products.ts";
 
 /** Read-only current market boundary. Exact eligibility and generic quantity
  * evidence come from existing public queries; no list data is persisted. */
@@ -63,6 +78,7 @@ function shoppingCandidate(
     id: o.id,
     canonicalId: o.canonicalId,
     title: o.title,
+    retailerId: o.retailerId,
     retailerName: o.retailerName,
     url: o.url,
     ordinaryPriceCents: o.currentPriceCents,
@@ -79,5 +95,78 @@ function shoppingCandidate(
     strongQuantity: o.unitPrice?.quality === "strong",
     pricingBasis: o.pricingBasis,
     substitutionProfile: getSubstitutionProfile(o),
+  };
+}
+
+/** One statement gives exact metadata and all current candidates a consistent
+ * snapshot. Bounded full-catalog retrieval is intentional at the current scale. */
+export async function evaluateCurrentShoppingList(
+  db: ReturnType<typeof createDatabase>,
+  list: ShoppingList,
+  mode: PriceMode,
+  now = new Date(),
+) {
+  const started = performance.now();
+  let queryMs = 0;
+  let candidates: ShoppingCandidate[] = [];
+  const titles = new Map<string, string>();
+  if (list.items.length) {
+    const ids = [
+      ...new Set(list.items.flatMap((i) => (i.intent === "generic" ? [] : [i.canonicalId]))),
+    ];
+    const queryStarted = performance.now();
+    const [result] = await db.batch([
+      db.execute(sql`${eligibleProducts}, current_listings as (
+      ${currentGenericOfferRows(now)}
+    ) select jsonb_build_object(
+      'products', coalesce((select jsonb_agg(jsonb_build_object('id',id,'title',"displayName"))
+        from products where ${
+          ids.length
+            ? sql`id in (${sql.join(
+                ids.map((id) => sql`${id}::uuid`),
+                sql`, `,
+              )})`
+            : sql`false`
+        }), '[]'::jsonb),
+      'listings', coalesce((select jsonb_agg(row_to_json(bounded)) from
+        (select * from current_listings order by listing->>'id' limit 1001) bounded), '[]'::jsonb)
+    ) as snapshot`),
+    ]);
+    queryMs = performance.now() - queryStarted;
+    const snapshot = z
+      .object({
+        products: z.array(z.object({ id: z.uuid(), title: z.string().min(1) })),
+        listings: z.array(z.unknown()),
+      })
+      .parse(result.rows[0]?.snapshot);
+    if (snapshot.listings.length > 1000)
+      throw new Error("Shopping catalog snapshot bound exceeded");
+    for (const product of snapshot.products) titles.set(product.id, product.title);
+    candidates = snapshot.listings
+      .map((raw) => genericProductOffer(raw, now, mode))
+      .filter((offer) => offer !== null)
+      .map(shoppingCandidate);
+  }
+  const fulfillments = list.items.map((item) => {
+    // Missing public identity cannot authorize either exact purchase or preference fallback.
+    const title = item.intent === "generic" ? undefined : titles.get(item.canonicalId);
+    return evaluateShoppingFulfillment(
+      item,
+      item.intent !== "generic" && !title ? [] : candidates,
+      mode,
+      now,
+      title,
+    );
+  });
+  return {
+    evaluations: fulfillments.map((f) => f.evaluation),
+    baskets: optimizeBasket(
+      fulfillments.map((f) => ({
+        itemId: f.evaluation.itemId,
+        options: f.approved.map((o) => basketOptionSchema.parse(o)),
+      })),
+    ),
+    evaluatedAt: now.toISOString(),
+    timings: { queryMs, totalMs: performance.now() - started },
   };
 }

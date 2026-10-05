@@ -1,12 +1,17 @@
 import { spawn } from "node:child_process";
 
 const [kind, ...args] = process.argv.slice(2);
-if (kind !== "integration" && kind !== "history" && kind !== "shopping")
-  throw new Error("Expected integration, history or shopping");
+if (kind !== "integration" && kind !== "history" && kind !== "shopping" && kind !== "basket")
+  throw new Error("Expected integration, history, shopping or basket");
 const child = spawn(
   "pnpm",
   [
-    kind === "integration" ? "test:integration" : "test:e2e:history",
+    ...(kind === "basket" ? ["--filter", "@comprafino/db"] : []),
+    kind === "integration"
+      ? "test:integration"
+      : kind === "basket"
+        ? "benchmark:basket"
+        : "test:e2e:history",
     ...(kind === "shopping" ? ["--shopping-list"] : []),
     ...args,
   ],

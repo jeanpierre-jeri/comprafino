@@ -4,63 +4,22 @@ import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import {
   formatPen,
   removeShoppingItem,
-  shoppingEvaluationSchema,
+  shoppingListEvaluationSchema,
   shoppingFrequencyLabels,
 } from "@comprafino/core";
-import type {
-  PriceMode,
-  ShoppingEvaluation,
-  ShoppingListItem,
-  ShoppingOption,
-} from "@comprafino/core";
+import type { PriceMode, ShoppingEvaluation, ShoppingListItem, BasketPlan } from "@comprafino/core";
 import { useShoppingList } from "./use-shopping-list";
+import { BasketComparison } from "./basket-comparison";
+import { CurrentOption } from "./current-shopping-option";
 import { ShoppingItemEditor } from "./shopping-item-editor";
 
-function CurrentOption({ option }: { option: ShoppingOption }) {
-  const measure = option.countsPackages
-    ? "paquetes"
-    : option.quantityUnit === "unit"
-      ? "unidades"
-      : option.quantityUnit;
-  return (
-    <div className="mt-3 space-y-2">
-      <p className="font-medium">{option.title}</p>
-      <p>
-        {option.retailerName} · <strong>{formatPen(option.totalCostCents)}</strong>
-      </p>
-      <p className="text-sm">
-        {option.packages} {option.packages === 1 ? "paquete" : "paquetes"} ·{" "}
-        {option.purchasedQuantity} {measure} en total
-        {option.overbuy > 0 ? ` · ${option.overbuy} ${measure} de más` : ""}
-      </p>
-      <p className="text-sm text-muted-foreground">
-        {formatPen(Math.round(option.effectiveUnitCents))} / {measure} ·{" "}
-        {option.condition ?? "Precio para todos"}
-      </p>
-      {option.condition && (
-        <p className="text-sm">
-          Para todos: {formatPen(option.ordinaryTotalCents)} por esta compra.
-        </p>
-      )}
-      <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-        <a className="card-link" href={option.url} target="_blank" rel="noopener noreferrer">
-          Ver en {option.retailerName}
-          <span className="sr-only"> (abre una nueva pestaña)</span>
-        </a>
-        {option.canonicalId && (
-          <Link className="card-link" href={`/products/${option.canonicalId}`}>
-            Comparar e historial
-          </Link>
-        )}
-      </div>
-    </div>
-  );
-}
 export function ShoppingListView() {
   const pricingId = useId();
   const { list, ready, warning, change } = useShoppingList();
   const [mode, setMode] = useState<PriceMode>("standard");
   const [evaluations, setEvaluations] = useState<ShoppingEvaluation[]>([]);
+  const [selectedBasketLimit, setSelectedBasketLimit] = useState<number | null>(null);
+  const [baskets, setBaskets] = useState<BasketPlan[]>([]);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [revision, setRevision] = useState(0);
@@ -79,6 +38,7 @@ export function ShoppingListView() {
     const controller = new AbortController();
     async function load() {
       setEvaluations([]);
+      setBaskets([]);
       setError("");
       if (!list.items.length) {
         setPending(false);
@@ -94,10 +54,12 @@ export function ShoppingListView() {
           cache: "no-store",
         });
         const body: unknown = await response.json();
-        if (!response.ok || typeof body !== "object" || body === null || !("evaluations" in body))
-          throw new Error("No pudimos cargar los precios.");
-        const parsed = shoppingEvaluationSchema.array().max(50).parse(body.evaluations);
-        if (!controller.signal.aborted) setEvaluations(parsed);
+        if (!response.ok) throw new Error("No pudimos cargar los precios.");
+        const parsed = shoppingListEvaluationSchema.parse(body);
+        if (!controller.signal.aborted) {
+          setEvaluations(parsed.evaluations);
+          setBaskets(parsed.baskets);
+        }
       } catch {
         if (!controller.signal.aborted)
           setError("No pudimos cargar los precios. Intenta nuevamente.");
@@ -119,8 +81,6 @@ export function ShoppingListView() {
       document.removeEventListener("visibilitychange", refresh);
     };
   }, [list, mode, ready, revision]);
-  const priced = evaluations.filter((e) => e.best);
-  const total = priced.reduce((sum, e) => sum + (e.best?.totalCostCents ?? 0), 0);
   return (
     <>
       <p className="eyebrow">Tus compras habituales</p>
@@ -166,26 +126,12 @@ export function ShoppingListView() {
                 </button>
               </>
             ) : (
-              <>
-                <p className="text-sm">
-                  Costo estimado hoy · {priced.length} de {list.items.length} necesidades
-                </p>
-                <p className="mt-2 text-3xl font-semibold text-primary">{formatPen(total)}</p>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Cada necesidad se evalúa por separado. No es una canasta optimizada entre tiendas.
-                  El total usa tu producto preferido cuando está disponible.
-                </p>
-                {list.items.length > priced.length && (
-                  <p className="mt-2 text-sm">
-                    Sin precio actual:{" "}
-                    {list.items
-                      .filter((i) => !priced.some((e) => e.itemId === i.id))
-                      .map((i) => i.label)
-                      .join(", ")}
-                    .
-                  </p>
-                )}
-              </>
+              <BasketComparison
+                plans={baskets}
+                items={list.items}
+                selectedLimit={selectedBasketLimit}
+                selectLimit={setSelectedBasketLimit}
+              />
             )}
           </div>
           {Object.entries(shoppingFrequencyLabels).map(([frequency, label]) => {
@@ -200,7 +146,7 @@ export function ShoppingListView() {
                     return (
                       <li key={item.id}>
                         <article className="empty-surface h-full" aria-label={item.label}>
-                          <h3 className="text-xl font-semibold break-words">{item.label}</h3>
+                          <h3 className="text-xl font-semibold wrap-break-word">{item.label}</h3>
                           <p className="mt-2 text-sm">
                             {item.quantity.amount}{" "}
                             {item.quantityMode === "packages"

@@ -1,6 +1,6 @@
 # Shopping lists — Milestone 15.1
 
-Milestone 15 supplies recurring browser-local needs and current recommendations. This refinement is implemented, with production build/Chromium and visual acceptance **pending local confirmation** because the sandbox blocks the Turbopack CSS worker port. It is not complete or committed yet. No basket optimization, temporal prediction, account, alert, dependency or PostgreSQL schema change is included.
+Milestone 15 supplies recurring browser-local needs and current recommendations. Milestone 15.1 is committed in `075c999` and accepted in the user-confirmed baseline. [Milestone 16 current basket optimization](basket-optimization.md) is implemented and validated: local production build, standard smoke and all 22 isolated shopping/basket Chromium tests pass. No temporal prediction, account, alert, dependency or PostgreSQL schema change is included.
 
 ## Contextual creation and editing
 
@@ -40,7 +40,7 @@ Search relevance and substitution compatibility are separate. Broad search can i
 
 Evaluation reuses normalized family/category and strong quantity evidence. Independent normalized retailer offers can satisfy generic needs without gaining invented canonical/history associations. Exact associations still require current automatic high-confidence public matching eligibility. Null or inconsistent saved compatibility fails closed. Preferred compatibility comes from the current canonical product, never a custom local label. A negative source-family classification remains negative.
 
-`/api/list/evaluate` validates the version-two list and performs read-only current-catalog queries; evaluation never ingests or refreshes retailers. The old product-selection endpoint remains available but is unused by the dialogs. Responses are uncached and validated; list prices refresh on tab return and every minute. Fresh active ordinary prices and supported CMR benefits use existing ranking. The summary adds independently priced needs, without claiming a globally cheapest basket or a monthly recurring bill.
+`/api/list/evaluate` validates the version-two list and performs read-only current-catalog queries; evaluation never ingests or refreshes retailers. The old product-selection endpoint remains available but is unused by the dialogs. Responses are uncached and validated; list prices refresh on tab return and every minute. Fresh active ordinary prices and supported CMR benefits use existing ranking. Milestone 16 now compares optimized complete/partial baskets for up to one, two and three retailers; per-item recommendations retain their existing behavior. Frequencies do not produce a monthly recurring bill.
 
 ## Real-data audit
 
@@ -82,6 +82,6 @@ pnpm test:db:down
 
 Review generic huevos search and canonical eggs add/edit flows, all three intents at desktop and 390px, both themes, keyboard containment, Escape and focus return. Local build/E2E and final UX acceptance were confirmed by the user. Commit `fix: simplify shopping list intent and safe substitutions`. Do not push or begin Milestone 16 automatically.
 
-## Limits and future basket work
+## Limits and current basket work
 
-The compatibility API and explicit quantity modes provide inputs for future basket optimization. Future optimization must apply the same safety gate, freshness and quantity evidence; it must never treat broad search relevance as equivalence. No optimizer is implemented. Legacy exact normalized quantities are intentionally retained, family coverage is deliberately limited, names may under-describe specialty properties, canonical references may become unavailable, and browser lists have no account sync or backup.
+The compatibility API and explicit quantity modes now supply Milestone 16 basket optimization through shared approved fulfillment. Optimization applies the same safety gate, freshness and quantity evidence; it must never treat broad search relevance as equivalence. Milestone 16 implements the optimizer through this shared domain boundary; see [basket optimization](basket-optimization.md) for scope and pending validation. Legacy exact normalized quantities are intentionally retained, family coverage is deliberately limited, names may under-describe specialty properties, canonical references may become unavailable, and browser lists have no account sync or backup.

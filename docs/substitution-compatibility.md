@@ -37,4 +37,4 @@ The [current audit](shopping-list-audit.json) enumerates broad candidates and ex
 
 Catalog evidence and normalized titles can omit attributes, and conservative exclusions can produce false negatives. New varieties need reviewed rules and meaningful tests; do not silently expand a profile to improve candidate counts. Stored generic profiles are checked against current policy, so a changed or unsupported key fails closed until explicitly saved under supported semantics.
 
-Future basket optimization must reuse these APIs, normalized quantity modes and separate pricing/quantity/freshness safeguards. This milestone supplies the boundary only. It does not optimize stores, mixed packages, delivery/travel cost or purchase timing.
+Milestone 16 [current basket optimization](basket-optimization.md) reuses these APIs through `evaluateShoppingFulfillment`, alongside the existing quantity, pricing and freshness safeguards. The optimizer receives only approved options. Global preferred savings gates run before retailer subsets. Mixed packages within a need, delivery/travel cost and purchase timing remain outside scope.

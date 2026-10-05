@@ -1,3 +1,4 @@
+import { seedBasketFixtures } from "./basket-fixtures.ts";
 import { seedShoppingListFixtures } from "./shopping-list-e2e-fixtures.ts";
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -166,7 +167,12 @@ try {
       throw new Error("Old fixture mismatch");
   }
   const shopping = process.argv.includes("--shopping-list");
-  const shoppingFixtures = shopping ? await seedShoppingListFixtures(db, scopedClient) : {};
+  const shoppingFixtures = shopping
+    ? {
+        ...(await seedShoppingListFixtures(db, scopedClient)),
+        ...(await seedBasketFixtures(db, scopedClient)),
+      }
+    : {};
   if (process.argv.includes("--validate-fixtures")) {
     console.log(
       shopping

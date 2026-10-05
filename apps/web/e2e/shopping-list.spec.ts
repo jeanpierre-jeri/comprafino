@@ -1,6 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
 import { shoppingListSchema } from "@comprafino/core";
+import { restrictBasketFixtureRetailers } from "@comprafino/db/basket-fixtures";
 import { createDatabase, persistListings } from "@comprafino/db";
+
+// Catalog-mutation scenarios share the same isolated PostgreSQL fixture schema.
+test.describe.configure({ mode: "serial" });
 
 async function openGeneric(page: Page, query = "huevos") {
   await page.goto(`/search?q=${query}`);
@@ -340,6 +344,10 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
         await expect(page).toHaveURL(url);
         expect(context.pages()).toHaveLength(tabs);
         await page.keyboard.press("Escape");
+        // Exit animation keeps the native dialog in the top layer until close.
+        // Wait for dismissal/focus return before clicking through to the card.
+        await expect(page.getByRole("dialog")).toHaveCount(0);
+        await expect(add).toBeFocused();
         const title = card.locator(".product-title-link");
         // The stretched link intentionally covers noninteractive card content.
         // Use a real pointer click instead of forcing the underlying price node.
@@ -427,8 +435,18 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       quantity: { amount: 30, unit: "unit" },
     });
     await page.getByRole("link", { name: "Mi lista", exact: true }).click();
-    await expect(page.getByRole("article").first()).toContainText("Huevos Tottus");
-    await expect(page.getByRole("article").first()).not.toContainText("Codorniz");
+    await expect(
+      page
+        .getByRole("region", { name: /Cada semana|Cada 2 semanas|Cada mes/ })
+        .getByRole("article")
+        .first(),
+    ).toContainText("Huevos Tottus");
+    await expect(
+      page
+        .getByRole("region", { name: /Cada semana|Cada 2 semanas|Cada mes/ })
+        .getByRole("article")
+        .first(),
+    ).not.toContainText("Codorniz");
   });
   test("unsupported independent retailer-option card retains its description and withholds alternatives", async ({
     page,
@@ -453,15 +471,21 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       substitutionProfile: null,
     });
     await page.getByRole("link", { name: "Mi lista", exact: true }).click();
-    await expect(page.getByRole("article").first()).toContainText(
-      "No encontramos alternativas suficientemente comparables",
-    );
+    await expect(
+      page
+        .getByRole("region", { name: /Cada semana|Cada 2 semanas|Cada mes/ })
+        .getByRole("article")
+        .first(),
+    ).toContainText("No encontramos alternativas suficientemente comparables");
   });
   test("preferred product exposes a cheaper compatible option and preserves its identity", async ({
     page,
   }) => {
     await addSpecific(page, "preferred");
-    const card = page.getByRole("article").first();
+    const card = page
+      .getByRole("region", { name: /Cada semana|Cada 2 semanas|Cada mes/ })
+      .getByRole("article")
+      .first();
     await expect(card).toContainText("Tu producto preferido");
     await expect(card).toContainText("Ahorra S/ 3.00");
     await expect(card).toContainText("Huevos Tottus");
@@ -480,7 +504,10 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
     page,
   }) => {
     await addSpecific(page, "strict");
-    const card = page.getByRole("article").first();
+    const card = page
+      .getByRole("region", { name: /Cada semana|Cada 2 semanas|Cada mes/ })
+      .getByRole("article")
+      .first();
     await expect(card).toContainText("S/ 17.90");
     await expect(card).not.toContainText("Huevos Tottus");
     await expect(card.getByRole("link", { name: "Comparar e historial" }).first()).toHaveAttribute(
@@ -494,7 +521,10 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
     page,
   }) => {
     await addGeneric(page);
-    const card = page.getByRole("article").first();
+    const card = page
+      .getByRole("region", { name: /Cada semana|Cada 2 semanas|Cada mes/ })
+      .getByRole("article")
+      .first();
     await expect(card).toContainText("Huevos Tottus");
     await expect(card).toContainText("S/ 14.90");
     await page.getByLabel("Precios", { exact: true }).selectOption("benefits");
@@ -505,7 +535,10 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
   });
   test("generic winner changes after fresh fixture price observations", async ({ page }) => {
     await addGeneric(page);
-    const card = page.getByRole("article").first();
+    const card = page
+      .getByRole("region", { name: /Cada semana|Cada 2 semanas|Cada mes/ })
+      .getByRole("article")
+      .first();
     await expect(card).toContainText("S/ 14.90");
     const db = createDatabase();
     async function observe(increased: boolean) {
@@ -564,6 +597,7 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
           await page.getByRole("button", { name: "Agregar", exact: true }).click();
           await page.getByRole("link", { name: "Mi lista", exact: true }).click();
           const edit = page
+            .getByRole("region", { name: /Cada semana|Cada 2 semanas|Cada mes/ })
             .getByRole("article")
             .first()
             .getByRole("button", { name: /^Editar/ });
@@ -586,7 +620,10 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
     page,
   }) => {
     await addSpecific(page, "preferred");
-    const card = page.getByRole("article").first();
+    const card = page
+      .getByRole("region", { name: /Cada semana|Cada 2 semanas|Cada mes/ })
+      .getByRole("article")
+      .first();
     await expect(card).toContainText("1 paquete · Cada semana");
     await card.getByRole("button", { name: /^Editar/ }).click();
     await page.getByLabel("Paquetes", { exact: true }).fill("2");
@@ -605,5 +642,179 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       quantityMode: "packages",
       quantity: { amount: 2, unit: "unit" },
     });
+  });
+});
+
+async function storeBasket(page: Page, count: number, unsupported = false) {
+  await page.goto("/list");
+  const now = new Date().toISOString();
+  const items = Array.from({ length: count }, (_, i) => ({
+    id: crypto.randomUUID(),
+    intent: "strict",
+    canonicalId: fixture(`basket-${i}`),
+    label: `Leche para canasta ${i + 1}`,
+    query: "leche",
+    quantityMode: "packages",
+    quantity: { amount: 1, unit: "unit" },
+    frequency: "weekly",
+    createdAt: now,
+    updatedAt: now,
+  }));
+  const list = shoppingListSchema.parse({
+    version: 2,
+    items: unsupported
+      ? [
+          ...items,
+          {
+            id: crypto.randomUUID(),
+            intent: "generic",
+            canonicalId: null,
+            label: "Leche sin perfil",
+            query: "leche",
+            quantityMode: "normalized",
+            substitutionProfile: null,
+            quantity: { amount: 6, unit: "unit" },
+            frequency: "weekly",
+            createdAt: now,
+            updatedAt: now,
+          },
+        ]
+      : items,
+  });
+  await page.evaluate(
+    (value) => localStorage.setItem("comprafino-shopping-list", JSON.stringify(value)),
+    list,
+  );
+  await page.reload();
+  await expect(page.getByRole("region", { name: "Comparación de canastas" })).toBeVisible();
+}
+
+test.describe("current basket optimization fixtures", () => {
+  test.skip(
+    !process.env.SHOPPING_LIST_FIXTURE_IDS,
+    "Run pnpm test:e2e:list:local for isolated catalog fixtures",
+  );
+  test.describe.configure({ mode: "serial" });
+  test("shows every limit, defaults to one store, groups purchases and refreshes after editing", async ({
+    page,
+  }) => {
+    await storeBasket(page, 3);
+    const first = page.getByRole("article", { name: "Límite 1", exact: true });
+    const second = page.getByRole("article", { name: "Límite 2", exact: true });
+    const third = page.getByRole("article", { name: "Límite 3", exact: true });
+    await expect(first).toContainText("S/ 60.00");
+    await expect(first.getByRole("button")).toHaveAttribute("aria-pressed", "true");
+    await expect(second).toContainText("S/ 45.00");
+    await expect(second).toContainText("S/ 15.00 menos");
+    await expect(third).toContainText("S/ 30.00");
+    await third.getByRole("button").click();
+    const details = page.getByRole("region", { name: "Compras del plan seleccionado" });
+    await expect(details.getByRole("heading", { level: 4 })).toHaveCount(3);
+    await expect(details).toContainText("1 paquete");
+    const card = page.getByRole("article", { name: "Leche para canasta 1", exact: true });
+    await card.getByRole("button", { name: "Editar Leche para canasta 1" }).click();
+    await page.getByLabel("Paquetes", { exact: true }).fill("2");
+    await page.getByRole("button", { name: "Guardar cambios" }).click();
+    await expect(first).toContainText("S/ 70.00");
+    await expect(third.getByRole("button")).toHaveAttribute("aria-pressed", "true");
+  });
+  test("a higher maximum retains the actual one-store count and zero-saving explanation", async ({
+    page,
+  }) => {
+    await storeBasket(page, 1);
+    for (const limit of [1, 2, 3]) {
+      const card = page.getByRole("article", { name: `Límite ${limit}`, exact: true });
+      await expect(card.getByRole("heading")).toHaveText("1 supermercado");
+      await expect(card).toContainText("Metro");
+      await expect(card).toContainText("S/ 10.00");
+      if (limit > 1) await expect(card).toContainText("No ahorras más al añadir otra tienda.");
+    }
+  });
+  test("selects the first complete higher tier when a single store cannot fulfill the list", async ({
+    page,
+  }) => {
+    await restrictBasketFixtureRetailers(true);
+    try {
+      await storeBasket(page, 2);
+      const first = page.getByRole("article", { name: "Límite 1", exact: true });
+      const second = page.getByRole("article", { name: "Límite 2", exact: true });
+      await expect(first).toContainText("1 de 2 productos");
+      await expect(first).toContainText("Subtotal de productos disponibles: S/ 10.00");
+      await expect(second.getByRole("button")).toHaveAttribute("aria-pressed", "true");
+      await expect(second).toContainText("Este límite permite completar la canasta.");
+      await expect(second).not.toContainText("menos que");
+      await storeBasket(page, 3);
+      await expect(
+        page.getByRole("article", { name: "Límite 3", exact: true }).getByRole("button"),
+      ).toHaveAttribute("aria-pressed", "true");
+    } finally {
+      await restrictBasketFixtureRetailers(false);
+    }
+  });
+  test("partial plans prominently show coverage, subtotal and missing needs without savings", async ({
+    page,
+  }) => {
+    await restrictBasketFixtureRetailers(true);
+    try {
+      await storeBasket(page, 3, true);
+      for (const limit of [1, 2, 3]) {
+        const card = page.getByRole("article", { name: `Límite ${limit}`, exact: true });
+        await expect(card).toContainText(`${limit} de 4 productos`);
+        await expect(card).toContainText("Subtotal de productos disponibles:");
+        await expect(card).toContainText("Faltan:");
+        await expect(card).toContainText("Leche sin perfil");
+        await expect(card).not.toContainText("menos que");
+        await expect(card).not.toContainText("ahorras");
+      }
+      await expect(
+        page.getByRole("article", { name: "Límite 3", exact: true }).getByRole("button"),
+      ).toHaveAttribute("aria-pressed", "true");
+      await expect(
+        page.getByRole("region", { name: "Compras del plan seleccionado" }),
+      ).toContainText("3 de 4 productos");
+    } finally {
+      await restrictBasketFixtureRetailers(false);
+    }
+  });
+  test("shows benefit conditions, preferred substitutions, retry and mobile/desktop layouts", async ({
+    page,
+  }) => {
+    await addSpecific(page, "preferred");
+    const comparison = page.getByRole("region", { name: "Comparación de canastas" });
+    await expect(page.getByRole("region", { name: "Compras del plan seleccionado" })).toContainText(
+      "Alternativa compatible a tu producto preferido",
+    );
+    await page.getByLabel("Precios", { exact: true }).selectOption("benefits");
+    await expect(comparison).toContainText("Requiere tarjeta CMR");
+    await expect(comparison).toContainText("Para todos, esta selección");
+    for (const width of [390, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const theme of ["light", "dark"] as const) {
+        await page.emulateMedia({ colorScheme: theme });
+        expect(
+          await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+        ).toBe(true);
+        await page.screenshot({
+          path: `test-results/basket-${width}-${theme}.png`,
+          fullPage: true,
+        });
+      }
+    }
+    await page.route(
+      "**/api/list/evaluate?*",
+      (route) =>
+        route.fulfill({
+          status: 503,
+          contentType: "application/json",
+          body: JSON.stringify({ error: "test failure" }),
+        }),
+      { times: 1 },
+    );
+    await page.reload();
+    await expect(page.getByRole("main").getByRole("alert")).toContainText(
+      "No pudimos cargar los precios",
+    );
+    await page.getByRole("button", { name: "Reintentar" }).click();
+    await expect(comparison).toBeVisible();
   });
 });

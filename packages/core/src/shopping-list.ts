@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { retailerIdSchema } from "./listing.ts";
 import { normalizeSearchQuery } from "./public-products.ts";
 import { classifyProductFamily } from "./product-family.ts";
 import {
@@ -187,6 +188,7 @@ export const shoppingCandidateSchema = z.object({
   id: z.string().min(1),
   canonicalId: z.uuid().nullable(),
   title: z.string().min(1),
+  retailerId: retailerIdSchema.optional(),
   retailerName: z.string().min(1),
   url: z.string().url(),
   ordinaryPriceCents: z.number().int().nonnegative().safe(),
@@ -203,6 +205,7 @@ export const shoppingOptionSchema = z.object({
   id: z.string(),
   canonicalId: z.uuid().nullable(),
   title: z.string(),
+  retailerId: retailerIdSchema.optional(),
   retailerName: z.string(),
   url: z.string().url(),
   packages: z.number().int().positive(),
@@ -225,23 +228,27 @@ export const shoppingEvaluationSchema = z.object({
   options: z.array(shoppingOptionSchema).max(3),
 });
 export type ShoppingEvaluation = z.infer<typeof shoppingEvaluationSchema>;
-export function evaluateShoppingListItem(
+export function evaluateShoppingFulfillment(
   item: ShoppingListItem,
   candidates: readonly ShoppingCandidate[],
   mode: PriceMode,
   now = new Date(),
   preferredTitle?: string,
-): ShoppingEvaluation {
+) {
   const compatibility = preferredTitle ? getSubstitutionProfile({ title: preferredTitle }) : null;
   const reference =
     item.intent !== "generic" && item.quantityMode === "packages"
-      ? candidates.find(
-          (c) =>
-            c.canonicalId === item.canonicalId &&
-            c.pricingBasis !== "kg" &&
-            c.strongQuantity &&
-            c.packageQuantity,
-        )
+      ? [...candidates]
+          .sort((a, b) => a.id.localeCompare(b.id))
+          .find(
+            (c) =>
+              c.canonicalId === item.canonicalId &&
+              c.pricingBasis !== "kg" &&
+              c.strongQuantity &&
+              c.available !== false &&
+              offerFreshness(c.observedAt, now) === "fresh" &&
+              c.packageQuantity,
+          )
       : null;
   const evaluated: ShoppingOption[] = [];
   for (const c of candidates) {
@@ -296,6 +303,7 @@ export function evaluateShoppingListItem(
       id: c.id,
       canonicalId: c.canonicalId,
       title: c.title,
+      retailerId: c.retailerId,
       retailerName: c.retailerName,
       url: c.url,
       packages,
@@ -309,13 +317,7 @@ export function evaluateShoppingListItem(
       condition: ranking.condition?.conditionLabel ?? null,
     });
   }
-  evaluated.sort(
-    (a, b) =>
-      a.totalCostCents - b.totalCostCents ||
-      a.overbuy - b.overbuy ||
-      a.effectiveUnitCents - b.effectiveUnitCents ||
-      a.id.localeCompare(b.id),
-  );
+  evaluated.sort(compareShoppingOptions);
   const preferred =
     item.intent === "preferred"
       ? (evaluated.find((o) => o.canonicalId === item.canonicalId) ?? null)
@@ -324,16 +326,21 @@ export function evaluateShoppingListItem(
     item.intent === "preferred"
       ? (evaluated.find((o) => o.canonicalId !== item.canonicalId) ?? null)
       : null;
-  // Meaningful: at least S/1 AND 5% of this purchase's preferred total.
+  // Global preference gate: all alternatives use the same exact market baseline.
+  const approved =
+    item.intent === "preferred"
+      ? evaluated.filter(
+          (option) =>
+            option.canonicalId === item.canonicalId ||
+            !preferred ||
+            preferred.totalCostCents - option.totalCostCents >=
+              Math.max(100, Math.ceil(preferred.totalCostCents * 0.05)),
+        )
+      : evaluated;
   const alternative =
-    cheapestAlternative &&
-    (!preferred ||
-      preferred.totalCostCents - cheapestAlternative.totalCostCents >=
-        Math.max(100, Math.ceil(preferred.totalCostCents * 0.05)))
-      ? cheapestAlternative
-      : null;
+    cheapestAlternative && approved.includes(cheapestAlternative) ? cheapestAlternative : null;
   const best = item.intent === "preferred" ? (preferred ?? alternative) : (evaluated[0] ?? null);
-  return {
+  const evaluation: ShoppingEvaluation = {
     itemId: item.id,
     best,
     preferred,
@@ -342,4 +349,20 @@ export function evaluateShoppingListItem(
       preferred && alternative ? preferred.totalCostCents - alternative.totalCostCents : 0,
     options: evaluated.slice(0, 3),
   };
+  return { evaluation, approved };
+}
+
+export function compareShoppingOptions(a: ShoppingOption, b: ShoppingOption) {
+  return (
+    a.totalCostCents - b.totalCostCents ||
+    a.overbuy - b.overbuy ||
+    a.effectiveUnitCents - b.effectiveUnitCents ||
+    a.id.localeCompare(b.id)
+  );
+}
+
+export function evaluateShoppingListItem(
+  ...args: Parameters<typeof evaluateShoppingFulfillment>
+): ShoppingEvaluation {
+  return evaluateShoppingFulfillment(...args).evaluation;
 }
