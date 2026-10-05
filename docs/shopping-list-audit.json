@@ -1,5 +1,5 @@
 {
-  "observedAt": "2026-10-05T01:25:20.930Z",
+  "observedAt": "2026-10-05T02:22:10.511Z",
   "readOnly": true,
   "results": [
     {
@@ -22,6 +22,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "eggs:regular",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T02:40:34.318Z"
         },
         {
@@ -37,6 +40,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "eggs:regular",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T02:40:34.318Z"
         },
         {
@@ -52,6 +58,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "eggs:regular",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T02:40:34.318Z"
         },
         {
@@ -67,6 +76,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "eggs:regular",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T02:40:34.318Z"
         },
         {
@@ -82,6 +94,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
           "observedAt": "2026-10-04T02:40:34.318Z"
         },
         {
@@ -97,6 +112,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
           "observedAt": "2026-10-04T02:40:34.318Z"
         },
         {
@@ -112,6 +130,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
           "observedAt": "2026-10-04T02:40:34.318Z"
         },
         {
@@ -127,6 +148,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "eggs:regular",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T02:41:38.606Z"
         },
         {
@@ -142,7 +166,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "eggs:regular",
-          "observedAt": "2026-10-04T21:05:43.906Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:18:30.610Z"
         },
         {
           "id": "6b524223-88e1-4a0c-af79-b80a0d47e78d",
@@ -157,6 +184,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "eggs:regular",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T02:41:38.606Z"
         },
         {
@@ -172,7 +202,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "eggs:regular",
-          "observedAt": "2026-10-04T21:05:46.529Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:18:32.245Z"
         },
         {
           "id": "d9c0c11d-ab6b-41ba-82c5-f6d8aa19c402",
@@ -187,6 +220,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "eggs:regular",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T02:41:38.606Z"
         },
         {
@@ -202,7 +238,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "eggs:regular",
-          "observedAt": "2026-10-04T21:05:43.906Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:18:30.610Z"
         },
         {
           "id": "a056dcde-131f-43b6-9f03-622657c21f39",
@@ -217,6 +256,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "eggs:regular",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T02:41:38.606Z"
         },
         {
@@ -232,6 +274,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "eggs:regular",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T02:41:38.606Z"
         },
         {
@@ -247,7 +292,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "eggs:regular",
-          "observedAt": "2026-10-04T21:05:48.784Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:18:37.414Z"
         },
         {
           "id": "1ad60ae6-865a-41fd-bbb8-4cf5ad555be3",
@@ -262,6 +310,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "eggs:regular",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T02:41:38.606Z"
         },
         {
@@ -277,6 +328,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "eggs:regular",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T02:41:38.606Z"
         },
         {
@@ -292,6 +346,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
           "observedAt": "2026-10-04T02:40:33.427Z"
         },
         {
@@ -307,6 +364,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
           "observedAt": "2026-10-04T02:40:33.427Z"
         },
         {
@@ -322,6 +382,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
           "observedAt": "2026-10-04T02:40:33.427Z"
         },
         {
@@ -337,6 +400,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
           "observedAt": "2026-10-04T02:40:33.427Z"
         },
         {
@@ -352,7 +418,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "eggs:regular",
-          "observedAt": "2026-10-04T21:05:45.095Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:18:32.245Z"
         },
         {
           "id": "13b6aa07-5443-45a4-97a3-79a688634017",
@@ -367,6 +436,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "eggs:regular",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T02:41:38.606Z"
         },
         {
@@ -382,6 +454,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "eggs:regular",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T02:40:32.217Z"
         },
         {
@@ -397,7 +472,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:47.656Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:35.501Z"
         },
         {
           "id": "99558d2c-898e-4cf5-b2a6-5de265b8b134",
@@ -412,6 +490,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
           "observedAt": "2026-10-04T02:40:32.217Z"
         },
         {
@@ -427,6 +508,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
           "observedAt": "2026-10-04T02:41:38.606Z"
         },
         {
@@ -442,11 +526,14 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
           "observedAt": "2026-10-04T02:41:38.606Z"
         }
       ],
       "evaluation": {
-        "itemId": "2285056e-f549-47d0-8533-03f7543c72a2",
+        "itemId": "5cd36441-96a2-4ade-b8c1-6e7d2f8e7cc2",
         "best": {
           "id": "55e567b2-6403-43f8-b31a-d3605c08dbad",
           "canonicalId": null,
@@ -454,6 +541,8 @@
           "retailerName": "Tottus",
           "url": "https://www.tottus.com.pe/tottus-pe/articulo/114518367/huevos-pardos-tottus-bandeja-30-und",
           "packages": 1,
+          "countsPackages": false,
+          "quantityUnit": "unit",
           "purchasedQuantity": 30,
           "overbuy": 0,
           "totalCostCents": 1590,
@@ -472,6 +561,8 @@
             "retailerName": "Tottus",
             "url": "https://www.tottus.com.pe/tottus-pe/articulo/114518367/huevos-pardos-tottus-bandeja-30-und",
             "packages": 1,
+            "countsPackages": false,
+            "quantityUnit": "unit",
             "purchasedQuantity": 30,
             "overbuy": 0,
             "totalCostCents": 1590,
@@ -486,6 +577,8 @@
             "retailerName": "Plaza Vea",
             "url": "https://www.plazavea.com.pe/huevos-pardos-bells-bandeja-30un-20353008/p",
             "packages": 1,
+            "countsPackages": false,
+            "quantityUnit": "unit",
             "purchasedQuantity": 30,
             "overbuy": 0,
             "totalCostCents": 1590,
@@ -500,6 +593,8 @@
             "retailerName": "Metro",
             "url": "https://www.metro.pe/huevos-pardos-metro-30un-1009776/p",
             "packages": 1,
+            "countsPackages": false,
+            "quantityUnit": "unit",
             "purchasedQuantity": 30,
             "overbuy": 0,
             "totalCostCents": 1650,
@@ -508,7 +603,129 @@
             "condition": null
           }
         ]
-      }
+      },
+      "preferredEggEvaluation": {
+        "itemId": "5cd36441-96a2-4ade-b8c1-6e7d2f8e7cc2",
+        "best": {
+          "id": "6798244f-de31-48de-ad64-754eb98e159b",
+          "canonicalId": "ee6d05db-1419-8815-9aa7-bd945790fa7b",
+          "title": "Huevos Pardos ARTISAN Bandeja 15un",
+          "retailerName": "Plaza Vea",
+          "url": "https://www.plazavea.com.pe/huevos-pardos-artisan-bandeja-15un/p",
+          "packages": 1,
+          "countsPackages": true,
+          "quantityUnit": "unit",
+          "purchasedQuantity": 1,
+          "overbuy": 0,
+          "totalCostCents": 1420,
+          "ordinaryTotalCents": 1420,
+          "effectiveUnitCents": 1420,
+          "condition": null
+        },
+        "preferred": {
+          "id": "6798244f-de31-48de-ad64-754eb98e159b",
+          "canonicalId": "ee6d05db-1419-8815-9aa7-bd945790fa7b",
+          "title": "Huevos Pardos ARTISAN Bandeja 15un",
+          "retailerName": "Plaza Vea",
+          "url": "https://www.plazavea.com.pe/huevos-pardos-artisan-bandeja-15un/p",
+          "packages": 1,
+          "countsPackages": true,
+          "quantityUnit": "unit",
+          "purchasedQuantity": 1,
+          "overbuy": 0,
+          "totalCostCents": 1420,
+          "ordinaryTotalCents": 1420,
+          "effectiveUnitCents": 1420,
+          "condition": null
+        },
+        "alternative": {
+          "id": "71d8b53c-b377-4d7e-bf1c-d556070be54a",
+          "canonicalId": null,
+          "title": "Huevos Pardos Metro 15un",
+          "retailerName": "Metro",
+          "url": "https://www.metro.pe/huevos-pardos-metro-15un-2-2/p",
+          "packages": 1,
+          "countsPackages": false,
+          "quantityUnit": "unit",
+          "purchasedQuantity": 15,
+          "overbuy": 0,
+          "totalCostCents": 930,
+          "ordinaryTotalCents": 930,
+          "effectiveUnitCents": 62,
+          "condition": null
+        },
+        "savingsCents": 490,
+        "options": [
+          {
+            "id": "71d8b53c-b377-4d7e-bf1c-d556070be54a",
+            "canonicalId": null,
+            "title": "Huevos Pardos Metro 15un",
+            "retailerName": "Metro",
+            "url": "https://www.metro.pe/huevos-pardos-metro-15un-2-2/p",
+            "packages": 1,
+            "countsPackages": false,
+            "quantityUnit": "unit",
+            "purchasedQuantity": 15,
+            "overbuy": 0,
+            "totalCostCents": 930,
+            "ordinaryTotalCents": 930,
+            "effectiveUnitCents": 62,
+            "condition": null
+          },
+          {
+            "id": "6abb3b30-6ca1-4168-9f96-f731693610d4",
+            "canonicalId": null,
+            "title": "Huevos de Gallina BELL'S Pardos Bandeja 15un",
+            "retailerName": "Plaza Vea",
+            "url": "https://www.plazavea.com.pe/huevos-de-gallina-bells-pardos-bandeja-15un/p",
+            "packages": 1,
+            "countsPackages": false,
+            "quantityUnit": "unit",
+            "purchasedQuantity": 15,
+            "overbuy": 0,
+            "totalCostCents": 940,
+            "ordinaryTotalCents": 940,
+            "effectiveUnitCents": 62.666666666666664,
+            "condition": null
+          },
+          {
+            "id": "a056dcde-131f-43b6-9f03-622657c21f39",
+            "canonicalId": null,
+            "title": "Huevos Pardos Tottus Bandeja 15 Und",
+            "retailerName": "Tottus",
+            "url": "https://www.tottus.com.pe/tottus-pe/articulo/113927690/huevos-pardos-tottus-bandeja-15-und",
+            "packages": 1,
+            "countsPackages": false,
+            "quantityUnit": "unit",
+            "purchasedQuantity": 15,
+            "overbuy": 0,
+            "totalCostCents": 950,
+            "ordinaryTotalCents": 950,
+            "effectiveUnitCents": 63.333333333333336,
+            "condition": null
+          }
+        ]
+      },
+      "quailRegression": [
+        {
+          "title": "Huevos de Codorniz BELL'S Bandeja 18un",
+          "remainsInBroadSearch": true,
+          "genericCompatible": false,
+          "preferredCompatible": false
+        },
+        {
+          "title": "Huevos de Codorniz BELL'S Bandeja 24un",
+          "remainsInBroadSearch": true,
+          "genericCompatible": false,
+          "preferredCompatible": false
+        },
+        {
+          "title": "Huevos de Codorniz LA CALERA Paquete 18un",
+          "remainsInBroadSearch": true,
+          "genericCompatible": false,
+          "preferredCompatible": false
+        }
+      ]
     },
     {
       "need": {
@@ -530,7 +747,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
-          "observedAt": "2026-10-04T01:46:24.081Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:00:29.123Z"
         },
         {
           "id": "6482624a-6529-43fc-b452-e4722d2bc0b4",
@@ -545,7 +765,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
-          "observedAt": "2026-10-04T01:46:24.081Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T01:59:36.580Z"
         },
         {
           "id": "e89d2672-9eba-492e-b900-293bc686f45b",
@@ -560,7 +783,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
-          "observedAt": "2026-10-04T01:46:24.081Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T01:59:39.462Z"
         },
         {
           "id": "f87f8a10-aa1b-4ee2-a923-c86f23b7bb6a",
@@ -575,7 +801,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
-          "observedAt": "2026-10-04T01:46:24.081Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:00:33.972Z"
         },
         {
           "id": "5c166c28-1b30-444d-96c5-2b31544e1856",
@@ -590,7 +819,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T01:46:24.081Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T01:59:35.316Z"
         },
         {
           "id": "7e17f974-fc02-455b-831c-2eaa97d1af5c",
@@ -605,7 +837,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
-          "observedAt": "2026-10-04T01:46:24.081Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:00:30.346Z"
         },
         {
           "id": "d1002ffa-6d5f-48d7-969d-9434dc7ea42a",
@@ -620,7 +855,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
-          "observedAt": "2026-10-04T01:46:24.081Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T01:59:38.237Z"
         },
         {
           "id": "d0019df8-37ea-41ac-b581-462a0225781a",
@@ -635,7 +873,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
-          "observedAt": "2026-10-04T01:46:24.081Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:00:32.765Z"
         },
         {
           "id": "ccb32e8d-92ea-48b8-b7ed-04d15c0f5316",
@@ -650,6 +891,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T21:57:45.415Z"
         },
         {
@@ -665,6 +909,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T21:57:45.415Z"
         },
         {
@@ -680,6 +927,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T02:39:10.654Z"
         },
         {
@@ -695,7 +945,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
-          "observedAt": "2026-10-04T01:46:24.081Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:00:31.553Z"
         },
         {
           "id": "d1aa573d-ef63-4cf3-be2f-d5f8c338ecbd",
@@ -710,6 +963,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T21:57:45.415Z"
         },
         {
@@ -725,7 +981,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
-          "observedAt": "2026-10-04T01:46:23.426Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T01:59:33.969Z"
         },
         {
           "id": "7a54c6bc-8e72-4a35-bdb0-49ad9afcf02e",
@@ -740,6 +999,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T20:27:10.959Z"
         },
         {
@@ -755,6 +1017,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T21:57:45.415Z"
         },
         {
@@ -770,6 +1035,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T20:26:43.022Z"
         },
         {
@@ -785,6 +1053,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T21:57:45.415Z"
         },
         {
@@ -800,7 +1071,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
-          "observedAt": "2026-10-04T01:46:21.888Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:00:15.444Z"
         },
         {
           "id": "9127d738-2b8e-4c0e-9aa4-2ef195946566",
@@ -815,7 +1089,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
-          "observedAt": "2026-10-04T01:46:21.888Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:00:18.608Z"
         },
         {
           "id": "31f8d08f-c6fb-4f7f-b8bf-557e84499b3b",
@@ -830,7 +1107,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T01:46:23.426Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:00:23.614Z"
         },
         {
           "id": "e6fe6bd4-0a84-4b91-985c-622e397485e5",
@@ -845,7 +1125,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
-          "observedAt": "2026-10-04T01:46:23.426Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T01:59:32.657Z"
         },
         {
           "id": "fa0f89b0-90d6-4939-a89e-467b8b3a8a29",
@@ -860,6 +1143,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T21:57:45.415Z"
         },
         {
@@ -875,7 +1161,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
-          "observedAt": "2026-10-04T01:38:03.313Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T01:59:54.342Z"
         },
         {
           "id": "408cdffb-4661-4acc-856e-e43569c588a3",
@@ -890,6 +1179,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T20:27:12.837Z"
         },
         {
@@ -905,6 +1197,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T20:26:43.022Z"
         },
         {
@@ -920,6 +1215,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T20:26:43.022Z"
         },
         {
@@ -935,6 +1233,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T20:26:43.022Z"
         },
         {
@@ -950,6 +1251,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T21:57:45.415Z"
         },
         {
@@ -965,7 +1269,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T01:46:23.426Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T01:59:30.014Z"
         },
         {
           "id": "8d317fca-d78e-433c-9fca-45f6fe55759a",
@@ -980,7 +1287,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
-          "observedAt": "2026-10-04T01:46:23.426Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T01:59:31.201Z"
         },
         {
           "id": "a1e6d288-4173-4364-9c81-14550ef7b6b3",
@@ -995,6 +1305,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T21:57:45.415Z"
         },
         {
@@ -1010,6 +1323,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
           "observedAt": "2026-10-04T20:27:12.837Z"
         },
         {
@@ -1025,6 +1341,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T02:39:19.768Z"
         },
         {
@@ -1040,6 +1359,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T21:57:45.415Z"
         },
         {
@@ -1055,7 +1377,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
-          "observedAt": "2026-10-04T01:46:21.888Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:00:17.051Z"
         },
         {
           "id": "a9829211-9137-459b-a14c-d8ec36953c19",
@@ -1070,7 +1395,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T01:46:23.426Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:00:26.349Z"
         },
         {
           "id": "ba98df84-6d18-476c-ba79-cddf553a3447",
@@ -1085,6 +1413,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
           "observedAt": "2026-10-04T20:27:12.837Z"
         },
         {
@@ -1100,7 +1431,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
-          "observedAt": "2026-10-04T01:46:23.426Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:00:25.089Z"
         },
         {
           "id": "fcc90744-e25c-43ed-8598-ced263fe195a",
@@ -1115,7 +1449,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
-          "observedAt": "2026-10-04T01:46:21.888Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:00:20.592Z"
         },
         {
           "id": "fc5b7d6f-cfa2-4aa7-9356-5c3d2c0ef0bf",
@@ -1130,6 +1467,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T20:27:10.959Z"
         },
         {
@@ -1145,6 +1485,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T20:27:09.572Z"
         },
         {
@@ -1160,6 +1503,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T20:27:10.959Z"
         },
         {
@@ -1175,6 +1521,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T20:27:12.837Z"
         },
         {
@@ -1190,6 +1539,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T20:27:10.959Z"
         },
         {
@@ -1205,6 +1557,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T20:27:12.837Z"
         },
         {
@@ -1220,6 +1575,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
           "observedAt": "2026-10-04T20:26:43.022Z"
         },
         {
@@ -1235,6 +1593,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T20:27:12.837Z"
         },
         {
@@ -1250,6 +1611,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T20:27:12.837Z"
         },
         {
@@ -1265,6 +1629,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
           "observedAt": "2026-10-04T20:27:10.959Z"
         },
         {
@@ -1280,6 +1647,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
           "observedAt": "2026-10-04T21:57:45.415Z"
         },
         {
@@ -1295,6 +1665,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
           "observedAt": "2026-10-04T20:27:10.959Z"
         },
         {
@@ -1310,6 +1683,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T20:27:09.572Z"
         },
         {
@@ -1325,11 +1701,14 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "rice:white",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T20:27:09.572Z"
         }
       ],
       "evaluation": {
-        "itemId": "64e2f262-165e-4ddd-823e-b67ac53da457",
+        "itemId": "c33f7472-7149-4ae6-bef0-f6fd4a32a191",
         "best": {
           "id": "32f17871-3777-43dd-b45e-43d89a2a62c0",
           "canonicalId": null,
@@ -1337,6 +1716,8 @@
           "retailerName": "Plaza Vea",
           "url": "https://www.plazavea.com.pe/arroz-superior-faraon-bolsa-5kg/p",
           "packages": 1,
+          "countsPackages": false,
+          "quantityUnit": "kg",
           "purchasedQuantity": 5,
           "overbuy": 0,
           "totalCostCents": 1950,
@@ -1355,6 +1736,8 @@
             "retailerName": "Plaza Vea",
             "url": "https://www.plazavea.com.pe/arroz-superior-faraon-bolsa-5kg/p",
             "packages": 1,
+            "countsPackages": false,
+            "quantityUnit": "kg",
             "purchasedQuantity": 5,
             "overbuy": 0,
             "totalCostCents": 1950,
@@ -1369,6 +1752,8 @@
             "retailerName": "Tottus",
             "url": "https://www.tottus.com.pe/tottus-pe/articulo/113706045/arroz-extra-tottus-bolsa-5-kg",
             "packages": 1,
+            "countsPackages": false,
+            "quantityUnit": "kg",
             "purchasedQuantity": 5,
             "overbuy": 0,
             "totalCostCents": 1990,
@@ -1383,6 +1768,8 @@
             "retailerName": "Plaza Vea",
             "url": "https://www.plazavea.com.pe/arroz-extra-gran-chalan-anejo-bolsa-5kg-20356924/p",
             "packages": 1,
+            "countsPackages": false,
+            "quantityUnit": "kg",
             "purchasedQuantity": 5,
             "overbuy": 0,
             "totalCostCents": 2050,
@@ -1391,7 +1778,9 @@
             "condition": null
           }
         ]
-      }
+      },
+      "preferredEggEvaluation": null,
+      "quailRegression": null
     },
     {
       "need": {
@@ -1413,7 +1802,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T01:46:54.571Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:00:40.458Z"
         },
         {
           "id": "024d926b-2455-4c58-b31c-fb5758392875",
@@ -1428,7 +1820,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "oil:vegetable",
-          "observedAt": "2026-10-04T01:46:55.888Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:00:46.673Z"
         },
         {
           "id": "dc0fa002-ec64-46be-bf0b-5f2ab31051e6",
@@ -1443,7 +1838,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "oil:vegetable",
-          "observedAt": "2026-10-04T01:46:55.888Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:00:50.951Z"
         },
         {
           "id": "77206088-781a-4c90-9449-884b4c4f2dbf",
@@ -1458,7 +1856,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "oil:vegetable",
-          "observedAt": "2026-10-04T01:46:54.571Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:00:38.904Z"
         },
         {
           "id": "e5c26829-9994-43e3-91a8-6d133547c066",
@@ -1473,7 +1874,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "oil:vegetable",
-          "observedAt": "2026-10-04T01:46:55.888Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:00:52.148Z"
         },
         {
           "id": "21d904a0-8192-4718-8fbb-69b94f310c94",
@@ -1488,7 +1892,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "oil:vegetable",
-          "observedAt": "2026-10-04T01:46:55.888Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:00:47.857Z"
         },
         {
           "id": "967f04cc-f278-477e-b4b2-66af7b11fa1e",
@@ -1503,7 +1910,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "oil:vegetable",
-          "observedAt": "2026-10-04T01:46:54.571Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:00:42.073Z"
         },
         {
           "id": "fad4337b-b188-455e-84b4-54aac532d303",
@@ -1518,7 +1928,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "oil:vegetable",
-          "observedAt": "2026-10-04T01:46:54.571Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:00:45.265Z"
         },
         {
           "id": "f0fd44c8-b453-401d-8e45-52a150da9c07",
@@ -1533,7 +1946,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "oil:vegetable",
-          "observedAt": "2026-10-04T01:46:55.888Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:00:53.330Z"
         },
         {
           "id": "10ba0b01-b77a-40dc-aa50-7e676dbcd104",
@@ -1548,7 +1964,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T01:38:35.584Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T01:59:55.896Z"
         },
         {
           "id": "5a10dff2-83e2-4447-acd6-5f41e3146bfd",
@@ -1563,7 +1982,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "oil:vegetable",
-          "observedAt": "2026-10-04T01:46:54.571Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:00:37.274Z"
         },
         {
           "id": "e79a9df4-5161-466a-b3cc-b2458000cff3",
@@ -1578,7 +2000,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T01:46:54.571Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:00:43.694Z"
         },
         {
           "id": "49409009-c97c-4d76-afa5-8ce459bb6a0b",
@@ -1593,6 +2018,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
           "observedAt": "2026-10-04T21:08:36.033Z"
         },
         {
@@ -1608,6 +2036,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
           "observedAt": "2026-10-04T02:50:17.009Z"
         },
         {
@@ -1623,6 +2054,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
           "observedAt": "2026-10-04T02:39:16.396Z"
         },
         {
@@ -1638,7 +2072,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T01:38:35.584Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T01:59:57.551Z"
         },
         {
           "id": "16c05f26-f00d-4875-96d9-75878eb341a1",
@@ -1653,6 +2090,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "oil:vegetable",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T02:39:09.050Z"
         },
         {
@@ -1668,6 +2108,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "oil:vegetable",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T02:39:18.131Z"
         },
         {
@@ -1683,6 +2126,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "oil:vegetable",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
           "observedAt": "2026-10-04T02:39:21.408Z"
         },
         {
@@ -1698,7 +2144,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "oil:vegetable",
-          "observedAt": "2026-10-04T01:46:55.888Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T01:59:42.297Z"
         },
         {
           "id": "ce120c52-e300-48e6-80cf-b4c72fb22fc2",
@@ -1713,7 +2162,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "oil:vegetable",
-          "observedAt": "2026-10-04T01:46:54.571Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T01:59:41.028Z"
         },
         {
           "id": "fdb73ae8-3de8-4780-9c6c-3e6ece6c4e50",
@@ -1728,7 +2180,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "oil:vegetable",
-          "observedAt": "2026-10-04T01:46:56.995Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T01:59:43.477Z"
         },
         {
           "id": "71cbc785-1a23-4b82-9f21-d57e4710bb10",
@@ -1743,7 +2198,10 @@
           "quality": null,
           "quantityReason": "ambiguous-quantity",
           "compatibility": null,
-          "observedAt": "2026-10-04T01:46:56.995Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:00:59.728Z"
         },
         {
           "id": "aea3e1cb-079e-44d3-aa8f-096d3537f6b5",
@@ -1758,7 +2216,10 @@
           "quality": null,
           "quantityReason": "ambiguous-quantity",
           "compatibility": "oil:vegetable",
-          "observedAt": "2026-10-04T01:46:56.995Z"
+          "semanticCompatible": true,
+          "safeSubstitution": false,
+          "exclusionReason": "Insufficient quantity evidence",
+          "observedAt": "2026-10-05T02:01:00.938Z"
         },
         {
           "id": "ff302fca-28af-457a-a7ff-eab7bbbe4282",
@@ -1773,7 +2234,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T01:46:56.995Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:01:03.727Z"
         },
         {
           "id": "593f5a46-5bc2-4e75-9a8a-c7818ec83b85",
@@ -1787,8 +2251,11 @@
           },
           "quality": "strong",
           "quantityReason": null,
-          "compatibility": null,
-          "observedAt": "2026-10-04T01:46:56.995Z"
+          "compatibility": "oil:vegetable",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:00:57.059Z"
         },
         {
           "id": "4e6c6756-d229-4f06-b1d2-93e46aaaa5a2",
@@ -1802,12 +2269,15 @@
           },
           "quality": "strong",
           "quantityReason": null,
-          "compatibility": null,
-          "observedAt": "2026-10-04T01:46:54.571Z"
+          "compatibility": "oil:vegetable",
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:00:35.596Z"
         }
       ],
       "evaluation": {
-        "itemId": "b6b4a038-258c-4ad1-ab5e-e97c05ab4146",
+        "itemId": "b30d3c36-2a67-4474-b805-c0dfd183238e",
         "best": {
           "id": "024d926b-2455-4c58-b31c-fb5758392875",
           "canonicalId": null,
@@ -1815,6 +2285,8 @@
           "retailerName": "Plaza Vea",
           "url": "https://www.plazavea.com.pe/aceite-vegetal-bells-botella-3l-20193770/p",
           "packages": 1,
+          "countsPackages": false,
+          "quantityUnit": "L",
           "purchasedQuantity": 3,
           "overbuy": 0,
           "totalCostCents": 1850,
@@ -1833,6 +2305,8 @@
             "retailerName": "Plaza Vea",
             "url": "https://www.plazavea.com.pe/aceite-vegetal-bells-botella-3l-20193770/p",
             "packages": 1,
+            "countsPackages": false,
+            "quantityUnit": "L",
             "purchasedQuantity": 3,
             "overbuy": 0,
             "totalCostCents": 1850,
@@ -1847,6 +2321,8 @@
             "retailerName": "Tottus",
             "url": "https://www.tottus.com.pe/tottus-pe/articulo/123559462/aceite-vegetal-tottus-botella-3-l",
             "packages": 1,
+            "countsPackages": false,
+            "quantityUnit": "L",
             "purchasedQuantity": 3,
             "overbuy": 0,
             "totalCostCents": 1990,
@@ -1861,6 +2337,8 @@
             "retailerName": "Plaza Vea",
             "url": "https://www.plazavea.com.pe/aceite-vegetal-bells-botella-900ml-959308/p",
             "packages": 4,
+            "countsPackages": false,
+            "quantityUnit": "L",
             "purchasedQuantity": 3.6,
             "overbuy": 0.6,
             "totalCostCents": 2200,
@@ -1869,7 +2347,9 @@
             "condition": null
           }
         ]
-      }
+      },
+      "preferredEggEvaluation": null,
+      "quailRegression": null
     },
     {
       "need": {
@@ -1891,7 +2371,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:02.496Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:52.192Z"
         },
         {
           "id": "214ebf3b-fbdd-4f82-8fdb-ac4f4a0abc16",
@@ -1906,7 +2389,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:00.078Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:48.862Z"
         },
         {
           "id": "a56e9495-ab98-46f2-806c-c37c5cdeca60",
@@ -1921,7 +2407,28 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:47.656Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:35.501Z"
+        },
+        {
+          "id": "ae43a1c7-1a8b-4443-81c5-a389226e8f5d",
+          "title": "Leche Light UHT VIGOR Bolsa 800ml",
+          "retailer": "Plaza Vea",
+          "canonicalId": null,
+          "priceCents": 470,
+          "quantity": {
+            "value": 800,
+            "unit": "ml"
+          },
+          "quality": "strong",
+          "quantityReason": null,
+          "compatibility": null,
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:37.414Z"
         },
         {
           "id": "f6946861-41ef-4ef2-b0c5-487f1d26a544",
@@ -1936,7 +2443,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:46.529Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:33.975Z"
         },
         {
           "id": "1e7e66d5-de70-4240-95b3-7ab4068c8603",
@@ -1951,7 +2461,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:45.095Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:32.245Z"
         },
         {
           "id": "98f4fcf8-e568-49ba-ad3e-6e8a5d2aa9f9",
@@ -1966,7 +2479,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:02.496Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:52.192Z"
         },
         {
           "id": "c97c3bac-4f13-45ab-b7be-c06bc0ac7809",
@@ -1981,7 +2497,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:36.884Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:24.748Z"
         },
         {
           "id": "34c9226c-2317-44b0-97e7-1c7cee62ab46",
@@ -1996,7 +2515,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:48.784Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:37.414Z"
         },
         {
           "id": "1454ddab-74a8-42e3-af2f-5fbc6b4ad770",
@@ -2011,7 +2533,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:05.068Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:54.862Z"
         },
         {
           "id": "13aef2b7-c7b2-4e42-9fa9-6ac7b2cf24ab",
@@ -2026,7 +2551,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:43.906Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:30.610Z"
         },
         {
           "id": "a2697387-b66c-4e81-8155-5f8dfb8d9a6d",
@@ -2041,7 +2569,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:39.012Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:27.103Z"
         },
         {
           "id": "38764e0b-3726-44d2-ad8a-81ec631c2955",
@@ -2056,7 +2587,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:02.496Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:52.192Z"
         },
         {
           "id": "37f50afb-355d-400e-a717-d1130b71e1be",
@@ -2071,7 +2605,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:45.095Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:32.245Z"
         },
         {
           "id": "484843fe-49a9-49b1-9888-04b0c0b652e8",
@@ -2086,7 +2623,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:45.095Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:32.245Z"
         },
         {
           "id": "4f7bb4a8-5b1b-4275-a531-c0cf8d4d0607",
@@ -2101,7 +2641,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:47.656Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:35.501Z"
         },
         {
           "id": "80068483-8460-48ad-9825-e1fe1d963102",
@@ -2116,7 +2659,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:39.012Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:27.103Z"
         },
         {
           "id": "b05e1e03-e172-4abd-8835-af485e8c5e01",
@@ -2131,7 +2677,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:46.529Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:33.975Z"
         },
         {
           "id": "768d08f0-b216-414d-b580-a030d56c3b4a",
@@ -2146,7 +2695,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:36.884Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:24.748Z"
         },
         {
           "id": "ef451f53-c903-4b6d-9f36-9b93fb675422",
@@ -2161,7 +2713,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:43.906Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:30.610Z"
         },
         {
           "id": "8e0e38a2-22d9-465d-853f-00cbd5d9767f",
@@ -2176,7 +2731,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:43.906Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:30.610Z"
         },
         {
           "id": "6c348298-b754-49d2-8cb1-8a2a59c58011",
@@ -2191,7 +2749,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:01.278Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:50.368Z"
         },
         {
           "id": "5ec32651-11c5-4ded-bdf8-a21cbda1450c",
@@ -2206,7 +2767,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:48.784Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:37.414Z"
         },
         {
           "id": "43239243-fbe3-4dfc-ac81-12149e1b311d",
@@ -2221,7 +2785,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:46.529Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:33.975Z"
         },
         {
           "id": "8c076bd1-3bc7-44fd-9c79-4fcb714dd9aa",
@@ -2236,7 +2803,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:39.012Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:27.103Z"
         },
         {
           "id": "adb192db-33f3-413f-8c5e-4fa4dc7424ad",
@@ -2251,7 +2821,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:36.884Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:24.748Z"
         },
         {
           "id": "ad4d928b-7659-4aca-a2da-bc0594d6c73d",
@@ -2266,7 +2839,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:36.884Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:24.748Z"
         },
         {
           "id": "906fbb72-87be-46c3-84a6-6123ecb01bde",
@@ -2281,7 +2857,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:05.068Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:54.862Z"
         },
         {
           "id": "fedd8b43-48d5-4584-bb5b-cc07c3cec734",
@@ -2296,7 +2875,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:47.656Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:35.501Z"
         },
         {
           "id": "c7103529-6e7f-4fb5-9b92-ef69193b0796",
@@ -2311,7 +2893,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:03.632Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:53.664Z"
         },
         {
           "id": "92675e5d-6785-4924-b865-7a98c5f66ed0",
@@ -2326,7 +2911,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:02.496Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:52.192Z"
         },
         {
           "id": "c13d64ef-c936-430a-aa2f-cdd19ed7c85c",
@@ -2341,7 +2929,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:39.012Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:27.103Z"
         },
         {
           "id": "fb83537d-68d2-4fba-a352-e6fd868ae58d",
@@ -2356,7 +2947,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:39.012Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:27.103Z"
         },
         {
           "id": "28da2be6-7b40-4cbe-82e0-c8e3e1090049",
@@ -2371,7 +2965,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:48.784Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:35.501Z"
         },
         {
           "id": "1af80b71-8eaf-4bca-97e8-831c865e86c0",
@@ -2386,7 +2983,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:39.012Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:27.103Z"
         },
         {
           "id": "ab5410e3-a94b-4145-91fb-dabefabfb077",
@@ -2401,7 +3001,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:02.496Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:52.192Z"
         },
         {
           "id": "03a0b903-f1ca-4a5e-a77e-7209f5ce653c",
@@ -2416,7 +3019,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:01.278Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:50.368Z"
         },
         {
           "id": "ca5f6564-0dfd-4606-8351-20ea36fcc294",
@@ -2431,7 +3037,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:39.012Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:27.103Z"
         },
         {
           "id": "1c5db7ae-052e-4929-8b41-b1b2c96d6b44",
@@ -2446,7 +3055,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:43.906Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:30.610Z"
         },
         {
           "id": "64673d1a-a395-4c61-a739-c99a53fd76c5",
@@ -2461,7 +3073,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:36.884Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:24.748Z"
         },
         {
           "id": "e2035c24-5ec6-4338-a92c-1e219509ab42",
@@ -2476,7 +3091,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:36.884Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:24.748Z"
         },
         {
           "id": "34573b08-33fe-455d-bec1-96627eb88e1d",
@@ -2491,7 +3109,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-03T23:33:08.393Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T01:59:49.729Z"
         },
         {
           "id": "b48df65e-68aa-4f57-9035-6ffbcf8cc918",
@@ -2506,7 +3127,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:45.095Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:32.245Z"
         },
         {
           "id": "d39793a4-b5a0-4de9-98a8-bfa16561965e",
@@ -2521,7 +3145,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:36.884Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:24.748Z"
         },
         {
           "id": "89993e9d-082c-4c1c-9c77-c013287512d6",
@@ -2536,7 +3163,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:46.529Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:33.975Z"
         },
         {
           "id": "14bc5e5a-4a54-445e-9559-3d78e9cea184",
@@ -2551,7 +3181,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:36.884Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:24.748Z"
         },
         {
           "id": "47c75f72-1637-4019-bed8-d6ff3afa340a",
@@ -2566,7 +3199,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:39.012Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:27.103Z"
         },
         {
           "id": "647b6fc0-9bb4-4632-9a4a-f2813f9c862b",
@@ -2581,6 +3217,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
           "observedAt": "2026-10-04T02:40:10.743Z"
         },
         {
@@ -2596,7 +3235,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-03T23:33:20.601Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T01:59:28.779Z"
         },
         {
           "id": "d3e72996-4096-418e-821d-098935f4ca58",
@@ -2611,6 +3253,9 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
           "observedAt": "2026-10-04T02:40:10.743Z"
         },
         {
@@ -2626,7 +3271,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:05.068Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:54.862Z"
         },
         {
           "id": "943796bc-6d72-4532-9e81-02a1e1aa75d1",
@@ -2641,7 +3289,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:03.632Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:53.664Z"
         },
         {
           "id": "f6a22203-8c02-4ea0-b2c7-38133d73a449",
@@ -2656,7 +3307,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:01.278Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:50.368Z"
         },
         {
           "id": "1eb5c9f0-eefc-4062-b7f0-c97f0b8d9b3e",
@@ -2671,7 +3325,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:45.095Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:30.610Z"
         },
         {
           "id": "5cc4b2db-5cfb-41d3-b0ab-cdb79067847d",
@@ -2686,7 +3343,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:36.884Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:24.748Z"
         },
         {
           "id": "6c76221f-8b8b-4034-9d69-fece5c8b3892",
@@ -2701,7 +3361,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:43.906Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:30.610Z"
         },
         {
           "id": "0de8aca3-f629-4870-b28f-b3ed7963f17c",
@@ -2716,7 +3379,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:43.906Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:30.610Z"
         },
         {
           "id": "4b2d0cb3-b611-4adb-af15-34d4f1d6af86",
@@ -2731,7 +3397,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:43.906Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:30.610Z"
         },
         {
           "id": "36e84922-de34-43b2-a388-ffb9a4643bfc",
@@ -2746,7 +3415,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:48.784Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:37.414Z"
         },
         {
           "id": "4f3aa57c-b12c-464f-9e6c-b56604f7e98a",
@@ -2761,7 +3433,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:43.906Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:30.610Z"
         },
         {
           "id": "bf48d4e8-d2e0-4fb8-a050-e3172c64bcd9",
@@ -2776,7 +3451,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:48.784Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:37.414Z"
         },
         {
           "id": "d8a0fe42-5b72-4381-a1bc-e811ec60af31",
@@ -2791,7 +3469,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:39.012Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:27.103Z"
         },
         {
           "id": "db5cfd9c-9251-4e42-aab9-3b19e3099174",
@@ -2806,7 +3487,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:01.278Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:50.368Z"
         },
         {
           "id": "f2ca222b-e110-4c67-bde7-3ae4753f606d",
@@ -2821,7 +3505,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:46.529Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:32.245Z"
         },
         {
           "id": "e93c08c4-ee83-4d27-ad71-b4a0d0b267fb",
@@ -2836,7 +3523,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:36.884Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:24.748Z"
         },
         {
           "id": "5730e31f-b763-4ad5-bc92-e001e8491ad9",
@@ -2848,7 +3538,10 @@
           "quality": null,
           "quantityReason": "ambiguous-quantity",
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:03.632Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:53.664Z"
         },
         {
           "id": "87e77524-9427-4d24-a4b6-90e555f44ba0",
@@ -2863,7 +3556,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:43.906Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:30.610Z"
         },
         {
           "id": "84ed0562-c8db-4e56-b92d-ddfe3e9bb659",
@@ -2878,7 +3574,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:36.884Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:24.748Z"
         },
         {
           "id": "6c0126ab-8185-4296-87b3-6fef1d169bad",
@@ -2893,7 +3592,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:47.656Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:35.501Z"
         },
         {
           "id": "bc4f2d05-f34b-4ce1-993d-9bc50bc2f9f6",
@@ -2908,7 +3610,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:43.906Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:30.610Z"
         },
         {
           "id": "5d397061-2d15-406f-9349-409b03b1a7bc",
@@ -2923,7 +3628,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:46.529Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:33.975Z"
         },
         {
           "id": "5462bf72-9b64-4ad8-a023-727de0d8a933",
@@ -2938,7 +3646,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:45.095Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:32.245Z"
         },
         {
           "id": "d0e8a595-1ebd-4697-9733-c7b10565d1b0",
@@ -2953,7 +3664,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:36.884Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:24.748Z"
         },
         {
           "id": "777785ea-03f4-4d9b-8fd9-44a31286cae4",
@@ -2968,7 +3682,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:36.884Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:24.748Z"
         },
         {
           "id": "325158dc-b94d-4434-9fb3-2de26fc69258",
@@ -2983,7 +3700,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:02.496Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:52.192Z"
         },
         {
           "id": "b750f1d6-d15f-4a88-8f5d-4f325a7db513",
@@ -2998,7 +3718,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:45.095Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:32.245Z"
         },
         {
           "id": "656f69e8-37d7-414f-b29d-2829e84d4197",
@@ -3013,7 +3736,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:39.012Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:27.103Z"
         },
         {
           "id": "da2a97a3-8edf-4641-bfaf-4eca1a34d639",
@@ -3028,7 +3754,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:43.906Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:30.610Z"
         },
         {
           "id": "70d84309-0d6c-4a4d-807c-dc851a38344d",
@@ -3043,7 +3772,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:36.884Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:24.748Z"
         },
         {
           "id": "f9155438-1db7-43d3-8162-bc4d1aca2363",
@@ -3058,7 +3790,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:47.656Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:35.501Z"
         },
         {
           "id": "3806a4cd-fd38-431b-9616-afaa8e9c36b7",
@@ -3073,7 +3808,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:45.095Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:32.245Z"
         },
         {
           "id": "45b58b7b-9a71-4ee4-b95c-bd3edfc3fd3a",
@@ -3088,7 +3826,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-03T23:33:05.288Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T01:59:46.627Z"
         },
         {
           "id": "a2e8c91d-4ed5-4cd5-85a9-d0530dd1c172",
@@ -3103,7 +3844,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:39.012Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:27.103Z"
         },
         {
           "id": "92822f3c-f26d-42bf-a175-3e25fc5239c0",
@@ -3118,7 +3862,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:47.656Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:35.501Z"
         },
         {
           "id": "fbd9108f-d152-46b6-83b3-2b435cd663a5",
@@ -3133,7 +3880,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:47.656Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:35.501Z"
         },
         {
           "id": "9027290c-bcd2-4670-95e8-368880df2b78",
@@ -3148,7 +3898,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:46.529Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:33.975Z"
         },
         {
           "id": "90a5e0e8-8738-4821-afb0-559ab77a98b0",
@@ -3163,7 +3916,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:46.529Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:33.975Z"
         },
         {
           "id": "4d7e9b76-310e-415c-8889-ee1ed0e76ae7",
@@ -3178,7 +3934,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:01.278Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:50.368Z"
         },
         {
           "id": "0d882411-628a-432c-9af7-cdc92af92c5d",
@@ -3190,7 +3949,10 @@
           "quality": null,
           "quantityReason": "missing-quantity",
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:00.078Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:48.862Z"
         },
         {
           "id": "4571648f-88da-4c71-9099-8986cfd88473",
@@ -3205,7 +3967,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:00.078Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:48.862Z"
         },
         {
           "id": "9767d062-30b4-4c84-a6aa-dc17d6b9317a",
@@ -3220,7 +3985,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:00.078Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:48.862Z"
         },
         {
           "id": "509afb82-93e5-468a-ae6d-02f42f10ee8c",
@@ -3235,7 +4003,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:00.078Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:48.862Z"
         },
         {
           "id": "3855ec57-d36d-4165-b60d-f2ae54c17698",
@@ -3250,7 +4021,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:00.078Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:48.862Z"
         },
         {
           "id": "1d00e03c-c28a-46a6-b8d1-e751df69ccbb",
@@ -3265,7 +4039,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:00.078Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:48.862Z"
         },
         {
           "id": "4f5127ec-cb77-4431-bce0-bed3bfaeeb2a",
@@ -3280,7 +4057,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:00.078Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:48.862Z"
         },
         {
           "id": "23d741d3-194b-4bf1-ac24-96b2db2f7094",
@@ -3295,7 +4075,10 @@
           "quality": null,
           "quantityReason": "ambiguous-quantity",
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:05.068Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:54.862Z"
         },
         {
           "id": "1cba605c-80f7-442a-9f43-8fcb1b19a6ac",
@@ -3310,7 +4093,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:00.078Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:48.862Z"
         },
         {
           "id": "c36d8dfd-07db-4860-bea5-da0885e8b34b",
@@ -3325,7 +4111,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:00.078Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:48.862Z"
         },
         {
           "id": "d0962d18-392e-4e93-b5c1-f15ef27f23e0",
@@ -3340,7 +4129,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:00.078Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:48.862Z"
         },
         {
           "id": "62fc5d2a-7b7d-4b5e-8591-4d9d192255ad",
@@ -3355,7 +4147,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:00.078Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:48.862Z"
         },
         {
           "id": "404ce6b7-5954-4d73-ad2f-217137cdeb5d",
@@ -3370,7 +4165,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:05.068Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:54.862Z"
         },
         {
           "id": "37b4f696-0c92-44db-9fc9-eee691d76c5a",
@@ -3385,7 +4183,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:00.078Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:48.862Z"
         },
         {
           "id": "e677b63a-dbd8-42a0-8020-8ef2b1749d91",
@@ -3400,7 +4201,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:01.278Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:50.368Z"
         },
         {
           "id": "14ea9067-1fa2-41c2-8767-9193874453a7",
@@ -3415,7 +4219,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:06:03.632Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:53.664Z"
         },
         {
           "id": "a5a669a1-e16c-4ab4-9558-9fbaa055b66c",
@@ -3430,17 +4237,22 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T21:05:47.656Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:18:35.501Z"
         }
       ],
       "evaluation": {
-        "itemId": "88416b2a-a274-4df5-ae77-f61b16ef6289",
+        "itemId": "67183528-d2c7-49b9-96b0-8162b33d819d",
         "best": null,
         "preferred": null,
         "alternative": null,
         "savingsCents": 0,
         "options": []
-      }
+      },
+      "preferredEggEvaluation": null,
+      "quailRegression": null
     },
     {
       "need": {
@@ -3462,7 +4274,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:33.077Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:01:08.539Z"
         },
         {
           "id": "2974d607-478b-47b1-8a74-dd4fbfeb98dc",
@@ -3477,7 +4292,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:liquid:machine",
-          "observedAt": "2026-10-04T01:47:35.718Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Different family/form",
+          "observedAt": "2026-10-05T02:01:37.269Z"
         },
         {
           "id": "64c8c392-6eb1-406d-8496-cd5290f57ac5",
@@ -3492,7 +4310,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:33.077Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:01:13.500Z"
         },
         {
           "id": "9fcd2aea-da55-4bed-8b47-3cb197c91669",
@@ -3507,7 +4328,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:liquid",
-          "observedAt": "2026-10-04T01:47:35.718Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Different family/form",
+          "observedAt": "2026-10-05T02:01:42.548Z"
         },
         {
           "id": "ae8cf330-7e68-4fdb-b790-1b848e27db1e",
@@ -3522,7 +4346,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:liquid",
-          "observedAt": "2026-10-04T01:47:35.718Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Different family/form",
+          "observedAt": "2026-10-05T02:01:45.208Z"
         },
         {
           "id": "21794ecb-f7ea-435a-a2bb-7e2dbc6b0f8f",
@@ -3537,7 +4364,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:33.077Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:01:10.213Z"
         },
         {
           "id": "59ed1d0c-5aec-4cf0-a6b5-ce38fa59077f",
@@ -3552,7 +4382,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:liquid",
-          "observedAt": "2026-10-04T01:47:34.389Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Different family/form",
+          "observedAt": "2026-10-05T02:01:24.217Z"
         },
         {
           "id": "965dd9fa-1db9-4b3b-9cf8-e4e3e2c7a958",
@@ -3567,7 +4400,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:liquid",
-          "observedAt": "2026-10-04T01:47:35.718Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Different family/form",
+          "observedAt": "2026-10-05T02:01:39.684Z"
         },
         {
           "id": "4e5a1c7f-113e-4365-ad2b-233dd1b9f0fa",
@@ -3582,7 +4418,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T01:47:34.389Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:01:22.975Z"
         },
         {
           "id": "02ce7446-26a8-4b9c-a109-b5606aee7410",
@@ -3597,7 +4436,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:35.718Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:01:34.601Z"
         },
         {
           "id": "117e3fbb-6e82-4c12-b66d-b9812df5bcd3",
@@ -3612,7 +4454,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:35.718Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:01:35.860Z"
         },
         {
           "id": "fe6a4c53-afb1-43f1-b568-83eb818f8777",
@@ -3627,7 +4472,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:liquid",
-          "observedAt": "2026-10-04T01:47:34.389Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Different family/form",
+          "observedAt": "2026-10-05T02:01:32.981Z"
         },
         {
           "id": "14d14324-eeb6-40a2-81fc-5c5d3da8ba15",
@@ -3642,7 +4490,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:33.077Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:01:06.963Z"
         },
         {
           "id": "61ae6581-73eb-43b6-b059-593bbc1bf83c",
@@ -3657,7 +4508,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T01:47:34.389Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:01:25.452Z"
         },
         {
           "id": "501c2813-8a42-4e22-8ac2-02304b730ee2",
@@ -3672,7 +4526,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:33.077Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:01:11.805Z"
         },
         {
           "id": "6e0100c9-0e8e-47ef-a4c7-6c866921f637",
@@ -3687,7 +4544,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:33.077Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:01:15.147Z"
         },
         {
           "id": "98811fc8-78f1-470d-8376-a33a1568eed0",
@@ -3702,7 +4562,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T01:47:34.389Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:01:29.083Z"
         },
         {
           "id": "80cd30ee-7d85-402e-bebf-b4b1b6ba446b",
@@ -3717,7 +4580,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:33.077Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:01:16.839Z"
         },
         {
           "id": "ea6e244e-fba5-48c9-9e3a-812602c7421c",
@@ -3732,7 +4598,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:33.077Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:01:20.087Z"
         },
         {
           "id": "e52568ac-f95d-4d85-a4ff-e27750783b67",
@@ -3747,7 +4616,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:34.389Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:01:30.575Z"
         },
         {
           "id": "d82a063e-4b2f-486b-857d-28495904b057",
@@ -3762,7 +4634,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T01:47:33.077Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:01:18.435Z"
         },
         {
           "id": "f649d551-b47b-4a93-9fc9-7d46ceca0da1",
@@ -3777,7 +4652,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:liquid",
-          "observedAt": "2026-10-04T01:47:34.389Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Different family/form",
+          "observedAt": "2026-10-05T02:01:31.794Z"
         },
         {
           "id": "0dfc2ff1-7a5f-4865-9a51-3ca84894a29b",
@@ -3792,7 +4670,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:34.389Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:01:21.787Z"
         },
         {
           "id": "a613ec6e-e310-4441-b5cc-4033b18b242e",
@@ -3807,11 +4688,14 @@
           "quality": null,
           "quantityReason": "ambiguous-quantity",
           "compatibility": "detergent:liquid",
-          "observedAt": "2026-10-04T01:47:35.718Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Different family/form",
+          "observedAt": "2026-10-05T02:01:43.991Z"
         }
       ],
       "evaluation": {
-        "itemId": "7013057a-fd2f-4eac-8a36-4393b084d46f",
+        "itemId": "670269cc-edfb-4631-a04c-bd31f87166bb",
         "best": {
           "id": "21794ecb-f7ea-435a-a2bb-7e2dbc6b0f8f",
           "canonicalId": null,
@@ -3819,6 +4703,8 @@
           "retailerName": "Tottus",
           "url": "https://www.tottus.com.pe/tottus-pe/articulo/123560061/detergente-en-polvo-sapolio-limon-bolsa-2-kg",
           "packages": 2,
+          "countsPackages": false,
+          "quantityUnit": "kg",
           "purchasedQuantity": 4,
           "overbuy": 1,
           "totalCostCents": 3380,
@@ -3837,6 +4723,8 @@
             "retailerName": "Tottus",
             "url": "https://www.tottus.com.pe/tottus-pe/articulo/123560061/detergente-en-polvo-sapolio-limon-bolsa-2-kg",
             "packages": 2,
+            "countsPackages": false,
+            "quantityUnit": "kg",
             "purchasedQuantity": 4,
             "overbuy": 1,
             "totalCostCents": 3380,
@@ -3851,6 +4739,8 @@
             "retailerName": "Tottus",
             "url": "https://www.tottus.com.pe/tottus-pe/articulo/148092880/detergente-en-polvo-marsella-brisas-del-norte-bolsa-4-kg",
             "packages": 1,
+            "countsPackages": false,
+            "quantityUnit": "kg",
             "purchasedQuantity": 4,
             "overbuy": 1,
             "totalCostCents": 3490,
@@ -3865,6 +4755,8 @@
             "retailerName": "Plaza Vea",
             "url": "https://www.plazavea.com.pe/detergente-en-polvo-bolivar-cuidado-total-floral-bolsa-4kg-20423866/p",
             "packages": 1,
+            "countsPackages": false,
+            "quantityUnit": "kg",
             "purchasedQuantity": 4,
             "overbuy": 1,
             "totalCostCents": 4190,
@@ -3873,7 +4765,9 @@
             "condition": null
           }
         ]
-      }
+      },
+      "preferredEggEvaluation": null,
+      "quailRegression": null
     },
     {
       "need": {
@@ -3895,7 +4789,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:33.077Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Different family/form",
+          "observedAt": "2026-10-05T02:01:08.539Z"
         },
         {
           "id": "2974d607-478b-47b1-8a74-dd4fbfeb98dc",
@@ -3910,7 +4807,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:liquid:machine",
-          "observedAt": "2026-10-04T01:47:35.718Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Different family/form",
+          "observedAt": "2026-10-05T02:01:37.269Z"
         },
         {
           "id": "64c8c392-6eb1-406d-8496-cd5290f57ac5",
@@ -3925,7 +4825,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:33.077Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Different family/form",
+          "observedAt": "2026-10-05T02:01:13.500Z"
         },
         {
           "id": "9fcd2aea-da55-4bed-8b47-3cb197c91669",
@@ -3940,7 +4843,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:liquid",
-          "observedAt": "2026-10-04T01:47:35.718Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:01:42.548Z"
         },
         {
           "id": "ae8cf330-7e68-4fdb-b790-1b848e27db1e",
@@ -3955,7 +4861,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:liquid",
-          "observedAt": "2026-10-04T01:47:35.718Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:01:45.208Z"
         },
         {
           "id": "21794ecb-f7ea-435a-a2bb-7e2dbc6b0f8f",
@@ -3970,7 +4879,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:33.077Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Different family/form",
+          "observedAt": "2026-10-05T02:01:10.213Z"
         },
         {
           "id": "59ed1d0c-5aec-4cf0-a6b5-ce38fa59077f",
@@ -3985,7 +4897,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:liquid",
-          "observedAt": "2026-10-04T01:47:34.389Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:01:24.217Z"
         },
         {
           "id": "965dd9fa-1db9-4b3b-9cf8-e4e3e2c7a958",
@@ -4000,7 +4915,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:liquid",
-          "observedAt": "2026-10-04T01:47:35.718Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:01:39.684Z"
         },
         {
           "id": "4e5a1c7f-113e-4365-ad2b-233dd1b9f0fa",
@@ -4015,7 +4933,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T01:47:34.389Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:01:22.975Z"
         },
         {
           "id": "02ce7446-26a8-4b9c-a109-b5606aee7410",
@@ -4030,7 +4951,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:35.718Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Different family/form",
+          "observedAt": "2026-10-05T02:01:34.601Z"
         },
         {
           "id": "117e3fbb-6e82-4c12-b66d-b9812df5bcd3",
@@ -4045,7 +4969,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:35.718Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Different family/form",
+          "observedAt": "2026-10-05T02:01:35.860Z"
         },
         {
           "id": "fe6a4c53-afb1-43f1-b568-83eb818f8777",
@@ -4060,7 +4987,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:liquid",
-          "observedAt": "2026-10-04T01:47:34.389Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:01:32.981Z"
         },
         {
           "id": "14d14324-eeb6-40a2-81fc-5c5d3da8ba15",
@@ -4075,7 +5005,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:33.077Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Different family/form",
+          "observedAt": "2026-10-05T02:01:06.963Z"
         },
         {
           "id": "61ae6581-73eb-43b6-b059-593bbc1bf83c",
@@ -4090,7 +5023,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T01:47:34.389Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:01:25.452Z"
         },
         {
           "id": "501c2813-8a42-4e22-8ac2-02304b730ee2",
@@ -4105,7 +5041,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:33.077Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Different family/form",
+          "observedAt": "2026-10-05T02:01:11.805Z"
         },
         {
           "id": "6e0100c9-0e8e-47ef-a4c7-6c866921f637",
@@ -4120,7 +5059,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:33.077Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Different family/form",
+          "observedAt": "2026-10-05T02:01:15.147Z"
         },
         {
           "id": "98811fc8-78f1-470d-8376-a33a1568eed0",
@@ -4135,7 +5077,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T01:47:34.389Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:01:29.083Z"
         },
         {
           "id": "80cd30ee-7d85-402e-bebf-b4b1b6ba446b",
@@ -4150,7 +5095,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:33.077Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Different family/form",
+          "observedAt": "2026-10-05T02:01:16.839Z"
         },
         {
           "id": "ea6e244e-fba5-48c9-9e3a-812602c7421c",
@@ -4165,7 +5113,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:33.077Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Different family/form",
+          "observedAt": "2026-10-05T02:01:20.087Z"
         },
         {
           "id": "e52568ac-f95d-4d85-a4ff-e27750783b67",
@@ -4180,7 +5131,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:34.389Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Different family/form",
+          "observedAt": "2026-10-05T02:01:30.575Z"
         },
         {
           "id": "d82a063e-4b2f-486b-857d-28495904b057",
@@ -4195,7 +5149,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": null,
-          "observedAt": "2026-10-04T01:47:33.077Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Unsupported or specialty variant",
+          "observedAt": "2026-10-05T02:01:18.435Z"
         },
         {
           "id": "f649d551-b47b-4a93-9fc9-7d46ceca0da1",
@@ -4210,7 +5167,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:liquid",
-          "observedAt": "2026-10-04T01:47:34.389Z"
+          "semanticCompatible": true,
+          "safeSubstitution": true,
+          "exclusionReason": null,
+          "observedAt": "2026-10-05T02:01:31.794Z"
         },
         {
           "id": "0dfc2ff1-7a5f-4865-9a51-3ca84894a29b",
@@ -4225,7 +5185,10 @@
           "quality": "strong",
           "quantityReason": null,
           "compatibility": "detergent:powder",
-          "observedAt": "2026-10-04T01:47:34.389Z"
+          "semanticCompatible": false,
+          "safeSubstitution": false,
+          "exclusionReason": "Different family/form",
+          "observedAt": "2026-10-05T02:01:21.787Z"
         },
         {
           "id": "a613ec6e-e310-4441-b5cc-4033b18b242e",
@@ -4240,11 +5203,14 @@
           "quality": null,
           "quantityReason": "ambiguous-quantity",
           "compatibility": "detergent:liquid",
-          "observedAt": "2026-10-04T01:47:35.718Z"
+          "semanticCompatible": true,
+          "safeSubstitution": false,
+          "exclusionReason": "Insufficient quantity evidence",
+          "observedAt": "2026-10-05T02:01:43.991Z"
         }
       ],
       "evaluation": {
-        "itemId": "a34e84af-5f1d-4e1b-944b-da8d738ddd06",
+        "itemId": "e6d0a21f-bbaf-41d2-8140-1f92414ea1ab",
         "best": {
           "id": "fe6a4c53-afb1-43f1-b568-83eb818f8777",
           "canonicalId": null,
@@ -4252,6 +5218,8 @@
           "retailerName": "Plaza Vea",
           "url": "https://www.plazavea.com.pe/detergente-liquido-bolivar-cuidado-total-doypack-3l-20462964/p",
           "packages": 1,
+          "countsPackages": false,
+          "quantityUnit": "L",
           "purchasedQuantity": 3,
           "overbuy": 0,
           "totalCostCents": 4150,
@@ -4270,6 +5238,8 @@
             "retailerName": "Plaza Vea",
             "url": "https://www.plazavea.com.pe/detergente-liquido-bolivar-cuidado-total-doypack-3l-20462964/p",
             "packages": 1,
+            "countsPackages": false,
+            "quantityUnit": "L",
             "purchasedQuantity": 3,
             "overbuy": 0,
             "totalCostCents": 4150,
@@ -4284,6 +5254,8 @@
             "retailerName": "Metro",
             "url": "https://www.metro.pe/detergente-liquido-bolivar-active-care-3l-888203/p",
             "packages": 1,
+            "countsPackages": false,
+            "quantityUnit": "L",
             "purchasedQuantity": 3,
             "overbuy": 0,
             "totalCostCents": 4250,
@@ -4298,6 +5270,8 @@
             "retailerName": "Plaza Vea",
             "url": "https://www.plazavea.com.pe/detergente-liquido-bolivar-cuidado-total-19l-20464560/p",
             "packages": 2,
+            "countsPackages": false,
+            "quantityUnit": "L",
             "purchasedQuantity": 3.8,
             "overbuy": 0.8,
             "totalCostCents": 5980,
@@ -4306,7 +5280,9 @@
             "condition": null
           }
         ]
-      }
+      },
+      "preferredEggEvaluation": null,
+      "quailRegression": null
     }
   ]
 }

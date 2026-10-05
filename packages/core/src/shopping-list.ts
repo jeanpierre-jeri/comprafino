@@ -1,12 +1,19 @@
 import { z } from "zod";
 import { normalizeSearchQuery } from "./public-products.ts";
-import { classifyProductFamily, resolveProductFamilyQuery } from "./product-family.ts";
+import { classifyProductFamily } from "./product-family.ts";
+import {
+  getSubstitutionProfile,
+  genericSubstitutionContexts,
+  inferGenericSubstitutionProfile,
+  isListingCompatibleWithGenericNeed,
+} from "./substitution-compatibility.ts";
+export { shoppingCompatibilityKey } from "./substitution-compatibility.ts";
 import { offerFreshness } from "./listing-refresh.ts";
 import { conditionalOfferSchema, rankedPrice } from "./conditional-pricing.ts";
 import type { PriceMode } from "./conditional-pricing.ts";
 
 export const shoppingIntentLabels = {
-  generic: "Cualquier opción que convenga",
+  generic: "Cualquier opción equivalente",
   preferred: "Prefiero este producto",
   strict: "Solo quiero este producto",
 } as const;
@@ -30,18 +37,38 @@ const common = {
   label: z.string().trim().min(2).max(120),
   query: z.string().trim().min(2).max(120),
   quantity: shoppingQuantitySchema,
+  quantityMode: z.enum(["normalized", "packages"]).default("normalized"),
+  substitutionProfile: z.string().max(80).nullable().default(null),
   frequency: z.enum(["weekly", "biweekly", "monthly"]),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 };
+function validPackageQuantity(item: {
+  quantityMode: string;
+  quantity: { amount: number; unit: string };
+}) {
+  return (
+    item.quantityMode !== "packages" ||
+    (item.quantity.unit === "unit" && Number.isInteger(item.quantity.amount))
+  );
+}
 export const shoppingListItemSchema = z.discriminatedUnion("intent", [
-  z.object({ ...common, intent: z.literal("generic"), canonicalId: z.null() }),
-  z.object({ ...common, intent: z.literal("preferred"), canonicalId: z.uuid() }),
-  z.object({ ...common, intent: z.literal("strict"), canonicalId: z.uuid() }),
+  z.object({
+    ...common,
+    quantityMode: z.literal("normalized").default("normalized"),
+    intent: z.literal("generic"),
+    canonicalId: z.null(),
+  }),
+  z
+    .object({ ...common, intent: z.literal("preferred"), canonicalId: z.uuid() })
+    .refine(validPackageQuantity, "Package count must be whole units"),
+  z
+    .object({ ...common, intent: z.literal("strict"), canonicalId: z.uuid() })
+    .refine(validPackageQuantity, "Package count must be whole units"),
 ]);
 export type ShoppingListItem = z.infer<typeof shoppingListItemSchema>;
 export const shoppingListSchema = z
-  .object({ version: z.literal(1), items: z.array(shoppingListItemSchema).max(50) })
+  .object({ version: z.literal(2), items: z.array(shoppingListItemSchema).max(50) })
   .refine(
     (list) => new Set(list.items.map((i) => i.id)).size === list.items.length,
     "Duplicate IDs",
@@ -52,12 +79,30 @@ export const shoppingListSchema = z
   );
 export type ShoppingList = z.infer<typeof shoppingListSchema>;
 export function emptyShoppingList(): ShoppingList {
-  return { version: 1, items: [] };
+  return { version: 2, items: [] };
 }
 export function parseShoppingList(raw: string | null): { list: ShoppingList; invalid: boolean } {
   if (raw === null) return { list: emptyShoppingList(), invalid: false };
   try {
-    const parsed = shoppingListSchema.safeParse(JSON.parse(raw) as unknown);
+    const value: unknown = JSON.parse(raw);
+    const legacy = z
+      .object({ version: z.literal(1), items: z.array(shoppingListItemSchema).max(50) })
+      .safeParse(value);
+    const parsed = shoppingListSchema.safeParse(
+      legacy.success
+        ? {
+            version: 2,
+            items: legacy.data.items.map((item) => ({
+              ...item,
+              quantityMode: "normalized",
+              substitutionProfile:
+                item.intent === "generic"
+                  ? inferGenericSubstitutionProfile(item.query, item.quantity.unit)
+                  : null,
+            })),
+          }
+        : value,
+    );
     if (parsed.success) return { list: parsed.data, invalid: false };
   } catch {
     /* Invalid storage is recoverable. */
@@ -69,10 +114,27 @@ export function serializeShoppingList(list: ShoppingList): string {
 }
 export function shoppingItemKey(item: ShoppingListItem): string {
   // Frequency/amount are editable metadata; adding again updates the existing need.
-  return `${item.intent}:${item.intent === "generic" ? shoppingGenericNeedKey(item.query, item.quantity.unit) : item.canonicalId}:${item.quantity.unit}`;
+  return `${item.intent}:${item.intent === "generic" ? shoppingGenericNeedKey(item.query, item.quantity.unit) : item.canonicalId}:${item.intent === "generic" ? (item.substitutionProfile ?? "withheld") : ""}:${item.quantityMode}:${item.quantity.unit}`;
 }
 export function saveShoppingItem(list: ShoppingList, raw: ShoppingListItem): ShoppingList {
   const item = shoppingListItemSchema.parse(raw);
+  if (item.intent === "generic") {
+    const query = normalizeSearchQuery(item.query);
+    const generatedLabel = normalizeSearchQuery(item.label) === query;
+    item.query = query;
+    if (
+      item.substitutionProfile !== inferGenericSubstitutionProfile(item.query, item.quantity.unit)
+    )
+      item.substitutionProfile = null;
+    const context = item.substitutionProfile
+      ? genericSubstitutionContexts[item.substitutionProfile]
+      : undefined;
+    // Persist the safe need itself, independent of retailer/brand search modifiers.
+    // Unsupported semantic variants retain their description; custom labels survive.
+    item.query = context?.query ?? query;
+    if (generatedLabel)
+      item.label = context?.label ?? item.label.charAt(0).toUpperCase() + item.label.slice(1);
+  }
   const existing =
     list.items.find((i) => i.id === item.id) ??
     list.items.find((i) => shoppingItemKey(i) === shoppingItemKey(item));
@@ -84,46 +146,16 @@ export function saveShoppingItem(list: ShoppingList, raw: ShoppingListItem): Sho
     throw new Error("Tu lista admite hasta 50 necesidades.");
   const saved = existing ? { ...item, id: existing.id, createdAt: existing.createdAt } : item;
   return shoppingListSchema.parse({
-    version: 1,
+    version: 2,
     items: existing
       ? list.items.map((i) => (i.id === existing.id ? saved : i))
       : [...list.items, saved],
   });
 }
 export function removeShoppingItem(list: ShoppingList, id: string): ShoppingList {
-  return { version: 1, items: list.items.filter((i) => i.id !== id) };
+  return { version: 2, items: list.items.filter((i) => i.id !== id) };
 }
 
-/** Reuse catalog family evidence, then narrow to audited interchangeable variants.
- * Unsupported or ambiguous families fail closed, even with lexical matches. */
-export function shoppingCompatibilityKey(title: string): string | null {
-  const family = classifyProductFamily({ title }).family;
-  const t = normalizeSearchQuery(title).normalize("NFD").replace(/\p{M}/gu, "");
-  if (
-    /\b(?:organic[oa]s?|premium|ecologic[oa]s?|enriquecid[oa]s?|integral(?:es)?|parbolizado|parboiled|precocido|rojo|negro|basmati|jazmin|risotto|arborio|gallinas? libres?|libre pastoreo|pastoreo|corral|omega|codorniz|pato|bebe|antibacterial|hipoalergenico|suavizante|pods?|capsulas?|oliva|coco|palta|sesamo|sacha inchi|oleico|quinua)\b/u.test(
-      t,
-    )
-  )
-    return null;
-  if (family === "eggs") return "eggs:regular";
-  if (family === "rice") return "rice:white";
-  if (family === "cooking_oil") {
-    if (/\bgirasol\b/u.test(t)) return "oil:sunflower";
-    if (/\b(?:vegetal|soya|soja)\b/u.test(t)) return "oil:vegetable";
-    return null;
-  }
-  if (family === "detergent") {
-    if (
-      /\b(?:baby|kids|bebes?|ninos?|micelar|ropa negra|ropa blanca|hipoalergenico|color)\b/u.test(t)
-    )
-      return null;
-    const machine = /\b(?:matic|automatic[oa])\b/u.test(t) ? ":machine" : "";
-    if (/\bliquido\b/u.test(t)) return `detergent:liquid${machine}`;
-    if (/\bpolvo\b/u.test(t)) return `detergent:powder${machine}`;
-    return null;
-  }
-  return null;
-}
 export function shoppingQueryForTitle(title: string): string {
   const family = classifyProductFamily({ title }).family;
   return family
@@ -141,25 +173,13 @@ export function shoppingQueryForTitle(title: string): string {
       }[family]
     : title.slice(0, 120);
 }
-function genericCompatibilityKey(query: string, unit: "unit" | "kg" | "L") {
-  const family = resolveProductFamilyQuery(query)?.family;
-  // A broad oil need defaults to ordinary vegetable oil; detergent's dimension
-  // selects powder versus liquid. More specific unsafe tokens remain excluded.
-  const explicit = shoppingCompatibilityKey(query);
-  if (explicit) return explicit;
-  if (family === "cooking_oil" && !resolveProductFamilyQuery(query)?.remainingQuery)
-    return "oil:vegetable";
-  if (family === "detergent" && !resolveProductFamilyQuery(query)?.remainingQuery)
-    return unit === "kg" ? "detergent:powder" : unit === "L" ? "detergent:liquid" : null;
-  return null;
-}
 /** A generic intent is a compatible family/variant, never a brand or pack size.
  * Unsupported intents retain their query rather than being silently generalized. */
 export function shoppingGenericNeedKey(query: string, unit: "unit" | "kg" | "L") {
-  return genericCompatibilityKey(query, unit) ?? normalizeSearchQuery(query);
+  return inferGenericSubstitutionProfile(query, unit) ?? normalizeSearchQuery(query);
 }
 export function shoppingMarketQuery(item: ShoppingListItem): string {
-  return genericCompatibilityKey(item.query, item.quantity.unit)
+  return inferGenericSubstitutionProfile(item.query, item.quantity.unit)
     ? shoppingQueryForTitle(item.query)
     : item.query;
 }
@@ -175,6 +195,8 @@ export const shoppingCandidateSchema = z.object({
   available: z.boolean().nullable(),
   packageQuantity: shoppingQuantitySchema.nullable(),
   strongQuantity: z.boolean(),
+  pricingBasis: z.enum(["unit", "kg"]).optional(),
+  substitutionProfile: z.string().nullable().optional(),
 });
 export type ShoppingCandidate = z.infer<typeof shoppingCandidateSchema>;
 export const shoppingOptionSchema = z.object({
@@ -185,6 +207,7 @@ export const shoppingOptionSchema = z.object({
   url: z.string().url(),
   packages: z.number().int().positive(),
   countsPackages: z.boolean(),
+  quantityUnit: z.enum(["unit", "kg", "L"]),
   purchasedQuantity: z.number().positive(),
   overbuy: z.number().nonnegative(),
   totalCostCents: z.number().int().nonnegative().safe(),
@@ -209,26 +232,56 @@ export function evaluateShoppingListItem(
   now = new Date(),
   preferredTitle?: string,
 ): ShoppingEvaluation {
-  const compatibility =
-    item.intent === "generic"
-      ? genericCompatibilityKey(item.query, item.quantity.unit)
-      : preferredTitle
-        ? shoppingCompatibilityKey(preferredTitle)
-        : null;
+  const compatibility = preferredTitle ? getSubstitutionProfile({ title: preferredTitle }) : null;
+  const reference =
+    item.intent !== "generic" && item.quantityMode === "packages"
+      ? candidates.find(
+          (c) =>
+            c.canonicalId === item.canonicalId &&
+            c.pricingBasis !== "kg" &&
+            c.strongQuantity &&
+            c.packageQuantity,
+        )
+      : null;
   const evaluated: ShoppingOption[] = [];
   for (const c of candidates) {
-    if (c.available === false || offerFreshness(c.observedAt, now) !== "fresh") continue;
+    if (
+      c.available === false ||
+      c.pricingBasis === "kg" ||
+      offerFreshness(c.observedAt, now) !== "fresh"
+    )
+      continue;
     const exact = item.intent !== "generic" && c.canonicalId === item.canonicalId;
     if (item.intent === "strict" && !exact) continue;
-    if (!exact && (!compatibility || shoppingCompatibilityKey(c.title) !== compatibility)) continue;
-    // Count for a specific mass/volume SKU means whole retail packages (envases).
+    const candidateProfile =
+      c.substitutionProfile !== undefined
+        ? c.substitutionProfile
+        : getSubstitutionProfile({ title: c.title });
+    if (
+      !exact &&
+      (item.intent === "generic"
+        ? !isListingCompatibleWithGenericNeed(item, { title: c.title }) ||
+          candidateProfile !== item.substitutionProfile
+        : !compatibility || candidateProfile !== compatibility)
+    )
+      continue;
     const countsPackages =
       exact &&
-      item.quantity.unit === "unit" &&
-      (c.packageQuantity?.unit === "kg" || c.packageQuantity?.unit === "L");
+      (item.quantityMode === "packages" ||
+        (item.quantity.unit === "unit" &&
+          (c.packageQuantity?.unit === "kg" || c.packageQuantity?.unit === "L")));
     const q = countsPackages ? { amount: 1, unit: "unit" as const } : c.packageQuantity;
-    if (!q || (!c.strongQuantity && !countsPackages) || q.unit !== item.quantity.unit) continue;
-    const required = Math.round(item.quantity.amount * 1000);
+    const target =
+      !exact && item.quantityMode === "packages"
+        ? reference?.packageQuantity
+          ? {
+              amount: reference.packageQuantity.amount * item.quantity.amount,
+              unit: reference.packageQuantity.unit,
+            }
+          : null
+        : item.quantity;
+    if (!q || !target || (!c.strongQuantity && !countsPackages) || q.unit !== target.unit) continue;
+    const required = Math.round(target.amount * 1000);
     const size = Math.round(q.amount * 1000);
     const packages = Math.ceil(required / size);
     const purchased = packages * size;
@@ -247,6 +300,7 @@ export function evaluateShoppingListItem(
       url: c.url,
       packages,
       countsPackages,
+      quantityUnit: q.unit,
       purchasedQuantity: purchased / 1000,
       overbuy: (purchased - required) / 1000,
       totalCostCents,

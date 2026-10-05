@@ -144,13 +144,17 @@ Use current/historical prices, confirmed future promotions and clearly labelled 
 
 Implemented: versioned browser-local generic/preferred/strict needs, quantity and frequency editing, safe storage and cross-tab updates, independently evaluated fresh whole-package options, conservative variant/quantity and overbuy policy, ordinary/CMR modes, preserved canonical preferences with meaningful alternatives, strict isolation, grouped `/list` cards and summary, search/detail add dialogs, header/loading/theme integration. No account, remote list storage, migration, dependency, basket optimization, alert, AI or timing recommendation.
 
-Unit/PostgreSQL coverage, isolated browser fixtures, read-only real-data audit and remaining acceptance gates are documented in [shopping lists](shopping-list.md). The sandbox build hit the known worker-port restriction; production Chromium execution and desktop/mobile visual review remain pending. Stage and await local confirmation before committing. **Milestone 15 is not complete until those checks pass.**
+Milestone 15 is complete per the accepted user baseline. Its recurring-list behavior is refined below before basket optimization.
 
-Recommended next milestone: reviewed generic compatibility/coverage expansion and purchase-decision evidence for recurring needs, before temporal recommendations. Do not begin it automatically.
+## Milestone 15.1 — Simplify intent UX and harden safe substitutions
 
-## Later — Basket optimization
+Implemented: contextual generic versus preselected exact creation, consistent secondary retailer-option add actions with evidence-based generic/withheld fallback, no nested product search or list-name input, normalized generic quantities versus exact sale-package counts, version-two local-storage migration preserving legacy quantities/custom labels, a shared conservative substitution API, and search-versus-substitution quail regression coverage. No dependency or SQL migration added.
 
-Compare one-store purchases and two-store combinations, delivery/travel costs where applicable and user preferences. Test explicit constraints.
+See [shopping lists](shopping-list.md) and [substitution compatibility](substitution-compatibility.md) for family policies, current-catalog audit, tests and limitations. Unit and PostgreSQL tests pass. The user confirmed fresh local `pnpm build` and `pnpm test:e2e` passed, reviewed the final UX, and accepted Milestone 15.1. Generic persistence now normalizes safe retailer/brand searches through the substitution profile while retaining unsupported semantic variants. The earlier agent worker-port restriction is historical; Next configuration is unchanged. Commit authorized; do not push automatically or begin Milestone 16.
+
+## Milestone 16 — Basket optimization (planned)
+
+Compare one-store purchases and two-store combinations, delivery/travel costs where applicable and user preferences. Test explicit constraints. Reuse conservative substitution compatibility and explicit normalized-quantity/package-count semantics; broad search relevance cannot authorize substitution. Do not begin automatically. No basket optimizer or temporal prediction is implemented in Milestone 15.1.
 
 ## Later — Accounts and alerts
 

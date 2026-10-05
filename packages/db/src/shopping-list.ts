@@ -1,5 +1,6 @@
 import {
   evaluateShoppingListItem,
+  getSubstitutionProfile,
   searchFilters,
   shoppingQueryForTitle,
   shoppingMarketQuery,
@@ -76,5 +77,7 @@ function shoppingCandidate(
           }
         : null,
     strongQuantity: o.unitPrice?.quality === "strong",
+    pricingBasis: o.pricingBasis,
+    substitutionProfile: getSubstitutionProfile(o),
   };
 }

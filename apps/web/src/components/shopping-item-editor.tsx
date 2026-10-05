@@ -1,244 +1,177 @@
 "use client";
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import {
   saveShoppingItem,
   shoppingFrequencyLabels,
-  shoppingIntentLabels,
   shoppingItemKey,
   shoppingListItemSchema,
-  shoppingQueryForTitle,
-  shoppingGenericNeedKey,
+  inferGenericSubstitutionProfile,
+  normalizeSearchQuery,
 } from "@comprafino/core";
-import type { ShoppingListItem } from "@comprafino/core";
+import type { ShoppingListItem, ShoppingCreationSeed } from "@comprafino/core";
+import { ModalDialog, useModalDialog } from "@comprafino/ui/components/modal-dialog";
 import { useShoppingList } from "./use-shopping-list";
-export type ShoppingSeed = {
-  label: string;
-  query: string;
-  canonicalId: string | null;
-  quantity?: ShoppingListItem["quantity"];
-};
-export function ShoppingItemEditor({
-  seed,
-  item,
-  close,
-  onSaved,
-}: {
+export type ShoppingSeed = ShoppingCreationSeed;
+export function ShoppingItemEditor(props: {
   seed: ShoppingSeed;
   item?: ShoppingListItem;
   close: () => void;
   onSaved?: () => void;
 }) {
-  const { list, change } = useShoppingList();
-  const dialog = useRef<HTMLDialogElement>(null);
-  const fieldId = useId();
-  const [intent, setIntent] = useState<ShoppingListItem["intent"]>(
-    item?.intent ?? (seed.canonicalId ? "preferred" : "generic"),
+  const titleId = useId();
+  return (
+    <ModalDialog className="shopping-dialog" labelledBy={titleId} onClose={props.close}>
+      <ShoppingItemForm
+        seed={props.seed}
+        item={props.item}
+        onSaved={props.onSaved}
+        titleId={titleId}
+      />
+    </ModalDialog>
   );
-  const [label, setLabel] = useState(item?.label ?? seed.label);
-  const [query, setQuery] = useState(item?.query ?? seed.query);
-  const [canonicalId, setCanonicalId] = useState(item?.canonicalId ?? seed.canonicalId);
-  const [amount, setAmount] = useState(String(item?.quantity.amount ?? seed.quantity?.amount ?? 1));
+}
+function ShoppingItemForm({
+  seed,
+  item,
+  onSaved,
+  titleId,
+}: {
+  seed: ShoppingSeed;
+  item?: ShoppingListItem;
+  onSaved?: () => void;
+  titleId: string;
+}) {
+  const { dismiss, closing } = useModalDialog();
+  const { list, change } = useShoppingList();
+  const fieldId = useId();
+  const generic = item ? item.intent === "generic" : !seed.canonicalId;
+  const [intent, setIntent] = useState<ShoppingListItem["intent"]>(
+    item?.intent ?? (generic ? "generic" : "preferred"),
+  );
+  const label = item?.label ?? seed.label;
+  const query = normalizeSearchQuery(item?.query ?? seed.query);
+  const canonicalId = item?.canonicalId ?? seed.canonicalId;
+  // Old normalized exact needs remain in their original measure until edited
+  // with catalog evidence; never guess how many eggs/bottles a package contains.
+  const quantityMode = item?.quantityMode ?? (generic ? "normalized" : "packages");
+  const packages = quantityMode === "packages";
+  const [amount, setAmount] = useState(
+    String(item?.quantity.amount ?? (generic ? (seed.quantity?.amount ?? 1) : 1)),
+  );
   const [unit, setUnit] = useState<ShoppingListItem["quantity"]["unit"]>(
-    item?.quantity.unit ?? seed.quantity?.unit ?? "unit",
+    item?.quantity.unit ?? (generic ? (seed.quantity?.unit ?? "unit") : "unit"),
   );
   const [frequency, setFrequency] = useState<ShoppingListItem["frequency"]>(
     item?.frequency ?? "weekly",
   );
-  const [products, setProducts] = useState<{ id: string; label: string }[]>([]);
   const [error, setError] = useState("");
-  const [searching, setSearching] = useState(false);
-  useEffect(() => {
-    dialog.current?.showModal();
-  }, []);
-  function dismiss() {
-    dialog.current?.close();
-    close();
+  const [identity] = useState(() => ({
+    id: crypto.randomUUID(),
+    createdAt: new Date().toISOString(),
+  }));
+  const substitutionsWithheld =
+    generic && (item ? item.substitutionProfile === null : seed.substitutionProfile === null);
+  function draft(now = item?.updatedAt ?? identity.createdAt) {
+    return shoppingListItemSchema.safeParse({
+      id: item?.id ?? identity.id,
+      label,
+      query,
+      intent,
+      canonicalId: generic ? null : canonicalId,
+      quantity: { amount: Number(amount), unit },
+      quantityMode,
+      substitutionProfile:
+        generic && !substitutionsWithheld ? inferGenericSubstitutionProfile(query, unit) : null,
+      frequency,
+      createdAt: item?.createdAt ?? identity.createdAt,
+      updatedAt: now,
+    });
   }
-  const duplicate = list.items.find(
-    (i) =>
-      i.id !== item?.id &&
-      shoppingItemKey(i) ===
-        `${intent}:${intent === "generic" ? shoppingGenericNeedKey(query, unit) : canonicalId}:${unit}`,
-  );
-  async function searchProducts() {
-    setSearching(true);
-    setError("");
-    try {
-      const response = await fetch(`/api/list/products?q=${encodeURIComponent(query)}`, {
-        cache: "no-store",
-      });
-      const body: unknown = await response.json();
-      if (
-        !response.ok ||
-        typeof body !== "object" ||
-        body === null ||
-        !("products" in body) ||
-        !Array.isArray(body.products)
-      )
-        throw new Error("No pudimos buscar productos.");
-      const validated: { id: string; label: string }[] = [];
-      for (const p of body.products) {
-        if (
-          typeof p !== "object" ||
-          p === null ||
-          !("id" in p) ||
-          typeof p.id !== "string" ||
-          !("label" in p) ||
-          typeof p.label !== "string"
-        )
-          throw new Error("Respuesta de productos inválida.");
-        validated.push({ id: p.id, label: p.label });
-      }
-      setProducts(validated);
-      if (!validated.length) setError("No encontramos productos. Prueba otra búsqueda.");
-    } catch {
-      setError("No pudimos buscar productos. Intenta nuevamente.");
-    } finally {
-      setSearching(false);
-    }
-  }
+  const parsedDraft = draft();
+  const duplicate =
+    parsedDraft.success &&
+    list.items.find(
+      (i) => i.id !== item?.id && shoppingItemKey(i) === shoppingItemKey(parsedDraft.data),
+    );
   return (
-    <dialog
-      ref={dialog}
-      className="shopping-dialog"
-      aria-labelledby="shopping-editor-title"
-      onCancel={(event) => {
+    <form
+      onSubmit={(event) => {
         event.preventDefault();
-        dismiss();
+        if (closing) return;
+        setError("");
+        const parsed = draft(new Date().toISOString());
+        if (!parsed.success) {
+          setError("Revisa la cantidad antes de guardar.");
+          return;
+        }
+        try {
+          change((current) => saveShoppingItem(current, parsed.data));
+          onSaved?.();
+          dismiss();
+        } catch (failure) {
+          setError(failure instanceof Error ? failure.message : "No pudimos guardar la lista.");
+        }
       }}
     >
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          setError("");
-          const now = new Date().toISOString();
-          const parsed = shoppingListItemSchema.safeParse({
-            id: item?.id ?? crypto.randomUUID(),
-            label,
-            query,
-            intent,
-            canonicalId: intent === "generic" ? null : canonicalId,
-            quantity: { amount: Number(amount), unit },
-            frequency,
-            createdAt: item?.createdAt ?? now,
-            updatedAt: now,
-          });
-          if (!parsed.success) {
-            setError(
-              "Revisa la cantidad, la búsqueda y selecciona un producto para guardar una preferencia.",
-            );
-            return;
-          }
-          try {
-            change((current) => saveShoppingItem(current, parsed.data));
-            onSaved?.();
-            dismiss();
-          } catch (failure) {
-            setError(failure instanceof Error ? failure.message : "No pudimos guardar la lista.");
-          }
-        }}
-      >
-        <h2 id="shopping-editor-title" className="text-2xl font-semibold">
-          {item ? "Editar necesidad" : "Agregar a mi lista"}
-        </h2>
-        <fieldset className="mt-5 space-y-3">
-          <legend className="mb-2 font-medium">¿Qué quieres comprar?</legend>
-          {Object.entries(shoppingIntentLabels).map(([value, text]) => (
-            <label key={value} className="flex items-center gap-3">
+      <h2 id={titleId} className="pr-12 text-xl font-semibold">
+        {item ? `Editar “${label}”` : `Agregar “${label}” a mi lista`}
+      </h2>
+      {!generic && (
+        <fieldset className="mt-4 space-y-3">
+          <legend className="mb-2 font-medium">¿Cómo quieres guardar este producto?</legend>
+          {(["preferred", "strict"] as const).map((value) => (
+            <label key={value} className="flex items-start gap-3">
               <input
+                className="mt-1"
+                aria-labelledby={`${fieldId}-${value}`}
+                aria-describedby={`${fieldId}-${value}-help`}
                 type="radio"
                 name="intent"
                 value={value}
                 checked={intent === value}
-                onChange={() => {
-                  setIntent(
-                    value === "strict" ? "strict" : value === "preferred" ? "preferred" : "generic",
-                  );
-                  if (value === "generic" && canonicalId) {
-                    setQuery(shoppingQueryForTitle(label));
-                    setLabel(shoppingQueryForTitle(label));
-                  }
-                }}
+                onChange={() => setIntent(value)}
               />
-              {text}
+              <span>
+                <span id={`${fieldId}-${value}`}>
+                  {value === "preferred" ? "Prefiero este producto" : "Solo quiero este producto"}
+                </span>
+                <span
+                  id={`${fieldId}-${value}-help`}
+                  className="mt-1 block text-sm text-muted-foreground"
+                >
+                  {value === "preferred"
+                    ? "También te mostraremos alternativas equivalentes si encontramos una mejor."
+                    : "No sustituiremos por otra marca o presentación."}
+                </span>
+              </span>
             </label>
           ))}
         </fieldset>
-        {intent === "generic" && (
-          <p className="mt-3 text-sm text-muted-foreground">
-            Comparamos huevos comunes, arroz blanco, aceite vegetal o girasol y detergente en polvo
-            o líquido. Para otras variedades, selecciona un producto exacto.
-          </p>
-        )}
+      )}
+      {!generic && !packages && (
+        <p className="mt-3 text-sm text-muted-foreground">
+          Conservamos la cantidad de tu lista anterior. Esta compra sigue expresada en{" "}
+          {unit === "unit" ? "unidades" : unit}.
+        </p>
+      )}
+      <p className="mt-4 text-sm font-medium">
+        {packages ? "¿Cuántos paquetes compras?" : "¿Cuánto compras normalmente?"}
+      </p>
+      <div className={packages ? "" : "grid grid-cols-2 gap-3"}>
         <label className="shopping-field">
-          Nombre en tu lista
+          {packages ? "Paquetes" : "Cantidad"}
           <input
-            value={label}
-            maxLength={120}
-            minLength={2}
+            data-modal-initial-focus
+            type="number"
+            min={unit === "unit" ? "1" : "0.001"}
+            max="10000"
+            step={unit === "unit" ? "1" : "0.001"}
             required
-            onChange={(e) => setLabel(e.target.value)}
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
           />
         </label>
-        <label className="shopping-field">
-          Búsqueda de productos
-          <input
-            value={query}
-            maxLength={120}
-            minLength={2}
-            required
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </label>
-        {intent !== "generic" && (
-          <div className="mt-3">
-            {canonicalId && <p className="text-sm">Producto seleccionado: {label}</p>}
-            <button
-              type="button"
-              className="card-link"
-              disabled={searching}
-              onClick={() => void searchProducts()}
-            >
-              {searching ? "Buscando…" : "Buscar producto para seleccionar"}
-            </button>
-            {products.length > 0 && (
-              <div className="shopping-field">
-                <label htmlFor={`${fieldId}-product`}>Producto exacto</label>
-                <select
-                  id={`${fieldId}-product`}
-                  value={canonicalId ?? ""}
-                  onChange={(e) => {
-                    const p = products.find((product) => product.id === e.target.value);
-                    if (p) {
-                      setCanonicalId(p.id);
-                      setLabel(p.label);
-                    }
-                  }}
-                >
-                  <option value="">Selecciona un producto</option>
-                  {products.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-          </div>
-        )}
-        <div className="grid grid-cols-2 gap-3">
-          <label className="shopping-field">
-            Cantidad
-            <input
-              type="number"
-              min={unit === "unit" ? "1" : "0.001"}
-              max="10000"
-              step={unit === "unit" ? "1" : "0.001"}
-              required
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
-          </label>
+        {!packages && (
           <div className="shopping-field">
             <label htmlFor={`${fieldId}-unit`}>Medida</label>
             <select
@@ -253,72 +186,87 @@ export function ShoppingItemEditor({
               <option value="L">L</option>
             </select>
           </div>
-        </div>
-        <p className="mt-2 text-xs text-muted-foreground">
-          Para un producto exacto medido en kg o L, “unidades” cuenta envases o packs de venta
-          completos. Las alternativas requieren la misma medida.
+        )}
+      </div>
+      <div className="shopping-field">
+        <label htmlFor={`${fieldId}-frequency`}>Frecuencia</label>
+        <select
+          id={`${fieldId}-frequency`}
+          value={frequency}
+          onChange={(e) =>
+            setFrequency(
+              e.target.value === "monthly"
+                ? "monthly"
+                : e.target.value === "biweekly"
+                  ? "biweekly"
+                  : "weekly",
+            )
+          }
+        >
+          {Object.entries(shoppingFrequencyLabels).map(([value, text]) => (
+            <option key={value} value={value}>
+              {text}
+            </option>
+          ))}
+        </select>
+      </div>
+      {generic && (
+        <p className="mt-3 text-sm text-muted-foreground">
+          {substitutionsWithheld
+            ? "Guardaremos esta necesidad. No encontramos alternativas suficientemente comparables por ahora."
+            : "Compararemos opciones equivalentes entre marcas y supermercados."}
         </p>
-        <div className="shopping-field">
-          <label htmlFor={`${fieldId}-frequency`}>Frecuencia</label>
-          <select
-            id={`${fieldId}-frequency`}
-            value={frequency}
-            onChange={(e) =>
-              setFrequency(
-                e.target.value === "monthly"
-                  ? "monthly"
-                  : e.target.value === "biweekly"
-                    ? "biweekly"
-                    : "weekly",
-              )
-            }
-          >
-            {Object.entries(shoppingFrequencyLabels).map(([value, text]) => (
-              <option key={value} value={value}>
-                {text}
-              </option>
-            ))}
-          </select>
-        </div>
-        {duplicate && (
-          <p className="mt-3 text-sm">
-            Ya tienes esta necesidad. Al guardar actualizarás su cantidad y frecuencia.
-          </p>
-        )}
-        {error && (
-          <p role="alert" className="mt-3">
-            {error}
-          </p>
-        )}
-        <div className="mt-5 flex flex-wrap gap-3">
-          <button className="shopping-button" type="submit">
-            {duplicate && !item ? "Actualizar existente" : item ? "Guardar cambios" : "Agregar"}
-          </button>
-          <button className="shopping-button secondary" type="button" onClick={dismiss}>
-            Cancelar
-          </button>
-        </div>
-      </form>
-    </dialog>
+      )}
+      {duplicate && (
+        <p className="mt-3 text-sm">
+          Ya tienes esta necesidad. Al guardar actualizarás su cantidad y frecuencia.
+        </p>
+      )}
+      {error && (
+        <p role="alert" className="mt-3">
+          {error}
+        </p>
+      )}
+      <div className="mt-5 flex flex-wrap gap-3">
+        <button className="shopping-button" type="submit" disabled={closing}>
+          {duplicate && !item ? "Actualizar existente" : item ? "Guardar cambios" : "Agregar"}
+        </button>
+        <button className="shopping-button secondary" type="button" onClick={dismiss}>
+          Cancelar
+        </button>
+      </div>
+    </form>
   );
 }
-export function AddShoppingItem({ seed }: { seed: ShoppingSeed }) {
+export function AddShoppingItem({
+  seed,
+  compact = false,
+  buttonLabel,
+}: {
+  seed: ShoppingSeed;
+  compact?: boolean;
+  buttonLabel?: string;
+}) {
   const [open, setOpen] = useState(false);
   const [saved, setSaved] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
   const { ready, warning } = useShoppingList();
   return (
-    <div className="mt-4">
+    <div className={compact ? "mt-2" : "mt-4"}>
       <button
         ref={trigger}
-        className="shopping-button secondary"
+        className={
+          compact
+            ? "card-link inline-flex min-h-11 items-center text-sm"
+            : "shopping-button secondary"
+        }
         disabled={!ready}
         onClick={() => {
           setOpen(true);
           setSaved(false);
         }}
       >
-        {seed.canonicalId ? "Agregar a mi lista" : "Agregar como necesidad"}
+        {buttonLabel ?? (seed.canonicalId ? "Agregar a mi lista" : "Agregar como necesidad")}
       </button>
       {saved && !open && <output className="mt-2 block text-sm">Guardado en Mi lista.</output>}
       {warning && <output className="mt-2 block text-sm">{warning}</output>}

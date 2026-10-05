@@ -1,3 +1,5 @@
+import { AddShoppingItem } from "./shopping-item-editor";
+import { shoppingQueryForTitle, shoppingSeedForRetailerOffer } from "@comprafino/core";
 import { ArrowRight, ArrowUpRight } from "@comprafino/ui";
 import { NavigationLink } from "./navigation-link";
 import { formatPen, formatUnitPrice } from "@comprafino/db";
@@ -102,6 +104,11 @@ export function GenericOfferCard({
             Comparar este producto en {offer.retailerCount} supermercados
           </NavigationLink>
         )}
+        <AddShoppingItem
+          compact
+          buttonLabel="Agregar a mi lista"
+          seed={shoppingSeedForRetailerOffer(offer)}
+        />
       </div>
     </article>
   );
@@ -182,6 +189,13 @@ export function ExactProductCard({
       </NavigationLink>
       <div className="mt-auto">
         {observedAt && <ObservedAt date={observedAt} relativeTo={observedNow} />}
+        <AddShoppingItem
+          seed={{
+            label: product.displayName,
+            query: shoppingQueryForTitle(product.displayName),
+            canonicalId: product.id,
+          }}
+        />
       </div>
     </article>
   );

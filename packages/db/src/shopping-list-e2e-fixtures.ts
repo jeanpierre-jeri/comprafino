@@ -1,10 +1,16 @@
 import { randomUUID } from "node:crypto";
-import { matchingVersion, shoppingListItemSchema } from "@comprafino/core";
+import {
+  matchingVersion,
+  shoppingListItemSchema,
+  inferGenericSubstitutionProfile,
+  shoppingSeedForRetailerOffer,
+} from "@comprafino/core";
 import { z } from "zod";
 import type { createDatabase } from "./client.ts";
 import type { createTestQueryClient } from "./test-query-client.ts";
 import { persistListings } from "./ingestion.ts";
 import { persistCatalogNormalizations } from "./catalog.ts";
+import { searchGenericProductOffers } from "./generic-offers.ts";
 import { evaluateCurrentShoppingItem } from "./shopping-list.ts";
 
 /** Only called by the isolated-schema browser harness. Never production data. */
@@ -75,9 +81,56 @@ export async function seedShoppingListFixtures(
       );
     }
   }
+  for (const [kind, title] of [
+    ["independent", "Huevos Independientes Bandeja 30un"],
+    ["unsupported", "Huevos de Codorniz Independientes Bandeja 30un"],
+  ] as const) {
+    const listing = {
+      retailer: "metro" as const,
+      externalId: `shopping-${kind}-metro`,
+      productId: `shopping-${kind}-metro`,
+      title,
+      sourceBrand: "Independientes",
+      url: `https://www.metro.pe/shopping-${kind}/p`,
+      currentPriceCents: kind === "independent" ? 4990 : 100,
+      currency: "PEN" as const,
+      priceUnit: "UN" as const,
+      observedAt,
+    };
+    await persistListings(db, "metro", [listing]);
+    const row = z
+      .array(z.object({ id: z.uuid() }))
+      .parse(
+        await client.query(
+          "select id from retailer_listings where external_id=$1 and retailer_id='metro'",
+          [listing.externalId],
+        ),
+      )[0]!;
+    fixtures[kind] = row.id;
+    await persistCatalogNormalizations(db, [{ ...listing, id: row.id, retailerId: "metro" }]);
+  }
+  const retailerOptions = await searchGenericProductOffers(db, "huevos", "relevance", observedAt);
+  const independent = retailerOptions.find((o) => o.id === fixtures.independent);
+  const unsupported = retailerOptions.find((o) => o.id === fixtures.unsupported);
+  const canonical = retailerOptions.find((o) => o.canonicalId === fixtures.preferred);
+  if (
+    !independent ||
+    independent.canonicalId !== null ||
+    shoppingSeedForRetailerOffer(independent).substitutionProfile !== "eggs:regular"
+  )
+    throw new Error("Independent retailer-option fixture failed");
+  if (
+    !unsupported ||
+    unsupported.canonicalId !== null ||
+    shoppingSeedForRetailerOffer(unsupported).substitutionProfile !== null
+  )
+    throw new Error("Unsupported retailer-option fixture failed");
+  if (!canonical || shoppingSeedForRetailerOffer(canonical).canonicalId !== fixtures.preferred)
+    throw new Error("Canonical retailer-option fixture failed");
   const need = shoppingListItemSchema.parse({
     id: randomUUID(),
     intent: "generic",
+    substitutionProfile: inferGenericSubstitutionProfile("huevos", "unit"),
     canonicalId: null,
     query: "huevos",
     label: "Huevos",

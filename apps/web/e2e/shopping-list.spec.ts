@@ -6,6 +6,9 @@ async function openGeneric(page: Page, query = "huevos") {
   await page.goto(`/search?q=${query}`);
   await page.getByRole("button", { name: "Agregar como necesidad" }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
+  await expect(page.getByRole("dialog").getByRole("radio")).toHaveCount(0);
+  await expect(page.getByLabel("Búsqueda de productos")).toHaveCount(0);
+  await expect(page.getByLabel("Nombre en tu lista")).toHaveCount(0);
 }
 async function addGeneric(page: Page) {
   await openGeneric(page);
@@ -91,7 +94,7 @@ test("quantity input supports whole units and fractional kg/L without a native s
 test("malformed and unsupported storage recover; unavailable storage keeps session edits", async ({
   page,
 }) => {
-  for (const raw of ["{", '{"version":2,"items":[]}']) {
+  for (const raw of ["{", '{"version":3,"items":[]}']) {
     await page.goto("/list");
     await page.evaluate((value) => localStorage.setItem("comprafino-shopping-list", value), raw);
     await page.reload();
@@ -114,6 +117,100 @@ test("malformed and unsupported storage recover; unavailable storage keeps sessi
   ).toBeVisible();
 });
 
+test("dialogs animate, close with X/outside/Escape, and respect reduced motion", async ({
+  page,
+}) => {
+  test.setTimeout(60_000);
+  for (const width of [390, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const reducedMotion of ["no-preference", "reduce"] as const) {
+      await page.emulateMedia({ reducedMotion });
+      await openGeneric(page);
+      const dialog = page.getByRole("dialog");
+      const trigger = page.getByRole("button", { name: "Agregar como necesidad", exact: true });
+      expect(await dialog.evaluate((element) => getComputedStyle(element).animationDuration)).toBe(
+        reducedMotion === "reduce" ? "0s" : "0.18s",
+      );
+      await expect(page.getByLabel("Cantidad", { exact: true })).toBeFocused();
+      await page.getByRole("button", { name: "Cerrar diálogo", exact: true }).click();
+      await expect(dialog).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+      await trigger.click();
+      await expect(dialog).toBeVisible();
+      // A click inside the content must not dismiss it.
+      await dialog.getByRole("heading").click();
+      await expect(dialog).toBeVisible();
+      const bounds = await dialog.boundingBox();
+      if (!bounds) throw new Error("Missing dialog bounds");
+      // Ending a content-origin drag on the backdrop must not discard edits.
+      await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(2, 2);
+      await page.mouse.up();
+      await expect(dialog).toBeVisible();
+      await page.mouse.click(2, 2);
+      await expect(dialog).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+      await trigger.click();
+      await page.keyboard.press("Escape");
+      await expect(dialog).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+    }
+  }
+});
+
+test("version-one local items retain all intents, custom labels and original amounts", async ({
+  page,
+}) => {
+  await page.goto("/list");
+  await page.evaluate(() => {
+    const now = new Date().toISOString();
+    localStorage.setItem(
+      "comprafino-shopping-list",
+      JSON.stringify({
+        version: 1,
+        items: ["generic", "preferred", "strict"].map((intent, index) => ({
+          id: `00000000-0000-4000-8000-00000000000${index + 1}`,
+          intent,
+          canonicalId: intent === "generic" ? null : "00000000-0000-4000-8000-000000000004",
+          label: `Mis huevos ${intent}`,
+          query: "huevos",
+          quantity: { amount: 30, unit: "unit" },
+          frequency: "weekly",
+          createdAt: now,
+          updatedAt: now,
+        })),
+      }),
+    );
+  });
+  await page.reload();
+  for (const intent of ["generic", "preferred", "strict"]) {
+    const card = page.getByRole("article", { name: `Mis huevos ${intent}`, exact: true });
+    await expect(card).toContainText("30 unidades");
+    await card.getByRole("button", { name: `Editar Mis huevos ${intent}`, exact: true }).click();
+    await expect(page.getByRole("dialog").getByRole("radio")).toHaveCount(
+      intent === "generic" ? 0 : 2,
+    );
+    await page.getByRole("button", { name: "Guardar cambios" }).click();
+  }
+  const saved = shoppingListSchema.parse(
+    JSON.parse(
+      (await page.evaluate(() => localStorage.getItem("comprafino-shopping-list"))) ?? "null",
+    ) as unknown,
+  );
+  expect(saved.version).toBe(2);
+  expect(saved.items.map((item) => item.quantityMode)).toEqual([
+    "normalized",
+    "normalized",
+    "normalized",
+  ]);
+  expect(saved.items.map((item) => item.label)).toEqual([
+    "Mis huevos generic",
+    "Mis huevos preferred",
+    "Mis huevos strict",
+  ]);
+});
+
 test("list updates across tabs and clears when storage is cleared", async ({ page, context }) => {
   await addGeneric(page);
   const other = await context.newPage();
@@ -132,18 +229,21 @@ test("keyboard dialog cancels and returns focus; list and editor fit both themes
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  for (const theme of ["light", "dark"] as const) {
-    await page.emulateMedia({ colorScheme: theme });
-    await openGeneric(page);
-    await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
-    await expect(page.getByRole("dialog").getByRole("radio").first()).toBeFocused();
-    await page.screenshot({ path: testInfo.outputPath(`add-390-${theme}.png`) });
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
-      true,
-    );
-    await page.keyboard.press("Escape");
-    await expect(page.getByRole("dialog")).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "Agregar como necesidad" })).toBeFocused();
+  for (const width of [390, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const theme of ["light", "dark"] as const) {
+      await page.emulateMedia({ colorScheme: theme });
+      await openGeneric(page);
+      await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+      await expect(page.getByLabel("Cantidad", { exact: true })).toBeFocused();
+      await page.screenshot({ path: testInfo.outputPath(`add-${width}-${theme}.png`) });
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+        true,
+      );
+      await page.keyboard.press("Escape");
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "Agregar como necesidad" })).toBeFocused();
+    }
   }
   await addGeneric(page);
   for (const width of [390, 1280]) {
@@ -155,6 +255,11 @@ test("keyboard dialog cancels and returns focus; list and editor fit both themes
         true,
       );
       await page.screenshot({ path: testInfo.outputPath(`list-${width}-${theme}.png`) });
+      await page.getByRole("button", { name: "Editar huevos" }).click();
+      await expect(page.getByRole("dialog").getByRole("radio")).toHaveCount(0);
+      await page.screenshot({ path: testInfo.outputPath(`edit-generic-${width}-${theme}.png`) });
+      await page.keyboard.press("Escape");
+      await expect(page.getByRole("button", { name: "Editar huevos" })).toBeFocused();
     }
   }
 });
@@ -170,6 +275,11 @@ function fixture(name: string): string {
 async function addSpecific(page: Page, intent: "preferred" | "strict") {
   await page.goto(`/products/${fixture("preferred")}`);
   await page.getByRole("button", { name: "Agregar a mi lista", exact: true }).click();
+  await expect(page.getByRole("dialog").getByRole("radio")).toHaveCount(2);
+  await expect(page.getByLabel("Búsqueda de productos")).toHaveCount(0);
+  await expect(page.getByLabel("Nombre en tu lista")).toHaveCount(0);
+  await expect(page.getByLabel("Medida", { exact: true })).toHaveCount(0);
+  await expect(page.getByLabel("Paquetes", { exact: true })).toHaveValue("1");
   await page
     .getByRole("radio", {
       name: intent === "preferred" ? "Prefiero este producto" : "Solo quiero este producto",
@@ -187,6 +297,166 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
     "Run pnpm test:e2e:list:local after a production build",
   );
   test.describe.configure({ mode: "serial" });
+  test("card links preserve their destinations while add buttons never navigate", async ({
+    page,
+    context,
+  }) => {
+    await context.route("https://www.metro.pe/shopping-independent/p", (route) =>
+      route.fulfill({ contentType: "text/html", body: "<title>Retailer fixture</title>" }),
+    );
+    for (const width of [390, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const linked of [true, false]) {
+        await page.goto("/search?q=huevos");
+        const card = linked
+          ? page
+              .getByRole("region", { name: "Opciones en supermercados", exact: true })
+              .getByRole("article")
+              .filter({ hasText: "Huevos Bell's Bandeja 30un" })
+              .first()
+          : page.locator(`[data-offer-id="${fixture("independent")}"]`);
+        const add = card.getByRole("button", { name: "Agregar a mi lista", exact: true });
+        await add.scrollIntoViewIfNeeded();
+        expect(
+          await add.evaluate((button) => {
+            const bounds = button.getBoundingClientRect();
+            return (
+              document
+                .elementFromPoint(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
+                ?.closest("button") === button
+            );
+          }),
+        ).toBe(true);
+        const url = page.url();
+        const tabs = context.pages().length;
+        await add.click();
+        await expect(page.getByRole("dialog")).toBeVisible();
+        await expect(page).toHaveURL(url);
+        expect(context.pages()).toHaveLength(tabs);
+        await page.keyboard.press("Escape");
+        await expect(add).toBeFocused();
+        await page.keyboard.press("Enter");
+        await expect(page.getByRole("dialog")).toBeVisible();
+        await expect(page).toHaveURL(url);
+        expect(context.pages()).toHaveLength(tabs);
+        await page.keyboard.press("Escape");
+        const title = card.locator(".product-title-link");
+        // The stretched link intentionally covers noninteractive card content.
+        // Use a real pointer click instead of forcing the underlying price node.
+        await card.locator(".card-amount").scrollIntoViewIfNeeded();
+        const background = await card.locator(".card-amount").boundingBox();
+        if (!background) throw new Error("Missing card background target");
+        const clickBackground = () =>
+          page.mouse.click(
+            background.x + background.width / 2,
+            background.y + background.height / 2,
+          );
+        if (linked) {
+          await expect(title).toHaveAttribute("href", `/products/${fixture("preferred")}`);
+          await clickBackground();
+          await expect(page).toHaveURL(new RegExp(`/products/${fixture("preferred")}$`));
+        } else {
+          await expect(title).toHaveAttribute(
+            "href",
+            "https://www.metro.pe/shopping-independent/p",
+          );
+          const popupPromise = page.waitForEvent("popup");
+          await clickBackground();
+          const popup = await popupPromise;
+          await expect(popup).toHaveURL("https://www.metro.pe/shopping-independent/p");
+          await popup.close();
+        }
+      }
+    }
+  });
+  test("canonicalized retailer-option card offers preferred/strict package saving", async ({
+    page,
+  }) => {
+    await page.goto("/search?q=huevos");
+    const card = page
+      .getByRole("region", { name: "Opciones en supermercados", exact: true })
+      .getByRole("article")
+      .filter({ hasText: "Huevos Bell's Bandeja 30un" })
+      .first();
+    await card.getByRole("button", { name: "Agregar a mi lista", exact: true }).click();
+    await expect(page.getByRole("dialog")).toContainText("Huevos Bell's Bandeja 30un");
+    await expect(page.getByRole("dialog").getByRole("radio")).toHaveCount(2);
+    await page.getByRole("radio", { name: "Solo quiero este producto", exact: true }).check();
+    await expect(page.getByLabel("Paquetes", { exact: true })).toHaveValue("1");
+    await page.getByRole("button", { name: "Agregar", exact: true }).click();
+    const saved = shoppingListSchema.parse(
+      JSON.parse(
+        (await page.evaluate(() => localStorage.getItem("comprafino-shopping-list"))) ?? "null",
+      ) as unknown,
+    );
+    expect(saved.items[0]).toMatchObject({
+      canonicalId: fixture("preferred"),
+      intent: "strict",
+      quantityMode: "packages",
+    });
+  });
+  test("unmatched retailer-option card saves a supported generic need without strict identity", async ({
+    page,
+  }) => {
+    await page.goto("/search?q=huevos");
+    const card = page.locator(`[data-offer-id="${fixture("independent")}"]`);
+    await expect(card.getByRole("link", { name: /Comparar este producto/ })).toHaveCount(0);
+    const add = card.getByRole("button", { name: "Agregar a mi lista", exact: true });
+    await add.click();
+    await expect(page.getByRole("dialog").getByRole("radio")).toHaveCount(0);
+    await expect(
+      page.getByRole("radio", { name: "Solo quiero este producto", exact: true }),
+    ).toHaveCount(0);
+    await expect(page.getByRole("dialog")).toContainText("Compararemos opciones equivalentes");
+    await expect(page.getByLabel("Cantidad", { exact: true })).toHaveValue("30");
+    await page.keyboard.press("Escape");
+    await expect(add).toBeFocused();
+    await add.click();
+    await page.getByRole("button", { name: "Agregar", exact: true }).click();
+    const saved = shoppingListSchema.parse(
+      JSON.parse(
+        (await page.evaluate(() => localStorage.getItem("comprafino-shopping-list"))) ?? "null",
+      ) as unknown,
+    );
+    expect(saved.items[0]).toMatchObject({
+      canonicalId: null,
+      intent: "generic",
+      label: "Huevos",
+      substitutionProfile: "eggs:regular",
+      quantityMode: "normalized",
+      quantity: { amount: 30, unit: "unit" },
+    });
+    await page.getByRole("link", { name: "Mi lista", exact: true }).click();
+    await expect(page.getByRole("article").first()).toContainText("Huevos Tottus");
+    await expect(page.getByRole("article").first()).not.toContainText("Codorniz");
+  });
+  test("unsupported independent retailer-option card retains its description and withholds alternatives", async ({
+    page,
+  }) => {
+    await page.goto("/search?q=huevos");
+    const card = page.locator(`[data-offer-id="${fixture("unsupported")}"]`);
+    await card.getByRole("button", { name: "Agregar a mi lista", exact: true }).click();
+    await expect(page.getByRole("dialog").getByRole("radio")).toHaveCount(0);
+    await expect(page.getByRole("dialog")).toContainText(
+      "No encontramos alternativas suficientemente comparables",
+    );
+    await page.getByRole("button", { name: "Agregar", exact: true }).click();
+    const saved = shoppingListSchema.parse(
+      JSON.parse(
+        (await page.evaluate(() => localStorage.getItem("comprafino-shopping-list"))) ?? "null",
+      ) as unknown,
+    );
+    expect(saved.items[0]).toMatchObject({
+      canonicalId: null,
+      intent: "generic",
+      label: "Huevos de Codorniz Independientes Bandeja 30un",
+      substitutionProfile: null,
+    });
+    await page.getByRole("link", { name: "Mi lista", exact: true }).click();
+    await expect(page.getByRole("article").first()).toContainText(
+      "No encontramos alternativas suficientemente comparables",
+    );
+  });
   test("preferred product exposes a cheaper compatible option and preserves its identity", async ({
     page,
   }) => {
@@ -200,7 +470,11 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
         (await page.evaluate(() => localStorage.getItem("comprafino-shopping-list"))) ?? "null",
       ) as unknown,
     );
-    expect(saved.items[0]?.canonicalId).toBe(fixture("preferred"));
+    expect(saved.items[0]).toMatchObject({
+      canonicalId: fixture("preferred"),
+      quantityMode: "packages",
+      quantity: { amount: 1, unit: "unit" },
+    });
   });
   test("strict product has retailer offers and history links without substitutes", async ({
     page,
@@ -265,18 +539,71 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       await observe(false);
     }
   });
-  test("editing a generic need into a specific intent requires selecting a canonical product", async ({
+  test("specific creation and editing fit desktop/mobile in both themes", async ({
+    page,
+  }, testInfo) => {
+    test.setTimeout(120_000);
+    for (const width of [390, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const theme of ["light", "dark"] as const) {
+        await page.emulateMedia({ colorScheme: theme });
+        for (const intent of ["preferred", "strict"] as const) {
+          await page.goto("/list");
+          await page.evaluate(() => localStorage.removeItem("comprafino-shopping-list"));
+          await page.goto(`/products/${fixture("preferred")}`);
+          await page.getByRole("button", { name: "Agregar a mi lista", exact: true }).click();
+          await page
+            .getByRole("radio", {
+              name: intent === "preferred" ? "Prefiero este producto" : "Solo quiero este producto",
+              exact: true,
+            })
+            .check();
+          await page.screenshot({
+            path: testInfo.outputPath(`create-${intent}-${width}-${theme}.png`),
+          });
+          await page.getByRole("button", { name: "Agregar", exact: true }).click();
+          await page.getByRole("link", { name: "Mi lista", exact: true }).click();
+          const edit = page
+            .getByRole("article")
+            .first()
+            .getByRole("button", { name: /^Editar/ });
+          await edit.click();
+          await expect(page.getByLabel("Paquetes", { exact: true })).toHaveValue("1");
+          await expect(page.getByRole("dialog").getByRole("radio")).toHaveCount(2);
+          await page.screenshot({
+            path: testInfo.outputPath(`edit-${intent}-${width}-${theme}.png`),
+          });
+          expect(
+            await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+          ).toBe(true);
+          await page.keyboard.press("Escape");
+          await expect(edit).toBeFocused();
+        }
+      }
+    }
+  });
+  test("specific edits use package counts and retain preferred/strict choices", async ({
     page,
   }) => {
-    await addGeneric(page);
-    await page.getByRole("button", { name: "Editar huevos" }).click();
+    await addSpecific(page, "preferred");
+    const card = page.getByRole("article").first();
+    await expect(card).toContainText("1 paquete · Cada semana");
+    await card.getByRole("button", { name: /^Editar/ }).click();
+    await page.getByLabel("Paquetes", { exact: true }).fill("2");
     await page.getByRole("radio", { name: "Solo quiero este producto", exact: true }).check();
     await page.getByRole("button", { name: "Guardar cambios" }).click();
-    await expect(page.getByRole("alert")).toContainText("selecciona un producto");
-    await page.getByRole("button", { name: "Buscar producto para seleccionar" }).click();
-    await page.getByLabel("Producto exacto").selectOption(fixture("preferred"));
-    await page.getByRole("button", { name: "Guardar cambios" }).click();
-    await expect(page.getByRole("article")).toContainText("Solo quiero este producto");
-    await expect(page.getByRole("article")).toContainText("S/ 17.90");
+    await expect(card).toContainText("2 paquetes · Cada semana");
+    await expect(card).toContainText("Producto exacto");
+    await expect(card).toContainText("S/ 35.80");
+    const saved = shoppingListSchema.parse(
+      JSON.parse(
+        (await page.evaluate(() => localStorage.getItem("comprafino-shopping-list"))) ?? "null",
+      ) as unknown,
+    );
+    expect(saved.items[0]).toMatchObject({
+      intent: "strict",
+      quantityMode: "packages",
+      quantity: { amount: 2, unit: "unit" },
+    });
   });
 });

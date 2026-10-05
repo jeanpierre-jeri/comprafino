@@ -22,3 +22,7 @@ export * from "./price-history.ts";
 export * from "./observation-coverage.ts";
 
 export * from "./shopping-list.ts";
+
+export * from "./substitution-compatibility.ts";
+
+export * from "./shopping-creation.ts";

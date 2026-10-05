@@ -6,7 +6,6 @@ import {
   removeShoppingItem,
   shoppingEvaluationSchema,
   shoppingFrequencyLabels,
-  shoppingIntentLabels,
 } from "@comprafino/core";
 import type {
   PriceMode,
@@ -17,13 +16,12 @@ import type {
 import { useShoppingList } from "./use-shopping-list";
 import { ShoppingItemEditor } from "./shopping-item-editor";
 
-function CurrentOption({ option, item }: { option: ShoppingOption; item: ShoppingListItem }) {
-  const measure =
-    item.quantity.unit === "unit"
-      ? option.countsPackages
-        ? "envases/packs"
-        : "unidades"
-      : item.quantity.unit;
+function CurrentOption({ option }: { option: ShoppingOption }) {
+  const measure = option.countsPackages
+    ? "paquetes"
+    : option.quantityUnit === "unit"
+      ? "unidades"
+      : option.quantityUnit;
   return (
     <div className="mt-3 space-y-2">
       <p className="font-medium">{option.title}</p>
@@ -205,11 +203,21 @@ export function ShoppingListView() {
                           <h3 className="text-xl font-semibold break-words">{item.label}</h3>
                           <p className="mt-2 text-sm">
                             {item.quantity.amount}{" "}
-                            {item.quantity.unit === "unit" ? "unidades" : item.quantity.unit} ·{" "}
-                            {shoppingFrequencyLabels[item.frequency]}
+                            {item.quantityMode === "packages"
+                              ? item.quantity.amount === 1
+                                ? "paquete"
+                                : "paquetes"
+                              : item.quantity.unit === "unit"
+                                ? "unidades"
+                                : item.quantity.unit}{" "}
+                            · {shoppingFrequencyLabels[item.frequency]}
                           </p>
                           <p className="mt-1 text-sm text-muted-foreground">
-                            {shoppingIntentLabels[item.intent]}
+                            {item.intent === "generic"
+                              ? "Cualquier opción equivalente"
+                              : item.intent === "preferred"
+                                ? "Producto preferido"
+                                : "Producto exacto"}
                           </p>
                           {pending ? (
                             <p className="mt-4">Buscando opciones actuales…</p>
@@ -222,10 +230,12 @@ export function ShoppingListView() {
                                   ? "Tu producto preferido"
                                   : "Mejor opción actual"}
                               </p>
-                              <CurrentOption option={result.best} item={item} />
+                              <CurrentOption option={result.best} />
                             </>
                           ) : (
-                            <p className="mt-4">Estamos actualizando este producto.</p>
+                            <p className="mt-4">
+                              No encontramos alternativas suficientemente comparables por ahora.
+                            </p>
                           )}
                           {!pending && !error && result?.alternative && (
                             <aside className="benefit-surface mt-4">
@@ -238,7 +248,7 @@ export function ShoppingListView() {
                                   Tu producto preferido no tiene un precio válido actual.
                                 </p>
                               )}
-                              <CurrentOption option={result.alternative} item={item} />
+                              <CurrentOption option={result.alternative} />
                             </aside>
                           )}
                           {!pending &&
@@ -253,7 +263,7 @@ export function ShoppingListView() {
                                     : "Otras opciones compatibles"}
                                 </summary>
                                 {result.options.slice(1).map((option) => (
-                                  <CurrentOption key={option.id} option={option} item={item} />
+                                  <CurrentOption key={option.id} option={option} />
                                 ))}
                               </details>
                             )}

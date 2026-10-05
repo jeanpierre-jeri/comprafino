@@ -1,3 +1,7 @@
+import {
+  inferGenericSubstitutionProfile,
+  isListingCompatibleWithGenericNeed,
+} from "./substitution-compatibility.ts";
 import { describe, expect, it } from "vitest";
 import {
   emptyShoppingList,
@@ -24,6 +28,10 @@ function item(overrides: Partial<ShoppingListItem> = {}): ShoppingListItem {
     frequency: "weekly",
     createdAt: now.toISOString(),
     updatedAt: now.toISOString(),
+    substitutionProfile: inferGenericSubstitutionProfile(
+      overrides.query ?? "huevos",
+      overrides.quantity?.unit ?? "unit",
+    ),
     ...overrides,
   });
 }
@@ -46,6 +54,46 @@ function candidate(overrides: Partial<ShoppingCandidate> = {}): ShoppingCandidat
 const evaluate = (i: ShoppingListItem, cs: ShoppingCandidate[]) =>
   evaluateShoppingListItem(i, cs, "standard", now, "Huevos Bell's 30 un");
 describe("versioned shopping persistence", () => {
+  it.each([
+    ["huevos tottus", "Huevos", "huevos", "eggs:regular", "unit"],
+    ["huevos metro", "Huevos", "huevos", "eggs:regular", "unit"],
+    ["huevos de codorniz", "Huevos de codorniz", "huevos de codorniz", null, "unit"],
+    ["arroz integral", "Arroz integral", "arroz integral", null, "kg"],
+    ["aceite de oliva", "Aceite de oliva", "aceite de oliva", null, "L"],
+    ["huevos Bell's 30un", "Huevos", "huevos", "eggs:regular", "unit"],
+  ] as const)(
+    "persists the semantic generic need for %s",
+    (search, label, query, profile, unit) => {
+      const original = item({ query: search, label: search, quantity: { amount: 1, unit } });
+      const list = saveShoppingItem(emptyShoppingList(), original);
+      const persisted = parseShoppingList(serializeShoppingList(list)).list.items[0]!;
+      expect(persisted).toMatchObject({
+        label,
+        query,
+        substitutionProfile: profile,
+        intent: "generic",
+        canonicalId: null,
+      });
+      expect(original.query).toBe(search);
+      expect(isListingCompatibleWithGenericNeed(persisted, candidate())).toBe(profile !== null);
+    },
+  );
+  it("normalizes safe queries while preserving custom labels and withheld evidence", () => {
+    const custom = saveShoppingItem(
+      emptyShoppingList(),
+      item({ query: "huevos tottus", label: "Huevos para el desayuno" }),
+    ).items[0]!;
+    expect(custom).toMatchObject({
+      query: "huevos",
+      label: "Huevos para el desayuno",
+      substitutionProfile: "eggs:regular",
+    });
+    const withheld = saveShoppingItem(
+      emptyShoppingList(),
+      item({ query: "huevos tottus", label: "huevos tottus", substitutionProfile: null }),
+    ).items[0]!;
+    expect(withheld).toMatchObject({ query: "huevos tottus", substitutionProfile: null });
+  });
   it("loads empty, valid, malformed and unknown versions safely", () => {
     expect(parseShoppingList(null)).toEqual({ list: emptyShoppingList(), invalid: false });
     const list = saveShoppingItem(emptyShoppingList(), item());
@@ -56,7 +104,7 @@ describe("versioned shopping persistence", () => {
       "{",
       "null",
       '{"version":0,"items":[]}',
-      '{"version":2,"items":[]}',
+      '{"version":3,"items":[]}',
       '{"version":1,"items":[{}]}',
     ])
       expect(parseShoppingList(raw)).toEqual({ list: emptyShoppingList(), invalid: true });
@@ -313,5 +361,146 @@ describe("flexible intentions and compatibility", () => {
     expect(
       evaluate(item({ query: "leche", quantity: { amount: 6, unit: "unit" } }), [c]).best,
     ).toBeNull();
+  });
+});
+
+describe("Milestone 15.1 quantity and migration boundaries", () => {
+  it("migrates all intents and custom labels without guessing package sizes", () => {
+    const originals = [
+      item(),
+      item({ id: canonicalId, intent: "preferred", canonicalId, label: "Mis huevos favoritos" }),
+      item({
+        id: "00000000-0000-4000-8000-000000000003",
+        intent: "strict",
+        canonicalId,
+        quantity: { amount: 2, unit: "kg" },
+      }),
+    ];
+    const legacy = originals.map(
+      ({ quantityMode: _mode, substitutionProfile: _profile, ...old }) => old,
+    );
+    const migrated = parseShoppingList(JSON.stringify({ version: 1, items: legacy }));
+    expect(migrated.invalid).toBe(false);
+    expect(migrated.list.version).toBe(2);
+    expect(migrated.list.items.map((i) => i.quantity)).toEqual(originals.map((i) => i.quantity));
+    expect(migrated.list.items.map((i) => i.label)).toEqual(originals.map((i) => i.label));
+    expect(migrated.list.items.map((i) => i.quantityMode)).toEqual([
+      "normalized",
+      "normalized",
+      "normalized",
+    ]);
+    expect(migrated.list.items[0]?.substitutionProfile).toBe("eggs:regular");
+    expect(parseShoppingList(serializeShoppingList(migrated.list))).toEqual(migrated);
+  });
+  it("preserves unsupported old generic needs but withholds recommendations", () => {
+    const old = item({ query: "leche", label: "Leche personalizada" });
+    const result = parseShoppingList(JSON.stringify({ version: 1, items: [old] }));
+    expect(result.list.items[0]?.label).toBe("Leche personalizada");
+    expect(result.list.items[0]?.substitutionProfile).toBeNull();
+    expect(
+      evaluate(result.list.items[0]!, [candidate({ title: "Leche Gloria 1L" })]).best,
+    ).toBeNull();
+    expect(evaluate(item({ substitutionProfile: null }), [candidate()]).best).toBeNull();
+    expect(
+      evaluate(item({ query: "leche", substitutionProfile: "eggs:regular" }), [candidate()]).best,
+    ).toBeNull();
+  });
+  it.each(["preferred", "strict"] as const)(
+    "%s exact eggs count sale packages rather than contained eggs",
+    (intent) => {
+      const need = item({
+        intent,
+        canonicalId,
+        quantityMode: "packages",
+        quantity: { amount: 2, unit: "unit" },
+      });
+      const result = evaluate(need, [candidate()]);
+      expect(result.best).toMatchObject({
+        packages: 2,
+        purchasedQuantity: 2,
+        countsPackages: true,
+        totalCostCents: 3580,
+      });
+    },
+  );
+  it("preferred alternatives fulfill the contents of the requested exact packages", () => {
+    const need = item({
+      intent: "preferred",
+      canonicalId,
+      quantityMode: "packages",
+      quantity: { amount: 2, unit: "unit" },
+    });
+    const other = candidate({
+      id: "other",
+      canonicalId: null,
+      title: "Huevos Tottus 15un",
+      packageQuantity: { amount: 15, unit: "unit" },
+      ordinaryPriceCents: 700,
+    });
+    expect(evaluate(need, [candidate(), other]).alternative).toMatchObject({
+      packages: 4,
+      purchasedQuantity: 60,
+      countsPackages: false,
+      quantityUnit: "unit",
+      totalCostCents: 2800,
+    });
+    expect(evaluate(need, [other]).alternative).toBeNull();
+  });
+  it("two exact 1kg rice packages mean 2kg for safe alternative fulfillment", () => {
+    const need = item({
+      intent: "preferred",
+      canonicalId,
+      query: "arroz",
+      quantityMode: "packages",
+      quantity: { amount: 2, unit: "unit" },
+    });
+    const base = candidate({
+      title: "Arroz Blanco 1kg",
+      ordinaryPriceCents: 600,
+      packageQuantity: { amount: 1, unit: "kg" },
+    });
+    const other = candidate({
+      id: "other",
+      canonicalId: null,
+      title: "Arroz Blanco 500g",
+      ordinaryPriceCents: 200,
+      packageQuantity: { amount: 0.5, unit: "kg" },
+    });
+    const result = evaluateShoppingListItem(need, [base, other], "standard", now, base.title);
+    expect(result.preferred).toMatchObject({ packages: 2, totalCostCents: 1200 });
+    expect(result.alternative).toMatchObject({
+      packages: 4,
+      purchasedQuantity: 2,
+      quantityUnit: "kg",
+      totalCostCents: 800,
+    });
+  });
+  it("never treats a direct kg quote as the price of an exact sale package", () => {
+    const need = item({
+      intent: "strict",
+      canonicalId,
+      quantityMode: "packages",
+      quantity: { amount: 2, unit: "unit" },
+    });
+    expect(
+      evaluate(need, [candidate({ pricingBasis: "kg", packageQuantity: null })]).best,
+    ).toBeNull();
+    expect(
+      evaluate(need, [
+        candidate({ pricingBasis: "unit", packageQuantity: null, strongQuantity: false }),
+      ]).best,
+    ).toMatchObject({ packages: 2, totalCostCents: 3580 });
+  });
+  it("rejects fractional package counts and generic package semantics", () => {
+    expect(
+      shoppingListItemSchema.safeParse({
+        ...item({ intent: "strict", canonicalId }),
+        quantityMode: "packages",
+        quantity: { amount: 1.5, unit: "kg" },
+      }).success,
+    ).toBe(false);
+    expect(shoppingListItemSchema.safeParse({ ...item(), quantityMode: "packages" }).success).toBe(
+      false,
+    );
   });
 });

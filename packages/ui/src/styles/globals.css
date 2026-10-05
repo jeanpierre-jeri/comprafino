@@ -170,6 +170,10 @@
   }
   .choice-icon {
     @apply shrink-0 text-muted-foreground;
+    transition: transform 160ms ease;
+  }
+  .choice-trigger[data-popup-open] .choice-icon {
+    transform: rotate(180deg);
   }
   .choice-trigger:hover:not(:disabled),
   .choice-trigger[data-popup-open] {
@@ -191,6 +195,12 @@
     z-index: 60;
   }
   .choice-popup {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transform-origin: var(--transform-origin);
+    transition:
+      opacity 140ms ease,
+      transform 140ms ease;
     width: max(var(--anchor-width), 11rem);
     max-width: var(--available-width);
     padding: 0.25rem;
@@ -199,6 +209,11 @@
     background: var(--surface);
     color: var(--foreground);
     box-shadow: 0 8px 24px rgb(0 0 0 / 16%);
+  }
+  .choice-popup[data-starting-style],
+  .choice-popup[data-ending-style] {
+    opacity: 0;
+    transform: translateY(-3px) scale(0.985);
   }
   .choice-list {
     max-height: min(var(--available-height), 18rem);
@@ -313,6 +328,11 @@
   .product-title-link {
     @apply rounded-sm hover:text-primary;
   }
+  /* Keep card controls above the stretched title link. */
+  .product-card button {
+    position: relative;
+    z-index: 10;
+  }
   .product-title-link::after {
     content: "";
     position: absolute;
@@ -391,6 +411,78 @@
   }
 }
 
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes modal-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(4px) scale(0.985);
+  }
+}
+@keyframes modal-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes modal-backdrop-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+.modal-dialog[open] {
+  animation: modal-in 180ms ease-out both;
+}
+.modal-dialog[data-closing] {
+  animation: modal-out 140ms ease-in both;
+}
+.modal-dialog[open]::backdrop {
+  animation: modal-backdrop-in 180ms ease-out both;
+}
+.modal-dialog[data-closing]::backdrop {
+  animation: modal-backdrop-out 140ms ease-in both;
+}
+.modal-dialog .modal-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 0.5rem;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+.modal-close:hover {
+  background: var(--secondary);
+  color: var(--foreground);
+}
+.modal-close:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
 .shopping-dialog {
   margin: auto;
   width: min(34rem, calc(100vw - 2rem));
@@ -423,6 +515,9 @@
   padding: 0.6rem 0.75rem;
   background: var(--background);
   color: var(--foreground);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 .shopping-dialog input[type="radio"] {
   accent-color: var(--primary);
@@ -438,6 +533,17 @@
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+.shopping-button:not(:disabled):hover {
+  filter: brightness(0.96);
+}
+.shopping-button:not(:disabled):active {
+  transform: translateY(1px);
 }
 .shopping-button.secondary {
   background: var(--background);

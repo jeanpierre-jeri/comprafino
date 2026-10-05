@@ -1,5 +1,5 @@
 import { evaluateCurrentShoppingItem } from "./shopping-list.ts";
-import { shoppingListItemSchema } from "@comprafino/core";
+import { shoppingListItemSchema, inferGenericSubstitutionProfile } from "@comprafino/core";
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { NeonQueryPromise } from "@neondatabase/serverless";
@@ -1057,11 +1057,22 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
     );
     await seedGeneric("Huevos Orgánicos Auditshopping Incompatible 30un", 1);
     const independent = await seedGeneric("Huevos Auditshopping Independiente 30un", 1690);
+    await seedGeneric("Huevos de Codorniz Auditshopping 30un", 1);
+    const discovery = await searchGenericProductOffers(
+      db,
+      "huevos auditshopping",
+      "relevance",
+      publicNow,
+      searchFilters(),
+      true,
+    );
+    expect(discovery.some((o) => o.title.includes("Codorniz"))).toBe(true);
     const makeItem = (intent: "generic" | "preferred" | "strict") =>
       shoppingListItemSchema.parse({
         id: randomUUID(),
         label: "Huevos",
         query: "huevos auditshopping",
+        substitutionProfile: inferGenericSubstitutionProfile("huevos auditshopping", "unit"),
         intent,
         canonicalId: intent === "generic" ? null : base.id,
         quantity: { amount: 30, unit: "unit" },
@@ -1075,6 +1086,7 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
       "standard",
       publicNow,
     );
+    expect(generic.options.some((o) => o.title.includes("Codorniz"))).toBe(false);
     expect(generic.best).toMatchObject({
       canonicalId: alternative.id,
       totalCostCents: 1490,
@@ -1086,6 +1098,7 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
       "standard",
       publicNow,
     );
+    expect(preferred.options.some((o) => o.title.includes("Codorniz"))).toBe(false);
     expect(preferred).toMatchObject({
       preferred: { canonicalId: base.id },
       alternative: { canonicalId: alternative.id },
