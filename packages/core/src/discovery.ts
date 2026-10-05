@@ -1,3 +1,10 @@
+// A month covers recurring weekly demand; 3,000 rows equals 100 daily budgets.
+export const discoveryDemandPolicy = {
+  inactiveDays: 30,
+  maximumRows: 3000,
+  cleanupBatch: 100,
+  maximumOriginalLength: 120,
+} as const;
 export const discoveryDailyLimit = 30;
 export const discoveryDefaultQueryLimit = 10;
 export const discoveryRetailerLimit = 10;
@@ -10,6 +17,8 @@ export function normalizeDiscoveryQuery(value: string): string {
 export function validDiscoveryQuery(value: string): boolean {
   // Bound work before Unicode normalization; do not retain pathological input.
   if (value.length > 240 || /\s{33}|[\p{Cc}\p{Cf}]/u.test(value)) return false;
+  if (value.trim().replace(/\s+/gu, " ").length > discoveryDemandPolicy.maximumOriginalLength)
+    return false;
   const query = normalizeDiscoveryQuery(value);
   return (
     query.length >= 3 &&

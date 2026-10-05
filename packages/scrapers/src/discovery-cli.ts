@@ -1,7 +1,9 @@
+import { logDiagnostic } from "./diagnostics.ts";
 import { catalogPolicy } from "@comprafino/core";
 import {
   createDatabase,
   claimDiscoveryQueries,
+  cleanupDiscoveryDemand,
   previewDiscoveryQueries,
   finishDiscoveryQuery,
   inspectDiscovery,
@@ -37,6 +39,8 @@ try {
   } else {
     // Guard before reserving any work, then again before downstream writes.
     await assertRefreshScope(db);
+    const retention = await cleanupDiscoveryDemand(db);
+    console.log(JSON.stringify({ operation: "discovery_retention", ...retention }));
     const claims = await claimDiscoveryQueries(db, limit);
     const results: Awaited<ReturnType<typeof processDiscoveryQuery>>[] = [];
     const tasks = {
@@ -105,9 +109,7 @@ try {
     );
     if (results.some((r) => r.status === "failed" || r.status === "partial")) process.exitCode = 1;
   }
-} catch {
-  console.error(
-    "Catalog discovery failed. Check options, DATABASE_URL, migrations and complete catalog scope; no credentials logged.",
-  );
+} catch (error) {
+  logDiagnostic(error, { stage: "admission", operation: "discovery", reason: "db_read_failed" });
   process.exitCode = 1;
 }

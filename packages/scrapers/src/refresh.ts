@@ -1,5 +1,5 @@
-import { retailerIdSchema, safeIngestionError } from "@comprafino/core";
-import type { RetailerId } from "@comprafino/core";
+import { retailerIdSchema, safeIngestionError, safeDiagnostic } from "@comprafino/core";
+import type { RetailerId, SafeDiagnostic } from "@comprafino/core";
 
 export interface RefreshTasks {
   ingest(retailer: RetailerId): Promise<{ fetched: number; persisted: number; changed: number }>;
@@ -9,7 +9,7 @@ export interface RefreshTasks {
 }
 type Outcome<T> =
   | { status: "success"; result: T }
-  | { status: "failed"; error: string }
+  | { status: "failed"; error: string; diagnostic: SafeDiagnostic }
   | { status: "skipped" };
 export interface RefreshEvent {
   stage: RetailerId | "targeted" | "normalization" | "matching" | "overall";
@@ -34,8 +34,20 @@ export async function refreshCatalog(
       const result = await tasks.ingest(retailer);
       retailers.push({ retailer, outcome: { status: "success", result } });
       event(retailer, "success");
-    } catch {
-      retailers.push({ retailer, outcome: { status: "failed", error: safeIngestionError } });
+    } catch (error) {
+      retailers.push({
+        retailer,
+        outcome: {
+          status: "failed",
+          error: safeIngestionError,
+          diagnostic: safeDiagnostic(error, {
+            stage: "source",
+            operation: "refresh",
+            retailer,
+            reason: "source_request_failed",
+          }),
+        },
+      });
       event(retailer, "failed");
     }
   }
@@ -45,10 +57,15 @@ export async function refreshCatalog(
     event("targeted", "started");
     try {
       targeted = { status: "success", result: await tasks.targeted() };
-    } catch {
+    } catch (error) {
       targeted = {
         status: "failed",
         error: "Targeted refresh failed; inspect listing attempt metadata.",
+        diagnostic: safeDiagnostic(error, {
+          stage: "persistence",
+          operation: "targeted",
+          reason: "db_write_failed",
+        }),
       };
     }
     event(
@@ -69,10 +86,15 @@ export async function refreshCatalog(
     event("normalization", "started");
     try {
       normalization = { status: "success", result: await tasks.normalize() };
-    } catch {
+    } catch (error) {
       normalization = {
         status: "failed",
         error: "Normalization failed; check database, migrations and scope.",
+        diagnostic: safeDiagnostic(error, {
+          stage: "normalization",
+          operation: "refresh",
+          reason: "db_write_failed",
+        }),
       };
     }
     if (normalization.status === "success") {
@@ -80,10 +102,15 @@ export async function refreshCatalog(
       event("matching", "started");
       try {
         matching = { status: "success", result: await tasks.match() };
-      } catch {
+      } catch (error) {
         matching = {
           status: "failed",
           error: "Matching failed; check fresh normalization and complete scope.",
+          diagnostic: safeDiagnostic(error, {
+            stage: "matching",
+            operation: "refresh",
+            reason: "db_write_failed",
+          }),
         };
       }
     } else event("normalization", "failed");

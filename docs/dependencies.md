@@ -43,7 +43,7 @@ Exact direct versions are pinned in manifests; the lockfile pins the graph. This
 | `@comprafino/core`         | `workspace:*` | dependencies    | framework-independent domain validation and policy |
 | `@neondatabase/serverless` | `1.2.0`       | dependencies    | Neon serverless HTTP driver                        |
 | `drizzle-orm`              | `0.45.3`      | dependencies    | typed PostgreSQL queries                           |
-| `pg`                       | `8.23.1`      | dependencies    | explicit local PostgreSQL test transport           |
+| `pg`                       | `8.23.1`      | devDependencies | explicit local PostgreSQL test transport           |
 | `zod`                      | `4.6.5`       | dependencies    | external boundary and domain schema validation     |
 | `@types/node`              | `24.19.1`     | devDependencies | native fetch and CLI types                         |
 | `@types/pg`                | `8.23.1`      | devDependencies | local PostgreSQL driver types                      |

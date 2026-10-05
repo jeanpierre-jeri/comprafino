@@ -7,7 +7,7 @@ import {
 } from "@comprafino/core";
 import { z } from "zod";
 import type { createDatabase } from "./client.ts";
-import type { createTestQueryClient } from "./test-query-client.ts";
+import type { createTestQueryClient } from "./testing/test-query-client.ts";
 import { persistListings } from "./ingestion.ts";
 import { persistCatalogNormalizations } from "./catalog.ts";
 import { searchGenericProductOffers } from "./generic-offers.ts";

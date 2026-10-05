@@ -1,15 +1,13 @@
+import { ownedTestDatabase } from "./testing/database.ts";
 import { randomUUID } from "node:crypto";
-import { readFileSync } from "node:fs";
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import {
   shoppingListItemSchema,
   shoppingListSchema,
   shoppingListEvaluationSchema,
 } from "@comprafino/core";
-import { createDatabase } from "./client.ts";
-import { createTestQueryClient, closeLocalTestConnections } from "./test-query-client.ts";
-import { testSchemaClient } from "./test-schema-client.ts";
+import { closeLocalTestConnections } from "./testing/test-query-client.ts";
 import { seedShoppingListFixtures } from "./shopping-list-e2e-fixtures.ts";
 import { evaluateCurrentShoppingList, evaluateCurrentShoppingItem } from "./shopping-list.ts";
 import { persistListings } from "./ingestion.ts";
@@ -17,17 +15,11 @@ import { persistCatalogNormalizations } from "./catalog.ts";
 
 const url = process.env.TEST_DATABASE_URL;
 describe.skipIf(!url)("batched current shopping snapshot", () => {
-  const schema = `comprafino_e2e_${randomUUID().replaceAll("-", "")}`;
-  const client = createTestQueryClient(
-    url ?? "postgresql://unused@localhost/comprafino_test",
-    process.env.COMPRAFINO_TEST_DATABASE_MODE,
-  );
-  const scoped = testSchemaClient(client, schema);
-  const db = createDatabase({
-    DATABASE_URL: url ?? "postgresql://unused@localhost/comprafino_test",
-    COMPRAFINO_E2E_SCHEMA: schema,
-    COMPRAFINO_TEST_DATABASE_MODE: process.env.COMPRAFINO_TEST_DATABASE_MODE,
+  const harness = ownedTestDatabase({
+    ...process.env,
+    TEST_DATABASE_URL: url ?? "postgresql://unused@localhost/comprafino_test",
   });
+  const { db, scoped } = harness;
   let fixtures: Record<string, string> = {};
   const now = new Date();
   const make = (
@@ -52,28 +44,19 @@ describe.skipIf(!url)("batched current shopping snapshot", () => {
       ...overrides,
     });
   beforeAll(async () => {
-    await client.query(`create schema "${schema}"`);
-    const journal = z
-      .object({ entries: z.array(z.object({ tag: z.string().regex(/^\d{4}_[a-z_]+$/u) })) })
-      .parse(
-        JSON.parse(
-          readFileSync(new URL("../migrations/meta/_journal.json", import.meta.url), "utf8"),
-        ) as unknown,
-      );
-    await scoped.transaction(
-      journal.entries.flatMap(({ tag }) =>
-        readFileSync(new URL(`../migrations/${tag}.sql`, import.meta.url), "utf8")
-          .split("--> statement-breakpoint")
-          .filter((s) => !s.trim().startsWith("CREATE EXTENSION"))
-          .map((s) => scoped.query(s.replaceAll('"public".', `"${schema}".`))),
-      ),
-    );
+    await harness.setup();
+  }, 30_000);
+  beforeEach(async () => {
+    await harness.reset();
     fixtures = await seedShoppingListFixtures(db, scoped);
-  }, 30000);
+  }, 30_000);
   afterAll(async () => {
-    await client.query(`drop schema if exists "${schema}" cascade`);
-    await closeLocalTestConnections();
-  });
+    try {
+      await harness.dispose();
+    } finally {
+      await closeLocalTestConnections();
+    }
+  }, 30_000);
   it("one batch evaluates all intents, preserves item evaluation, rejects quail and writes nothing", async () => {
     const list = shoppingListSchema.parse({
       version: 2,

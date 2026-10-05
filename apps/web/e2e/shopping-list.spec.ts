@@ -1,7 +1,9 @@
+import { fixtureDatabase } from "../../../packages/db/src/testing/fixture-client.ts";
+import { closeLocalTestConnections } from "../../../packages/db/src/testing/test-query-client.ts";
 import { expect, test, type Page } from "@playwright/test";
 import { shoppingListSchema } from "@comprafino/core";
 import { restrictBasketFixtureRetailers } from "@comprafino/db/basket-fixtures";
-import { createDatabase, persistListings } from "@comprafino/db";
+import { persistListings } from "@comprafino/db";
 
 // Catalog-mutation scenarios share the same isolated PostgreSQL fixture schema.
 test.describe.configure({ mode: "serial" });
@@ -626,7 +628,7 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       .getByRole("article")
       .first();
     await expect(card).toContainText("S/ 14.90");
-    const db = createDatabase();
+    const db = fixtureDatabase();
     async function observe(increased: boolean) {
       for (const [index, retailer] of (["metro", "plaza-vea", "tottus"] as const).entries())
         await persistListings(db, retailer, [
@@ -655,7 +657,11 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       await expect(card).toContainText("Huevos Bell's");
       await expect(card).toContainText("S/ 17.90");
     } finally {
-      await observe(false);
+      try {
+        await observe(false);
+      } finally {
+        await closeLocalTestConnections();
+      }
     }
   });
   test("specific creation and editing fit desktop/mobile in both themes", async ({

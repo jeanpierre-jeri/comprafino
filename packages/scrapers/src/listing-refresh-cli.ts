@@ -1,3 +1,4 @@
+import { logDiagnostic } from "./diagnostics.ts";
 import { catalogPolicy } from "@comprafino/core";
 import { parseListingRefreshOptions } from "@comprafino/core";
 import {
@@ -29,7 +30,12 @@ try {
           throw new Error("Stale normalization");
         normalizationWrites = normalized.persisted.changed;
         normalization = "success";
-      } catch {
+      } catch (error) {
+        logDiagnostic(error, {
+          stage: "normalization",
+          operation: "targeted",
+          reason: "db_write_failed",
+        });
         normalization = "failed";
       }
       if (normalization === "success") {
@@ -43,7 +49,12 @@ try {
             matched.persisted.productsUpdated +
             matched.persisted.productsRemoved;
           matching = "success";
-        } catch {
+        } catch (error) {
+          logDiagnostic(error, {
+            stage: "matching",
+            operation: "targeted",
+            reason: "db_write_failed",
+          });
           matching = "failed";
         }
       }
@@ -58,9 +69,7 @@ try {
     if (result.failures || normalization === "failed" || matching === "failed")
       process.exitCode = 1;
   }
-} catch {
-  console.error(
-    "Known listing refresh failed. Check options, database migrations and complete scope; no credentials logged.",
-  );
+} catch (error) {
+  logDiagnostic(error, { stage: "admission", operation: "targeted", reason: "db_read_failed" });
   process.exitCode = 1;
 }

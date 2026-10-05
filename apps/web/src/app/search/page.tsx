@@ -1,3 +1,4 @@
+import { logDiagnostic } from "../../server/diagnostics.ts";
 import { AddShoppingItem } from "../../components/shopping-item-editor";
 import { Suspense } from "react";
 import { SearchPageLoading } from "../../components/page-loading";
@@ -72,13 +73,17 @@ async function SearchResults({
         after(async () => {
           try {
             await recordDiscoveryForSearch(db, query, underlyingCount);
-          } catch {
-            console.error("Discovery demand recording failed.");
+          } catch (error) {
+            logDiagnostic(error, {
+              stage: "public",
+              operation: "discovery",
+              reason: "db_write_failed",
+            });
           }
         });
       }
-    } catch {
-      console.error("Public search database query failed.");
+    } catch (error) {
+      logDiagnostic(error, { stage: "public", operation: "search", reason: "db_read_failed" });
       failed = true;
     }
   }

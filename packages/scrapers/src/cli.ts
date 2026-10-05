@@ -1,3 +1,4 @@
+import { logDiagnostic } from "./diagnostics.ts";
 import { createIngestionStore } from "@comprafino/db";
 import { createTottusAdapter } from "./tottus.ts";
 import { createPlazaVeaAdapter } from "./plaza-vea.ts";
@@ -41,14 +42,10 @@ async function main() {
   }
 }
 await main().catch((error: unknown) => {
-  // Only print safe local/source messages, never arbitrary database driver errors.
-  const message =
-    error instanceof Error &&
-    /^(DATABASE_URL|Usage:|Limit must|Tottus HTTP|Tottus public|Tottus pagination|Tottus returned|Plaza Vea HTTP|Plaza Vea pagination|Plaza Vea returned|Metro HTTP|Metro pagination|Metro returned|Unexpected (?:Tottus|Plaza Vea|Metro)|Ambiguous)/u.test(
-      error.message,
-    )
-      ? error.message
-      : "Retailer ingestion failed (network, source validation or database); no credentials logged.";
-  console.error(message);
+  logDiagnostic(error, {
+    stage: "source",
+    operation: "ingestion",
+    reason: "source_request_failed",
+  });
   process.exitCode = 1;
 });

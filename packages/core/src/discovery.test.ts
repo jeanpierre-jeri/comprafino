@@ -63,3 +63,8 @@ describe("discovery query boundary", () => {
       expect(() => parseDiscoveryOptions(args)).toThrow(/option|limit/iu);
   });
 });
+it("bounds the retained original spelling before normalized admission", () => {
+  // NFKC composes two code points into one: normalized length alone is insufficient.
+  expect(validDiscoveryQuery("a\u0301".repeat(80))).toBe(false);
+  expect(validDiscoveryQuery("a\u0301".repeat(60))).toBe(true);
+});

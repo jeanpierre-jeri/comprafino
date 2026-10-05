@@ -8,7 +8,7 @@ import { z } from "zod";
 export function testSchemaClient(client: NeonQueryFunction<false, false>, rawSchema: string) {
   const schema = z
     .string()
-    .regex(/^comprafino_e2e_[0-9a-f]{32}$/u)
+    .regex(/^comprafino_(?:e2e|test)_[0-9a-f]{32}$/u)
     .parse(rawSchema);
   const setPath = () => client.query("select set_config('search_path', $1, true)", [schema]);
   return new Proxy(client, {

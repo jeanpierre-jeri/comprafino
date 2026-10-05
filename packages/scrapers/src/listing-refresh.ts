@@ -1,5 +1,10 @@
-import { listingSchema } from "@comprafino/core";
-import type { KnownListing, NormalizedRetailerListing, RetailerId } from "@comprafino/core";
+import { listingSchema, safeDiagnostic, DiagnosticError } from "@comprafino/core";
+import type {
+  KnownListing,
+  NormalizedRetailerListing,
+  RetailerId,
+  SafeDiagnostic,
+} from "@comprafino/core";
 import type { TargetedRetailerAdapter } from "./targeted.ts";
 export interface ListingRefreshTasks {
   adapters: Record<RetailerId, TargetedRetailerAdapter>;
@@ -28,6 +33,7 @@ export async function refreshKnownListings(
     externalId: string;
     status: "observed" | "unavailable" | "not-found" | "failed" | "skipped";
     priceStates: number;
+    diagnostic?: SafeDiagnostic;
   }[] = [];
   let requests = 0;
   for (const row of rows) {
@@ -42,7 +48,18 @@ export async function refreshKnownListings(
     }
     const at = new Date();
     // DB failures during admission/recording are fatal; never make unaccounted requests.
-    if (!(await tasks.claim(row, at))) {
+    let claimed: boolean;
+    try {
+      claimed = await tasks.claim(row, at);
+    } catch (error) {
+      throw new DiagnosticError(error, {
+        stage: "admission",
+        operation: "targeted",
+        retailer: row.retailer,
+        reason: "db_write_failed",
+      });
+    }
+    if (!claimed) {
       results.push({
         retailer: row.retailer,
         externalId: row.externalId,
@@ -55,6 +72,8 @@ export async function refreshKnownListings(
     requests++;
     let status: "observed" | "unavailable" | "not-found" | "failed" = "failed";
     let priceStates = 0;
+    let stage: "source" | "persistence" = "source";
+    let diagnostic: SafeDiagnostic | undefined;
     try {
       const result = await tasks.adapters[row.retailer].lookupListing(row);
       status = result.status;
@@ -66,15 +85,37 @@ export async function refreshKnownListings(
           listing.productId !== row.productId
         )
           throw new Error("Lookup returned another listing");
+        stage = "persistence";
         priceStates = (await tasks.persist(row.retailer, [listing])).changed;
       }
       consecutive.set(row.retailer, 0);
-    } catch {
+    } catch (error) {
+      diagnostic = safeDiagnostic(error, {
+        stage,
+        operation: "targeted",
+        retailer: row.retailer,
+        reason: stage === "source" ? "source_request_failed" : "db_write_failed",
+      });
       status = "failed";
       consecutive.set(row.retailer, (consecutive.get(row.retailer) ?? 0) + 1);
     }
-    await tasks.finish(row, at, status);
-    results.push({ retailer: row.retailer, externalId: row.externalId, status, priceStates });
+    try {
+      await tasks.finish(row, at, status);
+    } catch (error) {
+      throw new DiagnosticError(error, {
+        stage: "completion",
+        operation: "targeted",
+        retailer: row.retailer,
+        reason: "db_write_failed",
+      });
+    }
+    results.push({
+      retailer: row.retailer,
+      externalId: row.externalId,
+      status,
+      priceStates,
+      ...(diagnostic ? { diagnostic } : {}),
+    });
   }
   return {
     requests,

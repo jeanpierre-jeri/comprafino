@@ -9,7 +9,8 @@
     "start": "next start --hostname 127.0.0.1",
     "typecheck": "next typegen && tsc --noEmit",
     "test:e2e": "playwright test",
-    "test": "playwright test --config playwright.stream.config.ts"
+    "test": "playwright test --config playwright.stream.config.ts",
+    "benchmark:basket": "node --experimental-strip-types testing/basket-benchmark-cli.ts"
   },
   "dependencies": {
     "@comprafino/core": "workspace:*",

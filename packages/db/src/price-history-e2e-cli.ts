@@ -1,15 +1,14 @@
+import { fixtureDatabaseUrl } from "./testing/fixture-url.ts";
+import { ownedTestDatabase } from "./testing/database.ts";
 import { getPublicRetailerListingDetail } from "./listing-detail.ts";
 import { seedBasketFixtures } from "./basket-fixtures.ts";
 import { seedShoppingListFixtures } from "./shopping-list-e2e-fixtures.ts";
 import { randomUUID } from "node:crypto";
-import { readFileSync } from "node:fs";
 import { spawn } from "node:child_process";
-import { createTestQueryClient, closeLocalTestConnections } from "./test-query-client.ts";
+import { closeLocalTestConnections } from "./testing/test-query-client.ts";
 import { z } from "zod";
 import { matchingVersion } from "@comprafino/core";
-import { testSchemaClient } from "./test-schema-client.ts";
-import { requireDatabaseUrl } from "./env.ts";
-import { createDatabase } from "./client.ts";
+
 import { getCanonicalProductPriceHistory } from "./price-history.ts";
 import { knownListings, claimListingRefresh, finishListingRefresh } from "./listing-refresh.ts";
 import { searchGenericProductOffers } from "./generic-offers.ts";
@@ -18,38 +17,10 @@ import { persistCatalogNormalizations } from "./catalog.ts";
 import type { NormalizedRetailerListing } from "@comprafino/core";
 
 // Explicit opt-in only. All test writes and the web server are scoped to this schema.
-const url = requireDatabaseUrl({ DATABASE_URL: process.env.TEST_DATABASE_URL });
-const client = createTestQueryClient(url, process.env.COMPRAFINO_TEST_DATABASE_MODE);
-const schema = `comprafino_e2e_${randomUUID().replaceAll("-", "")}`;
-const quoted = `"${schema}"`;
-const scopedClient = testSchemaClient(client, schema);
-const journal = z
-  .object({ entries: z.array(z.object({ tag: z.string().regex(/^\d{4}_[a-z_]+$/u) })) })
-  .parse(
-    JSON.parse(
-      readFileSync(new URL("../migrations/meta/_journal.json", import.meta.url), "utf8"),
-    ) as unknown,
-  );
-let created = false;
+const harness = ownedTestDatabase();
+const { url, schema, scoped: scopedClient, db } = harness;
 try {
-  await client.query(`create schema ${quoted}`);
-  created = true;
-  const path = z
-    .array(z.object({ current_schema: z.string() }))
-    .parse(await scopedClient.query("select current_schema()"));
-  if (path[0]?.current_schema !== schema) throw new Error("E2E schema isolation failed");
-  const statements = journal.entries.flatMap(({ tag }) =>
-    readFileSync(new URL(`../migrations/${tag}.sql`, import.meta.url), "utf8")
-      .split("--> statement-breakpoint")
-      .filter((s) => !s.trim().startsWith("CREATE EXTENSION"))
-      .map((s) => scopedClient.query(s.replaceAll('"public".', `${quoted}.`))),
-  );
-  await scopedClient.transaction(statements);
-  const db = createDatabase({
-    DATABASE_URL: url,
-    COMPRAFINO_E2E_SCHEMA: schema,
-    COMPRAFINO_TEST_DATABASE_MODE: process.env.COMPRAFINO_TEST_DATABASE_MODE,
-  });
+  await harness.setup();
   const all = process.argv.includes("--all");
   const listings = all || process.argv.includes("--listings");
   const now = Date.now();
@@ -307,6 +278,14 @@ try {
         "pnpm",
         [
           "test:e2e",
+          ...process.argv
+            .slice(2)
+            .filter(
+              (arg) =>
+                !["--", "--all", "--listings", "--shopping-list", "--validate-fixtures"].includes(
+                  arg,
+                ),
+            ),
           ...(all
             ? []
             : [
@@ -322,7 +301,8 @@ try {
           stdio: "inherit",
           env: {
             ...process.env,
-            DATABASE_URL: url,
+            DATABASE_URL: fixtureDatabaseUrl(url, process.env.COMPRAFINO_TEST_DATABASE_MODE),
+            COMPRAFINO_E2E_PRELOAD: new URL("./testing/http-preload.ts", import.meta.url).href,
             COMPRAFINO_CONTROLLED_E2E: all ? "1" : "",
             COMPRAFINO_E2E_SCHEMA: schema,
             PRICE_HISTORY_FIXTURE_IDS: JSON.stringify(fixtures),
@@ -337,7 +317,7 @@ try {
   }
 } finally {
   try {
-    if (created) await client.query(`drop schema ${quoted} cascade`);
+    await harness.dispose();
   } finally {
     await closeLocalTestConnections();
   }

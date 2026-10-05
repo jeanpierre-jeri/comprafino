@@ -1,3 +1,4 @@
+import { logDiagnostic } from "./diagnostics.ts";
 import { listingRefreshPolicy } from "@comprafino/core";
 import { catalogPolicy } from "@comprafino/core";
 import { refreshKnownListings } from "./listing-refresh.ts";
@@ -75,9 +76,7 @@ try {
     JSON.stringify({ ...summary, observedAt: new Date().toISOString(), categoryRequests }, null, 2),
   );
   if (summary.status === "failed") process.exitCode = 1;
-} catch {
-  console.error(
-    "Catalog refresh failed. Check options, DATABASE_URL and applied migrations; no credentials logged.",
-  );
+} catch (error) {
+  logDiagnostic(error, { stage: "admission", operation: "refresh", reason: "db_read_failed" });
   process.exitCode = 1;
 }

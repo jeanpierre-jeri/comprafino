@@ -3,7 +3,7 @@ import { z } from "zod";
 import { matchingVersion, shoppingListSchema } from "@comprafino/core";
 import type { RetailerId } from "@comprafino/core";
 import type { createDatabase } from "./client.ts";
-import type { createTestQueryClient } from "./test-query-client.ts";
+import type { createTestQueryClient } from "./testing/test-query-client.ts";
 import { evaluateCurrentShoppingList } from "./shopping-list.ts";
 import { persistListings } from "./ingestion.ts";
 import { persistCatalogNormalizations } from "./catalog.ts";
@@ -87,17 +87,22 @@ export async function seedBasketFixtures(
 /** Browser fixture mutation is confined to the existing isolated-schema harness. */
 export async function restrictBasketFixtureRetailers(restricted: boolean) {
   const { sql } = await import("drizzle-orm");
-  const { createDatabase: create } = await import("./client.ts");
+  const { fixtureDatabase: create } = await import("./testing/fixture-client.ts");
   if (!/^comprafino_e2e_[0-9a-f]{32}$/u.test(process.env.COMPRAFINO_E2E_SCHEMA ?? ""))
     throw new Error("Basket fixture mutation requires an isolated E2E schema");
   const db = create();
-  await db.batch([
-    db.execute(sql`update retailer_listings set available = ${
-      restricted
-        ? sql`case
+  const { closeLocalTestConnections } = await import("./testing/test-query-client.ts");
+  try {
+    await db.batch([
+      db.execute(sql`update retailer_listings set available = ${
+        restricted
+          ? sql`case
     when external_id='basket-0-metro' or external_id='basket-1-plaza-vea' or external_id='basket-2-tottus' then true else false end`
-        : sql`null`
-    }
+          : sql`null`
+      }
     where external_id like 'basket-%'`),
-  ]);
+    ]);
+  } finally {
+    await closeLocalTestConnections();
+  }
 }

@@ -140,3 +140,31 @@ describe("bounded discovery processing", () => {
     );
   });
 });
+it("distinguishes source timeout, persistence and derivation failures without exposing their causes", async () => {
+  const tasks = setup();
+  const timeout = new Error("private query and URL");
+  timeout.name = "TimeoutError";
+  tasks.adapters[0]!.searchProducts.mockRejectedValue(timeout);
+  tasks.persist.mockRejectedValueOnce(
+    Object.assign(new Error("postgres://password@db"), { code: "23514" }),
+  );
+  tasks.match.mockRejectedValue(new Error("raw retailer body"));
+  const result = await processDiscoveryQuery(claim, tasks);
+  expect(result.retailers[0]?.diagnostic).toMatchObject({
+    stage: "source",
+    retailer: "tottus",
+    reason: "source_timeout",
+  });
+  expect(result.retailers[1]?.diagnostic).toMatchObject({
+    stage: "persistence",
+    retailer: "plaza-vea",
+    reason: "db_write_failed",
+    databaseCode: "23514",
+  });
+  expect(result.diagnostic).toMatchObject({
+    stage: "matching",
+    operation: "discovery",
+    reason: "db_write_failed",
+  });
+  expect(JSON.stringify(result)).not.toMatch(/private|password|raw retailer/u);
+});

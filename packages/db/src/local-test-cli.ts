@@ -6,7 +6,7 @@ if (kind !== "integration" && kind !== "history" && kind !== "shopping" && kind 
 const child = spawn(
   "pnpm",
   [
-    ...(kind === "basket" ? ["--filter", "@comprafino/db"] : []),
+    ...(kind === "basket" ? ["--filter", "@comprafino/web"] : []),
     kind === "integration"
       ? "test:integration"
       : kind === "basket"

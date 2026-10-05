@@ -42,11 +42,42 @@ it("records a safe failed run without persisting failed source data", async () =
   const persist = vi.fn<IngestionStore["persist"]>();
   const finish = vi.fn<IngestionStore["finish"]>().mockResolvedValue(undefined);
   await expect(ingest(adapter, 20, { start: async () => "run1", persist, finish })).rejects.toThrow(
-    "source unavailable",
+    "Retailer request failed.",
   );
   expect(persist).not.toHaveBeenCalled();
   expect(finish).toHaveBeenCalledWith(
     "run1",
     expect.objectContaining({ status: "failed", persisted: 0 }),
   );
+});
+it("retains persistence stage in safe run metadata and preserves the original exception as cause", async () => {
+  const failure = Object.assign(new Error("postgres://secret@host private source"), {
+    code: "23514",
+  });
+  const adapter: RetailerAdapter = {
+    retailer: "tottus",
+    fetchListings: async () => ({ listings: sample.listings, discovered: 49 }),
+  };
+  const finish = vi.fn<IngestionStore["finish"]>().mockResolvedValue(undefined);
+  await expect(
+    ingest(adapter, 5, {
+      start: async () => "run1",
+      persist: async () => {
+        throw failure;
+      },
+      finish,
+    }),
+  ).rejects.toMatchObject({
+    cause: failure,
+    diagnostic: {
+      stage: "persistence",
+      operation: "ingestion",
+      retailer: "tottus",
+      reason: "db_write_failed",
+      databaseCode: "23514",
+    },
+  });
+  const metadata = finish.mock.calls[0]?.[1].error;
+  expect(metadata).toContain('"reason":"db_write_failed"');
+  expect(metadata).not.toMatch(/secret|private/u);
 });

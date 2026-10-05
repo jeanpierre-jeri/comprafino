@@ -16,7 +16,7 @@ Retailer ingestion workflows are manual. Operational workflows require a `DATABA
 
 Retailer failures preserve previous committed data and allow other retailers to proceed; the overall command exits nonzero. Targeted refresh can still supply accepted observations after category failures. If no acquisition succeeds, derivation is skipped unless a partially failed stage may have committed writes. Normalization failure/stale rows prevents matching. Stages are individually transactional, not one transaction spanning the whole pipeline.
 
-Run creation/finish is separate from listing commits; interruption may leave `running`. A database outage cannot reliably record its own failure. Fixed safe summaries and CLI/Actions status are the fallback; no credentials/raw connection errors are printed. Explicit unavailable/absence/failure outcomes do not advance price freshness or usable coverage. See [availability](availability.md) and [listing refresh](listing-refresh.md).
+Run creation/finish is separate from listing commits; interruption may leave `running`. A database outage cannot reliably record its own failure. Safe structured summaries and CLI/Actions status are the fallback; no credentials/raw connection errors are printed. Explicit unavailable/absence/failure outcomes do not advance price freshness or usable coverage. See [availability](availability.md) and [listing refresh](listing-refresh.md).
 
 ## Health versus listing freshness
 
@@ -55,3 +55,11 @@ Fresh environments apply the full existing journal using `pnpm db:migrate`. Gene
 Current budget reporting qualifies local refresh measurements against current source identity and catalog size. Historical timing/test/catalog counts are [dated evidence](history/README.md), not current operational limits or deployment acceptance. Quotas, monthly transition growth and actual workflow overhead require fresh measurement.
 
 `pnpm benchmark:basket:local` writes a timestamped report under ignored `.artifacts/`; `--output=<path>` selects a repository-relative or absolute destination. Existing files are never replaced. Reviewed baseline updates require an intentionally new destination and review. Read-only audit CLIs print JSON to stdout; choose an explicit new output file when retaining it. Avoid redirecting routine output into historical evidence. See [local testing](local-testing.md).
+
+## Safe diagnostics and demand lifecycle
+
+Core `safeDiagnostic` formats fixed `stage`, `operation`, optional `retailer`, `reason` and `message`, plus an allowlisted SQLSTATE when present. Source timeout, request/validation, DB read/write and normalization/matching failures stay distinguishable. There is no logging dependency or telemetry service. Web/scraper sinks log these objects; they never copy arbitrary error messages, connection strings, request labels/queries, source payloads, stacks or driver detail. Retryability is omitted because no new retry decision exists.
+
+Category ingestion records the safe diagnostic JSON in the existing run error field. Exception wrappers retain original causes in memory for genuine failure propagation, never in persisted JSON. Refresh retailer/derivation summaries and discovery/targeted results retain their failing stage; admission/completion DB failures stay fatal. Public messages/status and last-known-good/failure isolation, cooldown/retry and availability policies remain unchanged. DB outages still require Actions/server logs; no remote error persistence is promised.
+
+Discovery admission retains at most 3,000 distinct rows. Normal scheduled discovery performs one oldest-first cleanup batch of at most 100 rows inactive for more than 30 days and outside cooldown; processing rows stay protected. The cleanup log reports removed count and the operation, without query text. Expiration removes the demand text/count and detaches query attribution while preserving acquired listings/history/source. Dry-run writes nothing. See [discovery lifecycle and rationale](discovery.md#normalization-and-demand). Shopping evaluation transmits browser-local list data transiently and never persists the shopping list.

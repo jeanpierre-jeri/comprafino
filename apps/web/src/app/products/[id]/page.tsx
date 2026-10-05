@@ -1,3 +1,4 @@
+import { logDiagnostic } from "../../../server/diagnostics.ts";
 import { AddShoppingItem } from "../../../components/shopping-item-editor";
 import { shoppingQueryForTitle } from "@comprafino/core";
 import type { Metadata } from "next";
@@ -30,7 +31,7 @@ const loadProduct = cache(async (id: string, mode: "standard" | "benefits" = "st
       failed: false,
     };
   } catch (error) {
-    console.error("Public comparison database query failed", error);
+    logDiagnostic(error, { stage: "public", operation: "comparison", reason: "db_read_failed" });
     return { product: null, failed: true };
   }
 });

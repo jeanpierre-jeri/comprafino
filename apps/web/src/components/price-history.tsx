@@ -1,3 +1,4 @@
+import { logDiagnostic } from "../server/diagnostics.ts";
 import Link from "next/link";
 import { formatPen, historyRanges } from "@comprafino/core";
 import type { HistoryRange } from "@comprafino/core";
@@ -27,7 +28,7 @@ export async function PriceHistory({
   try {
     history = await getCanonicalProductPriceHistory(createDatabase(), productId, { range });
   } catch (error) {
-    console.error("Public price history query failed", error);
+    logDiagnostic(error, { stage: "public", operation: "history", reason: "db_read_failed" });
   }
   return (
     <PriceHistoryPresentation

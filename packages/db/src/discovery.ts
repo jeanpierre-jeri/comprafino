@@ -2,6 +2,7 @@ import { desc, asc, eq, and, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   discoveryDailyLimit,
+  discoveryDemandPolicy,
   discoveryQueryForSearch,
   parseDiscoveryOptions,
 } from "@comprafino/core";
@@ -23,24 +24,46 @@ const claimSchema = z.object({
 });
 export type DiscoveryClaim = z.infer<typeof claimSchema>;
 
+// Schema-local lock coordinates count-based admission across request processes.
+const demandLock = sql`select pg_advisory_xact_lock(hashtext(current_schema() || ':discovery-demand'))`;
+
+/** Bounded, repeatable cleanup; active/interrupted processing claims are retained. */
+export async function cleanupDiscoveryDemand(db: Database) {
+  const results = await db.batch([
+    db.execute(demandLock),
+    db.execute(sql`with expired as materialized (
+      select id from discovery_queries
+      where status<>'processing' and last_requested_at<statement_timestamp()-make_interval(days=>${discoveryDemandPolicy.inactiveDays})
+        and next_eligible_at<=statement_timestamp()
+      order by last_requested_at,id limit ${discoveryDemandPolicy.cleanupBatch} for update skip locked
+    ), detached as (
+      update retailer_listings set discovery_query_id=null where discovery_query_id in(select id from expired) returning id
+    ), deleted as (
+      delete from discovery_queries where id in(select id from expired)
+        and (select count(*) from detached)>=0 returning id
+    ) select count(*)::integer as removed from deleted`),
+  ]);
+  return z.object({ removed: z.number().int() }).parse(results[1].rows[0]);
+}
+
 /** Only call after a successful local public search; failures are never zero results. */
 export async function recordDiscoveryForSearch(db: Database, query: string, resultCount: number) {
   const normalizedQuery = discoveryQueryForSearch(query, resultCount);
   if (!normalizedQuery) return false;
-  await db
-    .insert(discoveryQueries)
-    .values({
-      normalizedQuery,
-      originalQuery: query.trim().replace(/\s+/gu, " "),
-    })
-    .onConflictDoUpdate({
-      target: discoveryQueries.normalizedQuery,
-      set: {
-        requestCount: sql`least(${discoveryQueries.requestCount}::bigint + 1, 2147483647)::integer`,
-        lastRequestedAt: sql`greatest(${discoveryQueries.lastRequestedAt}, clock_timestamp())`,
-      },
-    });
-  return true;
+  const original = query.trim().replace(/\s+/gu, " ");
+  const results = await db.batch([
+    db.execute(demandLock),
+    // Separate statement after the lock: concurrent admissions see committed rows.
+    db.execute(sql`insert into discovery_queries(normalized_query,original_query)
+      select ${normalizedQuery},${original}
+      where (select count(*) from discovery_queries)<${discoveryDemandPolicy.maximumRows}
+        or exists(select 1 from discovery_queries where normalized_query=${normalizedQuery})
+      on conflict(normalized_query) do update set
+        request_count=least(discovery_queries.request_count::bigint+1,2147483647)::integer,
+        last_requested_at=greatest(discovery_queries.last_requested_at,clock_timestamp())
+      returning id`),
+  ]);
+  return results[1].rows.length > 0;
 }
 
 const eligible = sql`q.next_eligible_at <= statement_timestamp() and (

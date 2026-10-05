@@ -116,7 +116,7 @@ it("freezes validated category limits and persists neither Tottus category on a 
     { retailer: "tottus", fetchListings: dairyFetch },
   );
   await expect(ingest(adapter, 150, { start: async () => "id", persist, finish })).rejects.toThrow(
-    "restricted",
+    "Retailer request failed.",
   );
   expect(meatFetch).toHaveBeenCalledWith(50);
   expect(dairyFetch).toHaveBeenCalledWith(100);
@@ -251,7 +251,7 @@ it("a failed staple source prevents an atomic retailer write and further categor
   const persist = vi.fn<IngestionStore["persist"]>();
   const finish = vi.fn<IngestionStore["finish"]>().mockResolvedValue(undefined);
   await expect(ingest(adapter, 220, { start: async () => "id", persist, finish })).rejects.toThrow(
-    "restricted",
+    "Retailer request failed.",
   );
   expect(fetchListings).toHaveBeenCalledTimes(2);
   expect(persist).not.toHaveBeenCalled();

@@ -41,7 +41,7 @@ Apply the existing reviewed migration journal first. `pnpm db:generate` is for a
 
 Root CLI commands load `.env`. Set `DATABASE_URL` separately in `apps/web/.env.local` for development routes, and in hosting settings for deployment. Never commit credentials. `TEST_DATABASE_URL` is an explicit dedicated-test opt-in; test runners never use application `DATABASE_URL` as a fallback. Local Docker wrappers supply their own disposable URL.
 
-Test-only `COMPRAFINO_TEST_DATABASE_MODE`, `COMPRAFINO_E2E_SCHEMA`, `COMPRAFINO_CONTROLLED_E2E` and fixture-ID variables belong to the harness; do not set them in normal development or deployment. See [local testing](docs/local-testing.md).
+Test-only `COMPRAFINO_TEST_DATABASE_MODE`, `COMPRAFINO_E2E_SCHEMA`, `COMPRAFINO_E2E_PRELOAD`, `COMPRAFINO_CONTROLLED_E2E` and fixture-ID variables belong to the harness; do not set them in normal development or deployment. See [local testing](docs/local-testing.md).
 
 ## Validation and deterministic fixtures
 

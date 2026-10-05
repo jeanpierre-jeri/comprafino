@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { createDatabase } from "./client.ts";
-import { createTestQueryClient, validateLocalTestUrl } from "./test-query-client.ts";
+import { ownedTestDatabase } from "./testing/database.ts";
+import { createTestQueryClient, validateLocalTestUrl } from "./testing/test-query-client.ts";
 
 describe("local test database boundary", () => {
   it("accepts only loopback connections to the dedicated test database", () => {
@@ -21,10 +21,7 @@ describe("local test database boundary", () => {
       createTestQueryClient("postgresql://user@localhost/comprafino_test", "typo"),
     ).toThrow(/Unknown/u);
     expect(() =>
-      createDatabase({
-        DATABASE_URL: "postgresql://user@localhost/comprafino_test",
-        COMPRAFINO_TEST_DATABASE_MODE: "local",
-      }),
-    ).toThrow(/isolated/u);
+      ownedTestDatabase({ DATABASE_URL: "postgresql://user@localhost/comprafino_test" }),
+    ).toThrow(/DATABASE_URL/u);
   });
 });

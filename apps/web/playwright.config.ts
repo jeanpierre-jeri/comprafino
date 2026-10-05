@@ -10,7 +10,9 @@ export default defineConfig({
   use: { baseURL: "http://127.0.0.1:3100", trace: "retain-on-failure" },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: "pnpm start --port 3100",
+    command: process.env.COMPRAFINO_E2E_PRELOAD
+      ? "node --import ../../packages/db/src/testing/http-preload.ts node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3100"
+      : "pnpm start --port 3100",
     url: "http://127.0.0.1:3100",
     reuseExistingServer: false,
     timeout: 60_000,

@@ -1,3 +1,4 @@
+import { logDiagnostic } from "../../../server/diagnostics.ts";
 import type { Metadata } from "next";
 import { cache } from "react";
 import { connection } from "next/server";
@@ -27,7 +28,7 @@ const loadListing = cache(async (id: string, range: HistoryRange) => {
       failed: false,
     };
   } catch (error) {
-    console.error("Public listing query failed", error);
+    logDiagnostic(error, { stage: "public", operation: "listing", reason: "db_read_failed" });
     return { listing: null, failed: true };
   }
 });

@@ -98,3 +98,23 @@ it("skips concurrent or newer observations refused by admission", async () => {
   expect((await refreshKnownListings([row(1)], t)).requests).toBe(0);
   expect(t.adapters.metro.lookupListing).not.toHaveBeenCalled();
 });
+it("retains source timeout diagnostics and leaves fatal admission/finish failures fatal", async () => {
+  const t = tasks();
+  const failure = new Error("private source");
+  failure.name = "TimeoutError";
+  vi.mocked(t.adapters.metro.lookupListing).mockRejectedValue(failure);
+  expect((await refreshKnownListings([row(1)], t)).results[0]?.diagnostic).toMatchObject({
+    stage: "source",
+    operation: "targeted",
+    retailer: "metro",
+    reason: "source_timeout",
+  });
+  vi.mocked(t.claim).mockRejectedValueOnce(new Error("secret db"));
+  await expect(refreshKnownListings([row(1)], t)).rejects.toMatchObject({
+    diagnostic: { stage: "admission", reason: "db_write_failed" },
+  });
+  vi.mocked(t.finish).mockRejectedValueOnce(new Error("secret finish"));
+  await expect(refreshKnownListings([row(1)], t)).rejects.toMatchObject({
+    diagnostic: { stage: "completion", reason: "db_write_failed" },
+  });
+});

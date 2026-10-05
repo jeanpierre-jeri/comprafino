@@ -40,6 +40,10 @@ Search relevance and substitution compatibility are separate. Broad search can i
 
 Evaluation reuses normalized family/category and strong quantity evidence. Independent normalized retailer offers can satisfy generic needs without gaining invented canonical/history associations. Exact associations still require current automatic high-confidence public matching eligibility. Null or inconsistent saved compatibility fails closed. Preferred compatibility comes from the current canonical product, never a custom local label. A negative source-family classification remains negative.
 
+Shopping lists remain browser-local (with a session fallback). Evaluation requests transiently send list labels, queries, amounts and item metadata to the server. Evaluation does not persist the list or create discovery demand; no account/IP identity is attached.
+
+`/api/list/evaluate` accepts at most **128 KiB of UTF-8 body bytes**, including JSON escaping. This accommodates 50 items with maximum label/query/profile fields and conservative metadata headroom. Both declared length and actual streamed bytes are checked before JSON parsing; no streaming JSON parser is used. Oversized bodies return safe 413, malformed JSON/schema or more than 50 items return 400, and rejected requests never access market evaluation. Within the byte cap, labels/queries remain limited to 120 characters.
+
 `/api/list/evaluate` validates the version-two list and performs read-only current-catalog queries; evaluation never ingests or refreshes retailers. The old product-selection endpoint remains available but is unused by the dialogs. Responses are uncached and validated; list prices refresh on tab return and every minute. Fresh active ordinary prices and supported CMR benefits use existing ranking. Milestone 16 now compares optimized complete/partial baskets for up to one, two and three retailers; per-item recommendations retain their existing behavior. Frequencies do not produce a monthly recurring bill.
 
 ## Limits and current basket work

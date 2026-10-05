@@ -12,7 +12,7 @@
     "db:generate": "drizzle-kit generate --config drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config drizzle.migrate.config.ts",
     "test": "vitest run --exclude '**/*.integration.test.ts'",
-    "test:integration": "vitest run src/ingestion.integration.test.ts src/shopping-list.integration.test.ts",
+    "test:integration": "vitest run .integration.test.ts",
     "normalize:catalog": "node --env-file-if-exists=../../.env --experimental-strip-types src/catalog-cli.ts",
     "match:catalog": "node --env-file-if-exists=../../.env --experimental-strip-types src/matching-cli.ts",
     "match:evaluate": "node --env-file-if-exists=../../.env --experimental-strip-types src/matching-evaluate-cli.ts",
@@ -24,7 +24,6 @@
     "audit:price-history": "node --env-file-if-exists=../../.env --experimental-strip-types src/price-history-audit-cli.ts",
     "test:e2e:history": "node --experimental-strip-types src/price-history-e2e-cli.ts",
     "audit:observation-coverage": "node --env-file-if-exists=../../.env --experimental-strip-types src/observation-coverage-cli.ts",
-    "benchmark:basket": "node --experimental-strip-types src/basket-benchmark-cli.ts",
     "audit:shopping-list": "node --env-file-if-exists=../../.env --experimental-strip-types src/shopping-list-audit-cli.ts",
     "audit:catalog-coverage": "node --env-file-if-exists=../../.env --experimental-strip-types src/catalog-coverage-cli.ts",
     "audit:availability": "node --env-file-if-exists=../../.env --experimental-strip-types src/catalog-coverage-cli.ts"
@@ -33,7 +32,6 @@
     "@comprafino/core": "workspace:*",
     "@neondatabase/serverless": "1.2.0",
     "drizzle-orm": "0.45.3",
-    "pg": "8.23.1",
     "zod": "4.6.5"
   },
   "devDependencies": {
@@ -41,6 +39,7 @@
     "@types/pg": "8.23.1",
     "dotenv": "18.0.5",
     "drizzle-kit": "0.31.11",
+    "pg": "8.23.1",
     "vitest": "5.0.3"
   }
 }

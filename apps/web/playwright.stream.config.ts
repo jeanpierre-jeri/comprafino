@@ -1,8 +1,8 @@
 import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
-  testDir: "./e2e",
-  testMatch: "stream-cancellation.spec.ts",
+  testDir: ".",
+  testMatch: ["**/stream-cancellation.spec.ts", "testing/shopping-api.spec.ts"],
   workers: 1,
   reporter: "list",
 });
