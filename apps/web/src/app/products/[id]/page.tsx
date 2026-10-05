@@ -1,3 +1,5 @@
+import { AddShoppingItem } from "../../../components/shopping-item-editor";
+import { shoppingQueryForTitle } from "@comprafino/core";
 import type { Metadata } from "next";
 import { parseHistoryRange } from "@comprafino/core";
 import { PriceHistory } from "../../../components/price-history";
@@ -110,6 +112,20 @@ export default async function ProductPage({ params, searchParams }: Props) {
             )}
         </div>
       </div>
+      <AddShoppingItem
+        seed={{
+          label: product.displayName,
+          query: shoppingQueryForTitle(product.displayName),
+          canonicalId: product.id,
+          quantity: {
+            amount:
+              (product.quantityValue * product.packageCount) /
+              (product.quantityUnit === "unit" ? 1 : 1000),
+            unit:
+              product.quantityUnit === "g" ? "kg" : product.quantityUnit === "ml" ? "L" : "unit",
+          },
+        }}
+      />
       <SearchControls query="" filters={filters} comparisonPath={`/products/${product.id}`} />
       <section className="mt-8" aria-labelledby="offers-title">
         <h2 id="offers-title" className="text-2xl font-semibold tracking-tight">

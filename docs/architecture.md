@@ -93,3 +93,7 @@ Core owns range parsing, half-open state intersection, ordinary transitions and 
 Local database tests can use the disposable Docker PostgreSQL setup described in
 [local testing](local-testing.md). Production retains Neon HTTP; an explicit test
 mode provides TCP queries with the same Drizzle batch and schema isolation semantics.
+
+## Recurring shopping list ownership
+
+Core owns the versioned list schema, semantic duplicate keys, family/variant compatibility, integer package fulfillment and per-item pricing/overbuy ranking. DB reuses public generic/canonical current-offer eligibility and quantity evidence through a read-only evaluation boundary. Web owns isolated localStorage access, a small React subscription hook, add/edit dialogs and `/list`; route handlers validate requests and never persist list data or call retailers. Generic candidates include independently normalized store brands; null canonical identities never create exact/history associations. No account, migration or server list repository is introduced. See [shopping lists](shopping-list.md) for policy, audit and pending browser acceptance.

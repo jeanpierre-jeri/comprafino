@@ -20,3 +20,5 @@ export * from "./search-filters.ts";
 
 export * from "./price-history.ts";
 export * from "./observation-coverage.ts";
+
+export * from "./shopping-list.ts";

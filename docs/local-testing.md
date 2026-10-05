@@ -30,3 +30,9 @@ Normal application connections continue to use Neon HTTP. The local test transpo
 Browser tests require a successful production build first. A Turbopack worker-port restriction in the agent sandbox can prevent that build; run the build locally in that case.
 
 Verified: 41 integration tests and all six fixture kinds pass against this container, and cleanup leaves no test schemas. Formatting, lint, typechecking and 542 unit tests pass. The current sandbox production build fails at the documented Turbopack worker-port restriction; the local history browser run remains pending.
+
+## Shopping-list fixtures
+
+After a successful production build, run `pnpm test:e2e:list:local` for the shopping-list Chromium scenarios. The existing isolated-schema harness also seeds two fresh egg identities across three retailers and a supported CMR offer; generic/preferred/strict behavior and a fixture price change use that catalog. The browser writes only localStorage; the price-change test writes only its random fixture schema. `pnpm test:e2e:list:local --validate-fixtures` checks seed eligibility without running browsers. It uses the same explicit loopback test URL and cleanup as history tests, with `SHOPPING_LIST_FIXTURE_IDS` supplied only by the harness. No additional database or credentials are required.
+
+Milestone 15's current verification and pending build/browser gate are recorded in [shopping lists](shopping-list.md).

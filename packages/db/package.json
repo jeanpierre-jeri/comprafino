@@ -23,7 +23,8 @@
     "audit:quantity-quality": "node --env-file-if-exists=../../.env --experimental-strip-types src/quantity-quality-cli.ts",
     "audit:price-history": "node --env-file-if-exists=../../.env --experimental-strip-types src/price-history-audit-cli.ts",
     "test:e2e:history": "node --experimental-strip-types src/price-history-e2e-cli.ts",
-    "audit:observation-coverage": "node --env-file-if-exists=../../.env --experimental-strip-types src/observation-coverage-cli.ts"
+    "audit:observation-coverage": "node --env-file-if-exists=../../.env --experimental-strip-types src/observation-coverage-cli.ts",
+    "audit:shopping-list": "node --env-file-if-exists=../../.env --experimental-strip-types src/shopping-list-audit-cli.ts"
   },
   "dependencies": {
     "@comprafino/core": "workspace:*",

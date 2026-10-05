@@ -36,7 +36,9 @@
     "test:db:up": "docker compose -f compose.test.yaml up -d --wait",
     "test:db:down": "docker compose -f compose.test.yaml down",
     "test:integration:local": "node --experimental-strip-types packages/db/src/local-test-cli.ts integration",
-    "test:e2e:history:local": "node --experimental-strip-types packages/db/src/local-test-cli.ts history"
+    "test:e2e:history:local": "node --experimental-strip-types packages/db/src/local-test-cli.ts history",
+    "test:e2e:list:local": "node --experimental-strip-types packages/db/src/local-test-cli.ts shopping",
+    "audit:shopping-list": "pnpm --filter @comprafino/db audit:shopping-list"
   },
   "devDependencies": {
     "oxfmt": "0.71.0",

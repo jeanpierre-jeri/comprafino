@@ -130,7 +130,7 @@ Unit/PostgreSQL checks and a six-product read-only audit are recorded in [price 
 
 Implemented: reviewed prospective listing/day rollup in Peru time, shared atomic persistence for category/discovery/targeted observations, accepted-observation counts with replay protection, verified step segments and explicit gaps, conservative pre-coverage markers, retailer-specific selected-range changes/min/max/count and verified unchanged streaks, developer coverage metrics and read-only audit/storage projections. No backfill, CMR history, recommendation, forecast, alert, AI, dependency or new schedule.
 
-Unit/PostgreSQL, live refresh/repeat, storage and history audit evidence plus remaining local build/Chromium/visual gates are in [Milestone 14 validation](milestone-14-validation.md). The agent hit the specified Turbopack worker-port restriction and retains framework configuration. Stage and await local build/E2E/visual confirmation before committing. Milestone 14 is **not complete** until those gates pass. Do not begin buy/wait work or the next milestone automatically.
+Unit/PostgreSQL, live refresh/repeat, storage and history audit evidence plus remaining local build/Chromium/visual gates are in [Milestone 14 validation](milestone-14-validation.md). The agent hit the specified Turbopack worker-port restriction and retains framework configuration. Stage and await local build/E2E/visual confirmation before committing. The user-provided Milestone 15 baseline identifies Milestone 14 as complete; the preceding agent notes record its historical validation gate.
 
 ## Later — Promotions
 
@@ -140,9 +140,13 @@ Model percentage discounts, 2x1, second-unit discounts, quantity discounts, date
 
 Use current/historical prices, confirmed future promotions and clearly labelled historical patterns. Never present unconfirmed future prices as facts.
 
-## Later — Shopping lists
+## Milestone 15 — Flexible recurring shopping list
 
-Allow users to assemble full grocery baskets, using the simplest adequate state/persistence approach.
+Implemented: versioned browser-local generic/preferred/strict needs, quantity and frequency editing, safe storage and cross-tab updates, independently evaluated fresh whole-package options, conservative variant/quantity and overbuy policy, ordinary/CMR modes, preserved canonical preferences with meaningful alternatives, strict isolation, grouped `/list` cards and summary, search/detail add dialogs, header/loading/theme integration. No account, remote list storage, migration, dependency, basket optimization, alert, AI or timing recommendation.
+
+Unit/PostgreSQL coverage, isolated browser fixtures, read-only real-data audit and remaining acceptance gates are documented in [shopping lists](shopping-list.md). The sandbox build hit the known worker-port restriction; production Chromium execution and desktop/mobile visual review remain pending. Stage and await local confirmation before committing. **Milestone 15 is not complete until those checks pass.**
+
+Recommended next milestone: reviewed generic compatibility/coverage expansion and purchase-decision evidence for recurring needs, before temporal recommendations. Do not begin it automatically.
 
 ## Later — Basket optimization
 

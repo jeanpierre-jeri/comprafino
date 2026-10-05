@@ -123,7 +123,11 @@ test("mobile keyboard chip navigation responds in either theme and respects redu
       held.release();
     }
     await expect(page).toHaveURL(/\/search\?q=huevos$/);
-    await expect(page.getByRole("button", { name: "Buscar", exact: true })).toBeEnabled();
+    // URL commit can precede the streamed catalog response. Retry readiness
+    // within the test budget rather than treating ordinary query latency as failure.
+    await expect(page.getByRole("button", { name: "Buscar", exact: true })).toBeEnabled({
+      timeout: 15_000,
+    });
     await page.unrouteAll({ behavior: "wait" });
   }
 });

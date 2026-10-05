@@ -1,3 +1,4 @@
+import { NavigationLink } from "./navigation-link";
 import { ThemeControl } from "./theme-control";
 import Link from "next/link";
 
@@ -18,6 +19,9 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
           <span className="hidden text-xs text-muted-foreground sm:inline sm:text-sm">
             Hecho para comprar en Perú
           </span>
+          <NavigationLink href="/list" className="text-sm font-medium text-primary">
+            Mi lista
+          </NavigationLink>
           <ThemeControl />
         </div>
       </header>

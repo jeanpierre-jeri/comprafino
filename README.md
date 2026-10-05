@@ -251,3 +251,7 @@ The history browser runner creates and removes a random schema, checks isolation
 For a disposable Docker PostgreSQL database, run `pnpm test:db:up`, then
 `pnpm test:integration:local` or, after `pnpm build`, `pnpm test:e2e:history:local`.
 Stop it with `pnpm test:db:down`. See [local testing](docs/local-testing.md).
+
+## Recurring shopping list
+
+`/list` saves generic needs, preferred products or strict canonical products in this browser, with unit/kg/L quantities and weekly/biweekly/monthly frequency. Search/detail pages provide add dialogs; current ordinary/CMR options are evaluated independently per need. There is no account, server list persistence or whole-basket/timing optimizer. See [shopping-list behavior, current-data audit and pending local build/browser validation](docs/shopping-list.md). Run the read-only `pnpm audit:shopping-list` with root `.env`/`DATABASE_URL`, and `pnpm test:e2e:list:local` after a successful production build for isolated shopping-list browser fixtures.

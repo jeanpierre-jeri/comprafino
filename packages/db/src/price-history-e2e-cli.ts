@@ -1,3 +1,4 @@
+import { seedShoppingListFixtures } from "./shopping-list-e2e-fixtures.ts";
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { spawn } from "node:child_process";
@@ -164,22 +165,31 @@ try {
     if (kind === "old" && metro?.summary.status !== "empty")
       throw new Error("Old fixture mismatch");
   }
+  const shopping = process.argv.includes("--shopping-list");
+  const shoppingFixtures = shopping ? await seedShoppingListFixtures(db, scopedClient) : {};
   if (process.argv.includes("--validate-fixtures")) {
     console.log(
-      "Validated rich, sparse, outside-range, continuous, gap and decrease fixtures in an isolated schema; browser tests were not run.",
+      shopping
+        ? "Validated history and shopping-list fixtures in an isolated schema; browser tests were not run."
+        : "Validated rich, sparse, outside-range, continuous, gap and decrease fixtures in an isolated schema; browser tests were not run.",
     );
   } else {
     const exitCode = await new Promise<number>((resolve, reject) => {
-      const child = spawn("pnpm", ["test:e2e", "price-history.spec.ts"], {
-        cwd: new URL("../../../", import.meta.url),
-        stdio: "inherit",
-        env: {
-          ...process.env,
-          DATABASE_URL: url,
-          COMPRAFINO_E2E_SCHEMA: schema,
-          PRICE_HISTORY_FIXTURE_IDS: JSON.stringify(fixtures),
+      const child = spawn(
+        "pnpm",
+        ["test:e2e", shopping ? "shopping-list.spec.ts" : "price-history.spec.ts"],
+        {
+          cwd: new URL("../../../", import.meta.url),
+          stdio: "inherit",
+          env: {
+            ...process.env,
+            DATABASE_URL: url,
+            COMPRAFINO_E2E_SCHEMA: schema,
+            PRICE_HISTORY_FIXTURE_IDS: JSON.stringify(fixtures),
+            SHOPPING_LIST_FIXTURE_IDS: JSON.stringify(shoppingFixtures),
+          },
         },
-      });
+      );
       child.on("error", reject);
       child.on("exit", (code) => resolve(code ?? 1));
     });

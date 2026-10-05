@@ -1,3 +1,4 @@
+import { AddShoppingItem } from "../../components/shopping-item-editor";
 import { Suspense } from "react";
 import { SearchPageLoading } from "../../components/page-loading";
 import { ArrowRight } from "@comprafino/ui";
@@ -97,6 +98,22 @@ async function SearchResults({
       </div>
       {usefulSearchQuery(query) && !failed && (
         <SearchControls query={query} filters={filters} units={units} />
+      )}
+      {usefulSearchQuery(query) && (
+        <AddShoppingItem
+          seed={{
+            label: query,
+            query,
+            canonicalId: null,
+            quantity:
+              offers.find((o) => o.unitPrice?.quality === "strong")?.unitPrice?.dimension === "mass"
+                ? { amount: 1, unit: "kg" }
+                : offers.find((o) => o.unitPrice?.quality === "strong")?.unitPrice?.dimension ===
+                    "volume"
+                  ? { amount: 1, unit: "L" }
+                  : { amount: query.toLowerCase().startsWith("huevo") ? 30 : 1, unit: "unit" },
+          }}
+        />
       )}
       <section className="mt-6" aria-label="Resultados de búsqueda">
         {failed ? (

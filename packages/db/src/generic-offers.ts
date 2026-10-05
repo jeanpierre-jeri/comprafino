@@ -158,11 +158,13 @@ export async function searchGenericProductOffers(
   now = new Date(),
   filters: SearchFilters = searchFilters({ sort }),
   unlimited = false,
+  canonicalId: string | null = null,
 ): Promise<GenericProductOffer[]> {
-  if (!usefulSearchQuery(rawQuery)) return [];
+  if (canonicalId ? !z.uuid().safeParse(canonicalId).success : !usefulSearchQuery(rawQuery))
+    return [];
   const query = normalizeSearchQuery(rawQuery);
-  const interpretation = resolveProductFamilyQuery(rawQuery);
-  const requiredQuery = interpretation?.remainingQuery ?? query;
+  const interpretation = canonicalId ? null : resolveProductFamilyQuery(rawQuery);
+  const requiredQuery = canonicalId ? "" : (interpretation?.remainingQuery ?? query);
   const predicates = [...new Set(requiredQuery.split(" ").filter(Boolean))].map(
     (token) =>
       sql`exists (select 1 from unnest(string_to_array(identity_text,' ')) word where ${/^\d+$/u.test(token) ? sql`word=${token}` : sql`starts_with(word,${token})`})`,
@@ -185,6 +187,7 @@ export async function searchGenericProductOffers(
     left join products p on p.id=a.canonical_product_id
     where l.active and l.available is distinct from false and h.currency='PEN'
       and h.price_unit=l.price_unit and h.price_unit in ('UN','KG')
+      and ${canonicalId ? sql`p.id=${canonicalId}::uuid` : sql`true`}
       and l.last_seen_at between ${new Date(now.getTime() - 36 * 60 * 60 * 1000).toISOString()}::timestamptz and ${now.toISOString()}::timestamptz
   ) select * from generic where ${predicates.length ? sql.join(predicates, sql` and `) : sql`true`}
   order by (title_text=${query}) desc, starts_with(title_text,${query}) desc,
@@ -259,5 +262,24 @@ export function filterGenericOffers(
     (o) =>
       (!filters.retailer || o.retailerId === filters.retailer) &&
       (!filters.unit || o.unitPrice?.displayUnit === (filters.unit === "L" ? "l" : filters.unit)),
+  );
+}
+
+/** Exact current offers use the same fingerprint/quantity/freshness boundary as
+ * generic search and the existing public canonical eligibility CTE. */
+export function getCanonicalCurrentProductOffers(
+  db: ReturnType<typeof createDatabase>,
+  id: string,
+  now = new Date(),
+  mode: PriceMode = "standard",
+) {
+  return searchGenericProductOffers(
+    db,
+    "",
+    "relevance",
+    now,
+    searchFilters({ priceMode: mode }),
+    true,
+    id,
   );
 }

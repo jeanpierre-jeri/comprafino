@@ -1,3 +1,5 @@
+import { evaluateCurrentShoppingItem } from "./shopping-list.ts";
+import { shoppingListItemSchema } from "@comprafino/core";
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { NeonQueryPromise } from "@neondatabase/serverless";
@@ -1039,6 +1041,86 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
       );
     return { id: links[0]!.id, rows };
   }
+  it("shopping queries retain independent generic offers without leaking uncertain canonical identities", async () => {
+    const base = await seedPublicProduct("shopping-base", "Huevos Gloria Auditshopping Base 30un");
+    const alternative = await seedPublicProduct(
+      "shopping-alt",
+      "Huevos Gloria Auditshopping Otra 30un",
+    );
+    await query(
+      "update price_history set current_price_cents=1790 where listing_id=any($1::uuid[])",
+      [`{${base.rows.map((r) => r.id).join(",")}}`],
+    );
+    await query(
+      "update price_history set current_price_cents=1490 where listing_id=any($1::uuid[])",
+      [`{${alternative.rows.map((r) => r.id).join(",")}}`],
+    );
+    await seedGeneric("Huevos Orgánicos Auditshopping Incompatible 30un", 1);
+    const independent = await seedGeneric("Huevos Auditshopping Independiente 30un", 1690);
+    const makeItem = (intent: "generic" | "preferred" | "strict") =>
+      shoppingListItemSchema.parse({
+        id: randomUUID(),
+        label: "Huevos",
+        query: "huevos auditshopping",
+        intent,
+        canonicalId: intent === "generic" ? null : base.id,
+        quantity: { amount: 30, unit: "unit" },
+        frequency: "weekly",
+        createdAt: publicNow.toISOString(),
+        updatedAt: publicNow.toISOString(),
+      });
+    const generic = await evaluateCurrentShoppingItem(
+      db,
+      makeItem("generic"),
+      "standard",
+      publicNow,
+    );
+    expect(generic.best).toMatchObject({
+      canonicalId: alternative.id,
+      totalCostCents: 1490,
+      packages: 1,
+    });
+    const preferred = await evaluateCurrentShoppingItem(
+      db,
+      makeItem("preferred"),
+      "standard",
+      publicNow,
+    );
+    expect(preferred).toMatchObject({
+      preferred: { canonicalId: base.id },
+      alternative: { canonicalId: alternative.id },
+      savingsCents: 300,
+    });
+    const strict = await evaluateCurrentShoppingItem(db, makeItem("strict"), "standard", publicNow);
+    expect(strict.options).toHaveLength(2);
+    expect(strict.options.every((o) => o.canonicalId === base.id)).toBe(true);
+    await query("update canonical_product_listings set confidence=0.85 where listing_id=$1", [
+      alternative.rows[0]!.id,
+    ]);
+    expect(
+      (await evaluateCurrentShoppingItem(db, makeItem("generic"), "standard", publicNow)).best,
+    ).toMatchObject({ canonicalId: null, totalCostCents: 1490 });
+    await query("update canonical_product_listings set confidence=1 where listing_id=$1", [
+      alternative.rows[0]!.id,
+    ]);
+    await query(
+      "update retailer_listings set first_seen_at='2026-09-01T00:00:00Z', last_seen_at='2026-09-01T00:00:00Z' where id=any($1::uuid[])",
+      [`{${alternative.rows.map((r) => r.id).join(",")}}`],
+    );
+    expect(
+      (await evaluateCurrentShoppingItem(db, makeItem("generic"), "standard", publicNow)).best,
+    ).toMatchObject({ id: independent.id, canonicalId: null, totalCostCents: 1690 });
+    await query(
+      "update retailer_listings set first_seen_at='2026-09-01T00:00:00Z', last_seen_at='2026-09-01T00:00:00Z' where id=any($1::uuid[])",
+      [`{${base.rows.map((r) => r.id).join(",")}}`],
+    );
+    expect(
+      (await evaluateCurrentShoppingItem(db, makeItem("strict"), "standard", publicNow)).best,
+    ).toBeNull();
+    await query("update retailer_listings set active=false where external_id like 'shopping-%'");
+    await query("update retailer_listings set active=false where id=$1", [independent.id]);
+  }, 30000);
+
   it("incidental canonical groups do not suppress genuine staple demand; their exact route still works", async () => {
     const drink = await seedPublicProduct(
       "canonical-property",
@@ -1499,6 +1581,44 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
     };
     await persistListings(db, "metro", [other]);
     await persistCatalogNormalizations(db, await catalogRows(other.externalId));
+    const shoppingRows = await matchingRows([first.externalId, other.externalId]);
+    await persistMatching(
+      db,
+      shoppingRows,
+      await evaluatePairs(db, [[shoppingRows[0]!, shoppingRows[1]!]]),
+    );
+    const shoppingCanonicalId = z
+      .array(z.object({ id: z.uuid() }))
+      .parse(
+        await query(
+          "select canonical_product_id as id from canonical_product_listings where listing_id=$1",
+          [shoppingRows[0]!.id],
+        ),
+      )[0]!.id;
+    const shoppingNeed = shoppingListItemSchema.parse({
+      id: randomUUID(),
+      intent: "strict",
+      canonicalId: shoppingCanonicalId,
+      label: "Arroz",
+      query: "arroz auditbenefits",
+      quantity: { amount: 2, unit: "kg" },
+      frequency: "monthly",
+      createdAt: publicNow.toISOString(),
+      updatedAt: publicNow.toISOString(),
+    });
+    expect(
+      (await evaluateCurrentShoppingItem(db, shoppingNeed, "standard", publicNow)).best,
+    ).toMatchObject({ totalCostCents: 1980, condition: null });
+    expect(
+      (await evaluateCurrentShoppingItem(db, shoppingNeed, "benefits", publicNow)).best,
+    ).toMatchObject({
+      totalCostCents: 1780,
+      ordinaryTotalCents: 2180,
+      condition: "Requiere tarjeta CMR",
+    });
+    await query("delete from canonical_product_listings where listing_id=any($1::uuid[])", [
+      `{${shoppingRows.map((r) => r.id).join(",")}}`,
+    ]);
     const standard = await searchPublicProducts(db, "auditbenefits", "total-price", publicNow);
     expect(standard.offers[0]?.currentPriceCents).toBe(990);
     const benefits = await searchPublicProducts(

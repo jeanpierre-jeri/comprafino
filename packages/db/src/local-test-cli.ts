@@ -1,11 +1,15 @@
 import { spawn } from "node:child_process";
 
 const [kind, ...args] = process.argv.slice(2);
-if (kind !== "integration" && kind !== "history")
-  throw new Error("Expected integration or history");
+if (kind !== "integration" && kind !== "history" && kind !== "shopping")
+  throw new Error("Expected integration, history or shopping");
 const child = spawn(
   "pnpm",
-  [kind === "integration" ? "test:integration" : "test:e2e:history", ...args],
+  [
+    kind === "integration" ? "test:integration" : "test:e2e:history",
+    ...(kind === "shopping" ? ["--shopping-list"] : []),
+    ...args,
+  ],
   {
     cwd: new URL("../../../", import.meta.url),
     stdio: "inherit",
