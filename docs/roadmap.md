@@ -165,3 +165,9 @@ Add authentication only when user-specific lists, preferences or alerts justify 
 ## Later — Scale only as needed
 
 Potential options, not guaranteed requirements: TanStack Query, TanStack Form, shadcn Chart/Recharts, Cheerio, browser Playwright, Upstash, Inngest, dedicated workers and a dedicated search engine. Introduce each only for demonstrated requirements or measured workloads.
+
+## Milestone 17 — Public retailer-listing detail pages (complete)
+
+Implemented `/listings/[id]`, a validated DB public boundary independent of canonical identity, shared one-retailer ordinary history/coverage/insights, current versus stale/historical price labels, separate CMR/unit-price semantics, existing list intent flows, internal retailer-option navigation, metadata and loading states. No dependencies, schema/matching/ranking changes or recommendations.
+
+Read-only audit: 894 eligible current listings, 133 eligible canonical comparison links, 866 single-state listings, 892 with no multiple ordinary-price levels in the selected ranges, and two real ordinary transitions. Format/lint/types, 636 unit tests, 49 PostgreSQL tests, supplied local production build and Chromium validation pass: 22 standard smoke cases (35 expected skips), seven listing, six history and 22 shopping/basket cases. Desktop/mobile light/dark screenshots are reviewed. The navigation test race was corrected; the earlier sandbox worker-port restriction is historical. Commit message: `feat: add public retailer listing details`; no push. See [Milestone 17 validation](milestone-17-validation.md). Recommend catalog coverage and availability-quality work while temporal history accumulates; no next milestone has started.

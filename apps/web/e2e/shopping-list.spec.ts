@@ -359,21 +359,11 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
             background.x + background.width / 2,
             background.y + background.height / 2,
           );
-        if (linked) {
-          await expect(title).toHaveAttribute("href", `/products/${fixture("preferred")}`);
-          await clickBackground();
-          await expect(page).toHaveURL(new RegExp(`/products/${fixture("preferred")}$`));
-        } else {
-          await expect(title).toHaveAttribute(
-            "href",
-            "https://www.metro.pe/shopping-independent/p",
-          );
-          const popupPromise = page.waitForEvent("popup");
-          await clickBackground();
-          const popup = await popupPromise;
-          await expect(popup).toHaveURL("https://www.metro.pe/shopping-independent/p");
-          await popup.close();
-        }
+        const href = await title.getAttribute("href");
+        expect(href).toMatch(/^\/listings\/[0-9a-f-]{36}$/u);
+        await clickBackground();
+        await expect(page).toHaveURL(new RegExp(`${href}$`));
+        await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
       }
     }
   });

@@ -1,0 +1,316 @@
+{
+  "auditedAt": "2026-10-05T03:49:02.400Z",
+  "publicListings": 894,
+  "currentListings": 894,
+  "canonicalAssociated": 133,
+  "singleState": 866,
+  "ordinaryTransitions": 2,
+  "catalogQueryMs": 1845,
+  "historyRanges": {
+    "7d": {
+      "sparse": 892,
+      "empty": 0,
+      "events": 2,
+      "verified": 554
+    },
+    "30d": {
+      "sparse": 892,
+      "empty": 0,
+      "events": 2,
+      "verified": 554
+    },
+    "90d": {
+      "sparse": 892,
+      "empty": 0,
+      "events": 2,
+      "verified": 554
+    }
+  },
+  "samples": [
+    {
+      "id": "69b7facc-c8ed-4ffa-b3c3-2eb3c7198068",
+      "title": "Arroz Faraón Extra Añejo Premium Bolsa 10 Kg",
+      "retailer": "tottus",
+      "canonicalId": "35428d50-888d-8ffc-b323-409867e99ed1",
+      "current": true,
+      "freshness": "fresh",
+      "ordinary": 4610,
+      "cmr": [],
+      "unit": "kg",
+      "depth": {
+        "id": "69b7facc-c8ed-4ffa-b3c3-2eb3c7198068",
+        "states": 1,
+        "prices": 1
+      },
+      "historyStatus": "insufficient",
+      "changes": 0,
+      "queryMs": 726
+    },
+    {
+      "id": "b303194a-be8b-42bd-8bd2-037b691a734a",
+      "title": "Arroz Extra Faraón Bolsa 750 g",
+      "retailer": "tottus",
+      "canonicalId": "adfe01f0-0eef-825f-abe6-6d5abf4e9d48",
+      "current": true,
+      "freshness": "fresh",
+      "ordinary": 449,
+      "cmr": [],
+      "unit": "kg",
+      "depth": {
+        "id": "b303194a-be8b-42bd-8bd2-037b691a734a",
+        "states": 1,
+        "prices": 1
+      },
+      "historyStatus": "insufficient",
+      "changes": 0,
+      "queryMs": 488
+    },
+    {
+      "id": "16c05f26-f00d-4875-96d9-75878eb341a1",
+      "title": "Aceite Vegetal Primor Clásico Botella 1.8 L",
+      "retailer": "tottus",
+      "canonicalId": "49421a9b-916c-8c4c-bf73-835c6d5ea091",
+      "current": true,
+      "freshness": "fresh",
+      "ordinary": 1680,
+      "cmr": [],
+      "unit": "l",
+      "depth": {
+        "id": "16c05f26-f00d-4875-96d9-75878eb341a1",
+        "states": 1,
+        "prices": 1
+      },
+      "historyStatus": "insufficient",
+      "changes": 0,
+      "queryMs": 267
+    },
+    {
+      "id": "ce120c52-e300-48e6-80cf-b4c72fb22fc2",
+      "title": "Aceite Vegetal Primor Clásico Botella 900 mL",
+      "retailer": "tottus",
+      "canonicalId": "d62b1ffc-dae3-895c-80b1-86a161e7461b",
+      "current": true,
+      "freshness": "fresh",
+      "ordinary": 870,
+      "cmr": [],
+      "unit": "l",
+      "depth": {
+        "id": "ce120c52-e300-48e6-80cf-b4c72fb22fc2",
+        "states": 1,
+        "prices": 1
+      },
+      "historyStatus": "insufficient",
+      "changes": 0,
+      "queryMs": 372
+    },
+    {
+      "id": "bf4fbf39-c726-49f8-a240-a7aa81f5d488",
+      "title": "Lápices Artesco Chequeo Rojo Empaque 12 Und",
+      "retailer": "tottus",
+      "canonicalId": null,
+      "current": true,
+      "freshness": "fresh",
+      "ordinary": 700,
+      "cmr": [],
+      "unit": "unit",
+      "depth": {
+        "id": "bf4fbf39-c726-49f8-a240-a7aa81f5d488",
+        "states": 1,
+        "prices": 1
+      },
+      "historyStatus": "insufficient",
+      "changes": 0,
+      "queryMs": 305
+    },
+    {
+      "id": "a96d8328-36dc-436a-b5b3-ee666fbf5d2c",
+      "title": "Lápices Artesco Bicolor Rojo Y Azul Empaque 12 Und",
+      "retailer": "tottus",
+      "canonicalId": null,
+      "current": true,
+      "freshness": "fresh",
+      "ordinary": 790,
+      "cmr": [],
+      "unit": "unit",
+      "depth": {
+        "id": "a96d8328-36dc-436a-b5b3-ee666fbf5d2c",
+        "states": 1,
+        "prices": 1
+      },
+      "historyStatus": "insufficient",
+      "changes": 0,
+      "queryMs": 307
+    },
+    {
+      "id": "b9a5290a-60a8-49c0-baa2-396f98e97041",
+      "title": "Lápices Artesco Grafito Fantasía 2B Empaque 12 Und",
+      "retailer": "tottus",
+      "canonicalId": null,
+      "current": true,
+      "freshness": "fresh",
+      "ordinary": 680,
+      "cmr": [],
+      "unit": "unit",
+      "depth": {
+        "id": "b9a5290a-60a8-49c0-baa2-396f98e97041",
+        "states": 1,
+        "prices": 1
+      },
+      "historyStatus": "insufficient",
+      "changes": 0,
+      "queryMs": 308
+    },
+    {
+      "id": "c42f69d6-0c7e-4d7b-9a45-f3eb95625ada",
+      "title": "Harina de Arroz COSTEÑO Bolsa 1kg",
+      "retailer": "plaza-vea",
+      "canonicalId": null,
+      "current": true,
+      "freshness": "fresh",
+      "ordinary": 890,
+      "cmr": [],
+      "unit": "kg",
+      "depth": {
+        "id": "c42f69d6-0c7e-4d7b-9a45-f3eb95625ada",
+        "states": 1,
+        "prices": 1
+      },
+      "historyStatus": "insufficient",
+      "changes": 0,
+      "queryMs": 371
+    },
+    {
+      "id": "60390550-145d-44ff-93b8-37a81a02dfa9",
+      "title": "Yogurt Batido GLORIA Griego Sabor Frutos Rojos Vaso 120g",
+      "retailer": "plaza-vea",
+      "canonicalId": null,
+      "current": true,
+      "freshness": "fresh",
+      "ordinary": 199,
+      "cmr": [],
+      "unit": "kg",
+      "depth": {
+        "id": "60390550-145d-44ff-93b8-37a81a02dfa9",
+        "states": 2,
+        "prices": 1
+      },
+      "historyStatus": "insufficient",
+      "changes": 0,
+      "queryMs": 328
+    },
+    {
+      "id": "faa219c1-2eee-4047-b4a4-1ff50d8ab686",
+      "title": "Compas Lapiz CLASS&WORK",
+      "retailer": "plaza-vea",
+      "canonicalId": null,
+      "current": true,
+      "freshness": "fresh",
+      "ordinary": 390,
+      "cmr": [],
+      "unit": null,
+      "depth": {
+        "id": "faa219c1-2eee-4047-b4a4-1ff50d8ab686",
+        "states": 1,
+        "prices": 1
+      },
+      "historyStatus": "insufficient",
+      "changes": 0,
+      "queryMs": 252
+    },
+    {
+      "id": "509afb82-93e5-468a-ae6d-02f42f10ee8c",
+      "title": "Sixpack Leche Reconstituida Gloria Lata 390g",
+      "retailer": "metro",
+      "canonicalId": null,
+      "current": true,
+      "freshness": "fresh",
+      "ordinary": 2150,
+      "cmr": [],
+      "unit": "kg",
+      "depth": {
+        "id": "509afb82-93e5-468a-ae6d-02f42f10ee8c",
+        "states": 1,
+        "prices": 1
+      },
+      "historyStatus": "insufficient",
+      "changes": 0,
+      "queryMs": 380
+    },
+    {
+      "id": "62fc5d2a-7b7d-4b5e-8591-4d9d192255ad",
+      "title": "Sixpack Leche Ultrafiltrada Sin Lactosa Gloria Zero Lacto Lata 390g",
+      "retailer": "metro",
+      "canonicalId": null,
+      "current": true,
+      "freshness": "fresh",
+      "ordinary": 2650,
+      "cmr": [],
+      "unit": "kg",
+      "depth": {
+        "id": "62fc5d2a-7b7d-4b5e-8591-4d9d192255ad",
+        "states": 1,
+        "prices": 1
+      },
+      "historyStatus": "insufficient",
+      "changes": 0,
+      "queryMs": 409
+    },
+    {
+      "id": "4052fe66-351e-445f-bb59-004ee3d03b28",
+      "title": "Pack Primor: Aceite Vegetal Premium 900ml + Trozos de Atún en Aceite 2un",
+      "retailer": "metro",
+      "canonicalId": null,
+      "current": true,
+      "freshness": "fresh",
+      "ordinary": 1890,
+      "cmr": [],
+      "unit": null,
+      "depth": {
+        "id": "4052fe66-351e-445f-bb59-004ee3d03b28",
+        "states": 1,
+        "prices": 1
+      },
+      "historyStatus": "insufficient",
+      "changes": 0,
+      "queryMs": 331
+    },
+    {
+      "id": "f6a22203-8c02-4ea0-b2c7-38133d73a449",
+      "title": "Leche Entera Pasteurizada Danlac Botella 900ml",
+      "retailer": "metro",
+      "canonicalId": null,
+      "current": true,
+      "freshness": "fresh",
+      "ordinary": 810,
+      "cmr": [],
+      "unit": "l",
+      "depth": {
+        "id": "f6a22203-8c02-4ea0-b2c7-38133d73a449",
+        "states": 2,
+        "prices": 2
+      },
+      "historyStatus": "events",
+      "changes": 1,
+      "queryMs": 387
+    },
+    {
+      "id": "08b8cca7-9723-46dc-b28a-553c5870617a",
+      "title": "Filete De Pechuga Importada",
+      "retailer": "tottus",
+      "canonicalId": null,
+      "current": true,
+      "freshness": "fresh",
+      "ordinary": 1450,
+      "cmr": [1390],
+      "unit": "kg",
+      "depth": {
+        "id": "08b8cca7-9723-46dc-b28a-553c5870617a",
+        "states": 1,
+        "prices": 1
+      },
+      "historyStatus": "insufficient",
+      "changes": 0,
+      "queryMs": 409
+    }
+  ]
+}

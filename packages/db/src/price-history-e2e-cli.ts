@@ -1,3 +1,4 @@
+import { getPublicRetailerListingDetail } from "./listing-detail.ts";
 import { seedBasketFixtures } from "./basket-fixtures.ts";
 import { seedShoppingListFixtures } from "./shopping-list-e2e-fixtures.ts";
 import { randomUUID } from "node:crypto";
@@ -120,6 +121,7 @@ try {
           ),
         );
       const id = ids[0]!.id;
+      if (process.argv.includes("--listings")) fixtures[`listing-${kind}-${retailer}`] = id;
       if (!last) throw new Error("Missing fixture observation");
       const listing = {
         id,
@@ -138,7 +140,43 @@ try {
       );
     }
   }
-  for (const [kind, id] of Object.entries(fixtures)) {
+  if (process.argv.includes("--listings")) {
+    const value: NormalizedRetailerListing = {
+      retailer: "tottus",
+      externalId: "independent-listing",
+      productId: "independent-listing",
+      title: "Huevos Pardos Tottus Bandeja 30un",
+      currency: "PEN",
+      priceUnit: "UN",
+      currentPriceCents: 1790,
+      regularPriceCents: 1990,
+      observedAt: new Date(now - 60000),
+      url: "https://www.tottus.com.pe/tottus-pe/articulo/1/test",
+    };
+    await persistListings(db, "tottus", [value]);
+    const ids = z
+      .array(z.object({ id: z.uuid() }))
+      .parse(
+        await scopedClient.query(
+          "select id from retailer_listings where external_id='independent-listing'",
+        ),
+      );
+    fixtures.independent = ids[0]!.id;
+    await persistCatalogNormalizations(db, [
+      {
+        id: fixtures.independent,
+        retailerId: "tottus",
+        title: value.title,
+        priceUnit: "UN",
+        packageText: null,
+        sourceBrand: null,
+        sourceUnitMultiplier: null,
+      },
+    ]);
+  }
+  for (const [kind, id] of Object.entries(fixtures).filter(
+    ([key]) => !key.startsWith("listing-") && key !== "independent",
+  )) {
     const history = await getCanonicalProductPriceHistory(db, id);
     if (history?.retailers.length !== 3) throw new Error("Fixture history eligibility failed");
     const metro = history.retailers.find((r) => r.retailerId === "metro");
@@ -166,6 +204,40 @@ try {
     if (kind === "old" && metro?.summary.status !== "empty")
       throw new Error("Old fixture mismatch");
   }
+  if (process.argv.includes("--listings")) {
+    const unmatched = await getPublicRetailerListingDetail(db, fixtures.independent!);
+    if (!unmatched || unmatched.canonicalId || !unmatched.current)
+      throw new Error("Unmatched listing fixture failed");
+    for (const [range, maximum] of [
+      ["7d", 610],
+      ["30d", 620],
+      ["90d", 700],
+    ] as const) {
+      const rich = await getPublicRetailerListingDetail(db, fixtures["listing-rich-metro"]!, {
+        range,
+      });
+      if (
+        rich?.canonicalId !== fixtures.rich ||
+        rich?.history?.retailers[0]?.summary.maximumPriceCents !== maximum
+      )
+        throw new Error("Listing range fixture failed");
+    }
+    const cmr = await getPublicRetailerListingDetail(db, fixtures["listing-rich-tottus"]!);
+    if (
+      cmr?.conditionalOffers[0]?.priceCents !== 540 ||
+      cmr.history?.retailers[0]?.summary.minimumPriceCents !== 640
+    )
+      throw new Error("Listing CMR fixture failed");
+    for (const [kind, days, segments] of [
+      ["continuous", 6, 1],
+      ["gap", 2, 2],
+    ] as const) {
+      const detail = await getPublicRetailerListingDetail(db, fixtures[`listing-${kind}-metro`]!);
+      const summary = detail?.history?.retailers[0]?.summary;
+      if (summary?.verifiedUnchangedDays !== days || summary.segments.length !== segments)
+        throw new Error("Listing coverage fixture failed");
+    }
+  }
   const shopping = process.argv.includes("--shopping-list");
   const shoppingFixtures = shopping
     ? {
@@ -183,7 +255,14 @@ try {
     const exitCode = await new Promise<number>((resolve, reject) => {
       const child = spawn(
         "pnpm",
-        ["test:e2e", shopping ? "shopping-list.spec.ts" : "price-history.spec.ts"],
+        [
+          "test:e2e",
+          process.argv.includes("--listings")
+            ? "listing-detail.spec.ts"
+            : shopping
+              ? "shopping-list.spec.ts"
+              : "price-history.spec.ts",
+        ],
         {
           cwd: new URL("../../../", import.meta.url),
           stdio: "inherit",

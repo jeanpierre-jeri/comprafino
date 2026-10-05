@@ -121,3 +121,7 @@ Combined family search excludes incidental exact groups using member-title evide
 ## Milestone 11 conditional pricing and immediate filters
 
 [Conditional pricing](conditional-pricing.md) adds a separate current-offer read to existing aggregate queries without changing exact identity admission or ordinary history authority. `lowestPriceCents` stays ordinary; potential ranking and required conditions are separate. [Search UX](search-ux.md) documents immediate sort/retailer/unit/benefits navigation, clean URL defaults, compact cards and unfiltered discovery counts. Exact detail supports the temporary URL benefits mode; no personal preference is stored.
+
+## Milestone 17 — Retailer-option detail navigation
+
+Titles/card destinations under “Opciones en supermercados” now open `/listings/[id]` using stable retailer-listing UUIDs, whether or not a safe canonical association exists. Exact canonical cards keep their comparison routes. The retailer source link opens separately in a new tab; add-to-list and other controls preserve their independent interaction layers. Ranking, matching and list intent policies are unchanged. See [listing detail](listing-detail.md) for eligibility, freshness, history and the optional canonical comparison CTA.

@@ -22,24 +22,9 @@ export function GenericOfferCard({
         <ProductImage compact src={offer.imageUrl} name={offer.title} loading="lazy" />
         <div className="min-w-0">
           <h3 className="product-title">
-            {offer.canonicalId ? (
-              <NavigationLink
-                className="product-title-link"
-                href={`/products/${offer.canonicalId}${benefits ? "?priceMode=benefits" : ""}`}
-              >
-                {offer.title}
-              </NavigationLink>
-            ) : (
-              <a
-                className="product-title-link"
-                href={offer.url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {offer.title}
-                <span className="sr-only"> (en {offer.retailerName}, nueva pestaña)</span>
-              </a>
-            )}
+            <NavigationLink className="product-title-link" href={`/listings/${offer.id}`}>
+              {offer.title}
+            </NavigationLink>
           </h3>
           {offer.quantity && offer.packageCount && (
             <p className="mt-2 text-xs text-muted-foreground">

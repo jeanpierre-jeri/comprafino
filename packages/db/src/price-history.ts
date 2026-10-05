@@ -8,6 +8,7 @@ import {
   observationDay,
 } from "@comprafino/core";
 import type { HistoryRange } from "@comprafino/core";
+import type { SQL } from "drizzle-orm";
 import type { createDatabase } from "./client.ts";
 import { eligibleProducts, isPublicProductId } from "./public-products.ts";
 
@@ -41,20 +42,33 @@ export async function getCanonicalProductPriceHistory(
   options: { range?: HistoryRange; now?: Date } = {},
 ) {
   if (!isPublicProductId(productId)) return null;
-  const range = parseHistoryRange(options.range);
-  const { start, end } = historyWindow(range, options.now);
-  const [result] = await db.batch([
-    db.execute(sql`${eligibleProducts}, scoped as (
-    select p.id,p."displayName",a.listing_id,r.id as retailer_id,r.name as retailer_name,l.last_seen_at,l.available
+  return getScopedPriceHistory(
+    db,
+    sql`${eligibleProducts}, scoped as (
+    select p.id,p."displayName",a.listing_id,r.id as retailer_id,r.name as retailer_name,l.last_seen_at,l.available, 'UN'::text as price_unit
     from products p join canonical_product_listings a on a.canonical_product_id=p.id
     join retailer_listings l on l.id=a.listing_id and l.retailer_id=a.retailer_id
     join retailers r on r.id=a.retailer_id
     join listing_normalizations n on n.listing_id=l.id
     join price_history current on current.listing_id=l.id and current.valid_until is null
     where p.id=${productId}::uuid and l.active and current.currency='PEN' and current.price_unit='UN' and current.current_price_cents>0
-  ), ranged as (
+  )`,
+    options,
+  );
+}
+
+/** Both public routes use identical range, coverage, predecessor and summary semantics. */
+export async function getScopedPriceHistory(
+  db: ReturnType<typeof createDatabase>,
+  scope: SQL,
+  options: { range?: HistoryRange; now?: Date } = {},
+) {
+  const range = parseHistoryRange(options.range);
+  const { start, end } = historyWindow(range, options.now);
+  const [result] = await db.batch([
+    db.execute(sql`${scope}, ranged as (
     select s.*,h.current_price_cents,h.valid_from,h.valid_until,
-      case when previous.currency='PEN' and previous.price_unit='UN' and previous.current_price_cents>0 then previous.current_price_cents end as previous_price,
+      case when previous.currency='PEN' and previous.price_unit=s.price_unit and previous.current_price_cents>0 then previous.current_price_cents end as previous_price,
       previous.valid_until as previous_until
     from scoped s join price_history h on h.listing_id=s.listing_id
     left join lateral (
@@ -62,7 +76,7 @@ export async function getCanonicalProductPriceHistory(
       where prior.listing_id=h.listing_id and prior.valid_from<h.valid_from
       order by prior.valid_from desc limit 1
     ) previous on true
-    where h.currency='PEN' and h.price_unit='UN' and h.current_price_cents>0 and h.valid_from<=${end.toISOString()}::timestamptz
+    where h.currency='PEN' and h.price_unit=s.price_unit and h.current_price_cents>0 and h.valid_from<=${end.toISOString()}::timestamptz
       and (h.valid_until>${start.toISOString()}::timestamptz or h.valid_until is null)
   ) select s.id,s."displayName",s.retailer_id as "retailerId",s.retailer_name as "retailerName",
     s.last_seen_at as "lastObservedAt",s.available,

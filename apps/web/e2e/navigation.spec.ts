@@ -43,15 +43,19 @@ test("search immediately responds, prevents repeated submits, and restores back/
         .locator('form[aria-busy="true"], [aria-label="Cargando resultados de búsqueda"]')
         .first(),
     ).toBeVisible({ timeout: 1000 });
-    const form = page.locator('form[aria-busy="true"]');
-    if (await form.isVisible()) {
-      await expect(page.getByRole("button", { name: "Buscando…", exact: true })).toBeDisabled();
-      await form.evaluate((element) => {
-        if (!(element instanceof HTMLFormElement)) throw new Error("Expected search form");
-        element.requestSubmit();
-        element.requestSubmit();
-      });
-    }
+    // Loading can replace the form between Playwright calls. Read the attached
+    // form and exercise repeated submits in one browser task.
+    const pendingForm = await page.evaluate(() => {
+      const form = document.querySelector('form[aria-busy="true"]');
+      if (!(form instanceof HTMLFormElement)) return null;
+      const button = form.querySelector('button[type="submit"]');
+      if (!(button instanceof HTMLButtonElement)) throw new Error("Expected search button");
+      const state = { disabled: button.disabled, label: button.textContent };
+      form.requestSubmit();
+      form.requestSubmit();
+      return state;
+    });
+    if (pendingForm) expect(pendingForm).toEqual({ disabled: true, label: "Buscando…" });
     await expect.poll(held.count).toBe(1);
   } finally {
     held.release();
@@ -163,13 +167,15 @@ test("exact comparison cards immediately respond while detail data is delayed", 
         .locator('.exact-card a[aria-busy="true"], [aria-label="Cargando comparación de producto"]')
         .first(),
     ).toBeVisible({ timeout: 1000 });
-    if (await card.isVisible()) {
-      await card.evaluate((element) => {
-        if (!(element instanceof HTMLAnchorElement)) throw new Error("Expected comparison link");
-        element.click();
-        element.click();
-      });
-    }
+    await page.evaluate((destination) => {
+      const link = Array.from(document.querySelectorAll(".exact-card a.navigation-link")).find(
+        (element) => element.getAttribute("href") === destination,
+      );
+      if (link instanceof HTMLAnchorElement) {
+        link.click();
+        link.click();
+      }
+    }, href);
   } finally {
     held.release();
   }

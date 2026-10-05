@@ -30,6 +30,27 @@ export async function PriceHistory({
     console.error("Public price history query failed", error);
   }
   return (
+    <PriceHistoryPresentation
+      history={history ?? null}
+      range={range}
+      path={`/products/${productId}`}
+      benefits={benefits}
+    />
+  );
+}
+
+export function PriceHistoryPresentation({
+  history,
+  range,
+  path,
+  benefits = false,
+}: {
+  history: import("@comprafino/db").CanonicalProductPriceHistory | null;
+  range: HistoryRange;
+  path: string;
+  benefits?: boolean;
+}) {
+  return (
     <section
       className="mt-8 min-w-0 rounded-2xl bg-surface p-4 sm:p-6"
       aria-labelledby="history-title"
@@ -45,7 +66,7 @@ export async function PriceHistory({
               scroll={false}
               aria-current={range === r ? "page" : undefined}
               className={`inline-flex min-h-11 items-center rounded-lg border px-3 text-sm ${range === r ? "bg-primary text-primary-foreground" : "hover:bg-secondary"}`}
-              href={`/products/${productId}?range=${r}${benefits ? "&priceMode=benefits" : ""}`}
+              href={`${path}?range=${r}${benefits ? "&priceMode=benefits" : ""}`}
             >
               {Number.parseInt(r, 10)} días
             </Link>
@@ -86,7 +107,9 @@ export async function PriceHistory({
                 : "Aún no tenemos suficiente historial para mostrar una tendencia."}
             </p>
           )}
-          <div className="mt-5 grid gap-4 lg:grid-cols-3">
+          <div
+            className={`mt-5 grid gap-4 ${history.retailers.length > 1 ? "lg:grid-cols-3" : ""}`}
+          >
             {history.retailers.map((r) => {
               const s = r.summary;
               return (

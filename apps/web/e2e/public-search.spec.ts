@@ -130,7 +130,7 @@ test.describe("generic persisted offers (explicit DATABASE_URL)", () => {
       "_blank",
     );
     await linkedCard.click({ position: { x: 12, y: 12 } });
-    await expect(page).toHaveURL(new RegExp(`/products/${linked!.canonicalId}$`));
+    await expect(page).toHaveURL(new RegExp(`/listings/${linked!.id}$`));
   });
 });
 

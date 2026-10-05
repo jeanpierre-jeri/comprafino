@@ -1,3 +1,4 @@
+import { getPublicRetailerListingDetail } from "./listing-detail.ts";
 import { evaluateCurrentShoppingItem } from "./shopping-list.ts";
 import { shoppingListItemSchema, inferGenericSubstitutionProfile } from "@comprafino/core";
 import { randomUUID } from "node:crypto";
@@ -1041,6 +1042,59 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
       );
     return { id: links[0]!.id, rows };
   }
+  it("public listing details retain unmatched listings, separate CMR, and reuse ordinary coverage", async () => {
+    const row = await seedGeneric("Leche Gloria Auditdetail Entera 946ml", 650);
+    const read = (now = publicNow) =>
+      getPublicRetailerListingDetail(db, row.id, { now, range: "7d" });
+    const detail = await read();
+    expect(detail).toMatchObject({
+      id: row.id,
+      canonicalId: null,
+      current: true,
+      currentPriceCents: 650,
+      regularPriceCents: 1490,
+    });
+    expect(detail?.history?.retailers).toHaveLength(1);
+    expect(detail?.history?.retailers[0]?.summary.status).toBe("insufficient");
+    expect(detail?.history?.retailers[0]?.coverage).toHaveLength(1);
+    expect(detail).not.toHaveProperty("fingerprint");
+    expect(detail).not.toHaveProperty("reasons");
+    const observedAt = new Date("2026-10-03T09:05:00Z");
+    await query(
+      "insert into retailer_listing_offers(listing_id,condition_type,program_key,condition_label,price_cents,observed_at) values($1,'payment_card','cmr','Requiere tarjeta CMR',540,$2)",
+      [row.id, observedAt.toISOString()],
+    );
+    // The fixture's listing identity is stable; CMR does not alter its ordinary state.
+    const benefit = await read();
+    expect(benefit?.conditionalOffers[0]?.priceCents).toBe(540);
+    expect(benefit?.history?.retailers[0]?.summary.minimumPriceCents).toBe(650);
+    expect((await read(new Date("2026-10-05T12:00:00Z")))?.current).toBe(false);
+    expect((await read(new Date("2026-10-05T12:00:00Z")))?.conditionalOffers).toEqual([]);
+    await query(
+      "update price_history set valid_until=$2 where listing_id=$1 and valid_until is null",
+      [row.id, publicNow.toISOString()],
+    );
+    expect(await read()).toMatchObject({ current: false, historicalOnly: true });
+    await query("update retailer_listings set active=false where id=$1", [row.id]);
+    expect(await read()).toBeNull();
+    expect(await getPublicRetailerListingDetail(db, randomUUID())).toBeNull();
+    expect(await getPublicRetailerListingDetail(db, "invalid")).toBeNull();
+  });
+  it("listing comparison association uses the unchanged canonical eligibility boundary", async () => {
+    const { id, rows } = await seedPublicProduct("listing-associated", "Leche Gloria Entera 946ml");
+    const read = () => getPublicRetailerListingDetail(db, rows[0]!.id, { now: publicNow });
+    expect((await read())?.canonicalId).toBe(id);
+    for (const change of ["confidence=0.89", "method='manual'", "matching_version=99"]) {
+      await query(`update canonical_product_listings set ${change} where listing_id=$1`, [
+        rows[1]!.id,
+      ]);
+      expect(await read()).toMatchObject({ canonicalId: null, current: true });
+      await query(
+        "update canonical_product_listings set confidence=1,method='automatic',matching_version=1 where listing_id=$1",
+        [rows[1]!.id],
+      );
+    }
+  });
   it("shopping queries retain independent generic offers without leaking uncertain canonical identities", async () => {
     const base = await seedPublicProduct("shopping-base", "Huevos Gloria Auditshopping Base 30un");
     const alternative = await seedPublicProduct(

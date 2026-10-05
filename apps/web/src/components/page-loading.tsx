@@ -67,11 +67,16 @@ export function SearchPageLoading() {
     </PublicShell>
   );
 }
-export function ProductPageLoading() {
+export function ProductPageLoading({ listing = false }: { listing?: boolean } = {}) {
   return (
     <PublicShell>
-      <output className="mb-4 block text-sm font-medium text-primary">Abriendo comparación…</output>
-      <div aria-busy="true" aria-label="Cargando comparación de producto">
+      <output className="mb-4 block text-sm font-medium text-primary">
+        {listing ? "Abriendo producto…" : "Abriendo comparación…"}
+      </output>
+      <div
+        aria-busy="true"
+        aria-label={listing ? "Cargando detalle de producto" : "Cargando comparación de producto"}
+      >
         <Skeleton className="h-4 w-40" />
         <div className="detail-hero" aria-hidden="true">
           <Skeleton className="h-48 w-full sm:h-64" />
@@ -84,10 +89,10 @@ export function ProductPageLoading() {
             <Skeleton className="mt-6 h-14 w-36" />
           </div>
         </div>
-        <ToolbarSkeleton comparison />
+        {!listing && <ToolbarSkeleton comparison />}
         <Skeleton className="my-6 h-7 w-3/4 sm:w-80" />
         <div className="space-y-4" aria-hidden="true">
-          {[0, 1, 2].map((i) => (
+          {(listing ? [0] : [0, 1, 2]).map((i) => (
             <div className="comparison-row" key={i}>
               <div>
                 <Skeleton className="h-6 w-24" />
