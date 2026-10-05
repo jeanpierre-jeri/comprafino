@@ -1,3 +1,4 @@
+import { catalogPolicy } from "@comprafino/core";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
 import {
@@ -129,7 +130,7 @@ export async function evaluateCurrentShoppingList(
             : sql`false`
         }), '[]'::jsonb),
       'listings', coalesce((select jsonb_agg(row_to_json(bounded)) from
-        (select * from current_listings order by listing->>'id' limit 1001) bounded), '[]'::jsonb)
+        (select * from current_listings order by listing->>'id' limit ${catalogPolicy.overflowSentinel}) bounded), '[]'::jsonb)
     ) as snapshot`),
     ]);
     queryMs = performance.now() - queryStarted;
@@ -139,7 +140,7 @@ export async function evaluateCurrentShoppingList(
         listings: z.array(z.unknown()),
       })
       .parse(result.rows[0]?.snapshot);
-    if (snapshot.listings.length > 1000)
+    if (snapshot.listings.length > catalogPolicy.retainedListingCap)
       throw new Error("Shopping catalog snapshot bound exceeded");
     for (const product of snapshot.products) titles.set(product.id, product.title);
     candidates = snapshot.listings

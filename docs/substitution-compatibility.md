@@ -27,7 +27,7 @@ The initial model is a small family/form key plus conservative exclusion tokens,
 
 PostgreSQL tests seed an exceptionally cheap quail listing that remains relevant to broad huevos search but cannot win generic or preferred recommendations. Strict items always retain canonical isolation. Unit tests cover ordinary chicken eggs, quail singular/plural, organic/free-range/premium, white vs basmati/integral rice, vegetable/soy vs sunflower/olive oils, powder/liquid/pods/matic detergent and withheld generic milk.
 
-The [current audit](shopping-list-audit.json) enumerates broad candidates and exclusions for huevos, arroz, aceite, detergente and leche. Its compatibility counts require strong matching quantity evidence but precede the purchase's overbuy/ranking rules. Live Bell's quail 18/24 trays and La Calera quail 18 eggs remain searchable and fail the safety gate.
+The [current audit](history/shopping-list-audit.json) enumerates broad candidates and exclusions for huevos, arroz, aceite, detergente and leche. Its compatibility counts require strong matching quantity evidence but precede the purchase's overbuy/ranking rules. Live Bell's quail 18/24 trays and La Calera quail 18 eggs remain searchable and fail the safety gate.
 
 ## Saving from retailer-option cards
 

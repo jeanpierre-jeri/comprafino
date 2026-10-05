@@ -1,3 +1,4 @@
+import { catalogPolicy } from "@comprafino/core";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
 import {
@@ -66,16 +67,18 @@ export async function auditCatalogCoverage(db = createDatabase(), now = new Date
       n.input_fingerprint as fingerprint,l.current_price_cents as price,
       exists(select 1 from canonical_product_listings a where a.listing_id=l.id) as "canonicalAssociation"
       from retailer_listings l left join listing_normalizations n on n.listing_id=l.id
-      order by l.id limit 1001`),
-    db.execute(sql`${eligibleProducts} ${currentGenericOfferRows(now)} order by l.id limit 1001`),
+      order by l.id limit ${catalogPolicy.overflowSentinel}`),
     db.execute(
-      sql`${eligibleProducts} ${publicListingDetailRows(sql`true`, now)} order by l.id limit 1001`,
+      sql`${eligibleProducts} ${currentGenericOfferRows(now)} order by l.id limit ${catalogPolicy.overflowSentinel}`,
+    ),
+    db.execute(
+      sql`${eligibleProducts} ${publicListingDetailRows(sql`true`, now)} order by l.id limit ${catalogPolicy.overflowSentinel}`,
     ),
     db.execute(sql`select observation_date as day,count(*)::int as listings,
       sum(observation_count)::int as observations from listing_observation_days
       group by observation_date order by observation_date`),
   ]);
-  if ([base, current, detail].some((r) => r.rows.length > 1000))
+  if ([base, current, detail].some((r) => r.rows.length > catalogPolicy.retainedListingCap))
     throw new Error("Catalog audit exceeds 1000 guard");
   const offers = current.rows.map((r) => genericProductOffer(r, now)).filter((r) => r !== null);
   const offerIds = new Set(offers.map((o) => o.id));
@@ -233,7 +236,7 @@ export async function auditCatalogCoverage(db = createDatabase(), now = new Date
   return {
     observedAt: now.toISOString(),
     readOnly: true,
-    guard: 1000,
+    guard: catalogPolicy.retainedListingCap,
     totals: summarize(rows),
     retailers: Object.fromEntries(
       retailerIdSchema.options.map((retailer) => [

@@ -3,8 +3,8 @@
 import { ChoiceSelect } from "@comprafino/ui/components/select";
 import { useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { searchFilters, searchFilterQuery } from "@comprafino/db/search-filters";
-import type { SearchFilters } from "@comprafino/db/search-filters";
+import { searchFilters, searchFilterQuery } from "@comprafino/core/search-filters";
+import type { SearchFilters } from "@comprafino/core/search-filters";
 
 export function SearchControls({
   query,

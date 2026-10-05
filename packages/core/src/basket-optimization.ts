@@ -1,3 +1,4 @@
+import { shoppingListPolicy } from "./shopping-list.ts";
 import { z } from "zod";
 import { retailerIdSchema } from "./listing.ts";
 import {
@@ -13,8 +14,8 @@ const money = z.number().int().nonnegative().safe();
 const common = {
   maxRetailers: z.number().int().min(1).max(3),
   retailerIds: z.array(retailerIdSchema).max(3),
-  assignments: z.array(assignmentSchema).max(50),
-  missingItemIds: z.array(z.uuid()).max(50),
+  assignments: z.array(assignmentSchema).max(shoppingListPolicy.maximumItems),
+  missingItemIds: z.array(z.uuid()).max(shoppingListPolicy.maximumItems),
   ordinarySubtotalCents: money,
   marginalSavingsCents: money.nullable(),
 };
@@ -48,7 +49,7 @@ export const basketPlanSchema = z
     const ordinary = plan.assignments.reduce((sum, a) => sum + a.option.ordinaryTotalCents, 0);
     if (
       new Set([...ids, ...plan.missingItemIds]).size !== ids.length + plan.missingItemIds.length ||
-      ids.length + plan.missingItemIds.length > 50 ||
+      ids.length + plan.missingItemIds.length > shoppingListPolicy.maximumItems ||
       retailers.length > plan.maxRetailers ||
       retailers.join(",") !== plan.retailerIds.join(",") ||
       ordinary !== plan.ordinarySubtotalCents ||
@@ -63,7 +64,7 @@ export const basketPlanSchema = z
 export type BasketPlan = z.infer<typeof basketPlanSchema>;
 export const shoppingListEvaluationSchema = z
   .object({
-    evaluations: z.array(shoppingEvaluationSchema).max(50),
+    evaluations: z.array(shoppingEvaluationSchema).max(shoppingListPolicy.maximumItems),
     baskets: z.tuple([basketPlanSchema, basketPlanSchema, basketPlanSchema]),
     evaluatedAt: z.iso.datetime(),
     timings: z.object({ queryMs: z.number().nonnegative(), totalMs: z.number().nonnegative() }),
@@ -111,7 +112,10 @@ export function compareBasketPlans(a: BasketPlan, b: BasketPlan) {
 export function optimizeBasket(
   needs: readonly { itemId: string; options: readonly BasketOption[] }[],
 ): [BasketPlan, BasketPlan, BasketPlan] {
-  if (needs.length > 50 || new Set(needs.map((n) => n.itemId)).size !== needs.length)
+  if (
+    needs.length > shoppingListPolicy.maximumItems ||
+    new Set(needs.map((n) => n.itemId)).size !== needs.length
+  )
     throw new Error("Invalid basket needs");
   const ordered = [...needs].sort((a, b) => a.itemId.localeCompare(b.itemId));
   const retailers = retailerIdSchema.options.slice().sort();

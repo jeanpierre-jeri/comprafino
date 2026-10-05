@@ -1,3 +1,4 @@
+import { catalogPolicy } from "@comprafino/core";
 import { getScopedPriceHistory } from "./price-history.ts";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
@@ -12,12 +13,15 @@ const db = createDatabase();
 const now = new Date();
 const started = performance.now();
 const [rows, depths] = await db.batch([
-  db.execute(sql`${eligibleProducts} ${publicListingDetailRows(sql`true`, now)} limit 1001`),
+  db.execute(
+    sql`${eligibleProducts} ${publicListingDetailRows(sql`true`, now)} limit ${catalogPolicy.overflowSentinel}`,
+  ),
   db.execute(sql`select listing_id as id,count(*)::int as states,
     count(distinct current_price_cents)::int as prices from price_history
     where currency='PEN' and price_unit in ('UN','KG') group by listing_id`),
 ]);
-if (rows.rows.length > 1000) throw new Error("Audit catalog bound exceeded");
+if (rows.rows.length > catalogPolicy.retainedListingCap)
+  throw new Error("Audit catalog bound exceeded");
 const listings = rows.rows.map((r) => publicRetailerListing(r, now)).filter((r) => r !== null);
 const depth = z
   .array(z.object({ id: z.uuid(), states: z.number(), prices: z.number() }))

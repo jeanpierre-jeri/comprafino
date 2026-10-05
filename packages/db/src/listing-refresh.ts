@@ -1,3 +1,5 @@
+import { matchingThresholds } from "@comprafino/core";
+import { catalogPolicy } from "@comprafino/core";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
 import {
@@ -25,11 +27,11 @@ export async function knownListings(db: Database) {
       'packageText',l.package_text,'sourceBrand',l.source_brand,'sourceUnitMultiplier',l.source_unit_multiplier::float8) as catalog,
     l.category, n.normalization_version as version,n.input_fingerprint as fingerprint,l.last_targeted_attempt_at as "lastTargetedAttemptAt",
     exists (select 1 from canonical_product_listings a where a.listing_id=l.id
-      and a.method='automatic' and a.matching_version=${matchingVersion} and a.confidence>=0.90
+      and a.method='automatic' and a.matching_version=${matchingVersion} and a.confidence>=${matchingThresholds.auto}
       and not exists (select 1 from canonical_product_listings bad where bad.canonical_product_id=a.canonical_product_id
-        and (bad.method<>'automatic' or bad.matching_version<>${matchingVersion} or bad.confidence<0.90))
+        and (bad.method<>'automatic' or bad.matching_version<>${matchingVersion} or bad.confidence<${matchingThresholds.auto}))
       and (select count(*) from canonical_product_listings peer where peer.canonical_product_id=a.canonical_product_id)>=2) as public
-    from retailer_listings l left join listing_normalizations n on n.listing_id=l.id order by l.id limit 1001`);
+    from retailer_listings l left join listing_normalizations n on n.listing_id=l.id order by l.id limit ${catalogPolicy.overflowSentinel}`);
   const rows = result.rows.map((raw) => {
     const row = knownListingSchema.parse(raw);
     const evidence = z
@@ -70,7 +72,8 @@ export async function knownListings(db: Database) {
       usefulStaple: currentNormalization && family.family !== null && quantity.price !== null,
     };
   });
-  if (rows.length > 1000) throw new Error("Known listing refresh exceeds complete catalog bound");
+  if (rows.length > catalogPolicy.retainedListingCap)
+    throw new Error("Known listing refresh exceeds complete catalog bound");
   return rows;
 }
 export async function previewListingRefresh(

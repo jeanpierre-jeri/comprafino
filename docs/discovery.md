@@ -1,6 +1,6 @@
 # Search-driven catalog discovery
 
-Milestone 6 adds bounded demand-driven discovery using PostgreSQL and the existing GitHub Actions infrastructure. No retailer, category crawl, matcher rule, dependency or external service is added. Milestones 0–6 are complete and deployed in the user-provided baseline `558cb56`; historical validation/gate notes below describe the earlier implementation. Milestone 7 [known listing refresh](listing-refresh.md) closes the discovery price-freshness gap and adds first-acquisition query provenance.
+Current domain guidance. Dated audits, measurements and acceptance narratives are preserved in [engineering history](history/engineering-notes-2026-10-05.md).
 
 ## Public path and privacy
 
@@ -77,39 +77,6 @@ Default batch limit is 10; accepted bounds are 1–30. Unknown/duplicate options
 `.github/workflows/discover-catalog.yml` runs at `43 0,6,12,18 * * *` (00:43, 06:43, 12:43, 18:43 UTC; 19:43 preceding Peru day, 01:43, 07:43, 13:43 Peru). It processes ten queries per run, with the database cap limiting the day to thirty. Manual `workflow_dispatch` shares the same cap. It reuses `DATABASE_URL`, pinned pnpm/Node and frozen installation; it never applies migrations automatically. Its 60-minute timeout bounds slow source/downstream work. It shares refresh's `comprafino-catalog-refresh` concurrency group, with `cancel-in-progress: false`, to prevent overlapping scheduled full-scope pipelines. Database locks remain necessary for independent local/manual invocations. Schedules may be delayed; no per-user workflow is triggered.
 
 `/dev/discovery` is a read-only Server Component, showing the top 100 queries by lifetime demand, the original sample, timestamps, state, latest usable count, cooldown/next eligibility and safe errors. It also shows UTC daily usage. Production returns 404 before database access. No editing or retry buttons are added.
-
-## Validation
-
-Deterministic unit tests cover normalization, input boundaries, zero-result-only demand, safe outcomes, CLI bounds, retailer URL encoding/single-page limits/empty responses/errors, bounded/deduplicated output, success/partial/all failure/no results, derivation order/failure and zero-write downstream results. Four added isolated PostgreSQL tests cover concurrent demand/counts, 24-hour eligibility despite fresh demand, stale completion protection, concurrent daily-cap claims, popularity/age priority, no-write preview and completed-demand dormancy. No unit/integration test contacts a live retailer.
-
-Live validation and final check results are recorded below. Default Turbopack build currently hits the known CSS-worker port-binding restriction (`Operation not permitted`); Chromium E2E cannot start without its production artifact. Build configuration is unchanged. Keep changes staged, without a commit, until the developer confirms fresh local `pnpm build` and `pnpm test:e2e` results. Milestone 6 is pending that gate; do not start proactive expansion automatically.
-
-## Live validation — October 3, 2026 (Peru)
-
-The initial catalog had 352 listings and 28 canonical groups. Every query below was confirmed to have zero results through `searchCanonicalProducts` before recording. Each was recorded twice with different case/spacing: six unique rows, each with request count two. Live commands used the configured Neon database; retailer requests were bounded text searches, without category expansion.
-
-| Query                   | Tottus usable | Plaza Vea usable | Metro usable | New listings | New groups in its attempt | Public results after all discovery |
-| ----------------------- | ------------: | ---------------: | -----------: | -----------: | ------------------------: | ---------------------------------: |
-| `arroz costeño`         |            10 |           Failed |       Failed |           10 |                         0 |                                  5 |
-| `aceite primor`         |            10 |           Failed |       Failed |           10 |                         0 |                                  3 |
-| `atún florida`          |            10 |           Failed |       Failed |           10 |                         0 |                                  0 |
-| `arroz extra costeño`   |            10 |               10 |           10 |           23 |                         5 |                                  4 |
-| `aceite vegetal primor` |            10 |               10 |           10 |           22 |                         3 |                                  3 |
-| `detergente bolivar`    |            10 |               10 |           10 |           30 |                         0 |                                  0 |
-
-The first batch exposed the VTEX phrase-encoding issue and exercised genuine partial failure: Tottus results persisted, normalized and retained a `partial` outcome; the command exited nonzero. After standard URI whitespace encoding was corrected and covered by a regression test, three **distinct** pending phrases exercised successful three-retailer processing. No earlier cooldown was reset or bypassed. Initial rice/oil queries became publicly searchable from the later related discovery, while their historical partial outcomes accurately remain recorded.
-
-Totals: six queries recorded/processed; twelve demand requests; eighteen retailer search calls in the processor, including six failed calls; 120 usable listing observations (60 Tottus, 30 Plaza Vea, 30 Metro); **105 actual inserts** (45 Tottus, 30 Plaza Vea, 30 Metro); 105 normalization writes; 27 matching writes (eight products plus nineteen associations); eight new public groups. Final catalog: **457 listings, 457 normalizations, 36 canonical groups**. Investigative source requests are separate from those processor-call counts.
-
-The successful batch read one page per retailer/query: Tottus 48/48/45 source products, and each VTEX retailer twenty products per query. It retained only ten usable unique SKUs each. Fifteen observations reused existing Tottus identities, without extra price-history or normalization writes. The second batch's totals were ninety usable observations, seventy-five actual inserts/normalization writes and eight new groups.
-
-All eight new groups were inspected from persisted member titles, source brands and exact content: five Plaza Vea–Metro rice pairs (extra 750 g/5 kg, añejo extra 750 g/5 kg and integral 750 g), plus three three-retailer Primor oils (Clásico 900 ml/1.8 L and Premium 900 ml). Variants and quantities remain distinct. This inspection does not establish barcode/manufacturer equivalence beyond the existing matcher evidence. Tuna's partial single-retailer discovery and detergent's unmatched listings remain useful catalog data without fabricated public comparisons.
-
-Public API rechecks returned products for `arroz costeño` (5), `aceite primor` (3), `arroz extra costeño` (4) and `aceite vegetal primor` (3). `atún florida` and `detergente bolivar` remain zero. Browser-rendered flows remain pending the build gate; these counts verify persisted public-query availability.
-
-Both immediate repeats passed. The first skipped three cooldown rows; the final repeat skipped six. Final repeat: zero queries processed, zero retailer calls, zero inserts, zero normalization/matching writes, zero new groups; daily usage remained six. Dry-run selected only eligible pending demand and reported zero calls/writes.
-
-Final available checks passed: `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, **364 unit tests** (47 added) and **20 isolated PostgreSQL tests** (four discovery scenarios added). The PostgreSQL runner explicitly injected `TEST_DATABASE_URL`; the suite never loads `.env` or falls back to `DATABASE_URL`, and its randomly named schema was torn down. The reviewed additive migration was applied successfully. No dependencies were added. `pnpm build` failed at Turbopack's CSS worker port bind; `pnpm test:e2e` could not start the production web server. Nothing was committed or pushed; local build/E2E confirmation is required before `feat: add search-driven catalog discovery` can be committed.
 
 ## Milestone 8 combined-result admission
 

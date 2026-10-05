@@ -1,6 +1,6 @@
 # Plaza Vea Peru ingestion proof
 
-Investigated and verified on October 3, 2026 using legitimate anonymous public requests with the identifying CompraFino User-Agent. Milestone 1B ingestion correctness is verified. The earlier Turbopack failure was an environment/tooling issue, resolved locally after correcting the pnpm installation; the default Next.js build configuration is unchanged.
+Current adapter guidance. The original October 3–5 investigation, live samples and acceptance history are preserved in [engineering history](../history/engineering-notes-2026-10-05.md). Public endpoint shape is validated by the adapter; historical observations are not a promise of current source inventory.
 
 ## Public source and access
 
@@ -51,49 +51,6 @@ Dry-run prints five normalized samples and requires no database; this was also v
 
 The manual `.github/workflows/ingest-plaza-vea.yml` uses `workflow_dispatch`, a conservative default, a bounded CLI limit, concurrency serialization and the existing `DATABASE_URL` repository secret. Reviewed migrations must already be applied. It does not migrate or schedule ingestion, and regular CI does not access the retailer. `/dev/ingestion` uses the existing mixed-retailer queries; a retailer column was added to the listings table. It remains development-only.
 
-## Live verification
-
-Five real source examples from the successful 20-listing dry-run, shown with the final reference-price normalization (all `PEN`, `UN`, anonymously available):
-
-| External SKU | Parent product | Title                                                   | Current cents | Reference cents | Package      |
-| ------------ | -------------- | ------------------------------------------------------- | ------------- | --------------- | ------------ |
-| 11370895     | 101001962      | Leche UHT GLORIA Zero Lacto Caja 946ml                  | 620           | —               | Caja 946ml   |
-| 11359692     | 100990618      | Leche Reconstituida Entera GLORIA Lata 390g Paquete 6un | 2150          | 2460            | Paquete 6un  |
-| 10936209     | 100682930      | Huevos Pardos BELL'S Bandeja 30un                       | 1590          | 1790            | Bandeja 30un |
-| 3533         | 3649           | Leche Entera UHT GLORIA Caja 946ml                      | 620           | —               | Caja 946ml   |
-| 11390026     | 101021454      | Leche UHT GLORIA Zero Lacto Caja 946ml Paquete 3un      | 1650          | —               | Paquete 3un  |
-
-Before the reference-price invariant was corrected, two consecutive exact `pnpm scrape:plaza-vea -- --limit=50` runs succeeded:
-
-| Run                                               | Fetched products | Persisted listings | New price states |
-| ------------------------------------------------- | ---------------- | ------------------ | ---------------- |
-| First (`a0972a17-60e9-4971-9754-f941761f9186`)    | 60               | 50                 | 50               |
-| Repeated (`e2abc68b-be03-44e6-a0f9-e1eaaefd3cd9`) | 60               | 50                 | 0                |
-
-Read-only PostgreSQL verification confirmed both success records, 50 unique Plaza Vea listings, 50 total history states and exactly 50 open states. Tottus retained its 50 listings. Inspection of all 50 stored Plaza Vea rows found valid source IDs/URLs and ordinary/reference cents; source slug/package wording differences are preserved rather than silently corrected. The live Tottus dry-run passed with 49 discovered rows / 20 unique normalized listings. The developer page returned HTTP 200 with both retailers and the added retailer column. These historical counts precede the normalization correction: the next fresh ingestion can legitimately open new states when an equal reference price changes to null. No historical rows are rewritten by this code change.
-
-## Architecture result and validation
-
-The second retailer fits the existing normalized listing, schema, atomic persistence, idempotency, price history and run lifecycle cleanly. No database/schema/migration change was needed. `RetailerAdapter` moved out of `tottus.ts` into `adapter.ts`; the existing CLI now selects the retailer while sharing bounds, dry-run, persistence and safe errors. Pagination and source prices remain adapter-specific. Tottus source behavior was preserved.
-
-| Concern            | Tottus                                   | Plaza Vea                                                         |
-| ------------------ | ---------------------------------------- | ----------------------------------------------------------------- |
-| Source             | Public HTML `__NEXT_DATA__` hydration    | Public VTEX catalog JSON                                          |
-| Listing ID         | `skuId` (parent `productId`)             | `itemId` (parent `productId`)                                     |
-| Pagination         | `?page=N`, page/count/perPage            | Inclusive `_from`/`_to`, `resources` range                        |
-| Ordinary/reference | `internetPrice` / optional `normalPrice` | Seller-1 `Price` / optional `ListPrice`                           |
-| Conditional prices | Excludes `cmrPrice`                      | Excludes payment/quantity promotion teasers                       |
-| Units              | `measurements.unit` KG/UN and format     | `measurementUnit` kg/un, weighted multiplier and presentation     |
-| Availability       | Unknown (delivery labels only)           | Available in anonymous source context; unavailable offers skipped |
-
-Nineteen new Vitest fixture tests cover parsing, IDs/titles/URLs/images, normal/reference/card price selection, exact cents, packages/weighted units, optional fields, marketplace selection, unavailable placeholders, invalid boundaries, deduplication, source exhaustion, pagination, hard request/source caps and shared store lifecycle. Existing generic PostgreSQL transition, rollback and concurrency tests are reused, not duplicated for this retailer.
-
-Verification: format check, type-aware lint, strict typecheck and all 55 unit tests passed; the existing three PostgreSQL integration tests passed in their fresh random isolated schema using an explicit one-off `TEST_DATABASE_URL` opt-in to the configured Neon connection. No integration-suite fallback or environment-loading behavior was changed. No live tables were used by these tests. Earlier milestone verification passed the webpack production build and both Chromium smoke tests, including production 404 for developer tooling.
-
-The previous Turbopack CSS-worker/port failure was an environment/tooling issue. After correcting the local pnpm installation, the developer verified normal `pnpm build` with Next.js 16.3.8 Turbopack: compilation, TypeScript, page-data collection and static generation all passed. The local build-validation gap is resolved. A subsequent default-build rerun in the agent environment still encountered its worker-port `Operation not permitted` restriction, even with an elevated retry; that failed build left no production artifact, so the requested E2E rerun could not start. This environment-specific rerun does not invalidate the developer’s successful local build. Historical webpack verification is not a fallback configuration or a required command; the repository retains the default Next.js build and adds no webpack fallback.
-
-Metro was subsequently investigated and implemented in Milestone 1C; see the [Metro integration and three-retailer review](metro.md). No canonical matching, consumer comparison/search, promotion engine or scheduled ingestion was added.
-
 ## Milestone 2 source metadata follow-up
 
 Catalog normalization now preserves the validated source `brand` string separately from titles. VTEX adapters also retain the positive source sale-unit multiplier as structured metadata; Tottus retains its observed package description/pricing basis. Existing legacy rows remain null in the new columns until ordinary fresh ingestion supplies the values. No guessed brand backfill, retailer refetch or price-history rewrite was performed for the normalization audit. Quantity/count derivation remains a separate core-driven command, not an automatic ingestion hook. See [catalog normalization](../catalog-normalization.md) for trust rules, coverage and ambiguity handling.
@@ -110,10 +67,6 @@ Native fetch reads the existing public VTEX products/search endpoint with `ft`, 
 
 The adapter now accepts the small validated allowlist `dairy`, `sugar-brown`, `sugar-white`, `pasta`, `flour`, `oats`, `toilet-paper`. New sources use full paths from the public tree, at most twenty usable listings/two sequential pages/forty source products, ordinary anonymous seller-1 quotes and the existing source boundary. CLI requests above twenty for these sources fail before network access; dairy retains its prior cap. Terminal VTEX ranges can advertise a full page beyond the smaller total; actual row count is validated against that total. No empty source is treated as successful ingestion. See [staple coverage](../staple-coverage.md) for paths, actual acquisitions, quantity ambiguities and scheduled atomic integration.
 
-## Milestone 10 source-quality audit
+## Shared current safeguards
 
-[Quantity quality](../quantity-quality.md) records the retailer-specific raw tuna/paper/detergent/control inspection and [sanitized source samples](../quantity-source-audit.json). No unverified net/drained, sheet or roll-length specification becomes a denominator. Approximate roll prices and semantically unresolved tuna prices have explicit comparison policy; retailer adapters, ingestion metadata and permanent category bounds are unchanged.
-
-## Milestone 11 conditional-pricing investigation
-
-[Conditional pricing](../conditional-pricing.md) records the current anonymous source audit, exact fields, program/quantity/date/context limits and supported extraction. Observed payment-method/discount teasers remain excluded because the sampled metadata does not safely establish a concrete payable amount and complete consumer eligibility. Ordinary current/reference extraction and source bounds remain unchanged. [Source evidence](../conditional-source-audit.json) and [persisted validation](../conditional-live-validation.json) distinguish source observations from fixture-only safety cases.
+Ordinary quotes must be positive. Concrete Tottus CMR amounts are retained separately; VTEX percentage/payment teasers are not payable prices. Category/search availability and exact SKU/page evidence differ. Unknown stock cannot erase a newer explicit negative; missing seller/schema evidence is a failed lookup rather than fabricated unavailable stock. See [availability](../availability.md), [conditional pricing](../conditional-pricing.md), [normalization](../catalog-normalization.md) and [scheduled source configuration](../operations.md#refresh-coverage-and-ownership).

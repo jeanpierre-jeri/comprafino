@@ -1,3 +1,4 @@
+import { catalogPolicy } from "@comprafino/core";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
 import {
@@ -14,9 +15,10 @@ try {
   const db = createDatabase();
   const now = new Date();
   const result = await db.execute(
-    sql`select jsonb_build_object('id',l.id,'retailerId',l.retailer_id,'title',l.title,'priceUnit',l.price_unit,'packageText',l.package_text,'sourceBrand',l.source_brand,'sourceUnitMultiplier',l.source_unit_multiplier::float8) as listing,l.category,n.normalization_version as version,n.input_fingerprint as fingerprint,l.available,l.last_seen_at as "observedAt",h.current_price_cents as "priceCents" from retailer_listings l left join listing_normalizations n on n.listing_id=l.id left join price_history h on h.listing_id=l.id and h.valid_until is null where l.active order by l.retailer_id,l.title limit 1001`,
+    sql`select jsonb_build_object('id',l.id,'retailerId',l.retailer_id,'title',l.title,'priceUnit',l.price_unit,'packageText',l.package_text,'sourceBrand',l.source_brand,'sourceUnitMultiplier',l.source_unit_multiplier::float8) as listing,l.category,n.normalization_version as version,n.input_fingerprint as fingerprint,l.available,l.last_seen_at as "observedAt",h.current_price_cents as "priceCents" from retailer_listings l left join listing_normalizations n on n.listing_id=l.id left join price_history h on h.listing_id=l.id and h.valid_until is null where l.active order by l.retailer_id,l.title limit ${catalogPolicy.overflowSentinel}`,
   );
-  if (result.rows.length > 1000) throw new Error("Catalog bound exceeded");
+  if (result.rows.length > catalogPolicy.retainedListingCap)
+    throw new Error("Catalog bound exceeded");
   const rows = z
     .array(
       z.object({

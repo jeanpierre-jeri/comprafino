@@ -1,3 +1,4 @@
+import { catalogPolicy } from "@comprafino/core";
 import { parseListingRefreshOptions } from "@comprafino/core";
 import {
   createDatabase,
@@ -23,7 +24,7 @@ try {
     if (result.observed > 0) {
       try {
         await assertRefreshScope(db);
-        const normalized = await normalizeCatalog(db, 1000);
+        const normalized = await normalizeCatalog(db, catalogPolicy.retainedListingCap);
         if (!normalized.persisted || normalized.persisted.stale)
           throw new Error("Stale normalization");
         normalizationWrites = normalized.persisted.changed;
@@ -33,7 +34,7 @@ try {
       }
       if (normalization === "success") {
         try {
-          const matched = await matchCatalog(db, 1000);
+          const matched = await matchCatalog(db, catalogPolicy.retainedListingCap);
           if (!matched.persisted || matched.persisted.stale) throw new Error("Stale matching");
           matchingWrites =
             matched.persisted.linksCreated +

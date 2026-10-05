@@ -1,6 +1,6 @@
 # Public ordinary-price history — Milestones 13–14
 
-Milestone 13 is complete in the user-provided baseline. Milestone 14 adds prospective daily coverage and descriptive insights; its local production build, Chromium and desktop/mobile visual acceptance remain pending. Framework configuration is unchanged. See [observation coverage](observation-coverage.md) and [Milestone 14 validation](milestone-14-validation.md).
+Current domain guidance. Dated audits, measurements and acceptance narratives are preserved in [engineering history](history/engineering-notes-2026-10-05.md).
 
 ## Scope and ownership
 
@@ -48,68 +48,6 @@ The query fetches public identity, retailer/listing provenance, successful verif
 
 When every retailer has no intersecting state, the section shows a clean no-records message. With recorded prices but no ordinary transition or bounded coverage segment, it shows “Aún no tenemos suficiente historial para mostrar una tendencia.” and omits the chart. Useful current/min/max summaries and state details remain. Verified coverage can therefore display a flat ordinary-price segment without inventing a change. Chart visibility does not depend on the number of reference-only changes. Range links remain available in sparse/error states. History load failures do not discard the current comparison.
 
-Light/dark surfaces, grids, labels, markers, tooltip and empty states use shared CSS tokens. The chart has a fixed 256px height, responsive width, three sparse date ticks, a readable PEN axis and wrapping ≥44px retailer/range controls. State details provide prices without relying on hover. **These design provisions have type checks but have not yet received browser/visual verification** at desktop or ~390px in either theme. Touch tooltip behavior, keyboard SVG navigation, overlap handling and contrast require the pending browser acceptance. No visual screenshot claims are made.
-
-## Milestone 13 live read-only audit (historical)
-
-[Recorded audit](price-history-audit.json), October 4, 2026, approximately 15:17 Peru:
-
-- 763 history states, 736 listings and 736 open states.
-- Earliest start October 3 at 12:45 Peru; latest start October 4 at 12:32 Peru: approximately 23h47m between state starts, not verified observation coverage.
-- 709 listings have one state; 27 have two states. Of 27 transitions, **one** changed ordinary cents; 26 left ordinary cents unchanged.
-- No adjacent state starts exceed 36 hours. This is not evidence of continuous observations or no gaps.
-- The real ordinary change is Metro SKU `39254015`, **Leche Deslactosada Danlac Light Botella 900ml**, S/ 9.00 → S/ 7.50 on October 4 at 11:50 Peru. It has no canonical association, so it correctly does not appear on an exact-product history page.
-
-Six eligible exact products were inspected through the DB query in all three ranges. Current offers, original state sequences, min/max, last change, change count and chart point sequences are in the JSON. They all have zero ordinary transitions; reference changes do not manufacture a trend.
-
-| Exact product                        | Canonical ID                           | Metro / Plaza Vea / Tottus ordinary prices |
-| ------------------------------------ | -------------------------------------- | ------------------------------------------ |
-| Gloria Zero Lacto bolsa 800ml        | `157d7678-aa71-832c-bf8d-dd6885a89e42` | S/ 5.20 / 5.10 / 5.10                      |
-| Gloria Zero Lacto caja 946ml tripack | `36b44e42-3f15-8ac8-a66d-2f5153cdb339` | S/ 16.20 / 16.50 / 16.10                   |
-| Gloria Light caja 946ml tripack      | `4cf1e951-c626-8948-86da-b54020a18727` | S/ 16.20 / 16.50 / 16.10                   |
-| Gloria Entera caja 946ml tripack     | `69c3625d-2d3e-8624-b483-2323e108f94b` | S/ 15.90 / 16.20 / 16.10                   |
-| Ideal Cremosita 390g sixpack         | `898b8c56-fc13-89ca-9369-7860882dc6bd` | S/ 22.90 / 23.50 / 23.50                   |
-| La Calera huevos pardos 30un         | `05c25031-29a8-8ee6-9dff-129036aa42c9` | — / S/ 17.90 / 17.90; only first states    |
-
-For each retailer in these examples, min=max=current and last change is absent in 7/30/90 days. Public manual screenshots should use these real products, with their sparse state honestly visible. No fake history was inserted into application tables for appearance.
-
-## Milestone 13 tests and commands (historical)
-
-Added ten core cases cover range/default parsing, half-open clipping/carry-in, actual current verification, min/max, up/down/latest transitions, a predecessor outside the range, unchanged/reference-only states, disconnected predecessors, one/no-state results, immutable inputs, future verification and no invented daily/boundary points. Existing money tests cover the reused PEN helper. Two DB boundary cases reject unsafe/non-test schema names and verify lazy client construction.
-
-The isolated PostgreSQL history case checks multiple retailers, selected clipping, prior state carry-in, current open/closed history, latest unchanged verification, last-change predecessor outside the result, malformed/missing identity, active CMR exclusion, unmatched rows and manual/review-confidence group rejection. It uses the existing randomly scoped migration harness, no live retailer calls.
-
-Four browser scenarios cover sufficient fixture history, retailer toggles, summary/last-change values, URL ranges/back/benefits preservation, sparse/outside-range behavior, separate CMR and 390px light/dark chart/tooltip behavior. These are added but **not run yet**. The fixture runner creates a random schema, applies checked-in table migrations there (no shared extension creation), seeds three exact products using controlled observations/links, validates results, runs only the history spec and drops only its own schema in `finally`.
-
-Neon HTTP did not honor URL `search_path` options during fixture validation. The runner therefore passes validated `COMPRAFINO_E2E_SCHEMA=comprafino_e2e_<32 hex>` to its child web server. Every direct query/batch is wrapped with transaction-local `set_config`, with no public fallback. Normal database access remains unchanged without that explicit override. Do not set it in deployment. `PRICE_HISTORY_FIXTURE_IDS` supplies only fixture IDs to Playwright. No production endpoint/test bypass was introduced. Interruptions can leave a random schema for manual review; the runner never drops public tables.
-
-```sh
-pnpm audit:price-history
-pnpm format:check
-pnpm lint
-pnpm typecheck
-pnpm test
-# Explicit opt-in; the harness never reads .env or falls back:
-TEST_DATABASE_URL=... pnpm test:integration
-pnpm build
-pnpm test:e2e
-TEST_DATABASE_URL=... pnpm test:e2e:history
-# Fixture/SQL validation only, without a browser or build:
-TEST_DATABASE_URL=... pnpm --filter @comprafino/db test:e2e:history --validate-fixtures
-```
-
-The audit command loads the existing root `.env` and is read-only. It compares current offers with range-supported current values and records all three ranges. Integration and fixture validation here explicitly supplied the configured development database as `TEST_DATABASE_URL` in the runner; all writes stayed in the harness's random schemas.
-
-Validation status: formatting, lint, strict typechecking, **523 unit tests** and **37 PostgreSQL integration tests** pass. Rich/sparse/outside-range fixture construction, Neon isolation and cleanup pass. The restricted-sandbox `pnpm build` failed at the existing Turbopack CSS worker port restriction (`Operation not permitted`); no configuration workaround/elevated build was attempted. The user subsequently confirmed a fresh local default Turbopack build passed and provided the general production E2E result: 13 passed, 12 skipped, with known navigation stream-closure log messages. The isolated history fixture browser cases remain unexecuted; general E2E success and navigation visual acceptance do not establish history-chart acceptance. No completed price-history milestone or passing history-specific browser audit is claimed.
-
-## Files and next decision
-
-Important changes: core history helpers/tests; DB history query/integration, read-only audit CLI and JSON, isolated browser-fixture runner/client boundary; shared chart component/Recharts dependency; product history Server/Client Components, product route and range-preserving price controls; four E2E cases; README, architecture, dependency inventory and roadmap. No migration. The user authorized committing all remaining staged and relevant unstaged work as `feat: add public price history`. History-specific browser validation remains pending as documented above. Do not push automatically.
-
-Milestone 14 now implements prospective coverage and safe descriptive insights; see the linked model and validation report. Buy/wait and conditional history remain deferred. Today's CMR rows cannot reconstruct past benefits. No next milestone is started.
-
-Local Docker PostgreSQL is now supported by `pnpm test:e2e:history:local`; see [local testing](local-testing.md) for setup and the fixture-only command. All six fixture kinds and all 41 PostgreSQL integration tests pass locally. Browser validation still requires a successful production build.
-
 ## Milestone 17 — Individual listing history
 
-[Public listing details](listing-detail.md) reuse this query, presentation, chart and all coverage/metric semantics for one retailer series, including unmatched listings. Buying information stays above history. Safe canonical association provides an optional comparison link; it is not required for listing eligibility. No conditional history or inferred equivalence was added. Build/browser and desktop/mobile light/dark acceptance passed as recorded in [Milestone 17 validation](milestone-17-validation.md).
+[Public listing details](listing-detail.md) reuse this query, presentation, chart and all coverage/metric semantics for one retailer series, including unmatched listings. Buying information stays above history. Safe canonical association provides an optional comparison link; it is not required for listing eligibility. No conditional history or inferred equivalence was added. Build/browser and desktop/mobile light/dark acceptance passed as recorded in [Milestone 17 validation](history/milestone-17-validation.md).

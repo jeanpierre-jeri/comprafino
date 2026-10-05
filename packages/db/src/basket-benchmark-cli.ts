@@ -1,5 +1,6 @@
+import { reportOutputPath, writeReport } from "./report-output.ts";
 import { randomUUID } from "node:crypto";
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { z } from "zod";
 import {
   shoppingListItemSchema,
@@ -19,6 +20,7 @@ import { persistListings } from "./ingestion.ts";
 import { persistCatalogNormalizations } from "./catalog.ts";
 
 // Explicit test DB only; never reads .env or falls back to the application DB.
+const outputPath = reportOutputPath(process.argv.slice(2));
 const url = requireDatabaseUrl({ DATABASE_URL: process.env.TEST_DATABASE_URL });
 const client = createTestQueryClient(url, process.env.COMPRAFINO_TEST_DATABASE_MODE);
 const schema = `comprafino_e2e_${randomUUID().replaceAll("-", "")}`;
@@ -167,13 +169,11 @@ try {
     measuredRunsPerCase: 5,
     measurements,
   };
-  writeFileSync(
-    new URL("../../../docs/milestone-16-performance.json", import.meta.url),
-    `${JSON.stringify(report, null, 2)}\n`,
-  );
+  writeReport(outputPath, report);
   console.log(
     JSON.stringify(
       {
+        outputPath,
         catalogListings: report.catalogListings,
         measurements: measurements.map(({ samples: _samples, ...m }) => m),
       },

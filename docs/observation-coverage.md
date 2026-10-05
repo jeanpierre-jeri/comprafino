@@ -1,7 +1,5 @@
 # Durable ordinary-price observation coverage — Milestone 14
 
-Implementation is prospective. Local production build, Chromium and visual acceptance are still required before completion. See the [validation report](milestone-14-validation.md) for measured evidence and remaining gates.
-
 ## Why a separate model
 
 `price_history` records state changes (ordinary cents, reference cents, currency or sale unit). Reobserving an unchanged quote advances listing freshness but does not append another state. State intervals, ingestion-run success and today's `last_seen_at` cannot reconstruct which past days actually included a successful observation of a specific listing. Coverage therefore has its own minimal daily rollup, without fake daily prices or unchanged history rows.
@@ -54,14 +52,10 @@ Min/max use actual usable ordinary states intersecting the selected rolling wind
 
 ## Operations and budget
 
-`pnpm audit:observation-coverage` is a read-only JSON developer audit using root `DATABASE_URL`. `/dev/ingestion` also shows total day rows, first coverage date, mean observations per covered listing/day, today's known/public coverage and retailer expected/observed/missing counts. Public means currently eligible exact-product offers, including stale/unavailable retained members; unmatched generic offers remain in known counts. The audit samples up to twenty missing closed days from the last seven days after each public listing's first durable evidence. It does not invent gaps before that start or assert past public eligibility. It reports table/index allocation and 30-day row projections.
-
-Before implementation the measured catalog contained **826 listings**, **133 public exact offers**, **853 price states**, and a **10.42 MiB** database, compared with Milestone 10's 736 listings / 10.29 MiB. At full daily observation, 826 listings add **24,780 rows per 30 days**; 1,000 add **30,000**; 1,500 add **45,000**. Twice-daily refresh still creates at most one row per listing/day. These are upper coverage-growth scenarios; current bounded sources do not observe all retained listings daily. The existing 1,000-listing complete-catalog guard is unchanged; 1,500 is a projection, not an enabled catalog size.
+`pnpm audit:observation-coverage` is a read-only JSON developer audit using root `DATABASE_URL`. `/dev/ingestion` also shows total day rows, first coverage date, mean observations per covered listing/day, today's known/public coverage and retailer expected/observed/missing counts. Public here means the approximate exact-association priority signal, which can include stale/unavailable retained members; it is not current purchase eligibility. Unmatched generic offers remain in known counts. See [eligibility vocabulary](eligibility.md). The audit samples up to twenty missing closed days from the last seven days after each public listing's first durable evidence. It does not invent gaps before that start or assert past public eligibility. It reports table/index allocation and 30-day row projections.
 
 Live allocated sizes and actual full-refresh rows are recorded in the validation report. Small initial table allocation and same-day updates include fixed page overhead/dead tuples; bytes-per-row projections are approximate, not quotas or billing claims. No premature partitioning, retention job or monitoring infrastructure is introduced.
 
 ## Limits and later work
 
 The rollup retains first/latest/count, not every scrape timestamp or daily price. It cannot answer exactly which intermediate observation saw which quote beyond recorded state transitions. Historical queries ending inside an already completed rollup exclude rows whose latest timestamp is later than that end; the rollup cannot reconstruct an earlier intraday count. Normal public queries end now.
-
-Real history is young. Collect at least **4–6 weeks** of genuine coverage before evaluating whether buy/wait work has sufficient evidence; more time may be needed for gaps, stable retailer coverage or seasonal/promotion cycles. Calendar depth alone does not authorize recommendations. No next milestone is implemented.

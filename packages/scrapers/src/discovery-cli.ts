@@ -1,3 +1,4 @@
+import { catalogPolicy } from "@comprafino/core";
 import {
   createDatabase,
   claimDiscoveryQueries,
@@ -47,13 +48,13 @@ try {
       ) => persistListingsDetailed(db, retailer, rows, { source: "discovery", queryId: claim.id }),
       async normalize() {
         await assertRefreshScope(db);
-        const r = await normalizeCatalog(db, 1000);
+        const r = await normalizeCatalog(db, catalogPolicy.retainedListingCap);
         if (!r.persisted || r.persisted.stale) throw new Error("Stale normalization");
         return r.persisted.changed;
       },
       async match() {
         await assertRefreshScope(db);
-        const r = await matchCatalog(db, 1000);
+        const r = await matchCatalog(db, catalogPolicy.retainedListingCap);
         if (!r.persisted || r.persisted.stale) throw new Error("Stale matching");
         return {
           writes:

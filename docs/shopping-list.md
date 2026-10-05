@@ -1,6 +1,6 @@
-# Shopping lists — Milestone 15.1
+# Shopping lists
 
-Milestone 15 supplies recurring browser-local needs and current recommendations. Milestone 15.1 is committed in `075c999` and accepted in the user-confirmed baseline. [Milestone 16 current basket optimization](basket-optimization.md) is implemented and validated: local production build, standard smoke and all 22 isolated shopping/basket Chromium tests pass. No temporal prediction, account, alert, dependency or PostgreSQL schema change is included.
+Current domain guidance. Dated audits, measurements and acceptance narratives are preserved in [engineering history](history/engineering-notes-2026-10-05.md).
 
 ## Contextual creation and editing
 
@@ -42,53 +42,9 @@ Evaluation reuses normalized family/category and strong quantity evidence. Indep
 
 `/api/list/evaluate` validates the version-two list and performs read-only current-catalog queries; evaluation never ingests or refreshes retailers. The old product-selection endpoint remains available but is unused by the dialogs. Responses are uncached and validated; list prices refresh on tab return and every minute. Fresh active ordinary prices and supported CMR benefits use existing ranking. Milestone 16 now compares optimized complete/partial baskets for up to one, two and three retailers; per-item recommendations retain their existing behavior. Frequencies do not produce a monthly recurring bill.
 
-## Real-data audit
-
-The read-only [audit snapshot](shopping-list-audit.json) records current catalog data on October 4, 2026 (Peru). It lists every audited broad candidate, semantic compatibility, safe quantity evidence, exclusion reason and current recommendations. No retailer request or catalog write was made. Audit retrieval intentionally examines all eligible search offers rather than only the public page's first 30.
-
-| Need                   | Broad candidates | Compatible candidates with strong matching quantity evidence |
-| ---------------------- | ---------------: | -----------------------------------------------------------: |
-| Eggs, 30 units         |               29 |                                                           18 |
-| Rice, 5 kg             |               54 |                                                           44 |
-| Vegetable oil, 3 L     |               27 |                                                           17 |
-| Milk, 6 units          |              105 |                                                            0 |
-| Powder detergent, 3 kg |               24 |                                                           12 |
-| Liquid detergent, 3 L  |               24 |                                                            6 |
-
-These compatibility counts precede purchase-size/overbuy filtering and offer ranking. Three live quail offers remain discoverable: Bell's 18-unit and 24-unit trays and La Calera 18-unit eggs. All are incompatible and excluded. Other exclusions include corral/free-range/organic eggs, integral/arborio/parboiled/premium rice, oleic/premium oils, baby/micellar detergent and machine detergent for ordinary needs. Conservative rules also exclude some marketing names such as Faraón Rojo/Negro; precision is favored over recall.
-
-Reproduce with `pnpm audit:shopping-list` and the existing configured `DATABASE_URL`. Future prices and catalog membership may change.
-
-## Validation and completion gate
-
-Passed: TypeScript checks; 606 unit tests (including migration of every intent/custom labels, generic desired quantities, exact egg/rice package counts, preferred contents-based alternatives and compatibility family rules); 42 PostgreSQL integration tests; isolated shopping/history fixture validation. The PostgreSQL regression proves quail eggs remain in broad search while generic and preferred recommendations reject an artificially cheapest quail candidate.
-
-The user confirmed fresh local production `pnpm build` and `pnpm test:e2e` passed and accepted the final UX for Milestone 15.1. The final persistence-normalization correction then passed format/lint/types and 606 unit tests. A fresh agent build retry, including elevated execution, encountered the same CSS worker port restriction; full application E2E could not be repeated against that correction here. Earlier sandbox attempts were blocked by Turbopack CSS worker port restrictions; Next configuration was unchanged. Updated Chromium scenarios cover compact generic creation, preselected exact creation, package-count edits, version-one browser migration, Escape/focus, and create/edit screenshots for generic/preferred/strict items across both widths/themes. An isolated Chromium hit-test reproduced the stretched-link interception before the CSS fix, then confirmed add-button/dialog clicks and card-background/link clicks at 390px and 1280px using the actual overlay/control stylesheet rules. The actual shared React modal also passed isolated Chromium checks for opening/closing animation, close button, Cancel, Escape, backdrop dismissal, inside-click/drag protection, focus return and reduced motion at both widths. These isolated checks do not replace application E2E. Database-only fixture validation does not execute these browser scenarios. Retailer-option regressions additionally cover canonical preferred/strict creation, independent generic creation without strict mode, and unsupported/quail creation with recommendations withheld.
-
-Local acceptance commands:
-
-```sh
-pnpm format:check
-pnpm lint
-pnpm typecheck
-pnpm test
-pnpm test:db:up
-pnpm test:integration:local
-pnpm build
-pnpm test:e2e
-pnpm test:e2e:list:local
-pnpm test:db:down
-```
-
-Review generic huevos search and canonical eggs add/edit flows, all three intents at desktop and 390px, both themes, keyboard containment, Escape and focus return. Local build/E2E and final UX acceptance were confirmed by the user. Commit `fix: simplify shopping list intent and safe substitutions`. Do not push or begin Milestone 16 automatically.
-
 ## Limits and current basket work
 
-The compatibility API and explicit quantity modes now supply Milestone 16 basket optimization through shared approved fulfillment. Optimization applies the same safety gate, freshness and quantity evidence; it must never treat broad search relevance as equivalence. Milestone 16 implements the optimizer through this shared domain boundary; see [basket optimization](basket-optimization.md) for scope and pending validation. Legacy exact normalized quantities are intentionally retained, family coverage is deliberately limited, names may under-describe specialty properties, canonical references may become unavailable, and browser lists have no account sync or backup.
-
-## Milestone 18 availability and measured coverage
-
-Current evaluation keeps the existing SQL/current-offer boundary: explicit unavailable flags cannot be the best option, while unknown stock follows normal price freshness. The updated writer preserves stronger negative evidence through later unknown quotes and recovers only with newer explicit positive evidence. No substitution profile or intent policy is expanded. [Coverage audit](catalog-coverage.md) reports 103 potential generic candidates and 147 exact package candidates, before need-specific gates; family coverage is not equivalent to safe fulfillment. [Availability](availability.md) documents history, recovery and coordinated writer rollout.
+Basket optimization consumes shared approved fulfillment options and preserves substitution, freshness and quantity gates. Broad search relevance cannot establish equivalence. Legacy exact normalized quantities are retained; family coverage is limited, names may under-describe specialty properties, canonical references can become unavailable, and browser lists have no account sync or backup. See [basket optimization](basket-optimization.md).
 
 ## Transient browser-storage failure (Cleanup A)
 

@@ -1,3 +1,5 @@
+import { listingRefreshPolicy } from "@comprafino/core";
+import { catalogPolicy } from "@comprafino/core";
 import { listingOffers } from "./conditional-pricing.ts";
 import {
   conditionalOfferSchema,
@@ -175,11 +177,12 @@ export async function searchGenericProductOffers(
     ${currentGenericOfferRows(now)}
   ) select * from generic where ${canonicalId ? sql`"canonicalId"=${canonicalId}::uuid` : sql`true`} and ${predicates.length ? sql.join(predicates, sql` and `) : sql`true`}
   order by (title_text=${query}) desc, starts_with(title_text,${query}) desc,
-    public.similarity(title_text,${query}) desc, title_text collate "C", listing->>'id' limit 1001`),
+    public.similarity(title_text,${query}) desc, title_text collate "C", listing->>'id' limit ${catalogPolicy.overflowSentinel}`),
   ]);
   // Current catalog already has a 1000-row operational guard. Refuse truncation:
   // lowest-price modes must consider every admitted candidate before limiting.
-  if (result.rows.length > 1000) throw new Error("Generic search candidate bound exceeded");
+  if (result.rows.length > catalogPolicy.retainedListingCap)
+    throw new Error("Generic search candidate bound exceeded");
   const offers = result.rows
     .map((row) => genericProductOffer(row, now, filters.priceMode))
     .filter((offer) => offer !== null);
@@ -286,6 +289,6 @@ export function currentGenericOfferRows(now: Date) {
     left join products p on p.id=a.canonical_product_id
     where l.active and l.available is distinct from false and h.currency='PEN' and h.current_price_cents>0
       and h.price_unit=l.price_unit and h.price_unit in ('UN','KG')
-      and l.last_seen_at between ${new Date(now.getTime() - 36 * 60 * 60 * 1000).toISOString()}::timestamptz and ${now.toISOString()}::timestamptz
+      and l.last_seen_at between ${new Date(now.getTime() - listingRefreshPolicy.freshHours * 60 * 60 * 1000).toISOString()}::timestamptz and ${now.toISOString()}::timestamptz
 `;
 }

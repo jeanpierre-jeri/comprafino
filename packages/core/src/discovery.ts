@@ -1,4 +1,5 @@
 export const discoveryDailyLimit = 30;
+export const discoveryDefaultQueryLimit = 10;
 export const discoveryRetailerLimit = 10;
 export const discoveryCooldownHours = 24;
 
@@ -21,7 +22,7 @@ export function discoveryQueryForSearch(value: string, resultCount: number): str
   return resultCount === 0 && validDiscoveryQuery(value) ? normalizeDiscoveryQuery(value) : null;
 }
 export function parseDiscoveryOptions(args: readonly string[]) {
-  let limit = 10;
+  let limit: number = discoveryDefaultQueryLimit;
   let dryRun = false;
   const seen = new Set<string>();
   for (const arg of args.filter((value) => value !== "--")) {

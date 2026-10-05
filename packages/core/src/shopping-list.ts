@@ -13,6 +13,15 @@ import { offerFreshness } from "./listing-refresh.ts";
 import { conditionalOfferSchema, rankedPrice } from "./conditional-pricing.ts";
 import type { PriceMode } from "./conditional-pricing.ts";
 
+const quantityScale = 1000;
+export const shoppingListPolicy = {
+  maximumItems: 50,
+  maximumAmount: 10000,
+  quantityScale,
+  quantityStep: 1 / quantityScale,
+  preferredSavingsCents: 100,
+  preferredSavingsFraction: 0.05,
+} as const;
 export const shoppingIntentLabels = {
   generic: "Cualquier opción equivalente",
   preferred: "Prefiero este producto",
@@ -28,8 +37,14 @@ export const shoppingQuantitySchema = z
     amount: z
       .number()
       .positive()
-      .max(10000)
-      .refine((n) => Math.abs(n * 1000 - Math.round(n * 1000)) < 0.000001, "Usa hasta 3 decimales"),
+      .max(shoppingListPolicy.maximumAmount)
+      .refine(
+        (n) =>
+          Math.abs(
+            n * shoppingListPolicy.quantityScale - Math.round(n * shoppingListPolicy.quantityScale),
+          ) < 0.000001,
+        "Usa hasta 3 decimales",
+      ),
     unit: z.enum(["unit", "kg", "L"]),
   })
   .refine((q) => q.unit !== "unit" || Number.isInteger(q.amount), "Las unidades deben ser enteras");
@@ -69,7 +84,10 @@ export const shoppingListItemSchema = z.discriminatedUnion("intent", [
 ]);
 export type ShoppingListItem = z.infer<typeof shoppingListItemSchema>;
 export const shoppingListSchema = z
-  .object({ version: z.literal(2), items: z.array(shoppingListItemSchema).max(50) })
+  .object({
+    version: z.literal(2),
+    items: z.array(shoppingListItemSchema).max(shoppingListPolicy.maximumItems),
+  })
   .refine(
     (list) => new Set(list.items.map((i) => i.id)).size === list.items.length,
     "Duplicate IDs",
@@ -87,7 +105,10 @@ export function parseShoppingList(raw: string | null): { list: ShoppingList; inv
   try {
     const value: unknown = JSON.parse(raw);
     const legacy = z
-      .object({ version: z.literal(1), items: z.array(shoppingListItemSchema).max(50) })
+      .object({
+        version: z.literal(1),
+        items: z.array(shoppingListItemSchema).max(shoppingListPolicy.maximumItems),
+      })
       .safeParse(value);
     const parsed = shoppingListSchema.safeParse(
       legacy.success
@@ -143,7 +164,7 @@ export function saveShoppingItem(list: ShoppingList, raw: ShoppingListItem): Sho
     (i) => i.id !== existing?.id && shoppingItemKey(i) === shoppingItemKey(item),
   );
   if (duplicate) throw new Error("Ya tienes esta necesidad en tu lista. Edita la existente.");
-  if (!existing && list.items.length >= 50)
+  if (!existing && list.items.length >= shoppingListPolicy.maximumItems)
     throw new Error("Tu lista admite hasta 50 necesidades.");
   const saved = existing ? { ...item, id: existing.id, createdAt: existing.createdAt } : item;
   return shoppingListSchema.parse({
@@ -292,8 +313,8 @@ export function evaluateShoppingFulfillment(
           : null
         : item.quantity;
     if (!q || !target || (!c.strongQuantity && !countsPackages) || q.unit !== target.unit) continue;
-    const required = Math.round(target.amount * 1000);
-    const size = Math.round(q.amount * 1000);
+    const required = Math.round(target.amount * shoppingListPolicy.quantityScale);
+    const size = Math.round(q.amount * shoppingListPolicy.quantityScale);
     const packages = Math.ceil(required / size);
     const purchased = packages * size;
     // At most 100% extra. Oversize options cannot win by forcing a bulk purchase.
@@ -313,11 +334,11 @@ export function evaluateShoppingFulfillment(
       packages,
       countsPackages,
       quantityUnit: q.unit,
-      purchasedQuantity: purchased / 1000,
-      overbuy: (purchased - required) / 1000,
+      purchasedQuantity: purchased / shoppingListPolicy.quantityScale,
+      overbuy: (purchased - required) / shoppingListPolicy.quantityScale,
       totalCostCents,
       ordinaryTotalCents,
-      effectiveUnitCents: (totalCostCents * 1000) / purchased,
+      effectiveUnitCents: (totalCostCents * shoppingListPolicy.quantityScale) / purchased,
       condition: ranking.condition?.conditionLabel ?? null,
     });
   }
@@ -338,7 +359,10 @@ export function evaluateShoppingFulfillment(
             option.canonicalId === item.canonicalId ||
             !preferred ||
             preferred.totalCostCents - option.totalCostCents >=
-              Math.max(100, Math.ceil(preferred.totalCostCents * 0.05)),
+              Math.max(
+                shoppingListPolicy.preferredSavingsCents,
+                Math.ceil(preferred.totalCostCents * shoppingListPolicy.preferredSavingsFraction),
+              ),
         )
       : evaluated;
   const alternative =

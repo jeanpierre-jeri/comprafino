@@ -1,3 +1,4 @@
+import { catalogPolicy } from "@comprafino/core";
 import { desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { listingSchema } from "@comprafino/core";
@@ -59,7 +60,7 @@ export function persistenceStatements(
         select count(*)::int as total from jsonb_array_elements_text(${ids}::jsonb) incoming(external_id)
         where not exists(select 1 from retailer_listings l where l.retailer_id=${retailer} and l.external_id=incoming.external_id)
       ), admission as materialized (
-        select 1 / case when total=0 or (select count(*) from retailer_listings)+total<=1000 then 1 else 0 end as allowed
+        select 1 / case when total=0 or (select count(*) from retailer_listings)+total<=${catalogPolicy.retainedListingCap} then 1 else 0 end as allowed
         from new_identities
       ), updated as (insert into retailer_listings (retailer_id, external_id, product_id, title, url, image_url,
         current_price_cents, regular_price_cents, currency, price_unit, available, source_brand, source_unit_multiplier, package_text, category, first_seen_at, last_seen_at, first_seen_via, discovery_query_id, last_category_observed_at, availability_verified_at)

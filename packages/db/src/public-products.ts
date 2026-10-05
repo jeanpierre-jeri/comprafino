@@ -1,3 +1,4 @@
+import { matchingThresholds } from "@comprafino/core";
 import { listingOffers } from "./conditional-pricing.ts";
 import { conditionalOfferSchema, currentConditionalOffers, rankedPrice } from "@comprafino/core";
 import type { PriceMode } from "@comprafino/core";
@@ -188,7 +189,7 @@ export const eligibleProducts = sql`with offers as (
   join retailers r on r.id=l.retailer_id
   join listing_normalizations n on n.listing_id=l.id
   join price_history h on h.listing_id=l.id and h.valid_until is null
-  where a.method='automatic' and a.matching_version=${matchingVersion} and a.confidence>=0.90
+  where a.method='automatic' and a.matching_version=${matchingVersion} and a.confidence>=${matchingThresholds.auto}
     and l.active and h.currency='PEN' and h.price_unit='UN' and h.current_price_cents>0
 ), products as (
   select c.id, c.display_name as "displayName", c.brand_key,
@@ -203,7 +204,7 @@ export const eligibleProducts = sql`with offers as (
     array_agg(${searchText(sql`o.normalized_title`)}) as retailer_titles
   from canonical_products c join offers o on o.canonical_product_id=c.id
   where not exists (select 1 from canonical_product_listings a where a.canonical_product_id=c.id
-    and (a.method<>'automatic' or a.matching_version<>${matchingVersion} or a.confidence<0.90))
+    and (a.method<>'automatic' or a.matching_version<>${matchingVersion} or a.confidence<${matchingThresholds.auto}))
   group by c.id having count(distinct o.retailer_id)>=2
 )`;
 const publicColumns = sql`id,"displayName",brand,"quantityValue","quantityUnit","packageCount",offers`;

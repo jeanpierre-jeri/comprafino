@@ -22,7 +22,7 @@ All **763** ordinary history states retain digest `db3e44dab8fbfa44c75542c511a15
 | 145813824  | Gloria strawberry/banana yogurt 1.6 kg | S/ 8.90  | S/ 7.90  | S/ 10.80  |
 | 145813806  | Gloria peach yogurt 1.6 kg             | S/ 8.90  | S/ 7.90  | S/ 10.80  |
 
-The Nan 3 eight-can formula control has S/ 40.40 ordinary and no CMR/reference amount. Plaza Vea Gloria SKU `11359692` has S/ 21.50 ordinary / S/ 24.60 reference with discount teasers excluded. Metro Gloria SKU `39233309` has the same ordinary/reference and a 5% BIN-restricted card teaser excluded. Plaza Vea Laive `11359044` is an ordinary no-teaser control. See [pricing documentation](conditional-pricing.md) for why no additional program/quantity offer type was implemented.
+The Nan 3 eight-can formula control has S/ 40.40 ordinary and no CMR/reference amount. Plaza Vea Gloria SKU `11359692` has S/ 21.50 ordinary / S/ 24.60 reference with discount teasers excluded. Metro Gloria SKU `39233309` has the same ordinary/reference and a 5% BIN-restricted card teaser excluded. Plaza Vea Laive `11359044` is an ordinary no-teaser control. See [pricing documentation](../conditional-pricing.md) for why no additional program/quantity offer type was implemented.
 
 Exact product `df95f601-09b4-88a7-a48b-12d304075fee` is the audited Gloria whole-milk six-pack. Its standard minimum is **S/ 21.50 at Plaza Vea**. Benefits ranking selects **S/ 20.90 at Tottus, requiring CMR**; ordinary minimum fields remain S/ 21.50 and Tottus's ordinary row stays S/ 21.90.
 

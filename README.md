@@ -1,263 +1,101 @@
 # CompraFino
 
-A Peruvian grocery and household-products price intelligence platform with verified bounded Tottus, Plaza Vea and Metro ingestion pipelines.
+CompraFino compares observed grocery and household prices from Tottus, Plaza Vea and Metro in Peru. It provides exact product comparisons, independent retailer search options, ordinary price history with observation gaps, and browser-local recurring shopping lists with current basket comparisons across up to three supermarkets. Concrete Tottus CMR benefits are shown separately from ordinary prices. Prices are observations, not checkout guarantees.
 
-## Problem
+## Architecture and packages
 
-Supermarket pricing in Peru is fragmented across retailers. Promotions can depend on dates, quantities, payment methods and campaigns, making it difficult to judge the real cost of a purchase.
+Next.js App Router serves the public UI from persisted PostgreSQL data. GitHub Actions runs bounded retailer ingestion, refresh and search-driven discovery. Public browsing never fetches retailer websites. There is no separate always-on API server or worker.
 
-## Vision
+| Package             | Responsibility                                                                                        |
+| ------------------- | ----------------------------------------------------------------------------------------------------- |
+| `apps/web`          | Server-rendered routes, interactive controls, browser list storage and application tests              |
+| `packages/core`     | Framework-independent validation, pricing, normalization, matching and shopping/basket policy         |
+| `packages/db`       | Lazy Drizzle/Neon access, reviewed PostgreSQL migrations, ingestion transactions and query boundaries |
+| `packages/scrapers` | Isolated public-data retailer adapters and bounded acquisition orchestration                          |
+| `packages/ui`       | Shared Base UI components, theme and Recharts primitives                                              |
 
-CompraFino compares current prices, shows ordinary price history and stores shopping needs in this browser. Milestone 16 adds current basket comparisons across up to three supermarkets, validated by local production build and Chromium tests. Purchase-timing recommendations remain planned.
+Dependencies flow `web → ui, db, core`, `scrapers → core, db`, `db → core`. Internal dependencies use `workspace:*`; packages export typed source. See [architecture](docs/architecture.md) and [dependencies](docs/dependencies.md).
 
-## Current status
+## Install and develop
 
-Milestones 0–11 are complete in the provided baseline (`6c3a52f`). Milestone 12 refines the public home, search, cards and comparison pages with a shared visual system and intentional mobile layouts. Its focused second design iteration, custom Select menus and light/dark themes are accepted following user visual review. See [UI polish](docs/ui-polish.md) for the design, manual audit and validation, [conditional pricing](docs/conditional-pricing.md) for separate CMR semantics and [search UX](docs/search-ux.md) for URL controls. The homepage remains database-independent. Milestone 13 ordinary-price history is complete in the user-provided baseline. Milestone 14 adds durable Peru-day observation coverage, verified chart segments/gaps and safe descriptive price insights; local build, history Chromium and visual acceptance remain pending. See [price history](docs/price-history.md), [observation coverage](docs/observation-coverage.md) and [validation](docs/milestone-14-validation.md).
-
-## Initial retailers
-
-**Tottus**, **Plaza Vea** and **Metro** have bounded category and public text-search adapters.
-
-## Architecture
-
-Serverless first: Next.js is intended to run on Vercel, PostgreSQL on Neon, and scheduled ingestion on GitHub Actions. There is no always-on API server or worker. The existing Neon-backed application and scheduled refresh are deployed in the developer-provided baseline. See [architecture](docs/architecture.md).
-
-## Technology
-
-- **Next.js 16 / React 19:** Server Components and server-side loading keep the first application simple and suited to Vercel.
-- **PostgreSQL / Neon:** relational storage provides a durable basis for future catalog and price history without an always-on application server.
-- **Drizzle:** typed queries and reviewed SQL migrations, using Neon's serverless HTTP driver.
-- **pnpm workspaces:** package ownership and dependency relationships. **Turborepo:** task execution, dependency ordering, parallelism and caching.
-- **TypeScript:** strict authoritative checking. **Zod 4:** validation at external boundaries, currently the database URL.
-- **Oxlint / Oxfmt:** correctness-focused linting (including type-aware rules) and one repository formatter.
-- **Vitest / Playwright Test:** fast unit tests and a real Chromium smoke test of the production application.
-
-Stable dependency versions were checked against npm registry metadata before installation. Exact direct versions are pinned in manifests; `pnpm-lock.yaml` pins the full graph. [Dependency inventory](docs/dependencies.md) records ownership and purpose.
-
-## Repository structure
-
-```text
-apps/web/          Next.js App Router application and E2E tests
-packages/core/     Framework-independent pure logic and unit tests
-packages/db/       Lazy Drizzle/Neon client, schema home, environment validation, migration configs
-packages/scrapers/ Retailer public-data adapters, fixtures and bounded ingestion CLI
-packages/ui/       Shared shadcn Base UI components, utilities and Tailwind theme
-.github/workflows/ CI with persisted-catalog E2E, manual ingestion, twice-daily refresh and six-hour discovery
-docs/             Architecture, roadmap and dependency inventory
-```
-
-Internal dependencies: `web → ui, db, core`; `scrapers → core, db`; `db → core`. Library workspaces export typed source and are compiled by their consumer; they do not need artificial build scripts. The core package has no React, Next.js, database or browser dependency.
-
-## Local development
-
-Requires Node.js **24.x** and pnpm **12.8.1**. Use your existing version manager/Corepack to select the pinned pnpm version; do not install dependencies globally for this project.
+Use Node.js **24.x** and pnpm **12.8.1**, pinned by `.node-version` and `packageManager`. Select these with your version manager/Corepack; use pnpm only and do not install project dependencies globally.
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Open <http://127.0.0.1:3000>. Stop with Ctrl+C. The app uses system fonts, so builds need no external font download. The shared Base UI button and product-image error fallback are Client Components; the homepage and layout remain Server Components.
+Open <http://127.0.0.1:3000>. The homepage, unit tests and build require no database credentials. Database-backed routes require the reviewed schema and `DATABASE_URL`. System fonts avoid external font downloads.
 
-Codex repository instructions live in the root `AGENTS.md`. Next.js agent-file auto-generation is disabled so development does not create `CLAUDE.md` or duplicate app-level instructions.
+`apps/web/next-env.d.ts` is generated and ignored. `pnpm typecheck` runs `next typegen` before TypeScript, including on a fresh clone. Repository agent instructions live in [AGENTS.md](AGENTS.md).
 
-`apps/web/next-env.d.ts` is generated by Next.js and ignored by Git. Development references types in `.next/dev`, while builds reference `.next`; switching commands can rewrite this local file. Keep it in TypeScript's `include` list. `pnpm typecheck` runs `next typegen` before TypeScript, so a fresh checkout does not need a committed copy.
-
-If you are using the original bootstrap workspace and its older system pnpm, the ignored project-local binary is available:
-
-```sh
-export PATH="$PWD/.tools/bin:$PATH"
-pnpm --version
-```
-
-That helper is local to the bootstrap environment and is not required in a fresh checkout. The original bootstrap also stores Chromium locally; run `PLAYWRIGHT_BROWSERS_PATH="$PWD/.tools/browsers" pnpm test:e2e` to reuse it, or run the standard browser installation below. `pnpm-workspace.yaml` keeps the pnpm store inside the project; use the pinned pnpm yourself.
-
-## Environment variables
-
-The root `.env.example` contains `DATABASE_URL=` and the explicit integration-test opt-in `TEST_DATABASE_URL=`. No environment variable is needed for the homepage, unit tests or build. Public search/comparison requests require the migrated database through `DATABASE_URL` in `apps/web/.env.local` or deployment settings.
-
-For actual migrations:
+## Environment and database setup
 
 ```sh
 cp .env.example .env
-# Set DATABASE_URL to your Neon PostgreSQL connection URL.
-pnpm db:generate
-# Review the generated SQL before applying it.
+# Set DATABASE_URL in root .env to the application PostgreSQL connection URL.
 pnpm db:migrate
 ```
 
-Generation reads the schema locally and needs no database. The first migration creates retailers, retailer listings, price history and ingestion runs, and seeds the three retailer identities. Migration configuration loads root `.env`, respects existing process variables, and rejects a missing/invalid URL with a clear message. `createDatabase()` validates only when explicitly called. Web database access should receive `DATABASE_URL` through Vercel environment settings or `apps/web/.env.local`. Never commit secret files. The Tottus migration has since been applied and its live Neon constraints/indexes verified.
+Apply the existing reviewed migration journal first. `pnpm db:generate` is for an intentional schema change: review its SQL and metadata before applying it. Builds and startup never apply migrations automatically. PostgreSQL must support the journaled `pg_trgm` extension.
 
-## Tottus ingestion
+Root CLI commands load `.env`. Set `DATABASE_URL` separately in `apps/web/.env.local` for development routes, and in hosting settings for deployment. Never commit credentials. `TEST_DATABASE_URL` is an explicit dedicated-test opt-in; test runners never use application `DATABASE_URL` as a fallback. Local Docker wrappers supply their own disposable URL.
 
-```sh
-pnpm scrape:tottus -- --dry-run --limit=20
-# After reviewing and applying migrations, with DATABASE_URL in root .env:
-pnpm scrape:tottus -- --limit=50
-```
+Test-only `COMPRAFINO_TEST_DATABASE_MODE`, `COMPRAFINO_E2E_SCHEMA`, `COMPRAFINO_CONTROLLED_E2E` and fixture-ID variables belong to the harness; do not set them in normal development or deployment. See [local testing](docs/local-testing.md).
 
-Dry-run requires no database and prints five normalized samples. Default limit: 20; maximum: 500, restricted to one allowlisted category per run. Default meats is unchanged; `pnpm scrape:tottus -- --category=dairy --limit=100` selects the observed dairy category. Rows missing a quote unit are skipped without inferring UN/KG. Persisted runs fail clearly without `DATABASE_URL`. `/dev/ingestion` reads current results during `pnpm dev`; set `DATABASE_URL` in `apps/web/.env.local`. The route returns 404 in production. The manual workflow `.github/workflows/ingest-tottus.yml` needs a repository secret named `DATABASE_URL`; it never applies migrations automatically. See [Tottus integration](docs/retailers/tottus.md) for observed fields, verification evidence and limitations.
-
-## Plaza Vea ingestion
+## Validation and deterministic fixtures
 
 ```sh
-pnpm scrape:plaza-vea -- --dry-run --limit=20
-pnpm scrape:plaza-vea -- --limit=50
-```
-
-Native fetch reads the public VTEX catalog for one dairy/eggs category in anonymous channel 1. Seller-1 ordinary prices exclude conditional card/quantity teaser discounts. Default 20 usable listings, maximum 500, at most 25 sequential pages / 500 source products. Dry-run needs no database; persisted mode requires `DATABASE_URL`. Two live runs verified 50 then 0 new price states. No dependencies or migrations were added. The manual `.github/workflows/ingest-plaza-vea.yml` reuses the same `DATABASE_URL` secret and has no schedule. See [Plaza Vea integration](docs/retailers/plaza-vea.md) for source fields, price/unit interpretation and location limitations.
-
-## Metro ingestion
-
-```sh
-pnpm scrape:metro -- --dry-run --limit=20
-pnpm scrape:metro -- --limit=50
-```
-
-Native fetch reads the public VTEX catalog for one dairy category in anonymous channel 1. Seller-1 ordinary prices exclude Metro-card promotion teasers; only higher reference prices are retained. Default 20 usable listings, maximum 500, at most 25 sequential pages / 500 source products. Dry-run needs no database; persisted mode requires `DATABASE_URL`. Two live runs verified 50 then 0 new price states. No dependencies or migrations were added. The manual `.github/workflows/ingest-metro.yml` reuses `DATABASE_URL` and has no schedule. See [Metro integration and three-retailer review](docs/retailers/metro.md) for live samples, price/package semantics and validation limitations. Metro ingestion is committed in the Milestone 1 baseline; see current catalog validation below.
-
-## Catalog normalization
-
-After applying the reviewed migration, normalize existing listings independently of ingestion:
-
-```sh
-pnpm normalize:catalog -- --limit=100
-pnpm normalize:catalog -- --retailer=tottus --limit=50
-pnpm normalize:catalog -- --retailer=plaza-vea --limit=50
-pnpm normalize:catalog -- --retailer=metro --limit=50 --dry-run
-```
-
-This command requires root `.env`/`DATABASE_URL`, reads no retailer websites and leaves price history unchanged. Default 100, maximum 5000; repeated unchanged runs perform zero writes. Exact quantities use g/ml/unit; pricing basis remains separate. Source brands are retained during future ingestion; legacy title fallback and ambiguous/approximate values are conservative. `/dev/catalog` displays up to twenty rows per retailer during development and returns 404 in production. See [catalog normalization](docs/catalog-normalization.md) for model, precedence, migration, audit statistics and limitations.
-
-## Canonical product matching
-
-After applying the reviewed pg_trgm/canonical migration and refreshing normalization:
-
-```sh
-pnpm match:catalog -- --dry-run --limit=1000
-pnpm match:catalog -- --limit=1000
-pnpm match:evaluate
-pnpm match:audit
-```
-
-These commands use root `.env`/`DATABASE_URL`, without retailer requests. Matching uses exact brands/content, hard incompatibilities, PostgreSQL trigram similarity and conservative variant gates. Repeats with unchanged input perform zero canonical writes; dry-run writes nothing. A scope splitting an existing group, containing manual links or reading stale normalization refuses persistence. `/dev/matching` provides read-only development inspection and returns 404 in production. See [catalog matching](docs/catalog-matching.md) for scoring, schema, evaluation, audit gaps and limitations.
-
-## Scheduled catalog refresh
-
-```sh
-pnpm refresh:catalog
-pnpm refresh:catalog -- --dry-run
-pnpm refresh:listings -- --dry-run --limit=50
-pnpm coverage:report
-pnpm audit:staples
-pnpm audit:quantity-quality
-pnpm catalog:budget
-pnpm audit:observation-coverage
-```
-
-The full pipeline reuses category ingestion (Tottus meat/dairy plus Plaza Vea/Metro dairy and six bounded staple sources each), up to 100 eligible known-listing lookups, then one normalization and matching pass. New staple sources allow twenty usable listings and two pages each; see [staple coverage](docs/staple-coverage.md). Public offers older than 36 hours cannot win cheapest price; retained historical prices remain labelled. Its GitHub workflow supports manual dispatch and cron `17 11,23 * * *`: 11:17/23:17 UTC, or 06:17/18:17 Peru. Full refresh workflows do not overlap or cancel a running refresh. Failed retailers retain prior data; successful retailers continue, while the command still exits nonzero. `/dev/ingestion` shows distinct latest attempts/successes and healthy (≤18h), delayed (≤30h) or stale (>30h) operational freshness. GitHub schedules can start late; prices remain observed rather than real-time. See [operations](docs/operations.md) for fixed category limits, safe failure behavior, notifications and troubleshooting.
-
-## Search-driven discovery
-
-```sh
-# Apply the reviewed additive discovery migration first.
-pnpm db:migrate
-pnpm discover:catalog -- --dry-run --limit=3
-pnpm discover:catalog -- --limit=3
-```
-
-Both modes read root `DATABASE_URL`; dry-run previews demand without writes or retailer calls. Normal mode defaults to ten queries, respects the thirty-attempt UTC daily cap and 24-hour cooldown, and retains at most ten usable listings per retailer/query. The new workflow runs every six hours at minute 43 and shares refresh concurrency without canceling work. `/dev/discovery` shows popularity/outcomes in development and returns 404 in production. Only query text and operational metadata are retained. See [discovery](docs/discovery.md) for exact eligibility, failure semantics, privacy and live validation.
-
-## Scripts
-
-| Command                             | Purpose                                                                        |
-| ----------------------------------- | ------------------------------------------------------------------------------ |
-| `pnpm dev`                          | Start the web development server directly through pnpm                         |
-| `pnpm build`                        | Build production application through Turbo                                     |
-| `pnpm lint` / `pnpm lint:fix`       | Type-aware Oxlint checks / fixes                                               |
-| `pnpm format` / `pnpm format:check` | Oxfmt formatting / verification                                                |
-| `pnpm typecheck`                    | Generate Next types and run `tsc --noEmit` for every workspace                 |
-| `pnpm test`                         | Vitest tests in core, database and scraper packages                            |
-| `pnpm test:integration`             | Isolated-schema PostgreSQL tests; explicit `TEST_DATABASE_URL`                 |
-| `pnpm test:e2e`                     | Chromium smoke test against a production server (build first)                  |
-| `pnpm discover:catalog`             | Process bounded zero-result discovery demand; read-only dry-run available      |
-| `pnpm refresh:listings`             | Refresh eligible known SKUs; optional read-only selection preview              |
-| `pnpm audit:observation-coverage`   | Read-only daily evidence, public gaps, retailer health and storage projections |
-| `pnpm audit:quantity-quality`       | Read-only complete-catalog quantity basis, quality and withheld audit          |
-| `pnpm catalog:budget`               | Read-only catalog counts, storage, candidates and configured request budgets   |
-| `pnpm audit:unit-prices`            | Read-only unit-price coverage, samples and real-search audit                   |
-| `pnpm coverage:report`              | Read-only freshness, category coverage and discovery demand audit              |
-| `pnpm refresh:catalog`              | Refresh validated retailer scopes, normalize and match; optional dry-run       |
-| `pnpm db:generate`                  | Generate reviewed migrations from the schema                                   |
-| `pnpm normalize:catalog`            | Normalize bounded existing listings; requires `DATABASE_URL`                   |
-| `pnpm match:catalog`                | Match bounded fresh normalized listings; optional dry-run                      |
-| `pnpm match:evaluate`               | Evaluate the 66 reviewed real pairs with PostgreSQL similarity                 |
-| `pnpm match:audit`                  | Evaluate 105 independently reviewed pairs, separate from calibration           |
-| `pnpm db:migrate`                   | Apply migrations; requires `DATABASE_URL`                                      |
-
-Turbo caches builds, type checks and unit tests. The root development command starts the single web server directly through pnpm, avoiding Turbo's child-process output interaction with pnpm 12's Node.js fallback launcher. Development is uncached. Repository lint/format run once from the root. Only workspaces with actual tasks declare them.
-
-## Testing
-
-Unit tests cover source fixtures, money parsing, normalization, persistence SQL contracts, a deterministic price-state reference model and run outcomes without live network/database calls. `pnpm test:integration` separately exercises the real Neon HTTP persistence batch on PostgreSQL, without Turbo caching. It skips clearly when `TEST_DATABASE_URL` is absent and never loads `.env` or falls back to `DATABASE_URL`. Use `pnpm test:integration:local` with the [Docker test database](docs/local-testing.md), or export the test URL explicitly for a dedicated Neon test database/branch. The suite applies the checked-in migration inside a fresh randomly named schema, sets transaction-local search paths without a public fallback, and drops only its own schema afterwards. It applies journaled table migrations, qualifying foreign keys with that test schema. The target test database must already have pg_trgm from the reviewed migration; the suite excludes extension creation to keep shared public objects untouched. Live tables are untouched. The role needs schema-creation permission. An interrupted process may leave its isolated schema for manual review/cleanup. Browser smoke testing checks functional homepage search, blank/short searches, malformed product IDs and production blocking of developer tooling against `next start` on port 3100. Explicit `DATABASE_URL` in the runner enables two additional persisted-catalog flows; see [public search validation](docs/public-search.md).
-
-```sh
+pnpm format:check
+pnpm docs:check
+pnpm lint
+pnpm typecheck
 pnpm test
+pnpm test:db:up
+pnpm test:integration:local
 pnpm build
 pnpm --filter @comprafino/web exec playwright install chromium --only-shell
-pnpm test:e2e
+pnpm test:e2e:fixtures:local
+pnpm test:db:down
 ```
 
-On a Linux machine missing Chromium system libraries, use `playwright install --with-deps chromium --only-shell` in the web workspace. CI installs only Chromium's headless shell and its system requirements, then passes the existing repository secret `DATABASE_URL` only to `pnpm test:e2e`. Playwright and its child `next start` server inherit it, enabling persisted-catalog tests. GitHub does not supply repository secrets to fork pull requests; persisted-catalog tests remain skipped on those runs. `TEST_DATABASE_URL` remains a separate explicit opt-in for isolated PostgreSQL/history fixtures and is not supplied by ordinary CI. CI also checks frozen installation, formatting, lint, types, unit tests and production build on PRs and pushes to `main`.
+Oxlint lints, Oxfmt formats and TypeScript is authoritative. Vitest covers pure logic and boundaries; `pnpm test` also runs the browser-free Next stream regressions. PostgreSQL integration and browser fixtures apply the checked-in journal to owned random schemas and clean them up. Build before Chromium. On Linux, Playwright's `--with-deps` option installs browser system requirements.
 
-`@playwright/test` is application testing tooling; no browser scraper dependency is installed. React Testing Library is deferred until component-level tests justify it.
+`pnpm test:e2e` runs ordinary production smoke and optional live-catalog cases. Required CI instead runs the combined deterministic history/listing/shopping/basket fixture and smoke suite without repository secrets, including fork PRs. The `CI` workflow's `check` job uploads `playwright-failure-results` on failure. Individual fixture commands and database-only validation are documented in [local testing](docs/local-testing.md).
 
-## Data ingestion philosophy
+## Operational commands
 
-Use legitimate publicly accessible data only, with conservative requests. Prefer simple JSON/data endpoints, then HTTP parsing; browser automation is a last step justified by a real adapter. Do not bypass authentication, CAPTCHAs, bot protection or access controls, and do not use stealth tooling. Validate external data before domain logic or persistence. Bounded catalog refresh and discovery use scheduled GitHub Actions.
+Commands below use root `DATABASE_URL` unless marked database-free. Apply migrations before writers and readers, and roll out all ingestion/identity writers together.
 
-## Initial deployment strategy
+| Command                                                                                   | Purpose                                                                                                                        |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `pnpm scrape:tottus`, `pnpm scrape:plaza-vea`, `pnpm scrape:metro`                        | Bounded allowlisted ingestion; append `-- --dry-run --limit=20` to inspect without a database                                  |
+| `pnpm refresh:catalog`                                                                    | Category acquisition, targeted known listings, complete normalization and matching; `-- --dry-run` fetches without persistence |
+| `pnpm refresh:listings -- --dry-run --limit=50`                                           | Read-only database selection preview; normal mode performs bounded exact lookup                                                |
+| `pnpm discover:catalog -- --dry-run --limit=3`                                            | Read-only demand preview; normal mode processes bounded retailer searches                                                      |
+| `pnpm normalize:catalog -- --limit=1000`                                                  | Recompute derived listing identity; no retailer requests or price-history changes                                              |
+| `pnpm match:catalog -- --dry-run --limit=1000`                                            | Preview exact associations; omit dry-run for guarded persistence                                                               |
+| `pnpm match:evaluate`, `pnpm match:audit`                                                 | Separate calibration and independent reviewed matching evaluations                                                             |
+| `pnpm coverage:report`, `pnpm audit:catalog-coverage`, `pnpm audit:availability`          | Read-only freshness, usefulness and availability reports                                                                       |
+| `pnpm audit:unit-prices`, `pnpm audit:staples`, `pnpm audit:quantity-quality`             | Read-only relevance and comparison-quality audits                                                                              |
+| `pnpm audit:price-history`, `pnpm audit:observation-coverage`, `pnpm audit:shopping-list` | Read-only temporal and shopping audits                                                                                         |
+| `pnpm catalog:budget`                                                                     | Current configured limits and DB metrics alongside qualified dated evidence                                                    |
+| `pnpm benchmark:basket:local`                                                             | Disposable DB handler benchmark; writes a new ignored `.artifacts/` report                                                     |
 
-The user-provided deployed baseline uses: **Vercel** for web, **Neon** for PostgreSQL, **GitHub Actions** for scheduled ingestion. Free-tier quotas and provider terms must be assessed when deploying.
+Full refresh runs twice daily; discovery runs every six hours with shared noncanceling workflow concurrency. GitHub schedules may run late. Retailer-specific ingestion workflows are manual. Workflow `DATABASE_URL` secrets are operational inputs, not required CI test inputs. See [operations](docs/operations.md), [discovery](docs/discovery.md) and [listing refresh](docs/listing-refresh.md).
 
-For a future Vercel project, select this monorepo, set Root Directory to `apps/web`, enable inclusion of source outside that directory, and use the Next.js preset with the pinned pnpm lockfile. Use `pnpm exec turbo run build --filter=@comprafino/web` from the repository root if customizing the build command; the default app `pnpm build` also works. Set `DATABASE_URL` for server database features; the developer inspection route remains unavailable in production. Provision Neon separately and run reviewed migrations explicitly before dependent releases. The manual Tottus, Plaza Vea and Metro ingestion workflows require the GitHub Actions secret `DATABASE_URL` and explicitly applied migrations. They have no schedule. Do not put credentials in build commands or client bundles.
+## Deployment
 
-## Roadmap
+Vercel hosts the Next.js app, Neon supplies PostgreSQL, and GitHub Actions schedules acquisition. Local repository state does not establish which revision is currently deployed.
 
-Public search, verified product comparison, unit-price comparison, concrete CMR benefits, ordinary history/observation coverage and browser-local shopping lists are implemented through the accepted Milestone 15.1 baseline. Milestone 16 basket optimization is implemented and validated by local production build/Chromium tests; timing guidance remains future work. See the [roadmap](docs/roadmap.md).
+For Vercel, select `apps/web` as Root Directory, enable access to files outside that directory, retain the Next.js preset and set Install Command to `pnpm install --frozen-lockfile`. Use the workspace web build (`pnpm build` within that root); keep the default Next.js output. Set `DATABASE_URL` in the required deployment environments. Apply reviewed migrations explicitly before coordinated writer/reader rollout, then verify production public routes and refresh outcomes. Developer `/dev/*` routes return 404 in production.
 
-TanStack Form, TanStack Query and shadcn Chart/Recharts are intended options for future complexity, not current dependencies. Redis, queues, external search, AI, dedicated workers and browser scraping are also deferred.
+Frozen installation retains the version-pinned **next@16.3.8** stream-cancellation patch. Rebuild/restart after installation. Its reason, regressions and removal condition are in [dependencies](docs/dependencies.md#next-stream-cancellation-patch).
 
-## Quantity quality and operating budget
+## Important limitations and deeper guides
 
-Comparison bases distinguish physical kg/L and item counts from approximate paper-roll prices. Current cross-retailer tuna content remains semantically unresolved and has no unit price, including count-only packs. Exact normalization stays version 1 and matching remains unchanged. `pnpm audit:quantity-quality` and `pnpm catalog:budget` require migrated root `DATABASE_URL`, without retailer requests or writes. Budget runtime evidence is the timestamped local `docs/catalog-refresh-measurement.json`; missing evidence reports unavailable timing. See [policies and audited counts](docs/quantity-quality.md) and [operating limits and expansion scenarios](docs/catalog-budget.md).
+Coverage is bounded, with a retained **1,000-listing** admission/read guard. Source ordering and discovery can grow retained rows; no broad crawl or automatic capacity increase exists. Anonymous location/channel stock can be unknown, and observed prices can become stale. Exact comparison requires trusted identity; generic search relevance does not prove safe substitution. Supported substitutions remain conservative. Ordinary purchase prices must be positive; reference prices and conditional benefits have separate meanings.
 
-## Conditional pricing and immediate filters
+Shopping lists are stored in this browser, with a session fallback if storage fails. There are no accounts, server list persistence, delivery/travel fees or purchase-timing recommendations. History is sparse and daily coverage is prospective; gaps are disclosed without backfill. No remote quota or live catalog count is promised by repository documentation.
 
-Apply reviewed migration `0005_redundant_deadpool.sql` using `pnpm db:migrate` before deploying Milestone 11 readers and ingestion together. Existing Tottus category/search/targeted acquisition now confirms explicit CMR prices separately from ordinary history. Plaza Vea/Metro teaser discounts remain excluded. Existing scrape/refresh commands and request bounds are unchanged; no new environment variables or dependencies.
-
-Search supports immediate sorting, retailer selection, optional kg/L/item/approximate-roll basis and `priceMode=benefits`. Defaults omit URL parameters; browser back/forward restores them. Ordinary prices still determine default winners, and filtered emptiness never creates discovery demand when underlying catalog results exist. See [conditional pricing](docs/conditional-pricing.md) and [search UX](docs/search-ux.md).
-
-## Ordinary price history
-
-Exact product pages support `?range=7d`, `30d` and `90d` (initial default 7 days, based on the young live catalog). Summaries use ordinary state intervals; disconnected chart markers never invent daily observations. CMR remains separate.
-
-```sh
-pnpm audit:price-history
-# After a successful production build; explicit isolated-schema test opt-in:
-TEST_DATABASE_URL=... pnpm test:e2e:history
-```
-
-The history browser runner creates and removes a random schema, checks isolation, seeds controlled fixtures there and launches only the history spec. It passes a validated `COMPRAFINO_E2E_SCHEMA` to its child web server to scope every Neon HTTP batch/direct query transaction. Do not set that test-only override in deployment or normal development. No test URL fallback or automatic `.env` loading is provided. Interrupted runners may leave their random schema. The ordinary `pnpm test:e2e` smoke suite remains unchanged; the fixture-only cases skip clearly without the runner. Details and validation evidence: [price history](docs/price-history.md).
-
-For a disposable Docker PostgreSQL database, run `pnpm test:db:up`, then
-`pnpm test:integration:local` or, after `pnpm build`, `pnpm test:e2e:history:local`.
-Stop it with `pnpm test:db:down`. See [local testing](docs/local-testing.md).
-
-## Recurring shopping list
-
-`/list` saves generic needs, preferred products or strict canonical products in this browser, with unit/kg/L quantities and weekly/biweekly/monthly frequency. Search/detail pages provide add dialogs; current ordinary/CMR options share the Milestone 15.1 safe-substitution boundary. Milestone 16 compares complete/partial baskets using at most one, two and three supermarkets, with actual retailer counts, grouped purchases and marginal savings. There is no account, server list persistence or timing optimizer. See [basket optimization and validation](docs/basket-optimization.md). See [shopping-list behavior, current-data audit and validation](docs/shopping-list.md). Run the read-only `pnpm audit:shopping-list` with root `.env`/`DATABASE_URL`, and `pnpm test:e2e:list:local` after a successful production build for isolated shopping-list browser fixtures.
-
-## Milestone 18 catalog operations
-
-`pnpm audit:catalog-coverage` and `pnpm audit:availability` provide read-only complete catalog usefulness, family, stock and eligibility reports; add `-- --timings` to the coverage command for real DB basket/detail measurements. Apply reviewed migrations 0007/0008 and roll out all updated writers together. One bounded Metro eggs category is added, with ten scheduled listings; the 1,000-listing guard is retained. The measured catalog has 952 listings but only 103 generic shopping candidates and 228 potential generic/exact basket candidates. [Coverage report](docs/catalog-coverage.md) and [availability](docs/availability.md) distinguish search from safe fulfillment. Milestone 18 implementation and validation are complete: local production build, 22 smoke cases (36 expected skips), eight listing and 22 shopping/basket Chromium cases pass. Changes remain staged pending commit approval.
+See [eligibility vocabulary](docs/eligibility.md), [normalization](docs/catalog-normalization.md), [matching](docs/catalog-matching.md), [public search](docs/public-search.md), [quantity quality](docs/quantity-quality.md), [availability](docs/availability.md), [conditional pricing](docs/conditional-pricing.md), [price history](docs/price-history.md), [shopping lists](docs/shopping-list.md), [basket optimization](docs/basket-optimization.md), [catalog budget](docs/catalog-budget.md), [roadmap](docs/roadmap.md) and [dated engineering history](docs/history/README.md).

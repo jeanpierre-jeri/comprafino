@@ -1,3 +1,4 @@
+import { catalogPolicy } from "@comprafino/core";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
 import { observationDay, retailerIdSchema } from "@comprafino/core";
@@ -81,10 +82,12 @@ export async function observationCoverageReport(db = createDatabase(), now = new
     recentPublicGaps: z
       .array(z.object({ retailer: retailerIdSchema, externalId: z.string(), day: z.iso.date() }))
       .parse(gaps.rows),
-    projectedRowsPer30Days: [total.knownListings, 1000, 1500].map((listings) => ({
-      listings,
-      rows: listings * 30,
-    })),
+    projectedRowsPer30Days: [total.knownListings, catalogPolicy.retainedListingCap, 1500].map(
+      (listings) => ({
+        listings,
+        rows: listings * 30,
+      }),
+    ),
     note: "Today is still open. Missing coverage is unknown, not proof of a failed request. Gap samples exclude pre-coverage dates; public eligibility is evaluated now.",
   };
 }

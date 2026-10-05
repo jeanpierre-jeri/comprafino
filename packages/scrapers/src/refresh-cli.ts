@@ -1,3 +1,5 @@
+import { listingRefreshPolicy } from "@comprafino/core";
+import { catalogPolicy } from "@comprafino/core";
 import { refreshKnownListings } from "./listing-refresh.ts";
 import { listingRefreshTasks } from "./listing-refresh-tasks.ts";
 import {
@@ -38,7 +40,7 @@ try {
         if (!db) throw new Error("Database required");
         return refreshKnownListings(
           await previewListingRefresh(db, {
-            limit: 100,
+            limit: listingRefreshPolicy.limit,
             dryRun: false,
             retailer: undefined,
             externalId: undefined,
@@ -49,14 +51,14 @@ try {
       async normalize() {
         if (!db) throw new Error("Database required");
         await assertRefreshScope(db);
-        const r = await normalizeCatalog(db, 1000);
+        const r = await normalizeCatalog(db, catalogPolicy.retainedListingCap);
         if (!r.persisted || r.persisted.stale) throw new Error("Stale normalization");
         return { processed: r.coverage.processed, changed: r.persisted.changed };
       },
       async match() {
         if (!db) throw new Error("Database required");
         await assertRefreshScope(db);
-        const r = await matchCatalog(db, 1000);
+        const r = await matchCatalog(db, catalogPolicy.retainedListingCap);
         if (!r.persisted || r.persisted.stale) throw new Error("Stale matching");
         return {
           candidates: r.metrics.candidatePairs,

@@ -72,5 +72,12 @@
     "plaza-vea": 11,
     "metro": 12
   },
-  "measurementNote": "Milestone 18 bounded repeated refresh; see catalog-coverage-audit.json for before/expanded/repeat attribution and the partial baseline."
+  "measurementNote": "Milestone 18 bounded repeated refresh; see history/catalog-coverage-audit.json for before/expanded/repeat attribution and the partial baseline.",
+  "provenance": {
+    "baselineCommit": "c3e5eb7",
+    "sourceConfigurationIdentity": "metro/dairy:100|metro/eggs:10|metro/flour:20|metro/oats:20|metro/pasta:20|metro/sugar-brown:20|metro/sugar-white:20|metro/toilet-paper:20|plaza-vea/dairy:100|plaza-vea/flour:20|plaza-vea/oats:20|plaza-vea/pasta:20|plaza-vea/sugar-brown:20|plaza-vea/sugar-white:20|plaza-vea/toilet-paper:20|tottus/dairy:100|tottus/meat:50",
+    "categorySources": 17,
+    "catalogListings": 952,
+    "note": "Reconstructed from the October 5 Milestone 18 coverage report and history/catalog-coverage-audit.json, whose baseline is c3e5eb7; measured with Milestone 18 changes in the worktree, not an exact committed measurement revision. No environment identity was recorded."
+  }
 }

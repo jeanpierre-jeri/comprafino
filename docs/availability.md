@@ -1,6 +1,6 @@
-# Availability evidence — Milestone 18
+# Availability evidence
 
-Unknown stock remains distinct from unavailable. `pnpm audit:availability` and `pnpm audit:catalog-coverage` inspect the complete bounded catalog without retailer calls or writes. [Measured audit](catalog-coverage-audit.json) includes prospective timestamps, legacy booleans, price freshness, last request failures and exact absence separately.
+Unknown stock remains distinct from unavailable. `pnpm audit:availability` and `pnpm audit:catalog-coverage` inspect the complete bounded catalog without retailer calls or writes. [Measured audit](history/catalog-coverage-audit.json) includes prospective timestamps, legacy booleans, price freshness, last request failures and exact absence separately.
 
 ## Real source semantics
 
@@ -21,9 +21,9 @@ Existing nullable `available` remains the source-state value. Migration `0007_br
 - `exact_missing_count`: nonnegative consecutive successful exact-absence results, initialized to zero.
 - `last_exact_missing_at`: latest such absence timestamp; null after successful presence recovery.
 
-No availability event table, price-history model change, backfill or inferred legacy timestamps is added. Legacy true/false booleans retain their previous eligibility semantics but are reported separately from timestamped evidence. Migration `0008_large_masque.sql` drops the initially generated non-null-stock/timestamp constraint to keep older writers' unknown quotes compatible. Both are reviewed and applied; the final schema retains the nonnegative missing-count constraint. Neither touches history or observation coverage.
+No availability event table, price-history model change, backfill or inferred legacy timestamps is added. Legacy true/false booleans retain their previous eligibility semantics but are reported separately from timestamped evidence. Migration `0008_large_masque.sql` drops the initially generated non-null-stock/timestamp constraint to keep older writers' unknown quotes compatible. Both are reviewed journal entries; the final schema retains the nonnegative missing-count constraint. Neither touches history or observation coverage.
 
-**Rollout:** deploy every category/discovery/targeted writer from this revision together. Additive DB fields alone cannot upgrade older writers' evidence behavior or global capacity lock. Older writers can still replace stock with unknown, so preservation/cap guarantees apply to the updated writer. No workflow/app deployment was performed in this task. The compatibility correction avoids rejecting legacy writes while code is pending approval.
+**Rollout:** deploy every category/discovery/targeted writer from this revision together. Additive DB fields alone cannot upgrade older writers' evidence behavior or global capacity lock. Older writers can still replace stock with unknown, so preservation/cap guarantees apply to the updated writer. Database compatibility alone does not establish deployed writer behavior.
 
 Explicit category/discovery/targeted quote evidence updates stock and its timestamp only when newer than existing stock evidence. Unknown quote stock preserves the previous evidence; it cannot recover an unavailable listing. A quote arriving after an older price but before a newer negative may update real price metadata while retaining the stronger negative and withholding usable coverage. Exact absence/unavailable finalization is guarded by the owned attempt and timestamps, so an older request cannot overwrite a newer quote/stock observation. Failures update attempt metadata only. Replaying the same absent result does not increment the count twice.
 

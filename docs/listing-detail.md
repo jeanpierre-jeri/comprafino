@@ -1,6 +1,6 @@
-# Public retailer-listing details — Milestone 17
+# Public retailer-listing details
 
-`/listings/[id]` answers what happened to one exact retailer listing. Its identifier is the stored listing UUID. `/products/[id]` remains the safe exact cross-retailer comparison destination. A listing never needs a canonical association to have a public page.
+Current domain guidance. Dated audits, measurements and acceptance narratives are preserved in [engineering history](history/engineering-notes-2026-10-05.md).
 
 ## Public boundary and query
 
@@ -32,23 +32,9 @@ All independent cards under “Opciones en supermercados”, including cards wit
 
 The detail uses `shoppingSeedForRetailerOffer` and `AddShoppingItem`; no intent rules are copied. Safe canonical listings retain preferred/strict flows. Other listings use existing conservative generic saving/withholding policies. Add controls and source/comparison links retain their separate interactive layers from Milestone 15.1.
 
-The shared pending NavigationLink and route-level listing loading skeleton provide immediate feedback. Layout and chart reuse existing responsive styles and theme tokens. Chromium tests cover delayed navigation, back/forward, independent/associated cases, add controls, source URLs, ordinary/CMR separation, sparse/multi-state history, ranges, streaks/gaps, and 390px/1440px light/dark screenshots. Chromium suites and 390px/1440px light/dark screenshot review pass against the supplied local production build. The earlier sandbox restriction is recorded as historical.
-
-## Validation and real audit
-
-See [Milestone 17 validation](milestone-17-validation.md) and the [public catalog audit](listing-detail-audit.json). The read-only audit script reuses the production eligibility projection and history summaries. Run it with:
-
-```sh
-node --env-file-if-exists=.env --experimental-strip-types packages/db/src/listing-detail-audit-cli.ts
-```
-
-The audit is capped at 1000 catalog candidates; it fails instead of silently truncating. Its aggregate history query is used only by the CLI. Public detail queries scope history to one UUID.
-
 ## Limitations
 
 History depth depends on real observations already collected. Unknown stock does not imply confirmed availability. Current status can expire between requests. A closed state endpoint describes its stored lifecycle rather than proving when the retailer changed its price. There are no recommendations, other-product carousels, accounts, alerts or inferred equivalences. Not-found responses streamed after a loading boundary follow Next.js semantics: the public not-found UI/noindex may accompany HTTP 200 after headers have streamed.
-
-Milestone 17 is complete after local production build, Chromium fixture/regression runs and desktop/mobile light/dark visual verification. No next milestone or temporal recommendation work has begun.
 
 ## Milestone 18 evidence integration
 

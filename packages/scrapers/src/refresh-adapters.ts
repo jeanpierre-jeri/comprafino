@@ -29,6 +29,9 @@ export const refreshCoverage = {
     "toilet-paper": 20,
   },
 } as const;
+export function scheduledObservationLimit(retailer: keyof typeof refreshCoverage): number {
+  return Object.values(refreshCoverage[retailer]).reduce((sum: number, limit) => sum + limit, 0);
+}
 export function combineTottusCoverage(
   meat: RetailerAdapter = createTottusAdapter(),
   dairy: RetailerAdapter = createTottusAdapter(undefined, "dairy"),
@@ -56,7 +59,7 @@ export function combineVtexCoverage(
   return {
     retailer,
     async fetchListings(limit) {
-      const expectedLimit = retailer === "metro" ? 230 : 220;
+      const expectedLimit = scheduledObservationLimit(retailer);
       if (limit !== expectedLimit)
         throw new Error(`Scheduled VTEX coverage requires limit ${expectedLimit}`);
       const listings = new Map<string, NormalizedRetailerListing>();
@@ -84,17 +87,17 @@ export function createRefreshAdapters(fetchPage: typeof fetch = fetch) {
         createTottusAdapter(fetchPage),
         createTottusAdapter(fetchPage, "dairy"),
       ),
-      limit: 150,
+      limit: scheduledObservationLimit("tottus"),
     },
     "plaza-vea": {
       adapter: combineVtexCoverage("plaza-vea", (category) =>
         createPlazaVeaAdapter(fetchPage, category),
       ),
-      limit: 220,
+      limit: scheduledObservationLimit("plaza-vea"),
     },
     metro: {
       adapter: combineVtexCoverage("metro", (category) => createMetroAdapter(fetchPage, category)),
-      limit: 230,
+      limit: scheduledObservationLimit("metro"),
     },
   };
 }

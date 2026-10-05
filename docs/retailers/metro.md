@@ -1,6 +1,6 @@
 # Metro Peru ingestion proof
 
-Investigated and verified on October 3, 2026 through legitimate anonymous public requests. Milestone 1C is complete in the current task baseline; its pipeline is committed at `20acec9`. The historical agent validation notes below record the worker-port restriction encountered during that milestone.
+Current adapter guidance. The original October 3–5 investigation, live samples and acceptance history are preserved in [engineering history](../history/engineering-notes-2026-10-05.md). Public endpoint shape is validated by the adapter; historical observations are not a promise of current source inventory.
 
 ## Public source and access
 
@@ -47,57 +47,6 @@ Default 20 usable unique SKUs, maximum 500; one dairy category, at most 25 seque
 
 The manual `.github/workflows/ingest-metro.yml` uses `workflow_dispatch`, default limit 20, concurrency serialization and the existing `DATABASE_URL` secret. Reviewed migrations must already be applied. It never migrates, schedules or adds retailer requests to CI. `/dev/ingestion` already reads mixed-retailer runs/listings and requires no change; its production 404 remains covered by Chromium.
 
-## Live verification
-
-Five real normalized dry-run samples, all PEN, UN and anonymously available. URLs/images were present and used HTTPS; all twenty source-page observations had unique SKU IDs and sensible cents/reference semantics.
-
-| External SKU | Parent product | Title                                                      | Current cents | Reference cents | Package text                                              |
-| ------------ | -------------- | ---------------------------------------------------------- | ------------- | --------------- | --------------------------------------------------------- |
-| 39233309     | 994699         | Sixpack Leche Reconstituida Gloria Lata 390g               | 2150          | 2460            | Formato: Líquido; Pack-Unitario: Pack                     |
-| 39274018     | 1035113        | Tripack Leche UHT Sin Lactosa Gloria Zero Lacto Caja 946ml | 1620          | 1850            | —                                                         |
-| 39256390     | 1016805        | Sixpack Leche Light Laive Sin Lactosa Botella 390g         | 2350          | 2590            | —                                                         |
-| 39236537     | 997912         | Sixpack Leche Reconstituida Gloria Light Lata 390g         | 2310          | 2580            | Formato: Líquido; Tamaño: Individual; Pack-Unitario: Pack |
-| 39170436     | 572685         | Sixpack Leche para Diluir Laive Sin Lactosa Botella 390g   | 2270          | 2495            | —                                                         |
-
-Metro initially had zero listings; Tottus and Plaza Vea each had fifty. Two consecutive exact `pnpm scrape:metro -- --limit=50` runs succeeded:
-
-| Run                                               | Source products | Persisted listings | New price states |
-| ------------------------------------------------- | --------------- | ------------------ | ---------------- |
-| First (`1c05ec55-6135-4eb5-bdc3-7a17894e9318`)    | 60              | 50                 | 50               |
-| Repeated (`db58144b-9ba6-4f95-a702-2123a781173a`) | 60              | 50                 | 0                |
-
-Read-only PostgreSQL checks confirmed both successful run records, fifty Metro listings with fifty unique external IDs, fifty total history states and exactly fifty open states. All fifty stored rows passed current/reference cents, currency and URL checks. This establishes unchanged-run idempotency for this sample; no natural price change occurred between runs. Tottus/Plaza Vea persisted listing counts stayed fifty, and no persisted regression ingestion was performed.
-
-## Three-retailer architecture assessment
-
-| Concern             | Tottus                                 | Plaza Vea                                       | Metro                                                   |
-| ------------------- | -------------------------------------- | ----------------------------------------------- | ------------------------------------------------------- |
-| Source              | HTML `__NEXT_DATA__` hydration         | Public VTEX catalog JSON                        | VTEX IO storefront; public VTEX catalog JSON            |
-| Listing / parent ID | `skuId` / `productId`                  | `itemId` / `productId`                          | `itemId` / `productId`                                  |
-| Pagination          | `?page=N`, count/perPage               | Inclusive offsets + `resources`                 | Inclusive offsets + `resources`, observed independently |
-| Current / reference | `internetPrice` / higher `normalPrice` | Seller-1 `Price` / higher `ListPrice`           | Seller-1 `Price` / higher `ListPrice`                   |
-| Conditional prices  | Excludes CMR price                     | Excludes card/quantity teasers                  | Excludes Metro-card percentage teaser                   |
-| Package / unit      | `measurements.format`, KG/UN           | Source presentation, kg/un, KG multiplier       | Labelled specifications, kg/un, KG multiplier           |
-| Availability        | Unknown from delivery labels           | Anonymous available offers; unavailable skipped | Anonymous available offers; unavailable skipped         |
-
-The small `RetailerAdapter` contract still fits. All three validate retailer/SKU identity, separate parent identity, exact cents, meaningful price states, source unit and optional source metadata through one normalized listing boundary and persistence path. Fetching/pagination, category selection, seller choice, conditional-price fields and package labels remain retailer-specific. Price-context uncertainty remains explicit; no source establishes universal address-independent pricing.
-
-No abstraction rename, expanded adapter contract, source metadata field or schema change is justified. The existing normalized `priceUnit` already distinguishes quote basis from package text; retaining KG multiplier as raw text matches Plaza Vea and avoids speculative quantity modeling. Metro and Plaza Vea have similar VTEX mechanics, but their category/package/context choices remain isolated rather than adding a configurable scraping framework.
-
-Review found that Tottus parsed `normalPrice` without enforcing the strictly-higher reference invariant. A small correction now omits equal/lower/zero references, with five source-boundary regression cases; ordinary/card selection and existing fixtures remain unchanged. No history is rewritten and no persisted Tottus run was made. A later fresh Tottus ingestion can legitimately create a state when an old invalid reference becomes null.
-
-The ingestion foundation is stable enough to stop adding retailers and move next to catalog normalization after local validation closes this milestone. That work has not begun. Canonical products, matching, promotions, consumer UI and schedules remain out of scope.
-
-## Validation and limitations
-
-Seventeen Metro fixture/adapter tests cover identity, prices/card exclusion, reference invariants, exact cents, weighted products/multiplier, package placeholders, optional fields, SKU variants/sellers, unavailable cases, validation failures, limits, deduplication, pagination/exhaustion/request caps and generic store lifecycle. Five Tottus reference-price regression cases close the consistency gap. Generic PostgreSQL guarantees are reused rather than duplicated.
-
-Format check, type-aware lint, strict typecheck and all 77 unit tests pass. The existing three PostgreSQL integration tests passed with an explicit one-off `TEST_DATABASE_URL` opt-in to the configured connection, creating/dropping only a fresh isolated schema. The suite's environment policy is unchanged. Live twenty-listing dry-runs passed for Tottus (48 source rows), Plaza Vea (20 source products) and Metro (20 source products).
-
-`pnpm build` restored the existing matching Turbo build cache. Both Chromium smoke tests then passed against that production artifact with local-server permission. A fresh `pnpm build --force` was also attempted using the unchanged default Next.js 16.3.8 Turbopack build and elevated execution; it failed at the known CSS-worker port binding restriction (`Operation not permitted`). No webpack fallback or build-config modification was introduced. Fresh local build and subsequent E2E confirmation remain required before commit. The failed fresh build can leave incomplete `.next` output; rebuild locally before starting the app/E2E.
-
-Remaining limitations: one bounded production category; anonymous channel/location context; incomplete/unstructured package metadata; no persisted promotion details; unavailable offers skipped; long-term source/ID stability unproven; strict source drift requires review; existing partial-progress/run-reconciliation limitations. These validation notes describe the historical Milestone 1C agent run. Metro is now committed in the completed Milestone 1 baseline; current catalog validation is documented separately.
-
 ## Milestone 2 source metadata follow-up
 
 Catalog normalization now preserves the validated source `brand` string separately from titles. VTEX adapters also retain the positive source sale-unit multiplier as structured metadata; Tottus retains its observed package description/pricing basis. Existing legacy rows remain null in the new columns until ordinary fresh ingestion supplies the values. No guessed brand backfill, retailer refetch or price-history rewrite was performed for the normalization audit. Quantity/count derivation remains a separate core-driven command, not an automatic ingestion hook. See [catalog normalization](../catalog-normalization.md) for trust rules, coverage and ambiguity handling.
@@ -114,10 +63,6 @@ Native fetch reads the existing public VTEX products/search endpoint with `ft`, 
 
 The adapter now accepts the small validated allowlist `dairy`, `sugar-brown`, `sugar-white`, `pasta`, `flour`, `oats`, `toilet-paper`. New sources use full paths from the public tree, at most twenty usable listings/two sequential pages/forty source products, ordinary anonymous seller-1 quotes and the existing source boundary. CLI requests above twenty for these sources fail before network access; dairy retains its prior cap. Terminal VTEX ranges can advertise a full page beyond the smaller total; actual row count is validated against that total. No empty source is treated as successful ingestion. See [staple coverage](../staple-coverage.md) for paths, actual acquisitions, quantity ambiguities and scheduled atomic integration.
 
-## Milestone 10 source-quality audit
+## Shared current safeguards
 
-[Quantity quality](../quantity-quality.md) records the retailer-specific raw tuna/paper/detergent/control inspection and [sanitized source samples](../quantity-source-audit.json). No unverified net/drained, sheet or roll-length specification becomes a denominator. Approximate roll prices and semantically unresolved tuna prices have explicit comparison policy; retailer adapters, ingestion metadata and permanent category bounds are unchanged.
-
-## Milestone 11 conditional-pricing investigation
-
-[Conditional pricing](../conditional-pricing.md) records the current anonymous source audit, exact fields, program/quantity/date/context limits and supported extraction. Observed payment-method/discount teasers remain excluded because the sampled metadata does not safely establish a concrete payable amount and complete consumer eligibility. Ordinary current/reference extraction and source bounds remain unchanged. [Source evidence](../conditional-source-audit.json) and [persisted validation](../conditional-live-validation.json) distinguish source observations from fixture-only safety cases.
+Ordinary quotes must be positive. Concrete Tottus CMR amounts are retained separately; VTEX percentage/payment teasers are not payable prices. Category/search availability and exact SKU/page evidence differ. Unknown stock cannot erase a newer explicit negative; missing seller/schema evidence is a failed lookup rather than fabricated unavailable stock. See [availability](../availability.md), [conditional pricing](../conditional-pricing.md), [normalization](../catalog-normalization.md) and [scheduled source configuration](../operations.md#refresh-coverage-and-ownership).

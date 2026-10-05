@@ -1,6 +1,6 @@
-# Current basket optimization — Milestone 16
+# Current basket optimization
 
-Implemented and validated. The user’s local production build succeeded, and the standard Chromium run passed 21 tests with 29 expected fixture/database skips. The isolated shopping/basket Chromium run now passes all 22 tests, including all five Milestone 16 scenarios. The earlier agent Turbopack CSS-worker port restriction is historical; Next.js configuration is unchanged. Work remains staged and uncommitted.
+Current domain guidance. Dated audits, measurements and acceptance narratives are preserved in [engineering history](history/engineering-notes-2026-10-05.md).
 
 ## Ownership and safety
 
@@ -41,43 +41,3 @@ The initially selected plan is the complete one-store result when available; oth
 Incomplete cards and selected details prominently display “Canasta incompleta · X de Y productos”, “Subtotal de productos disponibles” and “Faltan”. Selected purchases group by supermarket with product, whole packages, quantity, overbuy, price and retailer link. Preferred substitutions are marked explicitly. Canonical/history links appear only for existing safe public associations.
 
 Standard mode uses ordinary prices. Benefits mode shows potential prices and required CMR conditions, plus the ordinary total/subtotal **for the same selected assignments**; that amount is not the independently optimized standard basket. Switching mode recomputes the global preference gate and basket optimization. Saved quantities and identities remain unchanged. Frequency groups, editing/removal, migration, browser persistence, minute/tab-return refresh and error/retry behavior remain.
-
-## Validation and performance
-
-Vitest covers exact optima (including non-nested winning combinations), an independent exhaustive-assignment oracle, complete/partial/empty results, default selection, actual counts, zero/marginal savings, deterministic shuffled inputs, fourth-ranked listings needed for coverage, thresholds, safety/identity, quantity/freshness/CMR and overflow. API unit tests cover invalid input, uncached timing headers and failure separation. PostgreSQL regressions exercise one-query evaluation, equivalence with the existing per-item evaluator, all intents, quail rejection, null identity, normalization/public eligibility, benefits and the snapshot guard. Browser scenarios cover comparison selection, actual counts, partial coverage, preferred/benefit labels, edit refresh, retry and 390px/1280px in both themes.
-
-The reproducible [performance snapshot](milestone-16-performance.json) uses a disposable loopback PostgreSQL 17 schema with 900 current normalized listings, valid lists mixing supported/unsupported generics and exact/preferred milk, one warmup and five measured runs per case, in both pricing modes. It calls the actual POST handler with native TypeScript and consumes/validates its JSON response. **It does not measure Next.js HTTP startup, deployment latency or network overhead.** Median values are recorded in the JSON; this controlled measurement is not a production latency claim.
-
-Current validation: format, lint and TypeScript passed; **623 unit tests** and **47 PostgreSQL integration tests** passed; isolated shopping/history/basket fixture validation passed. The user’s successful local production build and standard Chromium output establish **21 passed / 29 expected skips** across 50 discovered tests. After correcting three E2E synchronization/selector issues, a fresh isolated `pnpm test:e2e:list:local` run passed **all 22 tests in 45.5 seconds**, including all five basket scenarios. Those corrections wait for animated dialog removal before a card-background click, scope Edit to saved-item frequency sections, and scope retry errors to main content rather than Next.js’s route announcer. Application/substitution/optimizer code is unchanged by this follow-up. Mobile/desktop screenshots in both themes were generated; the mobile comparison was visually inspected. Work remains staged and uncommitted.
-
-Median local timings in milliseconds (900 listings, five measured runs after warmup):
-
-| Items | Mode     | DB retrieval | API handler through response consumption |
-| ----- | -------- | ------------ | ---------------------------------------- |
-| 5     | Standard | 44.1         | 83.2                                     |
-| 20    | Standard | 43.3         | 86.6                                     |
-| 50    | Standard | 42.3         | 88.9                                     |
-| 5     | Benefits | 43.1         | 80.9                                     |
-| 20    | Benefits | 42.1         | 87.5                                     |
-| 50    | Benefits | 40.7         | 88.2                                     |
-
-```sh
-pnpm format:check
-pnpm lint
-pnpm typecheck
-pnpm test
-pnpm test:db:up
-pnpm test:integration:local
-pnpm test:e2e:list:local --validate-fixtures
-pnpm benchmark:basket:local
-pnpm build
-pnpm test:e2e
-pnpm test:e2e:list:local
-pnpm test:db:down
-```
-
-No temporal advice, weekdays/month-period recommendations, travel/distance, delivery fees, alerts, accounts or individual retailer-listing history pages are included.
-
-## Milestone 18 availability and capacity review
-
-The shared current candidate query already excludes explicit false and admits unknown under freshness rules. Updated evidence persistence now prevents unknown quotes from undoing explicit unavailability; newer source-positive recovery restores eligible options. No optimization/substitution rule changes. The final 952-row catalog has 228 unique potential generic/exact basket candidates. Keep the 1,000 guard: real configured DB four-need retrieval median is 1,879.6 ms, distinct from the isolated 900-row handler benchmark (87.7–97.3 ms). See [coverage report](catalog-coverage.md), [availability](availability.md) and [new benchmark](milestone-18-basket-performance.json). The original Milestone 16 benchmark remains preserved.

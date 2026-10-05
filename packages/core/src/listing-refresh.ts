@@ -26,6 +26,7 @@ export const knownListingSchema = z.object({
   observedAt: z.coerce.date(),
   available: z.boolean().nullable().optional(),
   availabilityVerifiedAt: z.coerce.date().nullable().optional(),
+  // Exact-association refresh priority hint; not public purchase eligibility.
   public: z.boolean(),
   shoppingRelevant: z.boolean().optional(),
   usefulStaple: z.boolean().optional(),
@@ -53,7 +54,8 @@ export function listingNeedsRefresh(row: KnownListing, now: Date): boolean {
   );
 }
 export function selectListingRefresh(rows: readonly KnownListing[], now: Date, limit: number) {
-  if (!Number.isInteger(limit) || limit < 1 || limit > 100) throw new Error("Limit must be 1–100");
+  if (!Number.isInteger(limit) || limit < 1 || limit > listingRefreshPolicy.limit)
+    throw new Error("Limit must be 1–100");
   const priority = (row: KnownListing) =>
     row.public
       ? 0
@@ -75,7 +77,7 @@ export function selectListingRefresh(rows: readonly KnownListing[], now: Date, l
     .slice(0, limit);
 }
 export function parseListingRefreshOptions(args: readonly string[]) {
-  let limit = 100;
+  let limit: number = listingRefreshPolicy.limit;
   let dryRun = false;
   let retailer: z.infer<typeof retailerIdSchema> | undefined;
   let externalId: string | undefined;
@@ -90,7 +92,12 @@ export function parseListingRefreshOptions(args: readonly string[]) {
     else if (/^--external-id=\d+$/u.test(arg)) externalId = arg.slice(14);
     else throw new Error("Unknown listing refresh option");
   }
-  if (!Number.isInteger(limit) || limit < 1 || limit > 100 || (externalId && !retailer))
+  if (
+    !Number.isInteger(limit) ||
+    limit < 1 ||
+    limit > listingRefreshPolicy.limit ||
+    (externalId && !retailer)
+  )
     throw new Error("Invalid listing refresh scope");
   return { limit, dryRun, retailer, externalId };
 }

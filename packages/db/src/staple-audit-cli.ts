@@ -1,3 +1,4 @@
+import { catalogPolicy } from "@comprafino/core";
 import { z } from "zod";
 import { retailerIdSchema } from "@comprafino/core";
 import { sql } from "drizzle-orm";
@@ -50,8 +51,9 @@ try {
   const now = new Date();
   const catalog =
     await db.execute(sql`select l.id,l.retailer_id,l.external_id,l.title,l.category,l.package_text,l.source_brand,l.current_price_cents,l.last_seen_at,
-    n.normalization_version,n.input_fingerprint from retailer_listings l left join listing_normalizations n on n.listing_id=l.id order by l.retailer_id,l.title limit 1001`);
-  if (catalog.rows.length > 1000) throw new Error("Catalog bound exceeded");
+    n.normalization_version,n.input_fingerprint from retailer_listings l left join listing_normalizations n on n.listing_id=l.id order by l.retailer_id,l.title limit ${catalogPolicy.overflowSentinel}`);
+  if (catalog.rows.length > catalogPolicy.retainedListingCap)
+    throw new Error("Catalog bound exceeded");
   const demand = await db.execute(
     sql`select normalized_query,request_count,status from discovery_queries order by request_count desc,normalized_query limit 20`,
   );

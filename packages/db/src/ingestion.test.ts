@@ -1,6 +1,9 @@
 import { expect, it } from "vitest";
 import { PgDialect } from "drizzle-orm/pg-core";
 import { persistenceStatements } from "./ingestion.ts";
+import { catalogPolicy, listingRefreshPolicy, matchingThresholds } from "@comprafino/core";
+import { currentGenericOfferRows } from "./generic-offers.ts";
+import { eligibleProducts } from "./public-products.ts";
 import type { NormalizedRetailerListing } from "@comprafino/core";
 const listing: NormalizedRetailerListing = {
   retailer: "tottus",
@@ -13,6 +16,22 @@ const listing: NormalizedRetailerListing = {
   priceUnit: "UN",
   observedAt: new Date("2026-10-03T09:00:00Z"),
 };
+it("uses shared policy in SQL admission, confidence and current observation bounds", () => {
+  const dialect = new PgDialect();
+  const admission = persistenceStatements("tottus", [listing]).map((query) =>
+    dialect.sqlToQuery(query),
+  );
+  expect(admission.some((query) => query.params.includes(catalogPolicy.retainedListingCap))).toBe(
+    true,
+  );
+  const exact = dialect.sqlToQuery(eligibleProducts);
+  expect(exact.params.filter((value) => value === matchingThresholds.auto)).toHaveLength(2);
+  const now = new Date("2026-10-05T12:00:00Z");
+  const generic = dialect.sqlToQuery(currentGenericOfferRows(now));
+  expect(generic.params).toContain(
+    new Date(now.getTime() - listingRefreshPolicy.freshHours * 3_600_000).toISOString(),
+  );
+});
 it("builds one transactional lock/upsert/close/open batch with parameterized source data", () => {
   const queries = persistenceStatements("tottus", [listing]).map((statement) =>
     new PgDialect().sqlToQuery(statement),

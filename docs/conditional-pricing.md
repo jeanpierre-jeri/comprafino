@@ -1,16 +1,16 @@
-# Conditional pricing — Milestone 11
+# Conditional pricing
 
-Milestone 11 is complete in the provided baseline `6c3a52f`; its original agent build restrictions are historical. Milestone 12 refines presentation only; see [UI polish](ui-polish.md). Ordinary history and prospective coverage are now documented separately in [price history](price-history.md); accounts and conditional history remain deferred.
+Concrete current benefits are separate from ordinary prices and [ordinary history](price-history.md). Tottus CMR extraction is implemented; unsupported marketing teasers remain excluded. Dated acceptance is preserved in [engineering history](history/engineering-notes-2026-10-05.md#original-docsconditional-pricingmd). Accounts and conditional history remain deferred.
 
 ## Ordinary and conditional prices
 
 `currentPriceCents` remains the ordinary anonymous-context quote. Only a strictly higher ordinary reference is retained. A benefit is a separate concrete payable amount requiring an additional condition. It never substitutes for ordinary price-history rows or changes matching/normalization identity.
 
-For example, observed Tottus Gloria whole milk six-pack SKU `129087925` has ordinary **S/ 21.90**, reference **S/ 24.60**, and **S/ 20.90 with CMR**. These are three different facts. Prices depend on source/channel/location and do not guarantee availability at a selected address.
+For a dated October 4, 2026 example, observed Tottus Gloria whole milk six-pack SKU `129087925` has ordinary **S/ 21.90**, reference **S/ 24.60**, and **S/ 20.90 with CMR**. These are three different facts. Prices depend on source/channel/location and do not guarantee availability at a selected address.
 
 ## Evidence and retailer support
 
-The [sanitized audit](conditional-source-audit.json) contains October 4, 2026 anonymous public observations. Native fetch used the identifying CompraFino user agent, no cookies, credentials or selected location, sequential bounded requests and no access-control bypass. Public sources:
+The [sanitized audit](history/conditional-source-audit.json) contains October 4, 2026 anonymous public observations. Native fetch used the identifying CompraFino user agent, no cookies, credentials or selected location, sequential bounded requests and no access-control bypass. Public sources:
 
 - [Tottus dairy hydration](https://www.tottus.com.pe/tottus-pe/lista/CATG16061/Lacteos?page=1): `props.pageProps.results[].prices[]`. `internetPrice` is ordinary, `normalPrice` is reference, and an uncrossed `cmrPrice` accompanied by `icons=cmr-icon` supplies a concrete CMR amount. Seven products on one page established consistent program identity. The price entry exposes no validity timestamps or offer-specific minimum quantity. `measurements.minUnits=1` describes the sale offering, not a benefit requirement. Second-unit campaign badges/promotions without a payable amount are not interpreted.
 - [Plaza Vea public channel-1 catalog](https://www.plazavea.com.pe/api/catalog_system/pub/products/search?ft=leche&sc=1&_from=0&_to=19): seller-1 `commertialOffer.PromotionTeasers` has `Conditions.MinimumQuantity`, `PaymentMethodId`, and `Effects.Parameters` such as `PromotionalPriceTableItemsIds/Discount`. Gloria SKU `11359692` has ordinary S/ 21.50, reference S/ 24.60 and a 4.10 discount teaser. Payment sets differ (`208,202,210`, `210`, or `4`); hidden Lurín campaigns appear alongside public campaigns. These do not establish one reliable generally payable price or stable consumer program eligibility. No S/ 17.40 benefit is inferred. Teasers remain excluded.
@@ -38,10 +38,8 @@ Default `priceMode=standard` (omitted in clean URLs) ranks ordinary prices. Exac
 
 Search cards keep the ordinary amount visible and show “Con CMR: S/ …” with “Requiere tarjeta CMR” beside it. In benefits mode, calculated unit prices explicitly say “con CMR”. Detail rows distinguish ordinary online price, crossed reference and conditional block. The detail hero keeps “Mejor precio para todos” primary and places an existing lower CMR benefit beside its requirement in both modes. The URL benefits preference still selects potential ranking; it never replaces the ordinary amount. URL preference never writes an account, cookie or personal card profile.
 
-See [search UX](search-ux.md) for immediate URL filtering and [validation](milestone-11-validation.md) for measured checks and remaining gates.
+See [search UX](search-ux.md) for immediate URL filtering and [validation](history/milestone-11-validation.md) for measured checks and remaining gates.
 
-## Limitations and Milestone 13 recommendation
+## Limitations
 
 No promotion engine for 2x1/3x2, second-unit arithmetic, quantities, bundles, coupons, bank weekdays, percentage discount stacking or inferred card/loyalty programs. No new retailer, source category, dependency, queue, cache, analytics or other infrastructure. Anonymous context/location uncertainty remains.
-
-For Milestone 13, start by auditing ordinary history interval integrity and observation gaps, then consider a compact exact-product history table with retailer, quote basis, state-start and last-verification context. Decide conditional historical capture separately; current offer rows cannot reconstruct past CMR prices. Do not connect ordinary and CMR points into one series or infer historical observations from today's freshness. That work is a recommendation only.

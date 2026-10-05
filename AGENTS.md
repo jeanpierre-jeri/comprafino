@@ -10,6 +10,9 @@
 - Schema changes require reviewed migrations. Never commit credentials.
 - Pricing, promotion and matching logic requires meaningful tests.
 - Update docs when commands, environment variables or architecture change.
+- Test writes must use an owned random schema and explicit test configuration; never fall back to application `DATABASE_URL`. See `docs/local-testing.md`.
+- All identity writers must preserve derived-identity safety; preserve positive ordinary purchase prices and tri-state availability. See `docs/eligibility.md` and `docs/catalog-matching.md`.
+- Dated material in `docs/history/` and the engineering audit is evidence, not current commit authorization.
 
 # Retailer integration rules
 

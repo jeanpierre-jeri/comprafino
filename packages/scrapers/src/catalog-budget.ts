@@ -1,4 +1,58 @@
+import { catalogPolicy } from "@comprafino/core";
+import { z } from "zod";
 import { refreshCoverage } from "./refresh-adapters.ts";
+
+/** Stable identity includes each retailer/category limit, not just the total. */
+export function sourceConfigurationIdentity() {
+  return Object.entries(refreshCoverage)
+    .flatMap(([retailer, categories]) =>
+      Object.entries(categories).map(([category, limit]) => `${retailer}/${category}:${limit}`),
+    )
+    .sort()
+    .join("|");
+}
+
+const refreshMeasurementSchema = z
+  .object({
+    observedAt: z.iso.datetime().optional(),
+    status: z.string().optional(),
+    durationMs: z.number().nonnegative(),
+    targeted: z.object({
+      status: z.string(),
+      result: z.object({ requests: z.number().int().nonnegative() }).optional(),
+    }),
+    provenance: z
+      .object({
+        baselineCommit: z.string().nullable(),
+        sourceConfigurationIdentity: z.string(),
+        categorySources: z.number().int().positive(),
+        catalogListings: z.number().int().positive(),
+        note: z.string(),
+      })
+      .optional(),
+  })
+  .passthrough();
+
+export function refreshMeasurementEvidence(value: unknown, catalogListings: number) {
+  const measurement = refreshMeasurementSchema.parse(value);
+  const sourceScopeMatches =
+    measurement.provenance?.sourceConfigurationIdentity === sourceConfigurationIdentity() &&
+    measurement.provenance.categorySources === categoryRequestBudget().categorySources;
+  const catalogSizeMatches = measurement.provenance?.catalogListings === catalogListings;
+  const successfulRun = measurement.status === "success";
+  const comparable = Boolean(
+    measurement.observedAt && successfulRun && sourceScopeMatches && catalogSizeMatches,
+  );
+  return {
+    measurement,
+    sourceScopeMatches,
+    catalogSizeMatches,
+    successfulRun,
+    comparable,
+    classification: comparable ? "dated-comparable-measurement" : "historical-non-comparable",
+    note: "Comparability checks source configuration and catalog size only; this is dated local command evidence, not current workflow telemetry or a latency guarantee.",
+  };
+}
 
 /** Estimate full, usable pages; unavailable rows can require more bounded pages. */
 export function categoryRequestBudget() {
@@ -48,7 +102,7 @@ export function catalogProjection(listings: number, candidates: number, target: 
     listings: target,
     matchingCandidateEstimate: Math.round(candidates * (target / listings) ** 2),
     derivationLinearFactor: target / listings,
-    currentGuardExceeded: target > 1000,
+    currentGuardExceeded: target > catalogPolicy.retainedListingCap,
     storageAtSameCompositionFactor: target / listings,
   };
 }

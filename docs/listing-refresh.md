@@ -1,6 +1,6 @@
 # Known listing refresh and demand-guided coverage
 
-Milestone 7 closes the refresh gap for products discovered outside the scheduled categories. Implementation and bounded live validation are available; completion awaits fresh local production build and Chromium E2E confirmation because this agent encountered the known Turbopack CSS-worker port restriction. Milestones 0–6 are complete and deployed in the user-provided baseline `558cb56`. No category expansion, retailer, dependency, service or matcher change is introduced.
+Current domain guidance. Dated audits, measurements and acceptance narratives are preserved in [engineering history](history/engineering-notes-2026-10-05.md).
 
 ## Targeted mechanisms
 
@@ -91,66 +91,9 @@ Per retailer and globally: known/public listings, category-observed public listi
 
 A missing category observation is initially **unknown coverage**, not proof that an item cannot appear in that category. After a complete frozen category cycle, it identifies absence from the observed bounded sample. Ever-observed coverage can age or source ordering can rotate; the report also exposes observations within 24 hours. No category crawl starts automatically from demand.
 
-## Live validation and audit — October 3, 2026 (Peru)
-
-Initial read-only production audit: Tottus 197 / Plaza Vea 130 / Metro 130 known listings; twenty / thirty-three / thirty-one public associations, respectively. Historical Milestone 6 evidence identifies nineteen associations in eight discovery-created public groups (rice and oil). Origin was not stored, so those pre-migration identities remain unknown in the new schema.
-
-A full bounded existing-category refresh passed: 350 observations, nine new listings due to source ordering inside the same scopes, 466 total listings, nine normalization writes, zero matching writes. Its targeted selection was empty because all prices were recent. Categories were not expanded. The normal targeted dry-run also selected zero rows and made zero calls/writes.
-
-Nine explicit known public listings were observed twice, sequentially: eight outside the just-observed category sample and one Metro category-covered listing. All three retailer mechanisms passed. The sample spans Primor Clásico 1.8 L, Primor Premium 900 ml, Costeño Añejo Extra 750 g and one existing category product. Each pass made nine requests with zero failures, zero new price states, zero normalization writes and zero product/link matching writes. The selected listings retained ten total historical states before and after both passes; every successful observation timestamp advanced.
-
-| Retailer  | SKU       | Current PEN cents | Observed category coverage |
-| --------- | --------- | ----------------: | -------------------------- |
-| Metro     | 34895     |              1970 | Yes                        |
-| Tottus    | 119580636 |              1680 | No                         |
-| Metro     | 39257746  |               430 | No                         |
-| Metro     | 427       |               950 | No                         |
-| Tottus    | 113706603 |               970 | No                         |
-| Plaza Vea | 10614795  |               950 | No                         |
-| Plaza Vea | 10181308  |              1520 | No                         |
-| Plaza Vea | 11129479  |               410 | No                         |
-| Metro     | 39181622  |              1750 | No                         |
-
-First observations: 02:38:20–02:38:42 UTC; immediate repeat observations: 02:39:06–02:39:21 UTC (21:38–21:39 Peru, October 3). No natural price change occurred in this sample. Actual changed-price behavior is covered by PostgreSQL tests rather than fabricated live price mutations.
-
-The checked-in [audit snapshot](listing-refresh-audit.json) was read at **02:53:58 UTC October 4 / 21:53:58 Peru October 3**. Production continued receiving real discovery demand/listings during validation: the snapshot contains sixty-eight additional new discovery acquisitions after the category cycle. It is a measured point-in-time report, not a permanent total or a claim that this task processed those requests.
-
-| Metric                                                         | Count |
-| -------------------------------------------------------------- | ----: |
-| Known listings                                                 |   534 |
-| Public offers/associations audited                             |    93 |
-| Fresh ≤36h                                                     |    93 |
-| Stale-but-visible >36–72h                                      |     0 |
-| Too stale >72h                                                 |     0 |
-| Public listings category-observed                              |    67 |
-| Public listings outside observed category sample               |    26 |
-| Historically discovery-created public listings now refreshable |    19 |
-| Public listings with newly recorded discovery acquisition      |     5 |
-| Known identities with a targeted mechanism                     |   534 |
-| Public identities with a targeted mechanism                    |    93 |
-| Known identities without a mechanism                           |     0 |
-
-All 534 have a supported exact lookup identity/URL; live requests verified the bounded sample, not every SKU. Nineteen historically verified discovery acquisitions and five newly attributed discovery acquisitions give **24 verified discovery-created public listings with targeted paths**. They account for twenty-four of the twenty-six public listings outside category observations; two are retained earlier category listings. The remaining public source origins cannot be inferred solely from schema defaults. Current total origins: 457 unknown, nine category, sixty-eight discovery. No retroactive guessing was applied. The catalog now has 93 public associations, still below the 100-request budget; revisit that budget deliberately if public growth exceeds it.
-
-Measured demand at the final audit: `huevos tottus` seven requests; `huevos` four; `arroz costeño`, `arroz extra costeño`, `aceite primor`, `aceite vegetal primor`, `atún florida` and `detergente bolivar` two each. Rice queries currently return five/four public groups; oil queries return three each; generic eggs now returns three, including three groups with recorded first-acquisition query provenance. The retailer-brand egg query, tuna and detergent still return zero public groups. Independent production discovery progressed during validation; those new groups are not claimed as work performed by this task.
-
-Counts are small and overlapping query spellings are not summed into causal product demand. Eggs lead current demand, but existing dairy/egg coverage should be inspected first; retailer-specific own-brand identity must not be relaxed merely to make cross-retailer results appear. Rice and Primor oil have demonstrated comparable groups and are strong candidates for a future carefully bounded category review. Tuna and detergent follow; detergent needs the already-documented brand/pack/variant normalization review. Synthetic absent-product demand is not an expansion recommendation: its unrelated source suggestions can acquire listings later linked into groups without satisfying the original query. **No next milestone is started.**
-
-## Validation and remaining limits
-
-Unit tests cover admission priority/age/cooldown/limit, stale boundaries and cheapest exclusion/all-stale state, exact retailer mapping, invalid identity/URLs, ordinary price semantics, unavailable/missing/system outcomes, per-listing and per-retailer isolation, concurrent admission skips and scheduler ordering/one derivation pass. Isolated PostgreSQL tests cover immutable acquisition/category provenance, unchanged/changed history, concurrent claim serialization, negative outcomes versus newer successes, preserved history/observation, read-only demand/coverage reporting and all-stale public pages. Tests make no retailer requests.
-
-Format, lint and strict types passed; **388 unit tests** and **24 isolated PostgreSQL tests** passed (24 new unit cases and four new PostgreSQL scenarios). The final one-SKU Tottus CLI also passed with successful normalization/matching and zero price-state or derived writes; its immediate repeat also passed with zero price-state and derived writes. During concurrent production discovery, an earlier diagnostic CLI exited nonzero after recording a successful quote. Its generic error did not establish the exact downstream cause; after stage reporting was added, the later run and repeat completed without bypassing guards. The default build hit Turbopack's existing CSS-worker bind error (`Operation not permitted`); Chromium E2E could not start a production server without a successful build. Framework configuration is unchanged. Changes remain staged without commit or push until the developer confirms `pnpm build` and `pnpm test:e2e` locally, per the task's explicit gate.
-
-Remaining limits: anonymous channel/context and location-specific availability, unknown historical origins/query causality, changing category ordering, retailer URL/payload changes, no permanent-removal inference, latest rather than append-only targeted outcomes, complete-catalog 1000-row guard, per-invocation rather than global daily targeted budget, and low observed demand sample size. Broad untested SKU classes may fail safe validation; a supported lookup path is not a promise every current product is still sold. Schedules may delay. No matcher weights, thresholds or scoring code changed.
-
-## Milestone 10 follow-up
-
-Current comparison policy and audited quantities are in [quantity quality](quantity-quality.md); current operating counts, request budgets and headroom are in [catalog budget](catalog-budget.md). Comparison bases now separate approximate rolls from physical item counts, and all semantically unresolved tuna unit prices are withheld. Persisted normalization version 1, canonical matcher rules and existing source/refresh limits remain unchanged. Earlier milestone validation notes are historical; Milestones 0–9 are complete in the user-provided baseline `d8858b3`.
-
 ## Milestone 14 prospective observation evidence
 
-All successful category, discovery and targeted quotes now update one shared atomic listing/day coverage rollup in America/Lima. Failed/negative/unusable outcomes create no price coverage; unchanged accepted observations increment the rollup without duplicate price states. Existing schedules, source/request limits and the complete-catalog guard remain. Apply reviewed migration `0006_light_blink.sql` before deploying all writers/readers together. Use `pnpm audit:observation-coverage` and `/dev/ingestion` to inspect collection. See [observation model](observation-coverage.md) and [measured validation/storage](milestone-14-validation.md). Prior milestone measurements above are historical.
+All successful category, discovery and targeted quotes now update one shared atomic listing/day coverage rollup in America/Lima. Failed/negative/unusable outcomes create no price coverage; unchanged accepted observations increment the rollup without duplicate price states. Existing schedules, source/request limits and the complete-catalog guard remain. Apply reviewed migration `0006_light_blink.sql` before deploying all writers/readers together. Use `pnpm audit:observation-coverage` and `/dev/ingestion` to inspect collection. See [observation model](observation-coverage.md) and [measured validation/storage](history/milestone-14-validation.md). Prior milestone measurements above are historical.
 
 ## Milestone 18 usefulness and stock evidence
 

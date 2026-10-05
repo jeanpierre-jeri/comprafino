@@ -1,4 +1,6 @@
 "use client";
+
+import { shoppingListPolicy } from "@comprafino/core";
 import { useId, useRef, useState } from "react";
 import {
   saveShoppingItem,
@@ -163,9 +165,9 @@ function ShoppingItemForm({
           <input
             data-modal-initial-focus
             type="number"
-            min={unit === "unit" ? "1" : "0.001"}
-            max="10000"
-            step={unit === "unit" ? "1" : "0.001"}
+            min={unit === "unit" ? 1 : shoppingListPolicy.quantityStep}
+            max={shoppingListPolicy.maximumAmount}
+            step={unit === "unit" ? 1 : shoppingListPolicy.quantityStep}
             required
             value={amount}
             onChange={(e) => setAmount(e.target.value)}

@@ -1,3 +1,4 @@
+import { catalogPolicy } from "@comprafino/core";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
 import { formatUnitPrice } from "@comprafino/core";
@@ -25,8 +26,9 @@ try {
     r.name as "retailerName", l.url,l.image_url as "imageUrl",h.current_price_cents as "currentPriceCents",l.last_seen_at as "observedAt",l.available,n.input_fingerprint as fingerprint,n.normalization_version as version,a.canonical_product_id as association
     from retailer_listings l join retailers r on r.id=l.retailer_id join price_history h on h.listing_id=l.id and h.valid_until is null
     left join listing_normalizations n on n.listing_id=l.id left join canonical_product_listings a on a.listing_id=l.id
-    where l.active and h.price_unit=l.price_unit and h.currency='PEN' order by l.retailer_id,l.title limit 1001`);
-  if (rows.rows.length > 1000) throw new Error("Catalog bound exceeded");
+    where l.active and h.price_unit=l.price_unit and h.currency='PEN' order by l.retailer_id,l.title limit ${catalogPolicy.overflowSentinel}`);
+  if (rows.rows.length > catalogPolicy.retainedListingCap)
+    throw new Error("Catalog bound exceeded");
   const raw = z.array(auditRowSchema).parse(rows.rows);
   const eligible = raw.flatMap((row) => {
     if (row.fingerprint === null || row.version === null) return [];

@@ -1,3 +1,4 @@
+import { catalogPolicy } from "@comprafino/core";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
 import { generateCandidates, selectListingRefresh, offerFreshness } from "@comprafino/core";
@@ -31,7 +32,7 @@ export async function catalogBudget(db = createDatabase(), now = new Date()) {
   const rowCounts = Object.fromEntries(counts);
   const [coverage, matching, sizes, history, runs, demand, connections] = await Promise.all([
     knownListings(db),
-    readMatchingSample(db, 1000),
+    readMatchingSample(db, catalogPolicy.retainedListingCap),
     db.execute(
       sql`select c.relname as name,pg_total_relation_size(c.oid)::float8 as "totalBytes",pg_relation_size(c.oid)::float8 as "tableBytes",pg_indexes_size(c.oid)::float8 as "indexBytes" from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname=current_schema() and c.relkind='r' order by pg_total_relation_size(c.oid) desc limit 15`,
     ),
@@ -48,7 +49,7 @@ export async function catalogBudget(db = createDatabase(), now = new Date()) {
       sql`select pg_database_size(current_database())::float8 as "databaseBytes",(select count(*)::integer from pg_stat_activity where datname=current_database()) as "visibleConnections"`,
     ),
   ]);
-  if ((rowCounts.retailer_listings ?? 0) > 1000)
+  if ((rowCounts.retailer_listings ?? 0) > catalogPolicy.retainedListingCap)
     throw new Error("Catalog bound exceeded; review capacity before derivation");
   return {
     observedAt: now.toISOString(),

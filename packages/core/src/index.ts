@@ -27,3 +27,5 @@ export * from "./substitution-compatibility.ts";
 
 export * from "./shopping-creation.ts";
 export * from "./basket-optimization.ts";
+
+export * from "./catalog-policy.ts";

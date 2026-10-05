@@ -9,6 +9,7 @@
     "lint:fix": "oxlint --type-aware --fix .",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
+    "docs:check": "node scripts/check-doc-references.mjs",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:e2e": "pnpm --filter @comprafino/web test:e2e",
