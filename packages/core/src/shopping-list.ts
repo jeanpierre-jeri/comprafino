@@ -245,6 +245,8 @@ export function evaluateShoppingFulfillment(
               c.canonicalId === item.canonicalId &&
               c.pricingBasis !== "kg" &&
               c.strongQuantity &&
+              Number.isSafeInteger(c.ordinaryPriceCents) &&
+              c.ordinaryPriceCents > 0 &&
               c.available !== false &&
               offerFreshness(c.observedAt, now) === "fresh" &&
               c.packageQuantity,
@@ -253,6 +255,8 @@ export function evaluateShoppingFulfillment(
   const evaluated: ShoppingOption[] = [];
   for (const c of candidates) {
     if (
+      !Number.isSafeInteger(c.ordinaryPriceCents) ||
+      c.ordinaryPriceCents <= 0 ||
       c.available === false ||
       c.pricingBasis === "kg" ||
       offerFreshness(c.observedAt, now) !== "fresh"

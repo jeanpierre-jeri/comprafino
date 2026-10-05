@@ -33,11 +33,13 @@ test.describe("isolated listing details", () => {
     });
     await page.goto("/search?q=huevos+pardos");
     const card = page.locator(`[data-offer-id="${fixture("independent")}"]`);
-    await expect(card.locator(".product-title-link")).toHaveAttribute(
-      "href",
-      `/listings/${fixture("independent")}`,
+    await expect(
+      card.getByRole("link").filter({ hasText: "Huevos Pardos Tottus Bandeja 30un" }),
+    ).toHaveAttribute("href", `/listings/${fixture("independent")}`);
+    await expect(card.getByRole("link", { name: "Ver producto en Tottus" })).toHaveAttribute(
+      "target",
+      "_blank",
     );
-    await expect(card.locator(".source-link")).toHaveAttribute("target", "_blank");
     await page.context().route("https://www.tottus.com.pe/tottus-pe/articulo/1/test", (route) =>
       route.fulfill({
         contentType: "text/html",
@@ -45,7 +47,7 @@ test.describe("isolated listing details", () => {
       }),
     );
     const sourceTab = page.waitForEvent("popup");
-    await card.locator(".source-link").click();
+    await card.getByRole("link", { name: "Ver producto en Tottus" }).click();
     const popup = await sourceTab;
     await expect(popup).toHaveURL("https://www.tottus.com.pe/tottus-pe/articulo/1/test");
     await expect(page).toHaveURL(/\/search/);
@@ -57,7 +59,7 @@ test.describe("isolated listing details", () => {
     await page.keyboard.press("Escape");
     await expect(page.getByRole("dialog")).toHaveCount(0);
     try {
-      await card.locator(".product-title-link").click();
+      await card.getByRole("link").filter({ hasText: "Huevos Pardos Tottus Bandeja 30un" }).click();
       await expect(
         page
           .locator(
@@ -73,7 +75,7 @@ test.describe("isolated listing details", () => {
       "Huevos Pardos Tottus Bandeja 30un",
     );
     await expect(page.getByText("Precio online para todos", { exact: true })).toBeVisible();
-    await expect(page.getByText("S/ 17.90", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("S/ 49.90", { exact: true }).first()).toBeVisible();
     await expect(page.getByRole("link", { name: /Comparar este producto entre/ })).toHaveCount(0);
     await expect(page.getByRole("link", { name: /Ver producto en Tottus/ })).toHaveAttribute(
       "href",
@@ -85,7 +87,9 @@ test.describe("isolated listing details", () => {
       }),
     ).toBeVisible();
     await page.goBack();
-    await expect(card.locator(".product-title-link")).toHaveAttribute("aria-busy", "false");
+    await expect(
+      card.getByRole("link").filter({ hasText: "Huevos Pardos Tottus Bandeja 30un" }),
+    ).toHaveAttribute("aria-busy", "false");
     await page.goForward();
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   });

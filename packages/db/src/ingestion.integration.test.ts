@@ -541,6 +541,177 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
     const pairs = await evaluatePairs(db, [[rows[0]!, rows[1]!]]);
     return { rows, pairs };
   }
+  async function cleanupIdentity(prefix: string) {
+    await query(
+      "delete from canonical_products where id in (select a.canonical_product_id from canonical_product_listings a join retailer_listings l on l.id=a.listing_id where l.external_id in ($1,$2))",
+      [`${prefix}-metro`, `${prefix}-plaza-vea`],
+    );
+  }
+  it.each([
+    ["title", { title: "Leche Gloria Descremada Caja 946ml" }],
+    ["quantity", { title: "Leche Gloria Entera Caja 750ml" }],
+    ["unit", { priceUnit: "KG" as const }],
+    ["brand", { sourceBrand: "Otra" }],
+    ["package", { packageText: "Pack 2 Cajas 946ml" }],
+    ["multiplier", { sourceUnitMultiplier: 2 }],
+  ])(
+    "withholds changed %s identity before and after normalization until matching",
+    async (kind, patch) => {
+      const prefix = `identity-${kind}`;
+      const { rows, pairs } = await seedMatch(prefix);
+      await persistMatching(db, rows, pairs);
+      const id =
+        rows[0]!.priorGroupId ??
+        z
+          .array(z.object({ id: z.uuid() }))
+          .parse(
+            await query(
+              "select canonical_product_id as id from canonical_product_listings where listing_id=$1",
+              [rows[0]!.id],
+            ),
+          )[0]!.id;
+      expect(await getCanonicalProductComparison(db, id)).not.toBeNull();
+      const changed: NormalizedRetailerListing = {
+        ...observation(`${prefix}-metro`, 1),
+        retailer: "metro",
+        title: "Leche Gloria Entera Caja 946ml",
+        sourceBrand: "Gloria",
+        url: "https://www.metro.pe/leche/p",
+        ...patch,
+      };
+      await persistListings(db, "metro", [changed]);
+      // Interrupted/failed normalization cannot leave the old exact claim public.
+      await expect(
+        persistCatalogNormalizations(db, [
+          {
+            ...(await catalogRows(changed.externalId))[0]!,
+            sourceUnitMultiplier: 0,
+          },
+        ]),
+      ).rejects.toThrow(/Too small/u);
+      expect(await getCanonicalProductComparison(db, id)).toBeNull();
+      expect(await getCanonicalProductPriceHistory(db, id, { now: publicNow })).toBeNull();
+      const links = await query(
+        "select listing_id from canonical_product_listings where canonical_product_id=$1",
+        [id],
+      );
+      expect(links).toHaveLength(2);
+      await persistCatalogNormalizations(db, await catalogRows(changed.externalId));
+      expect(await getCanonicalProductComparison(db, id)).toBeNull();
+      const listingId = z
+        .array(z.object({ id: z.uuid() }))
+        .parse(
+          await query("select id from retailer_listings where external_id=$1", [
+            changed.externalId,
+          ]),
+        )[0]!.id;
+      const detail = await getPublicRetailerListingDetail(db, listingId, { now: publicNow });
+      expect(detail?.canonicalId).toBeNull();
+      expect(detail?.history).not.toBeNull();
+      const independent = await searchGenericProductOffers(
+        db,
+        "leche gloria",
+        "relevance",
+        publicNow,
+      );
+      expect(independent.find((offer) => offer.id === listingId)?.canonicalId).toBeNull();
+      // Restore the identity: normalization alone still must not renew confidence.
+      await persistListings(db, "metro", [
+        {
+          ...changed,
+          title: "Leche Gloria Entera Caja 946ml",
+          sourceBrand: "Gloria",
+          priceUnit: "UN",
+          packageText: undefined,
+          sourceUnitMultiplier: undefined,
+          observedAt: observation("unused", 2).observedAt,
+        },
+      ]);
+      await persistCatalogNormalizations(db, await catalogRows(changed.externalId));
+      expect(await getCanonicalProductComparison(db, id)).toBeNull();
+      const current = await matchingRows([`${prefix}-metro`, `${prefix}-plaza-vea`]);
+      const validated = await evaluatePairs(db, [[current[0]!, current[1]!]]);
+      expect((await persistMatching(db, current, validated)).stale).toBe(false);
+      expect(await getCanonicalProductComparison(db, id)).not.toBeNull();
+      await cleanupIdentity(prefix);
+    },
+  );
+
+  it("preserves automatic confidence for price-only/replayed updates and preserves manual decisions", async () => {
+    const prefix = "identity-manual";
+    const { rows, pairs } = await seedMatch(prefix);
+    await persistMatching(db, rows, pairs);
+    const value: NormalizedRetailerListing = {
+      ...observation(`${prefix}-metro`, 1),
+      retailer: "metro",
+      title: "Leche Gloria Entera Caja 946ml",
+      sourceBrand: "Gloria",
+    };
+    await persistListings(db, "metro", [{ ...value, currentPriceCents: 1400 }]);
+    await persistListings(db, "metro", [
+      { ...value, title: "Old replay", observedAt: observation("unused", 0).observedAt },
+    ]);
+    expect(
+      await query(
+        "select confidence::float8 as confidence from canonical_product_listings where listing_id=$1",
+        [rows.find((r) => r.retailer === "metro")!.id],
+      ),
+    ).toEqual([{ confidence: 1 }]);
+    await query("update canonical_product_listings set method='manual' where listing_id=$1", [
+      rows.find((r) => r.retailer === "metro")!.id,
+    ]);
+    const before = await query("select * from canonical_product_listings where listing_id=$1", [
+      rows.find((r) => r.retailer === "metro")!.id,
+    ]);
+    await persistListings(db, "metro", [
+      {
+        ...value,
+        title: "Leche Gloria Descremada Caja 946ml",
+        observedAt: observation("unused", 2).observedAt,
+      },
+    ]);
+    await persistCatalogNormalizations(db, await catalogRows(value.externalId));
+    const current = await matchingRows([`${prefix}-metro`, `${prefix}-plaza-vea`]);
+    expect(
+      (await persistMatching(db, current, await evaluatePairs(db, [[current[0]!, current[1]!]])))
+        .stale,
+    ).toBe(true);
+    expect(
+      await query("select * from canonical_product_listings where listing_id=$1", [
+        rows.find((r) => r.retailer === "metro")!.id,
+      ]),
+    ).toEqual(before);
+    await cleanupIdentity(prefix);
+  });
+
+  it("changed normalization evidence requires rematching even without a new raw observation", async () => {
+    const prefix = "identity-derived";
+    const { rows, pairs } = await seedMatch(prefix);
+    await persistMatching(db, rows, pairs);
+    const id = z
+      .array(z.object({ id: z.uuid() }))
+      .parse(
+        await query(
+          "select canonical_product_id as id from canonical_product_listings where listing_id=$1",
+          [rows[0]!.id],
+        ),
+      )[0]!.id;
+    // Simulate a prior derived correction awaiting the current normalizer.
+    await query(
+      "update listing_normalizations set normalized_title=normalized_title || ' old' where listing_id=$1",
+      [rows[0]!.id],
+    );
+    await persistCatalogNormalizations(db, await catalogRows(`${prefix}-${rows[0]!.retailer}`));
+    expect(await getCanonicalProductComparison(db, id)).toBeNull();
+    const current = await matchingRows([`${prefix}-metro`, `${prefix}-plaza-vea`]);
+    await persistMatching(db, current, await evaluatePairs(db, [[current[0]!, current[1]!]]));
+    expect(await getCanonicalProductComparison(db, id)).not.toBeNull();
+    // Idempotent normalization does not revoke freshly validated evidence.
+    await persistCatalogNormalizations(db, await catalogRows(`${prefix}-${rows[0]!.retailer}`));
+    expect(await getCanonicalProductComparison(db, id)).not.toBeNull();
+    await cleanupIdentity(prefix);
+  });
+
   it("queries range-clipped ordinary history for multiple verified retailers, excluding CMR and unlinked rows", async () => {
     const { rows, pairs } = await seedMatch("history-query");
     await persistMatching(db, rows, pairs);
@@ -700,8 +871,8 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
     expect(await persistMatching(db, renamed, renamedPairs)).toMatchObject({
       productsCreated: 0,
       productsUpdated: 1,
-      linksCreated: 0,
-      linksRemoved: 0,
+      linksCreated: 2,
+      linksRemoved: 2,
     });
   }, 30_000);
   it("refuses stale snapshots and scopes splitting groups; protects manual decisions and rebuilds obsolete links", async () => {
@@ -1855,7 +2026,9 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
       persistListings(db, "tottus", [{ ...value, currentPriceCents: -1 }]),
     ).rejects.toThrow(/Too small/u);
     expect(await coverageDays(value.externalId)).toEqual(before);
-    await persistListings(db, "tottus", [observation("coverage-zero", 0, 0)]);
+    await expect(
+      persistListings(db, "tottus", [observation("coverage-zero", 0, 0)]),
+    ).rejects.toThrow("Ordinary payable price must be positive");
     await persistListings(db, "tottus", [
       { ...observation("coverage-unavailable", 0), available: false },
     ]);

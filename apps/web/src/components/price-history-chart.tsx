@@ -53,7 +53,7 @@ function EventTooltip({
   )
     return null;
   return (
-    <div className="max-w-60 rounded-lg border bg-surface p-3 text-xs shadow-soft">
+    <div role="tooltip" className="max-w-60 rounded-lg border bg-surface p-3 text-xs shadow-soft">
       <p className="font-semibold">
         {raw.retailerName} · {formatPen(raw.priceCents)}
       </p>

@@ -122,7 +122,12 @@ export function optimizeBasket(
     const missingItemIds: string[] = [];
     for (const need of ordered) {
       const best = need.options
-        .filter((o) => subset.includes(o.retailerId))
+        .filter(
+          (o) =>
+            Number.isSafeInteger(o.ordinaryTotalCents) &&
+            o.ordinaryTotalCents > 0 &&
+            subset.includes(o.retailerId),
+        )
         .sort(compareShoppingOptions)[0];
       if (best) assignments.push({ itemId: need.itemId, option: best });
       else missingItemIds.push(need.itemId);

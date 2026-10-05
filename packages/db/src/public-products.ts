@@ -101,6 +101,7 @@ export function publicProduct(
 ): ProductComparison {
   const product = productSchema.parse(raw);
   const offers = product.offers
+    .filter((offer) => offer.currentPriceCents > 0)
     .map((offer): RetailerOffer => ({
       ...offer,
       freshness: offerFreshness(offer.observedAt, now),
@@ -188,7 +189,7 @@ export const eligibleProducts = sql`with offers as (
   join listing_normalizations n on n.listing_id=l.id
   join price_history h on h.listing_id=l.id and h.valid_until is null
   where a.method='automatic' and a.matching_version=${matchingVersion} and a.confidence>=0.90
-    and l.active and h.currency='PEN' and h.price_unit='UN'
+    and l.active and h.currency='PEN' and h.price_unit='UN' and h.current_price_cents>0
 ), products as (
   select c.id, c.display_name as "displayName", c.brand_key,
     c.quantity_value as "quantityValue", c.quantity_unit as "quantityUnit", c.package_count as "packageCount",

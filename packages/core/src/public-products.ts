@@ -27,6 +27,8 @@ export function cheapestOffers<
 >(offers: readonly T[], now = new Date()): T[] {
   offers = offers.filter(
     (offer) =>
+      Number.isSafeInteger(offer.currentPriceCents) &&
+      offer.currentPriceCents > 0 &&
       offer.available !== false &&
       (!offer.observedAt || offerFreshness(offer.observedAt, now) === "fresh"),
   );

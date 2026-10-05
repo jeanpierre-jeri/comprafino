@@ -134,3 +134,12 @@ it("skips observed dairy rows without a quote unit, preserving ordinary prices a
   unsupported.props.pageProps.results[0]!.measurements.unit = "L";
   expect(() => parseTottusPage(html(unsupported), observed)).toThrow(/KG|UN/u);
 });
+
+it("rejects a zero ordinary Tottus quote", () => {
+  const data = structuredClone(fixture);
+  const product = data.props.pageProps.results[0]!;
+  product.prices.find((price) => price.type === "internetPrice")!.price = ["0"];
+  expect(() => parseTottusPage(html(data), observed)).toThrow(
+    "Ordinary payable price must be positive",
+  );
+});

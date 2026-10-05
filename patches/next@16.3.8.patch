@@ -1,0 +1,124 @@
+diff --git a/dist/compiled/next-server/app-page-experimental.runtime.dev.js b/dist/compiled/next-server/app-page-experimental.runtime.dev.js
+index 80a1c676d22a5598e5869ee3e7fda5fd1ff37543..a0a201e7ab7b95d9927434ccc7f28cdcc25a4d8f 100644
+--- a/dist/compiled/next-server/app-page-experimental.runtime.dev.js
++++ b/dist/compiled/next-server/app-page-experimental.runtime.dev.js
+@@ -217,1 +217,2 @@
+ //# sourceMappingURL=app-page-experimental.runtime.dev.js.map
++require("./client-abort-fix.cjs")(module.exports.vendored["react-rsc"].ReactServerDOMWebpackServer);
+diff --git a/dist/compiled/next-server/app-page-experimental.runtime.prod.js b/dist/compiled/next-server/app-page-experimental.runtime.prod.js
+index 5e28384d27283ba35b14e4b5f67156ec66ff94e7..2fa246a5f817505c8c4a74f9f7edea18f667d60a 100644
+--- a/dist/compiled/next-server/app-page-experimental.runtime.prod.js
++++ b/dist/compiled/next-server/app-page-experimental.runtime.prod.js
+@@ -183,1 +183,2 @@
+ //# sourceMappingURL=app-page-experimental.runtime.prod.js.map
++require("./client-abort-fix.cjs")(module.exports.vendored["react-rsc"].ReactServerDOMWebpackServer);
+diff --git a/dist/compiled/next-server/app-page-turbo-experimental.runtime.dev.js b/dist/compiled/next-server/app-page-turbo-experimental.runtime.dev.js
+index 60d589f0b37f271689bab0c14d3504d5f7cbeb9b..f48d16ff1286157f4e88fe04358c2871d22658e3 100644
+--- a/dist/compiled/next-server/app-page-turbo-experimental.runtime.dev.js
++++ b/dist/compiled/next-server/app-page-turbo-experimental.runtime.dev.js
+@@ -217,1 +217,2 @@
+ //# sourceMappingURL=app-page-turbo-experimental.runtime.dev.js.map
++require("./client-abort-fix.cjs")(module.exports.vendored["react-rsc"].ReactServerDOMTurbopackServer);
+diff --git a/dist/compiled/next-server/app-page-turbo-experimental.runtime.prod.js b/dist/compiled/next-server/app-page-turbo-experimental.runtime.prod.js
+index 5eb0f612c1e8aa53ea6ca233d0c54009832bbac2..723fe1f4a91e4d9e1e33ab7eb815cc879208e85e 100644
+--- a/dist/compiled/next-server/app-page-turbo-experimental.runtime.prod.js
++++ b/dist/compiled/next-server/app-page-turbo-experimental.runtime.prod.js
+@@ -183,1 +183,2 @@
+ //# sourceMappingURL=app-page-turbo-experimental.runtime.prod.js.map
++require("./client-abort-fix.cjs")(module.exports.vendored["react-rsc"].ReactServerDOMTurbopackServer);
+diff --git a/dist/compiled/next-server/app-page-turbo.runtime.dev.js b/dist/compiled/next-server/app-page-turbo.runtime.dev.js
+index c6ff2889c6516103e0016f5811b4a2874e96995a..275e300b858f580feb0288ea44bd3c7e1da6e73f 100644
+--- a/dist/compiled/next-server/app-page-turbo.runtime.dev.js
++++ b/dist/compiled/next-server/app-page-turbo.runtime.dev.js
+@@ -217,1 +217,2 @@
+ //# sourceMappingURL=app-page-turbo.runtime.dev.js.map
++require("./client-abort-fix.cjs")(module.exports.vendored["react-rsc"].ReactServerDOMTurbopackServer);
+diff --git a/dist/compiled/next-server/app-page-turbo.runtime.prod.js b/dist/compiled/next-server/app-page-turbo.runtime.prod.js
+index b20f76553b40705326ab09e02216115e203dadbe..36a0c88b3e7ea053e8b77b9f5eb15e7fccee3ef7 100644
+--- a/dist/compiled/next-server/app-page-turbo.runtime.prod.js
++++ b/dist/compiled/next-server/app-page-turbo.runtime.prod.js
+@@ -183,1 +183,2 @@
+ //# sourceMappingURL=app-page-turbo.runtime.prod.js.map
++require("./client-abort-fix.cjs")(module.exports.vendored["react-rsc"].ReactServerDOMTurbopackServer);
+diff --git a/dist/compiled/next-server/app-page.runtime.dev.js b/dist/compiled/next-server/app-page.runtime.dev.js
+index 9194154fdf5fd21f576a856c35a20d4591c841a9..688598c91714a09b295dcb0d6f92f2f48ff22a0b 100644
+--- a/dist/compiled/next-server/app-page.runtime.dev.js
++++ b/dist/compiled/next-server/app-page.runtime.dev.js
+@@ -217,1 +217,2 @@
+ //# sourceMappingURL=app-page.runtime.dev.js.map
++require("./client-abort-fix.cjs")(module.exports.vendored["react-rsc"].ReactServerDOMWebpackServer);
+diff --git a/dist/compiled/next-server/app-page.runtime.prod.js b/dist/compiled/next-server/app-page.runtime.prod.js
+index edb3b5160a2962d168c8f997fb12475fee6c52fa..be9e157e2bd48894e0004c8216f39c844b5aa1ae 100644
+--- a/dist/compiled/next-server/app-page.runtime.prod.js
++++ b/dist/compiled/next-server/app-page.runtime.prod.js
+@@ -183,1 +183,2 @@
+ //# sourceMappingURL=app-page.runtime.prod.js.map
++require("./client-abort-fix.cjs")(module.exports.vendored["react-rsc"].ReactServerDOMWebpackServer);
+diff --git a/dist/compiled/next-server/client-abort-fix.cjs b/dist/compiled/next-server/client-abort-fix.cjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..d46e903fe7f7cc1afef2adc58d47b3fb29ebb927
+--- /dev/null
++++ b/dist/compiled/next-server/client-abort-fix.cjs
+@@ -0,0 +1,21 @@
++"use strict";
++// Backport https://github.com/vercel/next.js/pull/96715 to the prebuilt runtimes.
++const { ResponseAborted } = require("../../server/web/spec-extension/adapters/next-request");
++const patched = new WeakSet();
++module.exports = function patchClientAbort(server) {
++  if (patched.has(server)) return;
++  patched.add(server);
++  const render = server.renderToPipeableStream;
++  server.renderToPipeableStream = function (...args) {
++    const pipeable = render.apply(this, args);
++    const pipe = pipeable.pipe;
++    pipeable.pipe = function (destination) {
++      // Register before React's close handler so cancellation has its typed reason.
++      destination.once("close", () => {
++        if (!destination.writableEnded) pipeable.abort(new ResponseAborted());
++      });
++      return pipe.call(this, destination);
++    };
++    return pipeable;
++  };
++};
+diff --git a/dist/esm/server/app-render/stream-ops.node.js b/dist/esm/server/app-render/stream-ops.node.js
+index 17c897358e8feebcc13c5cd91b031f2069fb9cc0..46e122ccb3557555f38f248f17683cec471587b4 100644
+--- a/dist/esm/server/app-render/stream-ops.node.js
++++ b/dist/esm/server/app-render/stream-ops.node.js
+@@ -1,3 +1,4 @@
++import { ResponseAborted } from "../web/spec-extension/adapters/next-request";
+ /**
+  * Node.js stream operations for the rendering pipeline.
+  * Loaded by stream-ops.ts when process.env.__NEXT_USE_NODE_STREAMS is true.
+@@ -376,6 +377,9 @@ export function renderToNodeFlightStream(ComponentMod, payload, clientModules, o
+     const { signal, ...renderOptions } = opts ?? {};
+     const pt = new PassThrough();
+     const pipeable = ComponentMod.renderToPipeableStream(payload, clientModules, renderOptions);
++    pt.once("close", () => {
++        if (!pt.writableEnded) pipeable.abort(new ResponseAborted());
++    });
+     pipeable.pipe(pt);
+     if (signal) {
+         if (signal.aborted) {
+diff --git a/dist/server/app-render/stream-ops.node.js b/dist/server/app-render/stream-ops.node.js
+index a356f053b86380f6b62e9298194d4dde1ca9c846..6b028ed0a951bc96d9820d28b31f8aff350a1586 100644
+--- a/dist/server/app-render/stream-ops.node.js
++++ b/dist/server/app-render/stream-ops.node.js
+@@ -471,6 +471,7 @@ function createRootLayoutValidatorTransform() {
+         }
+     });
+ }
++const { ResponseAborted } = require("../web/spec-extension/adapters/next-request");
+ function renderToNodeFlightStream(ComponentMod, payload, clientModules, opts) {
+     if (!ComponentMod.renderToPipeableStream) {
+         throw Object.defineProperty(new Error('renderToPipeableStream is not implemented'), "__NEXT_ERROR_CODE", {
+@@ -487,6 +488,9 @@ function renderToNodeFlightStream(ComponentMod, payload, clientModules, opts) {
+     const { signal, ...renderOptions } = opts ?? {};
+     const pt = new _nodestream.PassThrough();
+     const pipeable = ComponentMod.renderToPipeableStream(payload, clientModules, renderOptions);
++    pt.once("close", () => {
++        if (!pt.writableEnded) pipeable.abort(new ResponseAborted());
++    });
+     pipeable.pipe(pt);
+     if (signal) {
+         if (signal.aborted) {

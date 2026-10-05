@@ -7,7 +7,13 @@ import {
   shoppingListEvaluationSchema,
   shoppingFrequencyLabels,
 } from "@comprafino/core";
-import type { PriceMode, ShoppingEvaluation, ShoppingListItem, BasketPlan } from "@comprafino/core";
+import type {
+  PriceMode,
+  ShoppingEvaluation,
+  ShoppingList,
+  ShoppingListItem,
+  BasketPlan,
+} from "@comprafino/core";
 import { useShoppingList } from "./use-shopping-list";
 import { BasketComparison } from "./basket-comparison";
 import { CurrentOption } from "./current-shopping-option";
@@ -17,12 +23,25 @@ export function ShoppingListView() {
   const pricingId = useId();
   const { list, ready, warning, change } = useShoppingList();
   const [mode, setMode] = useState<PriceMode>("standard");
-  const [evaluations, setEvaluations] = useState<ShoppingEvaluation[]>([]);
+  const [revision, setRevision] = useState(0);
+  const [market, setMarket] = useState<{
+    list: ShoppingList;
+    mode: PriceMode;
+    revision: number;
+    evaluations: ShoppingEvaluation[];
+    baskets: BasketPlan[];
+  } | null>(null);
+  // Effects clear old responses after commit. Withhold them during that render
+  // too: a removed item must never be looked up in an older basket assignment.
+  const currentMarket =
+    market?.list === list && market.mode === mode && market.revision === revision ? market : null;
+  const evaluations = currentMarket?.evaluations ?? [];
+  const baskets = currentMarket?.baskets ?? [];
   const [selectedBasketLimit, setSelectedBasketLimit] = useState<number | null>(null);
-  const [baskets, setBaskets] = useState<BasketPlan[]>([]);
+
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
-  const [revision, setRevision] = useState(0);
+
   const [editing, setEditing] = useState<ShoppingListItem | null>(null);
   const editButtons = useRef(new Map<string, HTMLButtonElement>());
   const focusItemId = useRef<string | null>(null);
@@ -37,8 +56,7 @@ export function ShoppingListView() {
     if (!ready) return undefined;
     const controller = new AbortController();
     async function load() {
-      setEvaluations([]);
-      setBaskets([]);
+      setMarket(null);
       setError("");
       if (!list.items.length) {
         setPending(false);
@@ -57,8 +75,13 @@ export function ShoppingListView() {
         if (!response.ok) throw new Error("No pudimos cargar los precios.");
         const parsed = shoppingListEvaluationSchema.parse(body);
         if (!controller.signal.aborted) {
-          setEvaluations(parsed.evaluations);
-          setBaskets(parsed.baskets);
+          setMarket({
+            list,
+            mode,
+            revision,
+            evaluations: parsed.evaluations,
+            baskets: parsed.baskets,
+          });
         }
       } catch {
         if (!controller.signal.aborted)

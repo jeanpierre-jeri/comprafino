@@ -89,3 +89,11 @@ The compatibility API and explicit quantity modes now supply Milestone 16 basket
 ## Milestone 18 availability and measured coverage
 
 Current evaluation keeps the existing SQL/current-offer boundary: explicit unavailable flags cannot be the best option, while unknown stock follows normal price freshness. The updated writer preserves stronger negative evidence through later unknown quotes and recovers only with newer explicit positive evidence. No substitution profile or intent policy is expanded. [Coverage audit](catalog-coverage.md) reports 103 potential generic candidates and 147 exact package candidates, before need-specific gates; family coverage is not equivalent to safe fulfillment. [Availability](availability.md) documents history, recovery and coordinated writer rollout.
+
+## Transient browser-storage failure (Cleanup A)
+
+Storage rereads use the latest module/session list as their fallback when localStorage access throws. Mutations and storage-event handling preserve that list instead of replacing it with an empty list. A read warning survives the same mutation even if its subsequent write succeeds. Session state continues across client navigation; a full reload without working storage cannot recover an unpersisted session.
+
+Working storage still supplies the latest persisted state before mutation and cross-tab events still synchronize it, including removal/clear. Missing or malformed/incompatible stored data retains the existing empty-list recovery semantics; it is distinct from inaccessible storage. No state-management dependency was added.
+
+Current item and basket responses are rendered only for the list object, price mode and refresh revision that produced them. When an item is removed or edited, the previous response is withheld immediately during rendering, before effects start reevaluation. This prevents a deleted item's basket assignment from being rendered against the updated list and preserves the remaining session items.

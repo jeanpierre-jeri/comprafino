@@ -88,7 +88,7 @@ export function catalogPersistenceStatements(raw: readonly CatalogRecord[]) {
     // Same locks as ingestion, in a stable order, so stale reads never overwrite current metadata.
     sql`select id from retailers where id in (select jsonb_array_elements_text(${retailers}::jsonb)) order by id for update`,
     sql`select count(*)::integer as eligible from (${eligible}) e`,
-    sql`insert into listing_normalizations (listing_id, input_fingerprint, normalization_version,
+    sql`with normalized as (insert into listing_normalizations (listing_id, input_fingerprint, normalization_version,
       normalized_title, brand, brand_key, brand_source, quantity_value, quantity_unit, package_count,
       total_quantity_value, total_quantity_unit, pricing_basis, sold_by_weight, issues)
       select id, input_fingerprint, normalization_version, normalized_title, brand, brand_key, brand_source,
@@ -109,7 +109,13 @@ export function catalogPersistenceStatements(raw: readonly CatalogRecord[]) {
         is distinct from (excluded.input_fingerprint, excluded.normalization_version, excluded.normalized_title,
         excluded.brand, excluded.brand_key, excluded.brand_source, excluded.quantity_value, excluded.quantity_unit,
         excluded.package_count, excluded.total_quantity_value, excluded.total_quantity_unit, excluded.pricing_basis,
-        excluded.sold_by_weight, excluded.issues) returning listing_id`,
+        excluded.sold_by_weight, excluded.issues) returning listing_id),
+      invalidated as (
+        -- Changed derived evidence also requires matching again. Unchanged reruns
+        -- return no rows and cannot revoke an already validated association.
+        update canonical_product_listings a set confidence=0 from normalized n
+        where a.listing_id=n.listing_id and a.method='automatic'
+      ) select listing_id from normalized`,
   ] as const;
 }
 export async function persistCatalogNormalizations(db: Database, rows: readonly CatalogRecord[]) {

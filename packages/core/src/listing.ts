@@ -11,7 +11,7 @@ export const listingSchema = z.object({
   title: z.string().trim().min(1),
   url: z.url({ protocol: /^https$/ }),
   imageUrl: z.url({ protocol: /^https$/ }).optional(),
-  currentPriceCents: cents,
+  currentPriceCents: cents.refine((value) => value > 0, "Ordinary payable price must be positive"),
   regularPriceCents: cents.optional(),
   currency: z.literal("PEN"),
   priceUnit: z.enum(["KG", "UN"]),

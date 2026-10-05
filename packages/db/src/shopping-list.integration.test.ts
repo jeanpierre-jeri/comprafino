@@ -112,6 +112,44 @@ describe.skipIf(!url)("batched current shopping snapshot", () => {
       retailerIds: ["tottus"],
     });
   });
+  it("legacy zero ordinary states cannot become shopping or basket winners", async () => {
+    // Simulate historical data accepted before Cleanup A; no constraints/history migration.
+    const changed = z
+      .array(z.object({ id: z.uuid(), listingId: z.uuid(), price: z.number() }))
+      .parse(
+        await scoped.query(
+          "update price_history h set current_price_cents=0 from retailer_listings l where h.listing_id=l.id and l.external_id='shopping-preferred-metro' and h.valid_until is null returning h.id, l.id as \"listingId\", l.current_price_cents as price",
+        ),
+      );
+    expect(changed).toHaveLength(1);
+    try {
+      for (const mode of ["standard", "benefits"] as const) {
+        const list = shoppingListSchema.parse({
+          version: 2,
+          items: [make("generic"), make("preferred"), make("strict")],
+        });
+        const result = await evaluateCurrentShoppingList(db, list, mode);
+        for (const evaluation of result.evaluations) {
+          expect(evaluation.options.every((o) => o.ordinaryTotalCents > 0)).toBe(true);
+          expect(evaluation.options.some((o) => o.id === changed[0]!.listingId)).toBe(false);
+        }
+        expect(
+          result.baskets
+            .flatMap((p) => p.assignments)
+            .every((a) => a.option.ordinaryTotalCents > 0),
+        ).toBe(true);
+        for (const item of list.items)
+          expect(result.evaluations.find((e) => e.itemId === item.id)).toEqual(
+            await evaluateCurrentShoppingItem(db, item, mode),
+          );
+      }
+    } finally {
+      await scoped.query("update price_history set current_price_cents=$1 where id=$2", [
+        changed[0]!.price,
+        changed[0]!.id,
+      ]);
+    }
+  });
   it("returns explicit incomplete coverage for null compatibility and missing canonical IDs", async () => {
     const list = shoppingListSchema.parse({
       version: 2,

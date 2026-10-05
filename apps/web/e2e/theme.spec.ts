@@ -69,7 +69,10 @@ test("unavailable storage falls back to system without breaking theme changes", 
 });
 
 test("keyboard custom filters navigate immediately without native selects", async ({ page }) => {
-  test.skip(!process.env.DATABASE_URL, "Requires the persisted catalog");
+  test.skip(
+    !process.env.DATABASE_URL || !!process.env.COMPRAFINO_CONTROLLED_E2E,
+    "Requires the persisted catalog",
+  );
   await page.goto("/search?q=huevos");
   await expect(page.locator(".filter-surface select")).toHaveCount(0);
   const sort = page.getByRole("combobox", { name: "Ordenar", exact: true });

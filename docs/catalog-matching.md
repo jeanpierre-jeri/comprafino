@@ -158,3 +158,15 @@ No npm dependencies were added. PostgreSQL pg_trgm is the only extension enabled
 ## Independent audit follow-up
 
 See [independent matching audit](catalog-matching-audit.md) for frozen file hashes, bounded retailer expansion, 351-listing normalization coverage, unchanged matching results (7278 candidates, 46 automatic pairs, 355 reviews, 6703 incompatible, 174 no-match), 105 independent labels (TP 34 / FP 0 / TN 52 / FN 19), separate design metrics and all 28 reviewed canonical groups. Persisted state has 19 two-retailer and nine three-retailer groups, 65 associations. Version 1 was retained unchanged; fresh local build/E2E confirmation is pending for the additional ingestion/audit code.
+
+## Exact identity revalidation (Cleanup A)
+
+Public exact identity requires current automatic matching evidence. Previously ingestion could change raw identity while the old link remained eligible, including after normalization and before matching.
+
+An accepted newer ingestion observation atomically sets an existing automatic link's confidence to zero when title, quote unit, package text, source brand or source unit multiplier changes. The fields are exactly those in the normalization fingerprint. A changed persisted normalization also sets automatic confidence to zero, including normalization-version or derived-value corrections; unchanged normalization reruns leave confidence intact. These writes use the existing retailer locks and batch transactions. Price, URL, image, category and availability changes alone do not revoke identity, and replayed observations cannot revoke it.
+
+Zero confidence means the old evidence is no longer valid for the current identity. Links, reasons, canonical records and ordinary history remain stored. The existing public method/version/confidence guard withholds the entire exact group until matching revalidates its complete scope. Normalization alone cannot reauthorize the claim. Matching's existing snapshot checks, complete-link policy and deletion/recreation of changed automatic links restore eligibility only when current evidence qualifies. An incompatible identity may leave the old group unavailable.
+
+Manual links and decisions are preserved by both invalidation writers and matching's existing manual-scope guard. Manual groups remain excluded from automatic public exact comparison under the existing policy. Independent generic/listing history remains available once its own normalization, trusted URL and ordinary-price boundaries pass; failed normalization may temporarily withhold independent metadata too.
+
+Deployment must roll out these writers together, then normalize and match the complete existing automatic catalog to revalidate associations created before this invariant. Out-of-band SQL edits and old writer deployments do not enforce the invariant; future identity writers must apply the same invalidation under retailer locks. No migration or historical-data rewrite is required.

@@ -1,7 +1,7 @@
 import { emptyShoppingList, parseShoppingList, serializeShoppingList } from "@comprafino/core";
 import type { ShoppingList } from "@comprafino/core";
 export const shoppingStorageKey = "comprafino-shopping-list";
-export function readShoppingStorage() {
+export function readShoppingStorage(fallback: ShoppingList = emptyShoppingList()) {
   if (typeof window === "undefined") return { list: emptyShoppingList(), warning: "" };
   try {
     const parsed = parseShoppingList(window.localStorage.getItem(shoppingStorageKey));
@@ -11,7 +11,7 @@ export function readShoppingStorage() {
     };
   } catch {
     return {
-      list: emptyShoppingList(),
+      list: fallback,
       warning: "No podemos guardar en este navegador. Tu lista durará esta sesión.",
     };
   }

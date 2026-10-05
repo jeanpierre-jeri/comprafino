@@ -504,3 +504,16 @@ describe("Milestone 15.1 quantity and migration boundaries", () => {
     );
   });
 });
+
+it("zero ordinary prices cannot fulfill generic or exact shopping needs", () => {
+  for (const intent of ["generic", "preferred", "strict"] as const) {
+    const need = item(
+      intent === "generic" ? { intent, canonicalId: null } : { intent, canonicalId },
+    );
+    const result = evaluate(need, [
+      candidate({ ordinaryPriceCents: 0 }),
+      candidate({ id: "paid" }),
+    ]);
+    expect(result.options.map((o) => o.id)).toEqual(["paid"]);
+  }
+});

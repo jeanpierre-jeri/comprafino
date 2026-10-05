@@ -11,5 +11,7 @@ minimumReleaseAgeExclude:
   - "@turbo/windows-64@2.11.7"
   - "@turbo/windows-arm64@2.11.7"
   - turbo@2.11.7
+patchedDependencies:
+  next@16.3.8: patches/next@16.3.8.patch
 storeDir: .pnpm-store
 strictPeerDependencies: true

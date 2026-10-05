@@ -195,3 +195,8 @@ it("unit and retailer filters never mix mass, litres, physical items or approxim
   ]);
   expect(filterGenericOffers(variants, searchFilters({ retailer: "plaza-vea" }))).toEqual([]);
 });
+
+it("withholds zero ordinary offers from generic ranking in both modes", () => {
+  for (const mode of ["standard", "benefits"] as const)
+    expect(genericProductOffer({ ...raw, currentPriceCents: 0 }, now, mode)).toBeNull();
+});

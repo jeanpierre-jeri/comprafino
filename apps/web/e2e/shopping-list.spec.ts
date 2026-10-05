@@ -121,6 +121,102 @@ test("malformed and unsupported storage recover; unavailable storage keeps sessi
   ).toBeVisible();
 });
 
+for (const operation of ["add", "edit", "remove"] as const) {
+  test(`a transient storage read failure preserves the mounted session during ${operation}`, async ({
+    page,
+  }) => {
+    await addGeneric(page);
+    const eggs = page.getByRole("article", { name: "Huevos", exact: true });
+    // Seed a second independent need while storage is still working.
+    await openGeneric(page, "arroz");
+    await page.getByRole("button", { name: "Agregar", exact: true }).click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await page.getByRole("link", { name: "Mi lista", exact: true }).click();
+    const rice = page.getByRole("article", { name: "Arroz blanco", exact: true });
+    await expect(eggs).toBeVisible();
+    await expect(rice).toBeVisible();
+    // In controlled runs load the old basket first so removal cannot race past
+    // this regression. Credential-free storage smoke still needs no catalog.
+    if (process.env.SHOPPING_LIST_FIXTURE_IDS)
+      await expect(
+        page.getByRole("region", { name: "Comparación de canastas", exact: true }),
+      ).toBeVisible();
+    const pageErrors: string[] = [];
+    page.on("pageerror", (error) => pageErrors.push(error.message));
+    // Reads fail only after mount; writes still work so the read warning must survive.
+    await page.evaluate(() => {
+      Storage.prototype.getItem = () => {
+        throw new Error("Transient read failure");
+      };
+    });
+    if (operation === "add") {
+      // Use client links: a full page.goto would reload and remove the failing
+      // Storage prototype, so it would not exercise the mounted-session bug.
+      await page.getByRole("link", { name: "CompraFino, inicio", exact: true }).click();
+      await page.getByRole("link", { name: "Aceite", exact: true }).click();
+      await page.getByRole("button", { name: "Agregar como necesidad" }).click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      expect(
+        await page.evaluate(() => {
+          try {
+            localStorage.getItem("comprafino-shopping-list");
+            return false;
+          } catch {
+            return true;
+          }
+        }),
+      ).toBe(true);
+      await page.getByRole("button", { name: "Agregar", exact: true }).click();
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+      await page.getByRole("link", { name: "Mi lista", exact: true }).click();
+      await expect(
+        page.getByRole("article", { name: "Aceite vegetal", exact: true }),
+      ).toBeVisible();
+    } else if (operation === "edit") {
+      await eggs.getByRole("button", { name: "Editar Huevos" }).click();
+      await page.getByLabel("Cantidad", { exact: true }).fill("60");
+      await page.getByRole("button", { name: "Guardar cambios" }).click();
+      await expect(eggs).toContainText("60 unidades");
+    } else {
+      await eggs.getByRole("button", { name: "Quitar Huevos" }).click();
+      await expect(eggs).toHaveCount(0);
+    }
+    await expect(rice).toBeVisible();
+    if (operation !== "remove") await expect(eggs).toBeVisible();
+    await expect(
+      page.getByText("No podemos guardar en este navegador. Tu lista durará esta sesión."),
+    ).toBeVisible();
+    // Client navigation must also retain the latest session fallback.
+    await page.getByRole("link", { name: "CompraFino, inicio", exact: true }).click();
+    await page.getByRole("link", { name: "Mi lista", exact: true }).click();
+    await expect(rice).toBeVisible();
+    expect(pageErrors).toEqual([]);
+  });
+}
+
+test("working cross-tab storage synchronizes additions, edits and removal", async ({
+  page,
+  context,
+}) => {
+  await addGeneric(page);
+  const other = await context.newPage();
+  await other.goto("/list");
+  const eggs = other.getByRole("article", { name: "Huevos", exact: true });
+  await expect(eggs).toBeVisible();
+  await page.getByRole("button", { name: "Editar Huevos" }).click();
+  await page.getByLabel("Cantidad", { exact: true }).fill("60");
+  await page.getByRole("button", { name: "Guardar cambios" }).click();
+  await expect(eggs).toContainText("60 unidades");
+  await openGeneric(other, "arroz");
+  await other.getByRole("button", { name: "Agregar", exact: true }).click();
+  await expect(other.getByRole("dialog")).toHaveCount(0);
+  await expect(page.getByRole("article", { name: "Arroz blanco", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Quitar Huevos" }).click();
+  await other.getByRole("link", { name: "Mi lista", exact: true }).click();
+  await expect(eggs).toHaveCount(0);
+  await expect(other.getByRole("article", { name: "Arroz blanco", exact: true })).toBeVisible();
+});
+
 test("dialogs animate, close with X/outside/Escape, and respect reduced motion", async ({
   page,
 }) => {

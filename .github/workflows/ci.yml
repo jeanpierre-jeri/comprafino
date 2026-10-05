@@ -26,8 +26,17 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
+      - run: pnpm test:db:up
+      - run: pnpm test:integration:local
       - run: pnpm build
       - run: pnpm --filter @comprafino/web exec playwright install --with-deps chromium --only-shell
-      - run: pnpm test:e2e
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - run: pnpm test:e2e:fixtures:local
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-failure-results
+          path: apps/web/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+      - run: pnpm test:db:down
+        if: always()

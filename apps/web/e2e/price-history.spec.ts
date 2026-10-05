@@ -25,7 +25,7 @@ test.describe("isolated ordinary-history fixtures", () => {
     await expect(metro).toContainText("subió de S/ 5.90 a S/ 6.10");
     await expect(page.getByText("S/ 5.40 con CMR").first()).toBeVisible();
     await expect(section).not.toContainText("S/ 5.40");
-    await expect(section.locator("[data-slot=chart] svg.recharts-surface")).toBeVisible();
+    await expect(section.locator("[data-slot=chart] svg")).toBeVisible();
     expect(
       await page
         .locator("#offers-title")
@@ -151,7 +151,7 @@ test.describe("isolated ordinary-history fixtures", () => {
       await page.locator("[data-slot=chart]").scrollIntoViewIfNeeded();
       await expect(page.locator(".recharts-scatter-symbol").first()).toBeVisible();
       await page.locator(".recharts-scatter-symbol").first().dispatchEvent("mouseover");
-      await expect(page.locator(".recharts-tooltip-wrapper")).toContainText("S/");
+      await expect(page.getByRole("tooltip")).toContainText("S/");
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
         true,
       );

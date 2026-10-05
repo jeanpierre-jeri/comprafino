@@ -162,6 +162,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  next@16.3.8: 8f32c78f44ea146c929ce7cd5e954460c696fd8d73d7354b04609c7661785235
+
 importers:
 
   .:
@@ -195,7 +198,7 @@ importers:
         version: link:../../packages/ui
       next:
         specifier: 16.3.8
-        version: 16.3.8(@playwright/test@1.63.0)(@types/node@24.19.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        version: 16.3.8(patch_hash=8f32c78f44ea146c929ce7cd5e954460c696fd8d73d7354b04609c7661785235)(@playwright/test@1.63.0)(@types/node@24.19.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       react:
         specifier: 19.3.0
         version: 19.3.0
@@ -3747,7 +3750,7 @@ snapshots:
 
   nanoid@3.3.19: {}
 
-  next@16.3.8(@playwright/test@1.63.0)(@types/node@24.19.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
+  next@16.3.8(patch_hash=8f32c78f44ea146c929ce7cd5e954460c696fd8d73d7354b04609c7661785235)(@playwright/test@1.63.0)(@types/node@24.19.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
     dependencies:
       '@next/env': 16.3.8
       '@swc/helpers': 0.5.23
@@ -3766,7 +3769,6 @@ snapshots:
       '@next/swc-linux-x64-musl': 16.3.8
       '@next/swc-win32-arm64-msvc': 16.3.8
       '@next/swc-win32-x64-msvc': 16.3.8
-      '@playwright/test': 1.63.0
       sharp: 0.35.5(@types/node@24.19.1)
     transitivePeerDependencies:
       - '@babel/core'

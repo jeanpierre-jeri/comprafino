@@ -50,6 +50,8 @@ try {
     COMPRAFINO_E2E_SCHEMA: schema,
     COMPRAFINO_TEST_DATABASE_MODE: process.env.COMPRAFINO_TEST_DATABASE_MODE,
   });
+  const all = process.argv.includes("--all");
+  const listings = all || process.argv.includes("--listings");
   const now = Date.now();
   const fixtures: Record<string, string> = {};
   for (const kind of ["rich", "sparse", "old", "continuous", "gap", "decrease"] as const) {
@@ -123,7 +125,7 @@ try {
           ),
         );
       const id = ids[0]!.id;
-      if (process.argv.includes("--listings")) fixtures[`listing-${kind}-${retailer}`] = id;
+      if (listings) fixtures[`listing-${kind}-${retailer}`] = id;
       if (!last) throw new Error("Missing fixture observation");
       const listing = {
         id,
@@ -142,7 +144,7 @@ try {
       );
     }
   }
-  if (process.argv.includes("--listings")) {
+  if (listings) {
     const value: NormalizedRetailerListing = {
       retailer: "tottus",
       externalId: "independent-listing",
@@ -150,8 +152,9 @@ try {
       title: "Huevos Pardos Tottus Bandeja 30un",
       currency: "PEN",
       priceUnit: "UN",
-      currentPriceCents: 1790,
-      regularPriceCents: 1990,
+      // Keep unrelated listing fixtures above controlled shopping winners.
+      currentPriceCents: 4990,
+      regularPriceCents: 5990,
       observedAt: new Date(now - 60000),
       url: "https://www.tottus.com.pe/tottus-pe/articulo/1/test",
     };
@@ -176,7 +179,7 @@ try {
       },
     ]);
   }
-  if (process.argv.includes("--listings")) {
+  if (listings) {
     for (const state of ["unavailable", "recovered"] as const) {
       const value: NormalizedRetailerListing = {
         retailer: "metro",
@@ -184,7 +187,7 @@ try {
         productId: `availability-${state}`,
         title: `Huevos Availability ${state} Bandeja 30un`,
         url: "https://www.metro.pe/availability/p",
-        currentPriceCents: 100,
+        currentPriceCents: 2790,
         currency: "PEN",
         priceUnit: "UN",
         available: true,
@@ -251,7 +254,7 @@ try {
     if (kind === "old" && metro?.summary.status !== "empty")
       throw new Error("Old fixture mismatch");
   }
-  if (process.argv.includes("--listings")) {
+  if (listings) {
     const unmatched = await getPublicRetailerListingDetail(db, fixtures.independent!);
     if (!unmatched || unmatched.canonicalId || !unmatched.current)
       throw new Error("Unmatched listing fixture failed");
@@ -285,7 +288,7 @@ try {
         throw new Error("Listing coverage fixture failed");
     }
   }
-  const shopping = process.argv.includes("--shopping-list");
+  const shopping = all || process.argv.includes("--shopping-list");
   const shoppingFixtures = shopping
     ? {
         ...(await seedShoppingListFixtures(db, scopedClient)),
@@ -304,11 +307,15 @@ try {
         "pnpm",
         [
           "test:e2e",
-          process.argv.includes("--listings")
-            ? "listing-detail.spec.ts"
-            : shopping
-              ? "shopping-list.spec.ts"
-              : "price-history.spec.ts",
+          ...(all
+            ? []
+            : [
+                listings
+                  ? "listing-detail.spec.ts"
+                  : shopping
+                    ? "shopping-list.spec.ts"
+                    : "price-history.spec.ts",
+              ]),
         ],
         {
           cwd: new URL("../../../", import.meta.url),
@@ -316,6 +323,7 @@ try {
           env: {
             ...process.env,
             DATABASE_URL: url,
+            COMPRAFINO_CONTROLLED_E2E: all ? "1" : "",
             COMPRAFINO_E2E_SCHEMA: schema,
             PRICE_HISTORY_FIXTURE_IDS: JSON.stringify(fixtures),
             SHOPPING_LIST_FIXTURE_IDS: JSON.stringify(shoppingFixtures),

@@ -86,7 +86,7 @@ describe("exact current basket optimization", () => {
       const needs = Array.from({ length: 3 }, (_, i) =>
         need(
           i,
-          retailers.map((r, j) => option(r, (seed * (i + 7) + j * 17 + i * j * 31) % 97)),
+          retailers.map((r, j) => option(r, 1 + ((seed * (i + 7) + j * 17 + i * j * 31) % 97))),
         ),
       );
       const assignments = needs[0]!.options.flatMap((a) =>
@@ -338,4 +338,20 @@ describe("basket approval uses Milestone 15.1 fulfillment", () => {
       4000,
     );
   });
+});
+
+it("zero ordinary candidates cannot enter approved basket options", () => {
+  for (const intent of ["generic", "preferred", "strict"] as const) {
+    const result = fulfillment(
+      [candidate({ ordinaryPriceCents: 0 }), candidate({ id: "paid" })],
+      intent,
+    );
+    expect(result.approved.map((o) => o.id)).toEqual(["paid"]);
+  }
+});
+
+it("a zero ordinary option cannot win even when passed directly to the basket optimizer", () => {
+  const plans = optimizeBasket([need(1, [option("metro", 0), option("tottus", 100)])]);
+  expect(plans.every((p) => p.totalCostCents === 100)).toBe(true);
+  expect(plans.every((p) => p.retailerIds.join(",") === "tottus")).toBe(true);
 });

@@ -59,6 +59,7 @@ const rowSchema = z.object({
 });
 export function genericProductOffer(raw: unknown, now = new Date(), mode: PriceMode = "standard") {
   const row = rowSchema.parse(raw);
+  if (row.currentPriceCents <= 0) return null;
   if (row.version !== normalizationVersion || row.fingerprint !== catalogFingerprint(row.listing))
     return null;
   const retailerId = retailerIdSchema.parse(row.listing.retailerId);
@@ -283,7 +284,7 @@ export function currentGenericOfferRows(now: Date) {
     join price_history h on h.listing_id=l.id and h.valid_until is null
     left join canonical_product_listings a on a.listing_id=l.id
     left join products p on p.id=a.canonical_product_id
-    where l.active and l.available is distinct from false and h.currency='PEN'
+    where l.active and l.available is distinct from false and h.currency='PEN' and h.current_price_cents>0
       and h.price_unit=l.price_unit and h.price_unit in ('UN','KG')
       and l.last_seen_at between ${new Date(now.getTime() - 36 * 60 * 60 * 1000).toISOString()}::timestamptz and ${now.toISOString()}::timestamptz
 `;

@@ -160,3 +160,19 @@ it("keeps the ordinary winner while explicitly selecting benefits, ties and prog
   );
   expect(stale.bestRanking?.retailers).toEqual(["Metro"]);
 });
+
+it("withholds zero ordinary offers from public exact ranking in both modes", () => {
+  for (const mode of ["standard", "benefits"] as const) {
+    const product = mapPublicProduct(
+      {
+        ...raw,
+        offers: [{ ...offer, currentPriceCents: 0 }, raw.offers[1]],
+      },
+      now,
+      mode,
+    );
+    expect(product.lowestPriceCents).toBe(620);
+    expect(product.bestRanking?.priceCents).toBe(620);
+    expect(product.offers.every((o) => o.currentPriceCents > 0)).toBe(true);
+  }
+});

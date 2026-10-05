@@ -125,3 +125,7 @@ Combined family search excludes incidental exact groups using member-title evide
 ## Milestone 17 — Retailer-option detail navigation
 
 Titles/card destinations under “Opciones en supermercados” now open `/listings/[id]` using stable retailer-listing UUIDs, whether or not a safe canonical association exists. Exact canonical cards keep their comparison routes. The retailer source link opens separately in a new tab; add-to-list and other controls preserve their independent interaction layers. Ranking, matching and list intent policies are unchanged. See [listing detail](listing-detail.md) for eligibility, freshness, history and the optional canonical comparison CTA.
+
+## Positive ordinary purchasing prices (Cleanup A)
+
+An ordinary payable quote must be a positive integer PEN-cent amount. Source listing validation (including Tottus category/search/PDP normalization) rejects zero before ingestion. Existing zero states are withheld by current exact/generic SQL projections and public mapping/ranking, shopping fulfillment and basket approval/optimization. A zero ordinary quote cannot become a current/free winner, even in benefits mode. Valid positive ordinary quotes and reference/conditional price semantics are unchanged. Historical price tables and their nonnegative constraints remain unchanged; historical states are not rewritten.

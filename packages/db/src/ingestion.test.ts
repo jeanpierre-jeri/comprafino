@@ -45,3 +45,9 @@ it("rejects duplicate identity, mixed retailers and invalid money before SQL", (
     /expected int/u,
   );
 });
+
+it("rejects zero ordinary payable prices before persistence", () => {
+  expect(() => persistenceStatements("tottus", [{ ...listing, currentPriceCents: 0 }])).toThrow(
+    "Ordinary payable price must be positive",
+  );
+});

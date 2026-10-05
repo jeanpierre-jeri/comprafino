@@ -23,7 +23,7 @@ export function useShoppingList() {
   const [ready, setReady] = useState(false);
   useEffect(() => {
     if (!loaded) {
-      const stored = readShoppingStorage();
+      const stored = readShoppingStorage(sessionList);
       sessionList = stored.list;
       sessionWarning = stored.warning;
       loaded = true;
@@ -35,7 +35,7 @@ export function useShoppingList() {
     };
     const storage = (event: StorageEvent) => {
       if (event.key !== shoppingStorageKey && event.key !== null) return;
-      const stored = readShoppingStorage();
+      const stored = readShoppingStorage(sessionList);
       sessionList = stored.list;
       sessionWarning = stored.warning;
       notify();
@@ -50,9 +50,14 @@ export function useShoppingList() {
   }, []);
   function change(next: (current: ShoppingList) => ShoppingList) {
     // Read latest persisted state before mutation to reduce cross-tab lost writes.
-    if (!sessionWarning) sessionList = readShoppingStorage().list;
+    let readWarning = "";
+    if (!sessionWarning) {
+      const stored = readShoppingStorage(sessionList);
+      sessionList = stored.list;
+      readWarning = stored.warning;
+    }
     sessionList = next(sessionList);
-    sessionWarning = writeShoppingStorage(sessionList);
+    sessionWarning = writeShoppingStorage(sessionList) || readWarning;
     notify();
   }
   return { list, warning, ready, change };

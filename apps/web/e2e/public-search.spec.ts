@@ -32,7 +32,10 @@ test("malformed product IDs show public not-found behavior", async ({ page }) =>
 // harness has no database fixture lifecycle. Opt in explicitly with DATABASE_URL;
 // expected values come from persistence, never retailer requests or invented data.
 test.describe("persisted public catalog (explicit DATABASE_URL)", () => {
-  test.skip(!process.env.DATABASE_URL, "Requires an explicitly supplied persisted database");
+  test.skip(
+    !process.env.DATABASE_URL || !!process.env.COMPRAFINO_CONTROLLED_E2E,
+    "Requires an explicitly supplied persisted database",
+  );
   test("homepage → search → comparison agrees with persisted ordinary offers on mobile", async ({
     page,
   }) => {
@@ -87,7 +90,10 @@ test.describe("persisted public catalog (explicit DATABASE_URL)", () => {
 });
 
 test.describe("generic persisted offers (explicit DATABASE_URL)", () => {
-  test.skip(!process.env.DATABASE_URL, "Requires an explicitly supplied persisted database");
+  test.skip(
+    !process.env.DATABASE_URL || !!process.env.COMPRAFINO_CONTROLLED_E2E,
+    "Requires an explicitly supplied persisted database",
+  );
   test("eggs show independent options and unit-price sorting agrees with persisted exact fractions", async ({
     page,
   }) => {
@@ -136,7 +142,10 @@ test.describe("generic persisted offers (explicit DATABASE_URL)", () => {
 });
 
 test.describe("staple persisted relevance (explicit DATABASE_URL)", () => {
-  test.skip(!process.env.DATABASE_URL, "Requires the refreshed persisted staple catalog");
+  test.skip(
+    !process.env.DATABASE_URL || !!process.env.COMPRAFINO_CONTROLLED_E2E,
+    "Requires the refreshed persisted staple catalog",
+  );
   test("sugar has packaged staples and a specific oil brand stays specific", async ({ page }) => {
     await page.goto("/search?q=az%C3%BAcar");
     const cards = page
@@ -161,7 +170,10 @@ test.describe("staple persisted relevance (explicit DATABASE_URL)", () => {
 });
 
 test.describe("immediate filters and CMR (explicit DATABASE_URL)", () => {
-  test.skip(!process.env.DATABASE_URL, "Requires migrated persisted catalog");
+  test.skip(
+    !process.env.DATABASE_URL || !!process.env.COMPRAFINO_CONTROLLED_E2E,
+    "Requires migrated persisted catalog",
+  );
   test("retailer, sort, benefits and browser back restore URL controls on mobile", async ({
     page,
   }) => {

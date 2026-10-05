@@ -156,7 +156,10 @@ for (const theme of ["light", "dark"] as const) {
 test("exact comparison cards immediately respond while detail data is delayed", async ({
   page,
 }) => {
-  test.skip(!process.env.DATABASE_URL, "Requires the explicitly configured persisted catalog");
+  test.skip(
+    !process.env.DATABASE_URL || !!process.env.COMPRAFINO_CONTROLLED_E2E,
+    "Requires the explicitly configured persisted catalog",
+  );
   // The destination is only known after search renders. Hold every product RSC
   // request, including Link prefetches, before any card can populate the router cache.
   const held = await holdNavigation(page, /^\/products\/[^/]+$/u, undefined, true);
