@@ -6,7 +6,7 @@
       "outcome": {
         "status": "success",
         "result": {
-          "id": "2ef486c1-884e-46fe-9b22-35b88b90a1ea",
+          "id": "3881c5b4-722e-442b-b162-e196254032f5",
           "fetched": 243,
           "persisted": 150,
           "changed": 0
@@ -18,10 +18,10 @@
       "outcome": {
         "status": "success",
         "result": {
-          "id": "9f9e5bf0-26c1-49f7-b5b7-96e746320252",
+          "id": "492725d1-fb5f-4c37-9f1f-ba798e7e2784",
           "fetched": 198,
           "persisted": 191,
-          "changed": 1
+          "changed": 0
         }
       }
     },
@@ -30,9 +30,9 @@
       "outcome": {
         "status": "success",
         "result": {
-          "id": "c2e63ca3-b969-4537-bbe7-63120a34ee46",
-          "fetched": 208,
-          "persisted": 208,
+          "id": "50cb8b5d-fe27-4dc6-9a70-c5fe8842bb49",
+          "fetched": 228,
+          "persisted": 218,
           "changed": 0
         }
       }
@@ -52,32 +52,25 @@
   "normalization": {
     "status": "success",
     "result": {
-      "processed": 736,
-      "changed": 1
+      "processed": 952,
+      "changed": 0
     }
   },
   "matching": {
     "status": "success",
     "result": {
-      "candidates": 8853,
+      "candidates": 9751,
       "associationsChanged": 0,
       "productsChanged": 0
     }
   },
   "status": "success",
-  "durationMs": 76503,
-  "observedAt": "2026-10-04T17:32:57.708Z",
+  "durationMs": 99840,
+  "observedAt": "2026-10-05T16:16:09.636Z",
   "categoryRequests": {
     "tottus": 5,
     "plaza-vea": 11,
-    "metro": 11
+    "metro": 12
   },
-  "stageDurationSeconds": {
-    "tottus": 11.312,
-    "plaza-vea": 18.155,
-    "metro": 23.277,
-    "targeted": 0.723,
-    "normalization": 2.657,
-    "matching": 20.378
-  }
+  "measurementNote": "Milestone 18 bounded repeated refresh; see catalog-coverage-audit.json for before/expanded/repeat attribution and the partial baseline."
 }

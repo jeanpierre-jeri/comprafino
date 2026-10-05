@@ -102,7 +102,7 @@ export function createPlazaVeaAdapter(
   fetchPage: typeof fetch = fetch,
   category: VtexCategory = "dairy",
 ): SearchRetailerAdapter {
-  if (!Object.hasOwn(vtexCategories["plaza-vea"], category))
+  if (category === "eggs" || !Object.hasOwn(vtexCategories["plaza-vea"], category))
     throw new Error("Unsupported PlazaVea category");
   return {
     retailer: "plaza-vea",

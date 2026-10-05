@@ -137,6 +137,7 @@ it("freezes validated category limits and persists neither Tottus category on a 
       "toilet-paper": 20,
     },
     metro: {
+      eggs: 10,
       dairy: 100,
       "sugar-brown": 20,
       "sugar-white": 20,
@@ -223,7 +224,7 @@ it("scheduled staple scopes are bounded, sequential and deduplicated before pers
     },
     pause,
   );
-  expect(await adapter.fetchListings(220)).toEqual({ listings: [], discovered: 140 });
+  expect(await adapter.fetchListings(230)).toEqual({ listings: [], discovered: 160 });
   expect(scopes).toEqual([
     "dairy",
     "sugar-brown",
@@ -232,9 +233,10 @@ it("scheduled staple scopes are bounded, sequential and deduplicated before pers
     "flour",
     "oats",
     "toilet-paper",
+    "eggs",
   ]);
-  expect(fetchListings.mock.calls.map((c) => c[0])).toEqual([100, 20, 20, 20, 20, 20, 20]);
-  expect(pause).toHaveBeenCalledTimes(6);
+  expect(fetchListings.mock.calls.map((c) => c[0])).toEqual([100, 20, 20, 20, 20, 20, 20, 10]);
+  expect(pause).toHaveBeenCalledTimes(7);
 });
 it("a failed staple source prevents an atomic retailer write and further category requests", async () => {
   const fetchListings = vi

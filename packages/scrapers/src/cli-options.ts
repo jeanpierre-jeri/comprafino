@@ -23,11 +23,13 @@ export function parseArguments(args: readonly string[]) {
     else if (/^--limit=\d+$/u.test(arg)) limit = Number(arg.slice(8));
     else
       throw new Error(
-        "Usage: pnpm scrape:<retailer> -- --dry-run --limit=20 --category=dairy|sugar-brown|sugar-white|pasta|flour|oats|toilet-paper (staple limit 1–20; dairy 1–500)",
+        "Usage: pnpm scrape:<retailer> -- --dry-run --limit=20 --category=dairy|eggs (Metro)|sugar-brown|sugar-white|pasta|flour|oats|toilet-paper (staple limit 1–20; dairy 1–500)",
       );
   }
   if (!Number.isInteger(limit) || limit < 1 || limit > 500)
     throw new Error("Limit must be from 1 to 500");
+  if (retailer === "plaza-vea" && category === "eggs")
+    throw new Error("Usage: eggs source is Metro only");
   if (retailer === "tottus" && category && category !== "dairy")
     throw new Error("Usage: Tottus supports only its existing meat/dairy categories");
   if (category && category !== "dairy" && limit > 20)

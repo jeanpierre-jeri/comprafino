@@ -50,6 +50,20 @@
       "when": 1791147201358,
       "tag": "0006_light_blink",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791215593904,
+      "tag": "0007_brainy_captain_britain",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791216962676,
+      "tag": "0008_large_masque",
+      "breakpoints": true
     }
   ]
 }

@@ -12,7 +12,20 @@ const vtexIdentity = z
   .array(
     z.object({
       productId: z.string(),
-      items: z.array(z.object({ itemId: z.string() })),
+      items: z.array(
+        z.object({
+          itemId: z.string(),
+          sellers: z.array(
+            z.object({
+              sellerId: z.string(),
+              commertialOffer: z.object({
+                IsAvailable: z.boolean(),
+                AvailableQuantity: z.number().int().nonnegative(),
+              }),
+            }),
+          ),
+        }),
+      ),
     }),
   )
   .max(1);
@@ -39,9 +52,15 @@ export async function lookupVtex(
   const matching = products[0]!.items.filter((item) => item.itemId === known.externalId);
   if (!matching.length) return { status: "not-found" };
   if (matching.length !== 1) throw new Error("Ambiguous SKU");
+  const sellers = matching[0]!.sellers.filter((seller) => seller.sellerId === "1");
+  // Missing or malformed seller evidence is unknown, never verified stock absence.
+  if (sellers.length !== 1) throw new Error("Missing or ambiguous availability evidence");
+  const offer = sellers[0]!.commertialOffer;
+  if (!offer.IsAvailable || offer.AvailableQuantity === 0) return { status: "unavailable" };
   const parsed = parse(raw, new Date());
   const listing = parsed.listings.find((row) => row.externalId === known.externalId);
-  return listing ? { status: "observed", listing } : { status: "unavailable" };
+  if (!listing) throw new Error("Available SKU lacks a usable quote");
+  return { status: "observed", listing };
 }
 function requestOptions(accept: string): RequestInit {
   return {
@@ -95,9 +114,10 @@ export function parseTottusProduct(html: string, known: KnownListing, at: Date):
     !product.isPublished ||
     !variant.isPurchaseable ||
     !variant.isOnlineSellable ||
-    !sellers[0]?.isActive
+    sellers[0]?.isActive === false
   )
     return { status: "unavailable" };
+  if (!sellers[0]) throw new Error("Missing availability seller evidence");
   // Reuse category/search price, unit and listing validation exactly.
   const mapped = {
     productId: product.id,
@@ -114,7 +134,7 @@ export function parseTottusProduct(html: string, known: KnownListing, at: Date):
     merchantCategoryId: product.merchantCategoryId,
     prices: variant.prices,
   };
-  const listing = normalizeTottusProduct(mapped, at);
+  const listing = { ...normalizeTottusProduct(mapped, at), available: true };
   return { status: "observed", listing };
 }
 export async function lookupTottus(

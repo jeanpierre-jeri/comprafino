@@ -1,0 +1,1 @@
+ALTER TABLE "retailer_listings" DROP CONSTRAINT "listing_availability_evidence";

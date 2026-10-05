@@ -55,7 +55,7 @@ try {
           discoveryPerRunCap: 30,
           discoveryPerDayCap: 90,
           totalScheduledDailyCap: refreshCadence.runsPerDay * (budget.maximumRequests + 100) + 90,
-          note: "Category estimate: Tottus 2+3 pages; VTEX dairy 5 pages and six one-page staples each. Actual source availability affects pages. Discovery caps are 10 queries/run, 30/day, three retailers. Audit/manual calls excluded.",
+          note: "Category estimate: Tottus 2+3 pages; VTEX dairy 5 pages and six one-page staples each, plus one Metro eggs page. Actual source availability affects pages. Discovery caps are 10 queries/run, 30/day, three retailers. Audit/manual calls excluded.",
         },
         actions: {
           refreshCommandMinutesPerDay: evidence

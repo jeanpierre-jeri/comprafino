@@ -11,6 +11,7 @@ export const vtexCategories = {
     "toilet-paper": "399/1627/402",
   },
   metro: {
+    eggs: "1001327/1001347/1001348", // Milestone 18: validated narrow eggs source
     dairy: "1001436", // existing verified dairy root
     "sugar-brown": "1001253/1001258/1001259",
     "sugar-white": "1001253/1001258/1001260",

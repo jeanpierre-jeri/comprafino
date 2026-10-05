@@ -13,6 +13,8 @@ const tables = [
   "canonical_product_listings",
   "price_history",
   "ingestion_runs",
+  "listing_observation_days",
+  "retailer_listing_offers",
   "discovery_queries",
   "discovery_daily_budget",
 ] as const;

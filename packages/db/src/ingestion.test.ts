@@ -25,7 +25,7 @@ it("builds one transactional lock/upsert/close/open batch with parameterized sou
   expect(queries[1]?.sql).toContain("on conflict (listing_id, observation_date)");
   expect(queries[1]?.sql).toContain("America/Lima");
   expect(queries[1]?.sql).toContain(
-    "x.current_price_cents > 0 and x.available is distinct from false",
+    "x.current_price_cents > 0 and u.available is distinct from false",
   );
   expect(queries[1]?.sql).not.toContain(listing.title);
   expect(

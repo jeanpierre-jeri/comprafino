@@ -11,6 +11,8 @@ import { testSchemaClient } from "./test-schema-client.ts";
 import { requireDatabaseUrl } from "./env.ts";
 import { createDatabase } from "./client.ts";
 import { getCanonicalProductPriceHistory } from "./price-history.ts";
+import { knownListings, claimListingRefresh, finishListingRefresh } from "./listing-refresh.ts";
+import { searchGenericProductOffers } from "./generic-offers.ts";
 import { persistListings } from "./ingestion.ts";
 import { persistCatalogNormalizations } from "./catalog.ts";
 import type { NormalizedRetailerListing } from "@comprafino/core";
@@ -173,6 +175,51 @@ try {
         sourceUnitMultiplier: null,
       },
     ]);
+  }
+  if (process.argv.includes("--listings")) {
+    for (const state of ["unavailable", "recovered"] as const) {
+      const value: NormalizedRetailerListing = {
+        retailer: "metro",
+        externalId: `availability-${state}`,
+        productId: `availability-${state}`,
+        title: `Huevos Availability ${state} Bandeja 30un`,
+        url: "https://www.metro.pe/availability/p",
+        currentPriceCents: 100,
+        currency: "PEN",
+        priceUnit: "UN",
+        available: true,
+        observedAt: new Date(now - 60000),
+      };
+      await persistListings(db, "metro", [value]);
+      const known = (await knownListings(db)).find((r) => r.externalId === value.externalId)!;
+      const at = new Date(now - 30000);
+      if (!(await claimListingRefresh(db, known, at)))
+        throw new Error("Availability fixture admission failed");
+      await finishListingRefresh(db, known, at, "unavailable");
+      if (state === "recovered")
+        await persistListings(db, "metro", [{ ...value, observedAt: new Date(now - 1000) }]);
+      await persistCatalogNormalizations(db, [{ ...value, id: known.id, retailerId: "metro" }]);
+      fixtures[`listing-${state}`] = known.id;
+      const detail = await getPublicRetailerListingDetail(db, known.id);
+      const offers = await searchGenericProductOffers(db, "huevos availability", "relevance");
+      if (
+        !detail?.history ||
+        detail.current !== (state === "recovered") ||
+        offers.some((o) => o.id === known.id) !== (state === "recovered")
+      )
+        throw new Error("Availability fixture current/history mismatch");
+      const history = z
+        .object({ count: z.number() })
+        .parse(
+          (
+            await scopedClient.query(
+              "select count(*)::int as count from price_history where listing_id=$1",
+              [known.id],
+            )
+          )[0],
+        );
+      if (history.count !== 1) throw new Error("Availability fixture modified ordinary history");
+    }
   }
   for (const [kind, id] of Object.entries(fixtures).filter(
     ([key]) => !key.startsWith("listing-") && key !== "independent",

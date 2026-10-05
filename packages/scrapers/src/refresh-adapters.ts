@@ -19,6 +19,7 @@ export const refreshCoverage = {
     "toilet-paper": 20,
   },
   metro: {
+    eggs: 10,
     dairy: 100,
     "sugar-brown": 20,
     "sugar-white": 20,
@@ -55,11 +56,16 @@ export function combineVtexCoverage(
   return {
     retailer,
     async fetchListings(limit) {
-      if (limit !== 220) throw new Error("Scheduled VTEX coverage requires limit 220");
+      const expectedLimit = retailer === "metro" ? 230 : 220;
+      if (limit !== expectedLimit)
+        throw new Error(`Scheduled VTEX coverage requires limit ${expectedLimit}`);
       const listings = new Map<string, NormalizedRetailerListing>();
       let discovered = 0;
-      for (const [index, category] of vtexCategoryKeys.entries()) {
-        const categoryLimit = refreshCoverage[retailer][category];
+      const categories: readonly VtexCategory[] =
+        retailer === "metro" ? [...vtexCategoryKeys, "eggs"] : vtexCategoryKeys;
+      for (const [index, category] of categories.entries()) {
+        const categoryLimit =
+          category === "eggs" ? refreshCoverage.metro.eggs : refreshCoverage[retailer][category];
         if (index > 0) await pause();
         const result = await createAdapter(category).fetchListings(categoryLimit);
         if (result.listings.length > categoryLimit)
@@ -88,7 +94,7 @@ export function createRefreshAdapters(fetchPage: typeof fetch = fetch) {
     },
     metro: {
       adapter: combineVtexCoverage("metro", (category) => createMetroAdapter(fetchPage, category)),
-      limit: 220,
+      limit: 230,
     },
   };
 }

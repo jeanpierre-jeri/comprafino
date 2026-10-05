@@ -130,3 +130,45 @@ it("rejects untrusted Tottus URL before a request and does not retry system fail
     ),
   ).toEqual({ status: "not-found" });
 });
+
+it.each([
+  ["metro", metro, createMetroAdapter],
+  ["plaza-vea", plaza, createPlazaVeaAdapter],
+] as const)(
+  "%s distinguishes missing seller evidence from explicit unavailable stock",
+  async (retailer, fixture, factory) => {
+    const original = fixture[0]!;
+    const item = original.items[0]!;
+    const row = known(item.itemId, original.productId, retailer);
+    const missing = structuredClone(original);
+    missing.items[0]!.sellers = [];
+    await expect(factory(async () => Response.json([missing])).lookupListing(row)).rejects.toThrow(
+      "availability evidence",
+    );
+    const zero = structuredClone(original);
+    zero.items[0]!.sellers.find((s) => s.sellerId === "1")!.commertialOffer.AvailableQuantity = 0;
+    expect(await factory(async () => Response.json([zero])).lookupListing(row)).toEqual({
+      status: "unavailable",
+    });
+    const invalid = structuredClone(original);
+    const seller = invalid.items[0]!.sellers.find((s) => s.sellerId === "1")!;
+    seller.commertialOffer.IsAvailable = true;
+    seller.commertialOffer.AvailableQuantity = 1;
+    seller.commertialOffer.Price = 0;
+    await expect(factory(async () => Response.json([invalid])).lookupListing(row)).rejects.toThrow(
+      /./u,
+    );
+  },
+);
+
+it("Tottus exact positive flags verify availability; missing seller is unknown", () => {
+  expect(parseTottusProduct(html(tottus), tottusKnown, new Date())).toMatchObject({
+    status: "observed",
+    listing: { available: true },
+  });
+  const missing = structuredClone(tottus);
+  missing.props.pageProps.productData.variants[0]!.offerings = [];
+  expect(() => parseTottusProduct(html(missing), tottusKnown, new Date())).toThrow(
+    "Missing availability",
+  );
+});

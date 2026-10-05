@@ -56,3 +56,18 @@ it("caps a sparse staple category at two pages even before reaching the usable l
   expect(result.discovered).toBe(40);
   expect(request).toHaveBeenCalledTimes(2);
 });
+
+it("keeps the new eggs source Metro-only and stops at the requested bounded sample", async () => {
+  const request = vi
+    .fn<typeof fetch>()
+    .mockResolvedValue(new Response(JSON.stringify(pasta), { headers: { resources: "0-19/67" } }));
+  const result = await createMetroAdapter(request, "eggs").fetchListings(10);
+  expect(result.listings).toHaveLength(10);
+  const input = request.mock.calls[0]![0];
+  if (!(input instanceof URL)) throw new Error("Expected category URL");
+  expect(input.searchParams.get("fq")).toBe("C:/1001327/1001347/1001348/");
+  expect(request).toHaveBeenCalledOnce();
+  expect(() => parseArguments(["--retailer=plaza-vea", "--category=eggs", "--limit=10"])).toThrow(
+    "Metro only",
+  );
+});

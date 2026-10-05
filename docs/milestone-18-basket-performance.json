@@ -1,0 +1,285 @@
+{
+  "measuredAt": "2026-10-05T16:12:14.004Z",
+  "environment": "Isolated loopback PostgreSQL 17; native TypeScript execution of the actual POST handler, no Next.js HTTP server or deployment/network overhead",
+  "catalogListings": 900,
+  "warmupsPerCase": 1,
+  "measuredRunsPerCase": 5,
+  "measurements": [
+    {
+      "items": 5,
+      "mode": "standard",
+      "queryMs": {
+        "min": 45.04177999999979,
+        "median": 53.64784899999995,
+        "max": 72.37800900000002
+      },
+      "totalMs": {
+        "min": 84.94279800000004,
+        "median": 94.71027699999968,
+        "max": 112.34792199999993
+      },
+      "handlerResponseMs": {
+        "min": 85.52648599999998,
+        "median": 95.4171150000002,
+        "max": 112.95027199999981
+      },
+      "samples": [
+        {
+          "queryMs": 45.36544599999979,
+          "totalMs": 84.94279800000004,
+          "handlerResponseMs": 85.52648599999998
+        },
+        {
+          "queryMs": 45.04177999999979,
+          "totalMs": 92.79631000000018,
+          "handlerResponseMs": 93.26813000000016
+        },
+        {
+          "queryMs": 72.37800900000002,
+          "totalMs": 112.34792199999993,
+          "handlerResponseMs": 112.95027199999981
+        },
+        {
+          "queryMs": 55.73910500000011,
+          "totalMs": 94.71027699999968,
+          "handlerResponseMs": 95.4171150000002
+        },
+        {
+          "queryMs": 53.64784899999995,
+          "totalMs": 95.87714099999994,
+          "handlerResponseMs": 96.34721900000022
+        }
+      ]
+    },
+    {
+      "items": 5,
+      "mode": "benefits",
+      "queryMs": {
+        "min": 47.04559500000005,
+        "median": 51.65431199999966,
+        "max": 63.63138100000015
+      },
+      "totalMs": {
+        "min": 89.83538300000009,
+        "median": 90.60691600000018,
+        "max": 101.53900000000021
+      },
+      "handlerResponseMs": {
+        "min": 90.42043100000001,
+        "median": 91.13874899999973,
+        "max": 102.0079380000002
+      },
+      "samples": [
+        {
+          "queryMs": 51.65431199999966,
+          "totalMs": 90.511798,
+          "handlerResponseMs": 90.9480739999999
+        },
+        {
+          "queryMs": 49.08080199999995,
+          "totalMs": 89.83538300000009,
+          "handlerResponseMs": 90.42043100000001
+        },
+        {
+          "queryMs": 63.63138100000015,
+          "totalMs": 101.53900000000021,
+          "handlerResponseMs": 102.0079380000002
+        },
+        {
+          "queryMs": 47.04559500000005,
+          "totalMs": 90.60691600000018,
+          "handlerResponseMs": 91.13874899999973
+        },
+        {
+          "queryMs": 52.67995599999995,
+          "totalMs": 97.31849499999998,
+          "handlerResponseMs": 97.78226300000006
+        }
+      ]
+    },
+    {
+      "items": 20,
+      "mode": "standard",
+      "queryMs": {
+        "min": 47.26447300000018,
+        "median": 50.562022999999954,
+        "max": 64.43342299999995
+      },
+      "totalMs": {
+        "min": 89.08386199999995,
+        "median": 96.4272820000001,
+        "max": 106.19693999999981
+      },
+      "handlerResponseMs": {
+        "min": 89.93579100000034,
+        "median": 97.29484199999979,
+        "max": 106.98890400000028
+      },
+      "samples": [
+        {
+          "queryMs": 50.562022999999954,
+          "totalMs": 96.4272820000001,
+          "handlerResponseMs": 97.29484199999979
+        },
+        {
+          "queryMs": 47.26447300000018,
+          "totalMs": 89.08386199999995,
+          "handlerResponseMs": 89.93579100000034
+        },
+        {
+          "queryMs": 64.43342299999995,
+          "totalMs": 106.19693999999981,
+          "handlerResponseMs": 106.98890400000028
+        },
+        {
+          "queryMs": 49.531570999999985,
+          "totalMs": 94.90209099999993,
+          "handlerResponseMs": 95.7386489999999
+        },
+        {
+          "queryMs": 50.98206899999968,
+          "totalMs": 101.64528100000007,
+          "handlerResponseMs": 102.94842800000015
+        }
+      ]
+    },
+    {
+      "items": 20,
+      "mode": "benefits",
+      "queryMs": {
+        "min": 46.19726900000023,
+        "median": 49.30336100000022,
+        "max": 61.96550500000012
+      },
+      "totalMs": {
+        "min": 86.7656179999999,
+        "median": 93.27680899999996,
+        "max": 105.05932900000016
+      },
+      "handlerResponseMs": {
+        "min": 87.57911400000012,
+        "median": 94.0928759999997,
+        "max": 105.93800099999999
+      },
+      "samples": [
+        {
+          "queryMs": 49.81779400000005,
+          "totalMs": 96.67064500000015,
+          "handlerResponseMs": 98.7022820000002
+        },
+        {
+          "queryMs": 49.30336100000022,
+          "totalMs": 93.27680899999996,
+          "handlerResponseMs": 94.0928759999997
+        },
+        {
+          "queryMs": 61.96550500000012,
+          "totalMs": 105.05932900000016,
+          "handlerResponseMs": 105.93800099999999
+        },
+        {
+          "queryMs": 47.16153600000007,
+          "totalMs": 87.71331499999997,
+          "handlerResponseMs": 88.50419000000011
+        },
+        {
+          "queryMs": 46.19726900000023,
+          "totalMs": 86.7656179999999,
+          "handlerResponseMs": 87.57911400000012
+        }
+      ]
+    },
+    {
+      "items": 50,
+      "mode": "standard",
+      "queryMs": {
+        "min": 43.136491000000206,
+        "median": 44.32782800000041,
+        "max": 67.8085860000001
+      },
+      "totalMs": {
+        "min": 84.0615429999998,
+        "median": 85.96141700000044,
+        "max": 109.39950099999987
+      },
+      "handlerResponseMs": {
+        "min": 85.92440500000066,
+        "median": 87.7264610000002,
+        "max": 111.25466200000028
+      },
+      "samples": [
+        {
+          "queryMs": 67.8085860000001,
+          "totalMs": 109.39950099999987,
+          "handlerResponseMs": 111.25466200000028
+        },
+        {
+          "queryMs": 43.136491000000206,
+          "totalMs": 84.0615429999998,
+          "handlerResponseMs": 85.92440500000066
+        },
+        {
+          "queryMs": 43.87492199999997,
+          "totalMs": 84.24331799999982,
+          "handlerResponseMs": 86.0551460000006
+        },
+        {
+          "queryMs": 60.47084200000063,
+          "totalMs": 100.48268999999982,
+          "handlerResponseMs": 102.91260800000055
+        },
+        {
+          "queryMs": 44.32782800000041,
+          "totalMs": 85.96141700000044,
+          "handlerResponseMs": 87.7264610000002
+        }
+      ]
+    },
+    {
+      "items": 50,
+      "mode": "benefits",
+      "queryMs": {
+        "min": 42.99301999999989,
+        "median": 44.83846999999969,
+        "max": 62.73055699999986
+      },
+      "totalMs": {
+        "min": 84.36448800000016,
+        "median": 86.27792300000056,
+        "max": 104.73042499999974
+      },
+      "handlerResponseMs": {
+        "min": 86.14320299999963,
+        "median": 88.06395799999973,
+        "max": 106.53822299999956
+      },
+      "samples": [
+        {
+          "queryMs": 62.73055699999986,
+          "totalMs": 104.73042499999974,
+          "handlerResponseMs": 106.53822299999956
+        },
+        {
+          "queryMs": 42.99301999999989,
+          "totalMs": 84.36448800000016,
+          "handlerResponseMs": 86.14320299999963
+        },
+        {
+          "queryMs": 44.83846999999969,
+          "totalMs": 85.89448200000061,
+          "handlerResponseMs": 87.73618199999964
+        },
+        {
+          "queryMs": 61.40293799999927,
+          "totalMs": 102.30347799999981,
+          "handlerResponseMs": 104.1080149999998
+        },
+        {
+          "queryMs": 43.78051400000004,
+          "totalMs": 86.27792300000056,
+          "handlerResponseMs": 88.06395799999973
+        }
+      ]
+    }
+  ]
+}

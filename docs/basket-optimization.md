@@ -77,3 +77,7 @@ pnpm test:db:down
 ```
 
 No temporal advice, weekdays/month-period recommendations, travel/distance, delivery fees, alerts, accounts or individual retailer-listing history pages are included.
+
+## Milestone 18 availability and capacity review
+
+The shared current candidate query already excludes explicit false and admits unknown under freshness rules. Updated evidence persistence now prevents unknown quotes from undoing explicit unavailability; newer source-positive recovery restores eligible options. No optimization/substitution rule changes. The final 952-row catalog has 228 unique potential generic/exact basket candidates. Keep the 1,000 guard: real configured DB four-need retrieval median is 1,879.6 ms, distinct from the isolated 900-row handler benchmark (87.7–97.3 ms). See [coverage report](catalog-coverage.md), [availability](availability.md) and [new benchmark](milestone-18-basket-performance.json). The original Milestone 16 benchmark remains preserved.

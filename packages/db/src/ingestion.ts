@@ -49,24 +49,45 @@ export function persistenceStatements(
   const ids = JSON.stringify(listings.map((listing) => listing.externalId));
   const scope = sql`l.retailer_id = ${retailer} and l.external_id in (select jsonb_array_elements_text(${ids}::jsonb))`;
   return [
-    sql`select id from retailers where id = ${retailer} for update`,
+    // Serialize new identity admission across retailers; existing quote updates remain allowed at the cap.
+    sql`with catalog_lock as materialized (select pg_advisory_xact_lock(hashtext('comprafino:catalog-admission')))
+      select id from retailers cross join catalog_lock where id = ${retailer} for update of retailers`,
+    // The SQL admission guard aborts the whole HTTP batch at capacity. Checking
+    // a returned boolean in JS would be too late to roll back its writes.
     sql`
-      with updated as (insert into retailer_listings (retailer_id, external_id, product_id, title, url, image_url,
-        current_price_cents, regular_price_cents, currency, price_unit, available, source_brand, source_unit_multiplier, package_text, category, first_seen_at, last_seen_at, first_seen_via, discovery_query_id, last_category_observed_at)
+      with new_identities as (
+        select count(*)::int as total from jsonb_array_elements_text(${ids}::jsonb) incoming(external_id)
+        where not exists(select 1 from retailer_listings l where l.retailer_id=${retailer} and l.external_id=incoming.external_id)
+      ), admission as materialized (
+        select 1 / case when total=0 or (select count(*) from retailer_listings)+total<=1000 then 1 else 0 end as allowed
+        from new_identities
+      ), updated as (insert into retailer_listings (retailer_id, external_id, product_id, title, url, image_url,
+        current_price_cents, regular_price_cents, currency, price_unit, available, source_brand, source_unit_multiplier, package_text, category, first_seen_at, last_seen_at, first_seen_via, discovery_query_id, last_category_observed_at, availability_verified_at)
       select retailer_id, external_id, product_id, title, url, image_url, current_price_cents,
         regular_price_cents, currency, price_unit, available, source_brand, source_unit_multiplier, package_text, category, observed_at, observed_at,
-        ${origin}, ${acquisition.queryId ?? null}::uuid, case when ${acquisition.source}='category' then observed_at else null end
+        ${origin}, ${acquisition.queryId ?? null}::uuid, case when ${acquisition.source}='category' then observed_at else null end,
+        case when available is not null then observed_at else null end
       from jsonb_to_recordset(${payload}::jsonb) as x(retailer_id text, external_id text, product_id text,
         title text, url text, image_url text, current_price_cents integer, regular_price_cents integer,
-        currency text, price_unit text, available boolean, source_brand text, source_unit_multiplier numeric, package_text text, category text, observed_at timestamptz)
+        currency text, price_unit text, available boolean, source_brand text, source_unit_multiplier numeric, package_text text, category text, observed_at timestamptz) cross join admission where admission.allowed=1
       on conflict (retailer_id, external_id) do update set
         product_id = excluded.product_id, title = excluded.title, url = excluded.url, image_url = excluded.image_url,
         current_price_cents = excluded.current_price_cents, regular_price_cents = excluded.regular_price_cents,
-        currency = excluded.currency, price_unit = excluded.price_unit, available = excluded.available,
+        currency = excluded.currency, price_unit = excluded.price_unit,
+        available = case when excluded.available is not null and
+          (retailer_listings.availability_verified_at is null or retailer_listings.availability_verified_at <= excluded.last_seen_at)
+          then excluded.available else retailer_listings.available end,
+        availability_verified_at = case when excluded.available is not null and
+          (retailer_listings.availability_verified_at is null or retailer_listings.availability_verified_at <= excluded.last_seen_at)
+          then excluded.last_seen_at else retailer_listings.availability_verified_at end,
+        exact_missing_count = case when retailer_listings.last_exact_missing_at is null or retailer_listings.last_exact_missing_at <= excluded.last_seen_at
+          then 0 else retailer_listings.exact_missing_count end,
+        last_exact_missing_at = case when retailer_listings.last_exact_missing_at is null or retailer_listings.last_exact_missing_at <= excluded.last_seen_at
+          then null else retailer_listings.last_exact_missing_at end,
         source_brand = excluded.source_brand, source_unit_multiplier = excluded.source_unit_multiplier,
         package_text = excluded.package_text, category = excluded.category, last_seen_at = excluded.last_seen_at, active = true,
         last_category_observed_at = coalesce(excluded.last_category_observed_at, retailer_listings.last_category_observed_at)
-      where retailer_listings.last_seen_at < excluded.last_seen_at returning id, external_id, (xmax=0) as inserted),
+      where retailer_listings.last_seen_at < excluded.last_seen_at returning id, external_id, available, (xmax=0) as inserted),
       incoming as (
         select u.id, x.observed_at, x.offers from updated u
         join jsonb_to_recordset(${payload}::jsonb) as x(external_id text, observed_at timestamptz, offers jsonb)
@@ -77,7 +98,7 @@ export function persistenceStatements(
         from updated u join jsonb_to_recordset(${payload}::jsonb)
           as x(external_id text, observed_at timestamptz, current_price_cents integer, available boolean)
           on x.external_id=u.external_id
-        where x.current_price_cents > 0 and x.available is distinct from false
+        where x.current_price_cents > 0 and u.available is distinct from false
         on conflict (listing_id, observation_date) do update set
           first_observed_at=least(listing_observation_days.first_observed_at, excluded.first_observed_at),
           last_observed_at=greatest(listing_observation_days.last_observed_at, excluded.last_observed_at),

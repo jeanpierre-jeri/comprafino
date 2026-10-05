@@ -24,7 +24,11 @@ export const knownListingSchema = z.object({
   productId: z.string().min(1),
   url: z.url(),
   observedAt: z.coerce.date(),
+  available: z.boolean().nullable().optional(),
+  availabilityVerifiedAt: z.coerce.date().nullable().optional(),
   public: z.boolean(),
+  shoppingRelevant: z.boolean().optional(),
+  usefulStaple: z.boolean().optional(),
   firstSeenVia: z.enum(["unknown", "category", "discovery"]),
   lastCategoryObservedAt: z.coerce.date().nullable(),
   lastTargetedAttemptAt: z.coerce.date().nullable(),
@@ -36,9 +40,13 @@ export function hasTargetedRefreshPath(row: KnownListing): boolean {
   return row.url.startsWith(`https://www.tottus.com.pe/tottus-pe/articulo/${row.productId}/`);
 }
 export function listingNeedsRefresh(row: KnownListing, now: Date): boolean {
+  // Unknown category quotes cannot indefinitely prevent verification/recovery
+  // after an explicit negative exact observation. Fresh negative evidence waits.
+  const evidenceAt =
+    row.available === false ? (row.availabilityVerifiedAt ?? row.observedAt) : row.observedAt;
   return (
     hasTargetedRefreshPath(row) &&
-    row.observedAt.getTime() <= now.getTime() - listingRefreshPolicy.ageHours * 3_600_000 &&
+    evidenceAt.getTime() <= now.getTime() - listingRefreshPolicy.ageHours * 3_600_000 &&
     (!row.lastTargetedAttemptAt ||
       row.lastTargetedAttemptAt.getTime() <=
         now.getTime() - listingRefreshPolicy.cooldownHours * 3_600_000)
@@ -47,7 +55,15 @@ export function listingNeedsRefresh(row: KnownListing, now: Date): boolean {
 export function selectListingRefresh(rows: readonly KnownListing[], now: Date, limit: number) {
   if (!Number.isInteger(limit) || limit < 1 || limit > 100) throw new Error("Limit must be 1–100");
   const priority = (row: KnownListing) =>
-    row.public ? 0 : row.firstSeenVia === "discovery" ? 1 : 2;
+    row.public
+      ? 0
+      : row.shoppingRelevant
+        ? 1
+        : row.firstSeenVia === "discovery"
+          ? 2
+          : row.usefulStaple
+            ? 3
+            : 4;
   return rows
     .filter((row) => listingNeedsRefresh(row, now))
     .sort(

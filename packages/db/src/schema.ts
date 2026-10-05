@@ -88,6 +88,9 @@ export const retailerListings = pgTable(
     currency: text("currency").notNull(),
     priceUnit: text("price_unit").notNull(),
     available: boolean("available"),
+    availabilityVerifiedAt: time("availability_verified_at"),
+    exactMissingCount: integer("exact_missing_count").notNull().default(0),
+    lastExactMissingAt: time("last_exact_missing_at"),
     sourceBrand: text("source_brand"),
     sourceUnitMultiplier: numeric("source_unit_multiplier"),
     packageText: text("package_text"),
@@ -117,6 +120,7 @@ export const retailerListings = pgTable(
       sql`${t.targetedStatus} is null or ${t.targetedStatus} in ('observed','unavailable','not-found','failed')`,
     ),
     check("listing_times", sql`${t.lastSeenAt} >= ${t.firstSeenAt}`),
+    check("listing_missing_count", sql`${t.exactMissingCount} >= 0`),
   ],
 );
 export const priceHistory = pgTable(

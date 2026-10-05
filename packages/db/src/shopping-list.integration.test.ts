@@ -186,7 +186,7 @@ describe.skipIf(!url)("batched current shopping snapshot", () => {
     }
   });
   it("retains options beyond the presentation cutoff and rejects snapshot overflow", async () => {
-    const listings = Array.from({ length: 994 }, (_, i) => ({
+    const listings = Array.from({ length: 992 }, (_, i) => ({
       retailer: "metro" as const,
       externalId: `basket-guard-${i}`,
       productId: `basket-guard-${i}`,
@@ -210,7 +210,19 @@ describe.skipIf(!url)("batched current shopping snapshot", () => {
       db,
       listings.map((l) => ({ ...l, id: ids.get(l.externalId)!, retailerId: "metro" })),
     );
-    // Eight existing fixtures + 994 gives 1002 current listings: never truncate.
+    // The writer now rejects new identities above 1000. Deliberately inject one
+    // extra isolated row to retain the independent reader overflow regression.
+    await scoped.query(`insert into retailer_listings select (jsonb_populate_record(null::retailer_listings,
+      to_jsonb(l)||jsonb_build_object('id',gen_random_uuid(),'external_id','basket-guard-overflow'))).*
+      from retailer_listings l where external_id='basket-guard-0'`);
+    await scoped.query(`insert into listing_normalizations select (jsonb_populate_record(null::listing_normalizations,
+      to_jsonb(n)||jsonb_build_object('listing_id',extra.id))).* from listing_normalizations n
+      join retailer_listings l on l.id=n.listing_id cross join retailer_listings extra
+      where l.external_id='basket-guard-0' and extra.external_id='basket-guard-overflow'`);
+    await scoped.query(`insert into price_history select (jsonb_populate_record(null::price_history,
+      to_jsonb(h)||jsonb_build_object('id',gen_random_uuid(),'listing_id',extra.id))).* from price_history h
+      join retailer_listings l on l.id=h.listing_id cross join retailer_listings extra
+      where l.external_id='basket-guard-0' and extra.external_id='basket-guard-overflow'`);
     await expect(
       evaluateCurrentShoppingList(db, { version: 2, items: [make("generic")] }, "standard"),
     ).rejects.toThrow("snapshot bound exceeded");

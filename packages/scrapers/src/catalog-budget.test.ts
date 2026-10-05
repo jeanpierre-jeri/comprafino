@@ -3,12 +3,12 @@ import { categoryRequestBudget, workflowCadence, catalogProjection } from "./cat
 it("accounts for sparse page caps independently of usable observation limits", () => {
   const budget = categoryRequestBudget();
   expect(budget).toMatchObject({
-    categorySources: 16,
-    observationCap: 590,
-    typicalRequests: 27,
-    maximumRequests: 98,
+    categorySources: 17,
+    observationCap: 600,
+    typicalRequests: 28,
+    maximumRequests: 100,
   });
-  expect(budget.sources.filter((s) => s.maximumRequests === 2)).toHaveLength(12);
+  expect(budget.sources.filter((s) => s.maximumRequests === 2)).toHaveLength(13);
 });
 it("reads actual cron cadence and refuses unsupported or invalid assumptions", () => {
   expect(workflowCadence('cron: "17 11,23 * * *"')).toEqual({

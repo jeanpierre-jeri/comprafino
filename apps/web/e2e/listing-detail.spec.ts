@@ -158,3 +158,28 @@ test.describe("isolated listing details", () => {
       }
   });
 });
+
+test("explicit unavailable offer retains its listing history and recovery restores search", async ({
+  page,
+}) => {
+  test.skip(!raw, "Run isolated listing fixtures after build");
+  await page.goto("/search?q=huevos+availability");
+  await expect(page.locator(`[data-offer-id="${fixture("listing-unavailable")}"]`)).toHaveCount(0);
+  await expect(page.locator(`[data-offer-id="${fixture("listing-recovered")}"]`)).toBeVisible();
+  await page.goto(`/listings/${fixture("listing-unavailable")}`);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Huevos Availability unavailable Bandeja 30un",
+  );
+  await expect(
+    page.locator(".detail-best-price").getByText("No disponible en la última consulta.", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(page.getByText("Precio online para todos", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Historial del precio para todos" })).toBeVisible();
+  await page.goto(`/listings/${fixture("listing-recovered")}`);
+  await expect(page.getByText("Precio online para todos", { exact: true })).toBeVisible();
+  await expect(page.getByText("No disponible en la última consulta.", { exact: true })).toHaveCount(
+    0,
+  );
+});

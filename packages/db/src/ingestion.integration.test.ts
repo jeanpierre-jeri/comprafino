@@ -1,6 +1,10 @@
 import { getPublicRetailerListingDetail } from "./listing-detail.ts";
 import { evaluateCurrentShoppingItem } from "./shopping-list.ts";
-import { shoppingListItemSchema, inferGenericSubstitutionProfile } from "@comprafino/core";
+import {
+  shoppingListItemSchema,
+  inferGenericSubstitutionProfile,
+  retailerIdSchema,
+} from "@comprafino/core";
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { NeonQueryPromise } from "@neondatabase/serverless";
@@ -1528,14 +1532,14 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
     await persistListings(
       db,
       "tottus",
-      [{ ...value, observedAt: observation("unused", 5).observedAt }],
+      [{ ...value, available: true, observedAt: observation("unused", 5).observedAt }],
       { source: "targeted" },
     );
     await finishListingRefresh(db, current, next, "unavailable");
     // A newer successful observation supersedes the older negative result.
     expect(
       (await query("select available from retailer_listings where id=$1", [row.id]))[0],
-    ).toMatchObject({ available: null });
+    ).toMatchObject({ available: true });
     expect(await states(value.externalId)).toHaveLength(1);
     const before = await states(value.externalId);
     await finishListingRefresh(db, current, next, "not-found");
@@ -1906,5 +1910,181 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
       now: new Date("2026-10-15T23:00:00Z"),
     });
     expect(later!.retailers.find((r) => r.retailerId === "metro")!.coverage).toEqual([]);
+  }, 30000);
+  it("persists explicit availability independently of price coverage, unknown quotes, failures and recovery", async () => {
+    const row = await seedGeneric("Arroz Availabilityfixture 1kg", 500);
+    const externalId = (await knownListings(db)).find((r) => r.id === row.id)!.externalId;
+    const value = { ...observation(externalId, 1, 500), title: row.title, available: true };
+    await persistListings(db, "tottus", [value], { source: "targeted" });
+    const read = async () =>
+      z
+        .object({
+          available: z.boolean().nullable(),
+          availability_verified_at: z.coerce.date().nullable(),
+          exact_missing_count: z.number(),
+          last_exact_missing_at: z.coerce.date().nullable(),
+        })
+        .parse(
+          (
+            await query(
+              "select available,availability_verified_at,exact_missing_count,last_exact_missing_at from retailer_listings where id=$1",
+              [row.id],
+            )
+          )[0],
+        );
+    expect(await read()).toMatchObject({
+      available: true,
+      availability_verified_at: value.observedAt,
+    });
+    const history = await states(externalId);
+    const coverage = await coverageDays(externalId);
+    const known = (await knownListings(db)).find((r) => r.id === row.id)!;
+    const unavailableAt = observation("unused", 2).observedAt;
+    expect(await claimListingRefresh(db, known, unavailableAt)).toBe(true);
+    await finishListingRefresh(db, known, unavailableAt, "unavailable");
+    expect(await read()).toMatchObject({
+      available: false,
+      availability_verified_at: unavailableAt,
+    });
+    expect(await states(externalId)).toEqual(history);
+    expect(await coverageDays(externalId)).toEqual(coverage);
+    expect(
+      await searchGenericProductOffers(db, "arroz availabilityfixture", "relevance", publicNow),
+    ).toEqual([]);
+    const detail = await getPublicRetailerListingDetail(db, row.id, { now: publicNow });
+    expect(detail).toMatchObject({ available: false, current: false });
+    expect(detail?.history).not.toBeNull();
+    // A quote arriving out of order cannot undo a newer exact negative.
+    await persistListings(db, "tottus", [
+      { ...value, observedAt: new Date(value.observedAt.getTime() + 30000) },
+    ]);
+    expect(await read()).toMatchObject({
+      available: false,
+      availability_verified_at: unavailableAt,
+    });
+    expect(await coverageDays(externalId)).toEqual(coverage);
+    // A successfully parsed price with unknown stock cannot erase explicit evidence.
+    await persistListings(db, "tottus", [
+      { ...value, available: undefined, observedAt: observation("unused", 3).observedAt },
+    ]);
+    expect(await read()).toMatchObject({
+      available: false,
+      availability_verified_at: unavailableAt,
+    });
+    expect(await coverageDays(externalId)).toEqual(coverage);
+    const current = (await knownListings(db)).find((r) => r.id === row.id)!;
+    const failedAt = observation("unused", 4).observedAt;
+    await claimListingRefresh(db, current, failedAt);
+    await finishListingRefresh(db, current, failedAt, "failed");
+    expect(await read()).toMatchObject({
+      available: false,
+      availability_verified_at: unavailableAt,
+    });
+    const recovered = { ...value, observedAt: observation("unused", 5).observedAt };
+    await persistListings(db, "tottus", [recovered], { source: "targeted" });
+    expect(await read()).toMatchObject({
+      available: true,
+      availability_verified_at: recovered.observedAt,
+      exact_missing_count: 0,
+    });
+    expect(await states(externalId)).toEqual(history);
+    expect((await coverageDays(externalId))[0]!.observation_count).toBe(
+      coverage[0]!.observation_count + 1,
+    );
+    expect(
+      (
+        await searchGenericProductOffers(db, "arroz availabilityfixture", "relevance", publicNow)
+      ).map((o) => o.id),
+    ).toEqual([row.id]);
+  }, 30000);
+
+  it("counts repeated exact absence without inferring stock, rejects replay and ignores category omission", async () => {
+    const row = await seedGeneric("Arroz Missingfixture 1kg", 500);
+    const externalId = (await knownListings(db)).find((r) => r.id === row.id)!.externalId;
+    const history = await states(externalId);
+    const coverage = await coverageDays(externalId);
+    for (const minute of [1, 2]) {
+      const known = (await knownListings(db)).find((r) => r.id === row.id)!;
+      const at = observation("unused", minute).observedAt;
+      expect(await claimListingRefresh(db, known, at)).toBe(true);
+      await finishListingRefresh(db, known, at, "not-found");
+      await finishListingRefresh(db, known, at, "not-found");
+    }
+    expect(
+      (
+        await query(
+          "select available,exact_missing_count,last_exact_missing_at from retailer_listings where id=$1",
+          [row.id],
+        )
+      )[0],
+    ).toMatchObject({
+      available: null,
+      exact_missing_count: 2,
+    });
+    await persistListings(db, "tottus", [observation("unrelated-category-observation", 3)]);
+    expect(
+      (
+        await query("select available,exact_missing_count from retailer_listings where id=$1", [
+          row.id,
+        ])
+      )[0],
+    ).toMatchObject({ available: null, exact_missing_count: 2 });
+    expect(await states(externalId)).toEqual(history);
+    expect(await coverageDays(externalId)).toEqual(coverage);
+    expect(
+      (await searchGenericProductOffers(db, "arroz missingfixture", "relevance", publicNow)).map(
+        (o) => o.id,
+      ),
+    ).toEqual([row.id]);
+    await persistListings(db, "tottus", [
+      { ...observation(externalId, 4, 500), title: row.title, available: true },
+    ]);
+    expect(
+      (
+        await query(
+          "select available,exact_missing_count,last_exact_missing_at from retailer_listings where id=$1",
+          [row.id],
+        )
+      )[0],
+    ).toMatchObject({ available: true, exact_missing_count: 0, last_exact_missing_at: null });
+  }, 30000);
+
+  it("enforces catalog identity capacity atomically across retailers while permitting known refresh", async () => {
+    const count = z
+      .object({ count: z.number() })
+      .parse((await query("select count(*)::int as count from retailer_listings"))[0]).count;
+    try {
+      await query(
+        `insert into retailer_listings(retailer_id,external_id,product_id,title,url,current_price_cents,currency,price_unit,first_seen_at,last_seen_at)
+        select 'metro','guard-fixture-'||i,'guard-fixture-'||i,'Catalog guard fixture','https://www.metro.pe/fixture/p',500,'PEN','UN',$1::timestamptz,$1::timestamptz from generate_series(1,$2::int) i`,
+        [publicNow.toISOString(), String(999 - count)],
+      );
+      const values = ["metro", "plaza-vea"].map((retailer) => ({
+        ...observation(`guard-fixture-${retailer}`, 0),
+        retailer: retailerIdSchema.parse(retailer),
+        title: "Catalog guard fixture",
+        available: true,
+      }));
+      const results = await Promise.allSettled(
+        values.map((value) => persistListings(db, value.retailer, [value])),
+      );
+      expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(1);
+      expect(results.filter((r) => r.status === "rejected")).toHaveLength(1);
+      expect(
+        (await query("select count(*)::int as count from retailer_listings"))[0],
+      ).toMatchObject({ count: 1000 });
+      const winner = values[results.findIndex((r) => r.status === "fulfilled")]!;
+      expect(
+        await persistListings(db, winner.retailer, [
+          { ...winner, observedAt: observation("unused", 1).observedAt },
+        ]),
+      ).toMatchObject({ changed: 0, persisted: 1 });
+    } finally {
+      for (const table of ["price_history", "listing_observation_days", "retailer_listing_offers"])
+        await query(
+          `delete from ${table} where listing_id in (select id from retailer_listings where title='Catalog guard fixture')`,
+        );
+      await query("delete from retailer_listings where title='Catalog guard fixture'");
+    }
   }, 30000);
 });

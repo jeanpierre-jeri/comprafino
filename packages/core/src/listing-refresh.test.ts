@@ -85,3 +85,36 @@ it("validates CLI bounds and explicit one-SKU scopes", () => {
   ])
     expect(() => parseListingRefreshOptions(args)).toThrow(/./u);
 });
+
+it("prioritizes exact, safe shopping candidates, discovery, useful staples and other rows deterministically", () => {
+  const rows = [
+    row(1, 100),
+    { ...row(2, 80), usefulStaple: true },
+    row(3, 70, false, true),
+    { ...row(4, 50), shoppingRelevant: true },
+    row(5, 30, true),
+    { ...row(6, 90), shoppingRelevant: true },
+    { ...row(7, 10), shoppingRelevant: true },
+  ];
+  const ids = ["5", "6", "4", "3", "2", "1"];
+  expect(selectListingRefresh(rows, now, 100).map((r) => r.externalId)).toEqual(ids);
+  expect(selectListingRefresh([...rows].reverse(), now, 100).map((r) => r.externalId)).toEqual(ids);
+});
+it("unknown stock remains eligible under freshness rules while explicit unavailability is excluded", () => {
+  const unknown = { currentPriceCents: 1, observedAt: ago(1), available: null };
+  const available = { currentPriceCents: 2, observedAt: ago(1), available: true };
+  expect(cheapestOffers([unknown, available], now)).toEqual([unknown]);
+  expect(cheapestOffers([{ ...unknown, available: false }, available], now)).toEqual([available]);
+});
+
+it("allows explicit unavailable recovery despite recent unknown category quotes, but respects fresh evidence and cooldown", () => {
+  const negative = { ...row(1, 1, true), available: false, availabilityVerifiedAt: ago(25) };
+  expect(selectListingRefresh([negative], now, 100)).toEqual([negative]);
+  expect(
+    selectListingRefresh([{ ...negative, availabilityVerifiedAt: ago(23) }], now, 100),
+  ).toEqual([]);
+  expect(selectListingRefresh([{ ...negative, lastTargetedAttemptAt: ago(11) }], now, 100)).toEqual(
+    [],
+  );
+  expect(selectListingRefresh([{ ...negative, available: null }], now, 100)).toEqual([]);
+});
