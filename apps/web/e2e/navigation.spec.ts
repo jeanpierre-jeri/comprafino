@@ -12,6 +12,7 @@ async function holdNavigation(
     release = resolve;
   });
   let requests = 0;
+  let navigationRequests = 0;
   await page.route("**/*", async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -23,18 +24,21 @@ async function holdNavigation(
       (includePrefetch || !headers["next-router-prefetch"])
     ) {
       requests++;
+      if (!headers["next-router-prefetch"]) navigationRequests++;
       await held;
     }
     await route.continue();
   });
-  return { release, count: () => requests };
+  return { release, count: () => requests, navigationCount: () => navigationRequests };
 }
 
 test("search immediately responds, prevents repeated submits, and restores back/forward state", async ({
   page,
 }) => {
+  // Form and chip prefetches share the search route tree. Hold them before
+  // loading the homepage so cached partial shells cannot bypass the delay.
+  const held = await holdNavigation(page, "/search", undefined, true);
   await page.goto("/");
-  const held = await holdNavigation(page, "/search", "a");
   try {
     await page.getByLabel("¿Qué necesitas comprar?").fill("a");
     await page.getByRole("button", { name: "Buscar", exact: true }).click();
@@ -56,7 +60,7 @@ test("search immediately responds, prevents repeated submits, and restores back/
       return state;
     });
     if (pendingForm) expect(pendingForm).toEqual({ disabled: true, label: "Buscando…" });
-    await expect.poll(held.count).toBe(1);
+    await expect.poll(held.navigationCount).toBe(1);
   } finally {
     held.release();
   }

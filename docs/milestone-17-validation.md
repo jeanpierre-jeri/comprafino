@@ -1,6 +1,6 @@
 # Milestone 17 implementation and validation report
 
-**Milestone 17 is complete.** The user supplied a successful local production build; its artifact postdates all runtime changes. Chromium smoke, isolated listing/history/shopping fixtures and mobile/desktop light/dark visual review pass. The navigation test's form-detachment race was corrected without changing runtime navigation or Next configuration. Commit message: `feat: add public retailer listing details`. No push or next milestone work.
+**Milestone 17 is complete.** The user supplied a successful local production build; its artifact postdates all runtime changes. Chromium smoke, isolated listing/history/shopping fixtures and mobile/desktop light/dark visual review pass. The navigation test's form-detachment and shared-route prefetch races were corrected without changing runtime navigation or Next configuration. Commit message: `feat: add public retailer listing details`. No push or next milestone work.
 
 ## Requested behavior
 
@@ -46,7 +46,7 @@ The real audit ran October 4, 2026 at 22:49 Peru time. [Audit JSON](listing-deta
 
 Passing: `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test` (636 unit tests), `pnpm test:integration:local` (49 tests), isolated listing fixture validation, read-only real listing audit, `git diff --check` and all Chromium runs below.
 
-The earlier sandbox `pnpm build` attempt could not bind Turbopack's CSS worker port. That validation gate is now resolved by the supplied local production build: its BUILD_ID artifact was created after the final runtime edits, and the production server successfully served every Chromium suite. Only tests/documentation changed in this acceptance follow-up; Next configuration remains unchanged.
+The earlier sandbox `pnpm build` attempt could not bind Turbopack's CSS worker port. That validation gate is now resolved by the supplied successful local `pnpm build` output (3.464 seconds): it compiled the dynamic `/listings/[id]` route, and the production server successfully served the Chromium suites. Only tests/documentation changed in this acceptance follow-up; Next configuration remains unchanged.
 
 | Chromium command                         | Result                                                    |
 | ---------------------------------------- | --------------------------------------------------------- |
@@ -62,3 +62,17 @@ Listing screenshots at 390px/1440px in both themes were reviewed: identity/curre
 Next still emits “The destination stream closed early” during some rapidly cancelled navigations in passing tests; no test failure is suppressed. The earlier agent environment failure is historical, rather than a remaining build/browser gate. Screenshots are generated under ignored `apps/web/test-results`; no binary artifacts or credentials are committed.
 
 All test writes are confined to the existing disposable PostgreSQL service and randomly isolated schemas. No live retailer request or matching adjustment was needed. No next milestone starts automatically.
+
+## Navigation prefetch follow-up
+
+A fresh user build passed, but its smoke rerun exposed a second timing race in the search navigation test. The trace showed unqueried `/search` route-tree and metadata prefetches completing while the test held only `q=a` navigation. A partially cached route shell could replace the form before the pending-state assertion, so the earlier atomic DOM inspection alone did not eliminate this failure.
+
+The test now installs its delay before loading the homepage and holds all `/search` RSC requests, including shared prefetches. A separate non-prefetch navigation counter still verifies exactly one navigation after repeated submit attempts. Timeout values, production prefetching, UI behavior and framework configuration remain unchanged.
+
+The affected test passed 12 repetitions with six concurrent workers:
+
+```sh
+pnpm --filter @comprafino/web test:e2e navigation.spec.ts --grep 'search immediately responds' --repeat-each=12 --workers=6
+```
+
+The complete browser chain was then rerun against the freshly supplied production build: standard smoke 22 passed / 35 expected skips, isolated listing seven passed, history six passed, and shopping/basket 22 passed. Format, lint and TypeScript checks also pass. The feature remains committed at `4617b91`; the test-only stabilization is a separate follow-up commit. No push or next milestone work.
