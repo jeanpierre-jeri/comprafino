@@ -32,6 +32,10 @@ type Series = {
   segments: { at: number; priceCents: number }[][];
   points: { at: number; priceCents: number; kind: "state-start" | "latest-observation" }[];
 };
+
+const EmptyShape = () => <g aria-hidden="true" />;
+
+
 function EventTooltip({
   active,
   payload,
@@ -149,7 +153,7 @@ export function PriceHistoryChart({
                 lineJointType="linear"
                 fill={treatment[s.retailerId].color}
                 hide={hidden.includes(s.retailerId)}
-                shape={<g aria-hidden="true" />}
+                shape={EmptyShape}
                 isAnimationActive={false}
               />
             )),
