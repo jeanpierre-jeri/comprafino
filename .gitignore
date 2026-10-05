@@ -2,6 +2,7 @@ node_modules/
 .pnpm-store/
 .tools/
 .next/
+/apps/web/next-env.d.ts
 .turbo/
 dist/
 coverage/
