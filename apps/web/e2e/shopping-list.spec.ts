@@ -25,11 +25,11 @@ async function addGeneric(page: Page) {
 
 test("local generic need persists, edits, deduplicates and removes", async ({ page }) => {
   await addGeneric(page);
-  const card = page.getByRole("article", { name: "huevos", exact: true });
+  const card = page.getByRole("article", { name: "Huevos", exact: true });
   await expect(card).toContainText("30 unidades");
   await page.reload();
   await expect(card).toBeVisible();
-  await card.getByRole("button", { name: "Editar huevos" }).click();
+  await card.getByRole("button", { name: "Editar Huevos" }).click();
   await page.getByLabel("Cantidad", { exact: true }).fill("60");
   await page.getByLabel("Frecuencia", { exact: true }).selectOption("biweekly");
   await page.getByRole("button", { name: "Guardar cambios" }).click();
@@ -37,15 +37,15 @@ test("local generic need persists, edits, deduplicates and removes", async ({ pa
   await expect(card).toContainText("60 unidades · Cada 2 semanas");
   await expect(
     page.getByRole("region", { name: "Cada 2 semanas", exact: true }).getByRole("article", {
-      name: "huevos",
+      name: "Huevos",
       exact: true,
     }),
   ).toBeVisible();
-  await expect(card.getByRole("button", { name: "Editar huevos" })).toBeFocused();
-  await card.getByRole("button", { name: "Editar huevos" }).click();
+  await expect(card.getByRole("button", { name: "Editar Huevos" })).toBeFocused();
+  await card.getByRole("button", { name: "Editar Huevos" }).click();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
-  await expect(card.getByRole("button", { name: "Editar huevos" })).toBeFocused();
+  await expect(card.getByRole("button", { name: "Editar Huevos" })).toBeFocused();
   await openGeneric(page);
   await expect(page.getByRole("button", { name: "Actualizar existente" })).toBeVisible();
   await page.getByLabel("Cantidad", { exact: true }).fill("30");
@@ -54,7 +54,7 @@ test("local generic need persists, edits, deduplicates and removes", async ({ pa
   await page.getByRole("link", { name: "Mi lista", exact: true }).click();
   await expect(card).toHaveCount(1);
   await expect(card).toContainText("30 unidades");
-  await card.getByRole("button", { name: "Quitar huevos" }).click();
+  await card.getByRole("button", { name: "Quitar Huevos" }).click();
   await expect(page.getByText("Todavía no tienes productos en tu lista.")).toBeVisible();
   await page.reload();
   await expect(page.getByText("Todavía no tienes productos en tu lista.")).toBeVisible();
@@ -86,7 +86,7 @@ test("quantity input supports whole units and fractional kg/L without a native s
   await page.getByRole("button", { name: "Agregar", exact: true }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.getByRole("link", { name: "Mi lista", exact: true }).click();
-  await expect(page.getByRole("article", { name: "huevos", exact: true })).toContainText(
+  await expect(page.getByRole("article", { name: "Huevos", exact: true })).toContainText(
     "1 unidades",
   );
 });
@@ -111,7 +111,7 @@ test("malformed and unsupported storage recover; unavailable storage keeps sessi
     });
   });
   await addGeneric(page);
-  await expect(page.getByRole("article", { name: "huevos", exact: true })).toBeVisible();
+  await expect(page.getByRole("article", { name: "Huevos", exact: true })).toBeVisible();
   await expect(
     page.getByText("No podemos guardar en este navegador. Tu lista durará esta sesión."),
   ).toBeVisible();
@@ -215,11 +215,11 @@ test("list updates across tabs and clears when storage is cleared", async ({ pag
   await addGeneric(page);
   const other = await context.newPage();
   await other.goto("/list");
-  await expect(other.getByRole("article", { name: "huevos", exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Quitar huevos" }).click();
+  await expect(other.getByRole("article", { name: "Huevos", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Quitar Huevos" }).click();
   await expect(other.getByText("Todavía no tienes productos en tu lista.")).toBeVisible();
   await addGeneric(page);
-  await expect(other.getByRole("article", { name: "huevos", exact: true })).toBeVisible();
+  await expect(other.getByRole("article", { name: "Huevos", exact: true })).toBeVisible();
   await page.evaluate(() => localStorage.clear());
   await expect(other.getByText("Todavía no tienes productos en tu lista.")).toBeVisible();
   await other.close();
@@ -250,16 +250,16 @@ test("keyboard dialog cancels and returns focus; list and editor fit both themes
     await page.setViewportSize({ width, height: 900 });
     for (const theme of ["light", "dark"] as const) {
       await page.emulateMedia({ colorScheme: theme });
-      await expect(page.getByRole("article", { name: "huevos", exact: true })).toBeVisible();
+      await expect(page.getByRole("article", { name: "Huevos", exact: true })).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
         true,
       );
       await page.screenshot({ path: testInfo.outputPath(`list-${width}-${theme}.png`) });
-      await page.getByRole("button", { name: "Editar huevos" }).click();
+      await page.getByRole("button", { name: "Editar Huevos" }).click();
       await expect(page.getByRole("dialog").getByRole("radio")).toHaveCount(0);
       await page.screenshot({ path: testInfo.outputPath(`edit-generic-${width}-${theme}.png`) });
       await page.keyboard.press("Escape");
-      await expect(page.getByRole("button", { name: "Editar huevos" })).toBeFocused();
+      await expect(page.getByRole("button", { name: "Editar Huevos" })).toBeFocused();
     }
   }
 });

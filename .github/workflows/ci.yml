@@ -29,3 +29,5 @@ jobs:
       - run: pnpm build
       - run: pnpm --filter @comprafino/web exec playwright install --with-deps chromium --only-shell
       - run: pnpm test:e2e
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

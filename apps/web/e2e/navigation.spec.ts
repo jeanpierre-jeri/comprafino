@@ -1,7 +1,12 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 
-async function holdNavigation(page: Page, pathname: string, query?: string) {
+async function holdNavigation(
+  page: Page,
+  pathname: string,
+  query?: string,
+  includePrefetch = false,
+) {
   let release: () => void = () => {};
   const held = new Promise<void>((resolve) => {
     release = resolve;
@@ -15,7 +20,7 @@ async function holdNavigation(page: Page, pathname: string, query?: string) {
       url.pathname === pathname &&
       (query === undefined || url.searchParams.get("q") === query) &&
       headers.rsc === "1" &&
-      !headers["next-router-prefetch"]
+      (includePrefetch || !headers["next-router-prefetch"])
     ) {
       requests++;
       await held;
@@ -75,18 +80,25 @@ test("search immediately responds, prevents repeated submits, and restores back/
   await expect(page.getByRole("button", { name: "Buscar", exact: true })).toBeEnabled();
 });
 
-test("mobile keyboard chip navigation responds in either theme and respects reduced motion", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  for (const theme of ["light", "dark"] as const) {
+for (const theme of ["light", "dark"] as const) {
+  // Each theme gets a fresh context so the previous search cannot satisfy
+  // navigation from the Next.js router cache before we observe feedback.
+  test(`mobile keyboard chip navigation responds in either theme and respects reduced motion (${theme})`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
     await page.emulateMedia({ colorScheme: theme, reducedMotion: "reduce" });
+    // Hold prefetch as well as navigation before the chip enters the viewport.
+    // Both requests still reach the real server once feedback is checked.
+    const held = await holdNavigation(page, "/search", "huevos", true);
     await page.goto("/");
     await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
-    const held = await holdNavigation(page, "/search", "huevos");
     const chip = page.locator('.search-chip[href="/search?q=huevos"]');
     try {
       await chip.focus();
+      expect(await chip.evaluate((element) => getComputedStyle(element).transitionDuration)).toBe(
+        "0s",
+      );
       await chip.press("Enter");
       await expect(
         page
@@ -116,6 +128,7 @@ test("mobile keyboard chip navigation responds in either theme and respects redu
       if (pendingState.attributes)
         expect(pendingState.attributes).toEqual({ busy: "true", disabled: "true" });
       if (pendingState.animationName !== null) expect(pendingState.animationName).toBe("none");
+      await expect.poll(held.count).toBeGreaterThan(0);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
         true,
       );
@@ -129,8 +142,8 @@ test("mobile keyboard chip navigation responds in either theme and respects redu
       timeout: 15_000,
     });
     await page.unrouteAll({ behavior: "wait" });
-  }
-});
+  });
+}
 
 test("exact comparison cards immediately respond while detail data is delayed", async ({
   page,

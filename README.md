@@ -42,7 +42,7 @@ packages/core/     Framework-independent pure logic and unit tests
 packages/db/       Lazy Drizzle/Neon client, schema home, environment validation, migration configs
 packages/scrapers/ Retailer public-data adapters, fixtures and bounded ingestion CLI
 packages/ui/       Shared shadcn Base UI components, utilities and Tailwind theme
-.github/workflows/ Credential-free CI, manual ingestion, twice-daily refresh and six-hour discovery
+.github/workflows/ CI with persisted-catalog E2E, manual ingestion, twice-daily refresh and six-hour discovery
 docs/             Architecture, roadmap and dependency inventory
 ```
 
@@ -206,7 +206,7 @@ pnpm --filter @comprafino/web exec playwright install chromium --only-shell
 pnpm test:e2e
 ```
 
-On a Linux machine missing Chromium system libraries, use `playwright install --with-deps chromium --only-shell` in the web workspace. CI installs only Chromium's headless shell and its system requirements, then runs the smoke test without credentials. CI also checks frozen installation, formatting, lint, types, unit tests and production build on PRs and pushes to `main`.
+On a Linux machine missing Chromium system libraries, use `playwright install --with-deps chromium --only-shell` in the web workspace. CI installs only Chromium's headless shell and its system requirements, then passes the existing repository secret `DATABASE_URL` only to `pnpm test:e2e`. Playwright and its child `next start` server inherit it, enabling persisted-catalog tests. GitHub does not supply repository secrets to fork pull requests; persisted-catalog tests remain skipped on those runs. `TEST_DATABASE_URL` remains a separate explicit opt-in for isolated PostgreSQL/history fixtures and is not supplied by ordinary CI. CI also checks frozen installation, formatting, lint, types, unit tests and production build on PRs and pushes to `main`.
 
 `@playwright/test` is application testing tooling; no browser scraper dependency is installed. React Testing Library is deferred until component-level tests justify it.
 
