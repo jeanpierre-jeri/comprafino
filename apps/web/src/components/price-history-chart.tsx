@@ -35,7 +35,6 @@ type Series = {
 
 const EmptyShape = () => <g aria-hidden="true" />;
 
-
 function EventTooltip({
   active,
   payload,
