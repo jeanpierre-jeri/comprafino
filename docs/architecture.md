@@ -88,4 +88,8 @@ Core owns validated concrete conditional offers, CMR identity, validity/freshnes
 
 ## Public ordinary price history
 
-Core owns range parsing, half-open state intersection, ordinary transitions and summary metrics. DB owns one canonical/range-scoped query sharing public exact-product eligibility. The product Server Component loads summaries below current offers; a Client Component renders disconnected Recharts event markers and retailer toggles. Recorded state starts and the latest listing verification are the only plotted timestamps. Historical observation coverage is unavailable. See [price history](price-history.md) for semantics and pending validation. No migration or ordinary-history writes were introduced.
+Core owns range parsing, half-open state intersection, ordinary transitions and summary metrics. DB owns one canonical/range-scoped query sharing public exact-product eligibility. The product Server Component loads summaries below current offers; a Client Component renders Recharts event markers, verified daily-coverage step segments and retailer toggles. Core also owns covered periods and conservative descriptive price insights. The shared atomic ingestion writer rolls accepted usable quotes into `listing_observation_days`, keyed by listing and Peru calendar date, while `price_history` retains actual state transitions. Daily evidence is queried separately from state aggregation; gaps split paths, and pre-coverage events remain disconnected. See [price history](price-history.md) and [observation coverage](observation-coverage.md) for semantics, migration, storage and pending validation.
+
+Local database tests can use the disposable Docker PostgreSQL setup described in
+[local testing](local-testing.md). Production retains Neon HTTP; an explicit test
+mode provides TCP queries with the same Drizzle batch and schema isolation semantics.

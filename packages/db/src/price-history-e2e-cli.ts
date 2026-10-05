@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { spawn } from "node:child_process";
-import { neon } from "@neondatabase/serverless";
+import { createTestQueryClient, closeLocalTestConnections } from "./test-query-client.ts";
 import { z } from "zod";
 import { matchingVersion } from "@comprafino/core";
 import { testSchemaClient } from "./test-schema-client.ts";
@@ -14,7 +14,7 @@ import type { NormalizedRetailerListing } from "@comprafino/core";
 
 // Explicit opt-in only. All test writes and the web server are scoped to this schema.
 const url = requireDatabaseUrl({ DATABASE_URL: process.env.TEST_DATABASE_URL });
-const client = neon(url);
+const client = createTestQueryClient(url, process.env.COMPRAFINO_TEST_DATABASE_MODE);
 const schema = `comprafino_e2e_${randomUUID().replaceAll("-", "")}`;
 const quoted = `"${schema}"`;
 const scopedClient = testSchemaClient(client, schema);
@@ -40,10 +40,14 @@ try {
       .map((s) => scopedClient.query(s.replaceAll('"public".', `${quoted}.`))),
   );
   await scopedClient.transaction(statements);
-  const db = createDatabase({ DATABASE_URL: url, COMPRAFINO_E2E_SCHEMA: schema });
+  const db = createDatabase({
+    DATABASE_URL: url,
+    COMPRAFINO_E2E_SCHEMA: schema,
+    COMPRAFINO_TEST_DATABASE_MODE: process.env.COMPRAFINO_TEST_DATABASE_MODE,
+  });
   const now = Date.now();
   const fixtures: Record<string, string> = {};
-  for (const kind of ["rich", "sparse", "old"] as const) {
+  for (const kind of ["rich", "sparse", "old", "continuous", "gap", "decrease"] as const) {
     const productId = randomUUID();
     fixtures[kind] = productId;
     await scopedClient.query(
@@ -52,7 +56,13 @@ try {
     );
     for (const retailer of ["metro", "plaza-vea", "tottus"] as const) {
       const ages =
-        kind === "rich" && retailer === "metro" ? [80, 40, 8, 0.01] : [kind === "old" ? 100 : 0.02];
+        kind === "continuous" || kind === "decrease"
+          ? [5, 4, 3, 2, 1, 0]
+          : kind === "gap"
+            ? [5, 4, 1, 0]
+            : kind === "rich" && retailer === "metro"
+              ? [80, 40, 8, 0.01]
+              : [kind === "old" ? 100 : 0.02];
       const prices =
         kind === "rich" && retailer === "metro"
           ? [700, 620, 590, 610]
@@ -72,7 +82,14 @@ try {
               : retailer === "metro"
                 ? "https://www.metro.pe/test/p"
                 : "https://www.plazavea.com.pe/test/p",
-          currentPriceCents: prices[index]!,
+          currentPriceCents:
+            kind === "decrease"
+              ? index < 4
+                ? 750
+                : 600
+              : kind === "continuous" || kind === "gap"
+                ? 650
+                : prices[index]!,
           currency: "PEN",
           priceUnit: "UN",
           observedAt,
@@ -130,6 +147,18 @@ try {
         metro.summary.changeCount !== 1)
     )
       throw new Error("Rich fixture history mismatch");
+    if (
+      kind === "continuous" &&
+      (metro?.summary.segments.length !== 1 || metro.summary.verifiedUnchangedDays !== 6)
+    )
+      throw new Error("Continuous fixture mismatch");
+    if (
+      kind === "gap" &&
+      (metro?.summary.segments.length !== 2 || metro.summary.verifiedUnchangedDays !== 2)
+    )
+      throw new Error("Gap fixture mismatch");
+    if (kind === "decrease" && metro?.summary.lastChange?.differenceCents !== -150)
+      throw new Error("Decrease fixture mismatch");
     if (kind === "sparse" && metro?.summary.status !== "insufficient")
       throw new Error("Sparse fixture mismatch");
     if (kind === "old" && metro?.summary.status !== "empty")
@@ -137,7 +166,7 @@ try {
   }
   if (process.argv.includes("--validate-fixtures")) {
     console.log(
-      "Validated rich, sparse and outside-range fixtures in an isolated schema; browser tests were not run.",
+      "Validated rich, sparse, outside-range, continuous, gap and decrease fixtures in an isolated schema; browser tests were not run.",
     );
   } else {
     const exitCode = await new Promise<number>((resolve, reject) => {
@@ -157,5 +186,9 @@ try {
     if (exitCode) process.exitCode = exitCode;
   }
 } finally {
-  if (created) await client.query(`drop schema ${quoted} cascade`);
+  try {
+    if (created) await client.query(`drop schema ${quoted} cascade`);
+  } finally {
+    await closeLocalTestConnections();
+  }
 }

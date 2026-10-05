@@ -1,5 +1,6 @@
 import {
   coverageReport,
+  observationCoverageReport,
   inspectIngestion,
   inspectOperations,
   freshnessHours,
@@ -24,14 +25,16 @@ export default async function IngestionPage() {
       </main>
     );
   }
+  let observations: Awaited<ReturnType<typeof observationCoverageReport>>;
   let coverage: Awaited<ReturnType<typeof coverageReport>>;
   let data: Awaited<ReturnType<typeof inspectIngestion>>;
   let operations: Awaited<ReturnType<typeof inspectOperations>>;
   try {
-    [data, operations, coverage] = await Promise.all([
+    [data, operations, coverage, observations] = await Promise.all([
       inspectIngestion(),
       inspectOperations(),
       coverageReport(),
+      observationCoverageReport(),
     ]);
   } catch {
     return (
@@ -44,6 +47,26 @@ export default async function IngestionPage() {
   return (
     <main className="mx-auto max-w-5xl space-y-6 p-8">
       <h1 className="text-2xl font-semibold">Developer ingestion inspection</h1>
+      <section className="space-y-3">
+        <h2 className="text-xl">Durable ordinary-price observation coverage</h2>
+        <p>
+          {observations.coverageRows} day rows · Started: {observations.earliestDate ?? "none"} ·{" "}
+          {observations.averageObservationsPerCoveredListingDay.toFixed(1)} observations per covered
+          listing/day
+        </p>
+        <p>
+          Today ({observations.today}, Peru): {observations.observedToday} known listings observed ·{" "}
+          {observations.publicObservedToday} / {observations.publicListings} public observed ·{" "}
+          {observations.publicMissingToday} missing
+        </p>
+        {observations.retailers.map((row) => (
+          <p key={row.retailer}>
+            {row.retailer}: {row.publicObservedToday} / {row.expectedPublic} public observed ·{" "}
+            {row.publicMissingToday} missing
+          </p>
+        ))}
+        <p className="text-sm">{observations.note}</p>
+      </section>
       <section className="space-y-3">
         <h2 className="text-xl">Known listing refresh</h2>
         <p>

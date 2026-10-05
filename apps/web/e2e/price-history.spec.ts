@@ -82,6 +82,64 @@ test.describe("isolated ordinary-history fixtures", () => {
     ).toBeVisible();
     await expect(page.locator("[data-slot=chart]")).toHaveCount(0);
   });
+  test("daily evidence connects steps, breaks gaps and supports safe retailer insights", async ({
+    page,
+  }) => {
+    await page.goto(`/products/${fixture("continuous")}`);
+    await expect(
+      page.locator(".verified-segment-metro .recharts-scatter-line .recharts-curve"),
+    ).toHaveCount(1);
+    const metro = page.getByRole("article", { name: "Historial de Metro", exact: true });
+    await expect(metro.getByTestId("unchanged-insight")).toHaveText(
+      "Sin cambios observados durante 6 días.",
+    );
+    await page.goto(`/products/${fixture("gap")}`);
+    await expect(
+      page.locator(".verified-segment-metro .recharts-scatter-line .recharts-curve"),
+    ).toHaveCount(2);
+    await expect(metro.getByTestId("unchanged-insight")).toHaveText(
+      "Sin cambios observados durante 2 días.",
+    );
+    await page.goto(`/products/${fixture("decrease")}`);
+    await expect(metro.getByTestId("price-change-insight")).toContainText("Bajó S/ 1.50");
+    await expect(metro.getByTestId("price-change-insight")).toContainText("20%");
+    await expect(
+      page.getByRole("region", { name: "Historial del precio para todos" }),
+    ).not.toContainText("S/ 5.40");
+  });
+  test("coverage charts fit desktop and mobile in light and dark themes", async ({
+    page,
+  }, testInfo) => {
+    for (const width of [390, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const theme of ["light", "dark"] as const) {
+        await page.emulateMedia({ colorScheme: theme });
+        for (const kind of ["continuous", "gap", "decrease"]) {
+          await page.goto(`/products/${fixture(kind)}`);
+          await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+          const section = page.getByRole("region", { name: "Historial del precio para todos" });
+          await section.scrollIntoViewIfNeeded();
+          await expect(section.locator("[data-slot=chart]")).toBeVisible();
+          // A flat SVG path has zero height, so Playwright's box-based visibility
+          // check reports hidden even when its stroke is drawn.
+          await expect
+            .poll(() =>
+              section
+                .locator(".verified-segment .recharts-scatter-line .recharts-curve")
+                .first()
+                .evaluate(
+                  (element) => element instanceof SVGPathElement && element.getBBox().width > 0,
+                ),
+            )
+            .toBe(true);
+          expect(
+            await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+          ).toBe(true);
+          await section.screenshot({ path: testInfo.outputPath(`${kind}-${width}-${theme}.png`) });
+        }
+      }
+    }
+  });
   test("mobile history works in both themes with touch targets, tooltips and no overflow", async ({
     page,
   }) => {

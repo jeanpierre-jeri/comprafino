@@ -29,6 +29,7 @@ const date = (at: number, detailed = false) =>
 type Series = {
   retailerId: RetailerId;
   retailerName: string;
+  segments: { at: number; priceCents: number }[][];
   points: { at: number; priceCents: number; kind: "state-start" | "latest-observation" }[];
 };
 function EventTooltip({
@@ -135,6 +136,24 @@ export function PriceHistoryChart({
             axisLine={false}
           />
           <ChartTooltip cursor={false} content={<EventTooltip />} />
+          {series.flatMap((s) =>
+            s.segments.map((segment, index) => (
+              <Scatter
+                key={`${s.retailerId}-${index}`}
+                data={segment}
+                className={`verified-segment verified-segment-${s.retailerId}`}
+                // Core expands transitions into horizontal/vertical endpoints.
+                // Joining those endpoints preserves exact steps and item tooltips.
+                line
+                lineType="joint"
+                lineJointType="linear"
+                fill={treatment[s.retailerId].color}
+                hide={hidden.includes(s.retailerId)}
+                shape={<g aria-hidden="true" />}
+                isAnimationActive={false}
+              />
+            )),
+          )}
           {series.map((s) => (
             <Scatter
               key={s.retailerId}

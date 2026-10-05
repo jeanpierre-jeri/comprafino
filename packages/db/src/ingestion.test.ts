@@ -21,6 +21,12 @@ it("builds one transactional lock/upsert/close/open batch with parameterized sou
   expect(queries[0]?.sql).toContain("for update");
   expect(queries[1]?.sql).toContain("on conflict (retailer_id, external_id) do update");
   expect(queries[1]?.sql).toContain("retailer_listings.last_seen_at < excluded.last_seen_at");
+  expect(queries[1]?.sql).toContain("insert into listing_observation_days");
+  expect(queries[1]?.sql).toContain("on conflict (listing_id, observation_date)");
+  expect(queries[1]?.sql).toContain("America/Lima");
+  expect(queries[1]?.sql).toContain(
+    "x.current_price_cents > 0 and x.available is distinct from false",
+  );
   expect(queries[1]?.sql).not.toContain(listing.title);
   expect(
     queries[1]?.params.some((value) => typeof value === "string" && value.includes(listing.title)),

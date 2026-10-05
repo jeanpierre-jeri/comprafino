@@ -1,0 +1,455 @@
+{
+  "measuredDatePeru": "2026-10-04",
+  "baseline": {
+    "retailer_listings": 826,
+    "listing_normalizations": 826,
+    "canonical_products": 59,
+    "canonical_product_listings": 133,
+    "price_history": 853,
+    "ingestion_runs": 47,
+    "discovery_queries": 20,
+    "discovery_daily_budget": 1
+  },
+  "firstRefresh": {
+    "dryRun": false,
+    "retailers": [
+      {
+        "retailer": "tottus",
+        "outcome": {
+          "status": "success",
+          "result": {
+            "id": "85539c3a-3823-43aa-83a7-25218fe337c7",
+            "fetched": 243,
+            "persisted": 150,
+            "changed": 0
+          }
+        }
+      },
+      {
+        "retailer": "plaza-vea",
+        "outcome": {
+          "status": "success",
+          "result": {
+            "id": "a002a2c6-dedf-43d9-a361-0eea7cc9aa0a",
+            "fetched": 218,
+            "persisted": 191,
+            "changed": 0
+          }
+        }
+      },
+      {
+        "retailer": "metro",
+        "outcome": {
+          "status": "success",
+          "result": {
+            "id": "15d02c68-2ca7-4738-a77c-1811dd477068",
+            "fetched": 208,
+            "persisted": 208,
+            "changed": 2
+          }
+        }
+      }
+    ],
+    "targeted": {
+      "status": "success",
+      "result": {
+        "requests": 0,
+        "results": [],
+        "changed": 0,
+        "observed": 0,
+        "failures": 0,
+        "status": "success"
+      }
+    },
+    "normalization": {
+      "status": "success",
+      "result": {
+        "processed": 826,
+        "changed": 0
+      }
+    },
+    "matching": {
+      "status": "success",
+      "result": {
+        "candidates": 9008,
+        "associationsChanged": 0,
+        "productsChanged": 0
+      }
+    },
+    "status": "success",
+    "durationMs": 107382,
+    "observedAt": "2026-10-04T21:03:53.173Z",
+    "categoryRequests": {
+      "tottus": 5,
+      "plaza-vea": 12,
+      "metro": 11
+    }
+  },
+  "repeatRefresh": {
+    "dryRun": false,
+    "retailers": [
+      {
+        "retailer": "tottus",
+        "outcome": {
+          "status": "success",
+          "result": {
+            "id": "ce4b2e80-5b4b-417e-8e7e-e24d040fa003",
+            "fetched": 243,
+            "persisted": 150,
+            "changed": 0
+          }
+        }
+      },
+      {
+        "retailer": "plaza-vea",
+        "outcome": {
+          "status": "success",
+          "result": {
+            "id": "b7c4563e-6fb9-44aa-bbd7-2e82599ceabc",
+            "fetched": 218,
+            "persisted": 191,
+            "changed": 0
+          }
+        }
+      },
+      {
+        "retailer": "metro",
+        "outcome": {
+          "status": "success",
+          "result": {
+            "id": "0ef2d80c-4ce4-465e-9ab5-c0e0d095461d",
+            "fetched": 208,
+            "persisted": 208,
+            "changed": 0
+          }
+        }
+      }
+    ],
+    "targeted": {
+      "status": "success",
+      "result": {
+        "requests": 0,
+        "results": [],
+        "changed": 0,
+        "observed": 0,
+        "failures": 0,
+        "status": "success"
+      }
+    },
+    "normalization": {
+      "status": "success",
+      "result": {
+        "processed": 826,
+        "changed": 0
+      }
+    },
+    "matching": {
+      "status": "success",
+      "result": {
+        "candidates": 9008,
+        "associationsChanged": 0,
+        "productsChanged": 0
+      }
+    },
+    "status": "success",
+    "durationMs": 113309,
+    "observedAt": "2026-10-04T21:07:24.320Z",
+    "categoryRequests": {
+      "tottus": 5,
+      "plaza-vea": 12,
+      "metro": 11
+    }
+  },
+  "sameDayVerification": {
+    "firstRows": 549,
+    "repeatRows": 549,
+    "newDailyRows": 0,
+    "allFirstTimesPreserved": true,
+    "allLastTimesAdvanced": true,
+    "allCountsIncrementedOnce": true,
+    "historyUnchanged": true,
+    "history": {
+      "states": 855,
+      "open": 826,
+      "oldest": "2026-10-03 17:45:11.644+00",
+      "newest": "2026-10-04 21:02:44.155+00",
+      "digest": "3bfa778ce91d73dd77fb766ffca63871"
+    }
+  },
+  "repeatedSamples": [
+    {
+      "first": {
+        "retailer_id": "metro",
+        "external_id": "10280",
+        "listing_id": "c5001a7c-854e-4bb1-973f-9e7f6c76a306",
+        "observation_date": "2026-10-04",
+        "first_observed_at": "2026-10-04 21:02:57.613+00",
+        "last_observed_at": "2026-10-04 21:02:57.613+00",
+        "observation_count": 1
+      },
+      "repeat": {
+        "retailer_id": "metro",
+        "external_id": "10280",
+        "listing_id": "c5001a7c-854e-4bb1-973f-9e7f6c76a306",
+        "observation_date": "2026-10-04",
+        "first_observed_at": "2026-10-04 21:02:57.613+00",
+        "last_observed_at": "2026-10-04 21:06:09.468+00",
+        "observation_count": 2
+      }
+    },
+    {
+      "first": {
+        "retailer_id": "metro",
+        "external_id": "10400",
+        "listing_id": "1d00e03c-c28a-46a6-b8d1-e751df69ccbb",
+        "observation_date": "2026-10-04",
+        "first_observed_at": "2026-10-04 21:02:42.529+00",
+        "last_observed_at": "2026-10-04 21:02:42.529+00",
+        "observation_count": 1
+      },
+      "repeat": {
+        "retailer_id": "metro",
+        "external_id": "10400",
+        "listing_id": "1d00e03c-c28a-46a6-b8d1-e751df69ccbb",
+        "observation_date": "2026-10-04",
+        "first_observed_at": "2026-10-04 21:02:42.529+00",
+        "last_observed_at": "2026-10-04 21:06:00.078+00",
+        "observation_count": 2
+      }
+    },
+    {
+      "first": {
+        "retailer_id": "plaza-vea",
+        "external_id": "10016995",
+        "listing_id": "5ac3a497-e882-41ba-8ed6-6304baa17d3d",
+        "observation_date": "2026-10-04",
+        "first_observed_at": "2026-10-04 21:02:39.446+00",
+        "last_observed_at": "2026-10-04 21:02:39.446+00",
+        "observation_count": 1
+      },
+      "repeat": {
+        "retailer_id": "plaza-vea",
+        "external_id": "10016995",
+        "listing_id": "5ac3a497-e882-41ba-8ed6-6304baa17d3d",
+        "observation_date": "2026-10-04",
+        "first_observed_at": "2026-10-04 21:02:39.446+00",
+        "last_observed_at": "2026-10-04 21:05:56.87+00",
+        "observation_count": 2
+      }
+    },
+    {
+      "first": {
+        "retailer_id": "plaza-vea",
+        "external_id": "10018187",
+        "listing_id": "00480f45-fe57-43ec-b0c8-eb6a3de457b3",
+        "observation_date": "2026-10-04",
+        "first_observed_at": "2026-10-04 21:02:37.909+00",
+        "last_observed_at": "2026-10-04 21:02:37.909+00",
+        "observation_count": 1
+      },
+      "repeat": {
+        "retailer_id": "plaza-vea",
+        "external_id": "10018187",
+        "listing_id": "00480f45-fe57-43ec-b0c8-eb6a3de457b3",
+        "observation_date": "2026-10-04",
+        "first_observed_at": "2026-10-04 21:02:37.909+00",
+        "last_observed_at": "2026-10-04 21:05:55.316+00",
+        "observation_count": 2
+      }
+    },
+    {
+      "first": {
+        "retailer_id": "tottus",
+        "external_id": "113705613",
+        "listing_id": "0ee521ed-864c-4e4a-9cf5-89ed547c9237",
+        "observation_date": "2026-10-04",
+        "first_observed_at": "2026-10-04 21:02:11.269+00",
+        "last_observed_at": "2026-10-04 21:02:11.269+00",
+        "observation_count": 1
+      },
+      "repeat": {
+        "retailer_id": "tottus",
+        "external_id": "113705613",
+        "listing_id": "0ee521ed-864c-4e4a-9cf5-89ed547c9237",
+        "observation_date": "2026-10-04",
+        "first_observed_at": "2026-10-04 21:02:11.269+00",
+        "last_observed_at": "2026-10-04 21:05:36.884+00",
+        "observation_count": 2
+      }
+    },
+    {
+      "first": {
+        "retailer_id": "tottus",
+        "external_id": "113705686",
+        "listing_id": "f9c918b8-a05c-4eef-8212-4ac00080541b",
+        "observation_date": "2026-10-04",
+        "first_observed_at": "2026-10-04 21:02:11.269+00",
+        "last_observed_at": "2026-10-04 21:02:11.269+00",
+        "observation_count": 1
+      },
+      "repeat": {
+        "retailer_id": "tottus",
+        "external_id": "113705686",
+        "listing_id": "f9c918b8-a05c-4eef-8212-4ac00080541b",
+        "observation_date": "2026-10-04",
+        "first_observed_at": "2026-10-04 21:02:11.269+00",
+        "last_observed_at": "2026-10-04 21:05:36.884+00",
+        "observation_count": 2
+      }
+    }
+  ],
+  "targeted": {
+    "requests": 1,
+    "results": [
+      {
+        "retailer": "metro",
+        "externalId": "427",
+        "status": "observed",
+        "priceStates": 0
+      }
+    ],
+    "changed": 0,
+    "observed": 1,
+    "failures": 0,
+    "status": "success",
+    "normalization": "success",
+    "matching": "success",
+    "normalizationWrites": 0,
+    "matchingWrites": 0
+  },
+  "targetedDailyRow": {
+    "retailer_id": "metro",
+    "external_id": "427",
+    "last_category_observed_at": null,
+    "first_seen_via": "unknown",
+    "title": "Aceite Vegetal Primor Premium Botella 900ml",
+    "listing_id": "49409009-c97c-4d76-afa5-8ce459bb6a0b",
+    "observation_date": "2026-10-04",
+    "first_observed_at": "2026-10-04 21:08:36.033+00",
+    "last_observed_at": "2026-10-04 21:08:36.033+00",
+    "observation_count": 1
+  },
+  "finalCoverage": {
+    "inspectedAt": "2026-10-04T21:10:00.352Z",
+    "today": "2026-10-04",
+    "timeZone": "America/Lima",
+    "coverageRows": 550,
+    "earliestDate": "2026-10-04",
+    "averageObservationsPerCoveredListingDay": 1.9981818181818183,
+    "knownListings": 826,
+    "publicListings": 133,
+    "observedToday": 550,
+    "publicObservedToday": 102,
+    "tableBytes": 114688,
+    "indexBytes": 57344,
+    "publicMissingToday": 31,
+    "retailers": [
+      {
+        "retailer": "metro",
+        "known": 295,
+        "expectedPublic": 48,
+        "observedToday": 209,
+        "publicObservedToday": 40,
+        "publicMissingToday": 8
+      },
+      {
+        "retailer": "plaza-vea",
+        "known": 269,
+        "expectedPublic": 56,
+        "observedToday": 191,
+        "publicObservedToday": 45,
+        "publicMissingToday": 11
+      },
+      {
+        "retailer": "tottus",
+        "known": 262,
+        "expectedPublic": 29,
+        "observedToday": 150,
+        "publicObservedToday": 17,
+        "publicMissingToday": 12
+      }
+    ],
+    "recentPublicGaps": [],
+    "projectedRowsPer30Days": [
+      {
+        "listings": 826,
+        "rows": 24780
+      },
+      {
+        "listings": 1000,
+        "rows": 30000
+      },
+      {
+        "listings": 1500,
+        "rows": 45000
+      }
+    ],
+    "note": "Today is still open. Missing coverage is unknown, not proof of a failed request. Gap samples exclude pre-coverage dates; public eligibility is evaluated now."
+  },
+  "historyIntegrity": {
+    "invalid_intervals": 0,
+    "disconnected_states": 0,
+    "wrong_open_count": 0
+  },
+  "allRealOrdinaryTransitions": [
+    {
+      "retailer_id": "metro",
+      "external_id": "39254015",
+      "title": "Leche Deslactosada Danlac Light Botella 900ml",
+      "previous_price": 900,
+      "current_price_cents": 750,
+      "valid_from": "2026-10-04 16:50:34.991+00",
+      "canonical_product_id": null
+    },
+    {
+      "retailer_id": "metro",
+      "external_id": "39254015",
+      "title": "Leche Deslactosada Danlac Light Botella 900ml",
+      "previous_price": 750,
+      "current_price_cents": 900,
+      "valid_from": "2026-10-04 21:02:44.155+00",
+      "canonical_product_id": null
+    },
+    {
+      "retailer_id": "metro",
+      "external_id": "8457",
+      "title": "Leche Entera Pasteurizada Danlac Botella 900ml",
+      "previous_price": 690,
+      "current_price_cents": 810,
+      "valid_from": "2026-10-04 21:02:44.155+00",
+      "canonical_product_id": null
+    }
+  ],
+  "growth": [
+    {
+      "listings": 549,
+      "rowsPer30Days": 16470,
+      "approxAllocatedMiBPer30Days": 4.92
+    },
+    {
+      "listings": 826,
+      "rowsPer30Days": 24780,
+      "approxAllocatedMiBPer30Days": 7.41
+    },
+    {
+      "listings": 1000,
+      "rowsPer30Days": 30000,
+      "approxAllocatedMiBPer30Days": 8.97
+    },
+    {
+      "listings": 1500,
+      "rowsPer30Days": 45000,
+      "approxAllocatedMiBPer30Days": 13.45
+    }
+  ],
+  "projectionNote": "Uses 549-row allocation after two same-day observations. Fixed pages, dead tuples, vacuum and index packing make this rough, not measured monthly storage.",
+  "validation": {
+    "unitTests": 540,
+    "postgresTests": 41,
+    "fixtureDatabaseValidation": "six kinds passed; isolated schemas",
+    "formatLintTypecheck": "passed",
+    "build": "Fresh agent build remains blocked by Turbopack CSS worker port binding. User-produced production artifact supported the recorded browser runs; final chart fix requires another local build.",
+    "e2e": "General Chromium: 13 passed, 14 skipped; corrected mobile navigation: 10/10 repeated passes. History fixture Chromium on the available build: 4 passed, 2 failed (flat-SVG visibility assertion and ComposedChart tooltip mode). Both fixes implemented; fresh build/history Chromium confirmation pending.",
+    "visual": "desktop/mobile light/dark pending local acceptance"
+  }
+}

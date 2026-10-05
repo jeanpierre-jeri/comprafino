@@ -53,8 +53,9 @@ export async function PriceHistory({
         </nav>
       </div>
       <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-        Mostramos estados de precio registrados; puede haber periodos sin observaciones. Los puntos
-        no están conectados. Beneficios como CMR se muestran por separado.
+        Las líneas unen días consecutivos con observaciones verificadas; los huecos indican falta de
+        cobertura. Los registros anteriores quedan como puntos. Beneficios como CMR se muestran por
+        separado.
       </p>
       {!history ? (
         <p className="mt-5 text-sm text-muted-foreground">
@@ -65,7 +66,9 @@ export async function PriceHistory({
           <p className="mt-2 text-xs text-muted-foreground">
             {date(history.start)} – {date(history.end)} · Hora de Perú
           </p>
-          {history.retailers.some((r) => r.summary.status === "events") ? (
+          {history.retailers.some(
+            (r) => r.summary.status === "events" || r.summary.segments.length > 0,
+          ) ? (
             <PriceHistoryChart
               start={history.start.getTime()}
               end={history.end.getTime()}
@@ -73,6 +76,7 @@ export async function PriceHistory({
                 retailerId: r.retailerId,
                 retailerName: r.retailerName,
                 points: r.summary.points,
+                segments: r.summary.segments,
               }))}
             />
           ) : (
@@ -142,6 +146,25 @@ export async function PriceHistory({
                       : s.status === "empty"
                         ? "Sin registros en este rango."
                         : "Sin cambios observados en este rango."}
+                  </p>
+                  {s.lastChange ? (
+                    <p className="mt-2 text-sm font-medium" data-testid="price-change-insight">
+                      {s.lastChange.direction === "down" ? "↓ Bajó" : "↑ Subió"}{" "}
+                      {formatPen(s.lastChange.absoluteDifferenceCents)} en el último cambio del
+                      rango
+                      {s.lastChange.percentDifference !== null
+                        ? ` (${Math.abs(s.lastChange.percentDifference)}%)`
+                        : ""}
+                      .
+                    </p>
+                  ) : s.verifiedUnchangedDays !== null ? (
+                    <p className="mt-2 text-sm font-medium" data-testid="unchanged-insight">
+                      Sin cambios observados durante {s.verifiedUnchangedDays} días.
+                    </p>
+                  ) : null}
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {r.coverage.length} días con observaciones en el rango. Un día observado no
+                    garantiza un precio constante entre consultas.
                   </p>
                   <details className="mt-3 text-xs text-muted-foreground">
                     <summary className="min-h-10 cursor-pointer py-2">

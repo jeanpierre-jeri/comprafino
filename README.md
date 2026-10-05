@@ -12,7 +12,7 @@ The roadmap aims to help people decide where to buy, when to buy, whether a pric
 
 ## Current status
 
-Milestones 0–11 are complete in the provided baseline (`6c3a52f`). Milestone 12 refines the public home, search, cards and comparison pages with a shared visual system and intentional mobile layouts. Its focused second design iteration, custom Select menus and light/dark themes are accepted following user visual review. See [UI polish](docs/ui-polish.md) for the design, manual audit and validation, [conditional pricing](docs/conditional-pricing.md) for separate CMR semantics and [search UX](docs/search-ux.md) for URL controls. The homepage remains database-independent. Milestone 13 implements ordinary-price history on exact-product pages; the user confirmed the local production build and general E2E run passed, while history-specific Chromium and visual acceptance remain pending. See [price history](docs/price-history.md).
+Milestones 0–11 are complete in the provided baseline (`6c3a52f`). Milestone 12 refines the public home, search, cards and comparison pages with a shared visual system and intentional mobile layouts. Its focused second design iteration, custom Select menus and light/dark themes are accepted following user visual review. See [UI polish](docs/ui-polish.md) for the design, manual audit and validation, [conditional pricing](docs/conditional-pricing.md) for separate CMR semantics and [search UX](docs/search-ux.md) for URL controls. The homepage remains database-independent. Milestone 13 ordinary-price history is complete in the user-provided baseline. Milestone 14 adds durable Peru-day observation coverage, verified chart segments/gaps and safe descriptive price insights; local build, history Chromium and visual acceptance remain pending. See [price history](docs/price-history.md), [observation coverage](docs/observation-coverage.md) and [validation](docs/milestone-14-validation.md).
 
 ## Initial retailers
 
@@ -150,6 +150,7 @@ pnpm coverage:report
 pnpm audit:staples
 pnpm audit:quantity-quality
 pnpm catalog:budget
+pnpm audit:observation-coverage
 ```
 
 The full pipeline reuses category ingestion (Tottus meat/dairy plus Plaza Vea/Metro dairy and six bounded staple sources each), up to 100 eligible known-listing lookups, then one normalization and matching pass. New staple sources allow twenty usable listings and two pages each; see [staple coverage](docs/staple-coverage.md). Public offers older than 36 hours cannot win cheapest price; retained historical prices remain labelled. Its GitHub workflow supports manual dispatch and cron `17 11,23 * * *`: 11:17/23:17 UTC, or 06:17/18:17 Peru. Full refresh workflows do not overlap or cancel a running refresh. Failed retailers retain prior data; successful retailers continue, while the command still exits nonzero. `/dev/ingestion` shows distinct latest attempts/successes and healthy (≤18h), delayed (≤30h) or stale (>30h) operational freshness. GitHub schedules can start late; prices remain observed rather than real-time. See [operations](docs/operations.md) for fixed category limits, safe failure behavior, notifications and troubleshooting.
@@ -167,35 +168,36 @@ Both modes read root `DATABASE_URL`; dry-run previews demand without writes or r
 
 ## Scripts
 
-| Command                             | Purpose                                                                      |
-| ----------------------------------- | ---------------------------------------------------------------------------- |
-| `pnpm dev`                          | Start the web development server directly through pnpm                       |
-| `pnpm build`                        | Build production application through Turbo                                   |
-| `pnpm lint` / `pnpm lint:fix`       | Type-aware Oxlint checks / fixes                                             |
-| `pnpm format` / `pnpm format:check` | Oxfmt formatting / verification                                              |
-| `pnpm typecheck`                    | Generate Next types and run `tsc --noEmit` for every workspace               |
-| `pnpm test`                         | Vitest tests in core, database and scraper packages                          |
-| `pnpm test:integration`             | Isolated-schema PostgreSQL tests; explicit `TEST_DATABASE_URL`               |
-| `pnpm test:e2e`                     | Chromium smoke test against a production server (build first)                |
-| `pnpm discover:catalog`             | Process bounded zero-result discovery demand; read-only dry-run available    |
-| `pnpm refresh:listings`             | Refresh eligible known SKUs; optional read-only selection preview            |
-| `pnpm audit:quantity-quality`       | Read-only complete-catalog quantity basis, quality and withheld audit        |
-| `pnpm catalog:budget`               | Read-only catalog counts, storage, candidates and configured request budgets |
-| `pnpm audit:unit-prices`            | Read-only unit-price coverage, samples and real-search audit                 |
-| `pnpm coverage:report`              | Read-only freshness, category coverage and discovery demand audit            |
-| `pnpm refresh:catalog`              | Refresh validated retailer scopes, normalize and match; optional dry-run     |
-| `pnpm db:generate`                  | Generate reviewed migrations from the schema                                 |
-| `pnpm normalize:catalog`            | Normalize bounded existing listings; requires `DATABASE_URL`                 |
-| `pnpm match:catalog`                | Match bounded fresh normalized listings; optional dry-run                    |
-| `pnpm match:evaluate`               | Evaluate the 66 reviewed real pairs with PostgreSQL similarity               |
-| `pnpm match:audit`                  | Evaluate 105 independently reviewed pairs, separate from calibration         |
-| `pnpm db:migrate`                   | Apply migrations; requires `DATABASE_URL`                                    |
+| Command                             | Purpose                                                                        |
+| ----------------------------------- | ------------------------------------------------------------------------------ |
+| `pnpm dev`                          | Start the web development server directly through pnpm                         |
+| `pnpm build`                        | Build production application through Turbo                                     |
+| `pnpm lint` / `pnpm lint:fix`       | Type-aware Oxlint checks / fixes                                               |
+| `pnpm format` / `pnpm format:check` | Oxfmt formatting / verification                                                |
+| `pnpm typecheck`                    | Generate Next types and run `tsc --noEmit` for every workspace                 |
+| `pnpm test`                         | Vitest tests in core, database and scraper packages                            |
+| `pnpm test:integration`             | Isolated-schema PostgreSQL tests; explicit `TEST_DATABASE_URL`                 |
+| `pnpm test:e2e`                     | Chromium smoke test against a production server (build first)                  |
+| `pnpm discover:catalog`             | Process bounded zero-result discovery demand; read-only dry-run available      |
+| `pnpm refresh:listings`             | Refresh eligible known SKUs; optional read-only selection preview              |
+| `pnpm audit:observation-coverage`   | Read-only daily evidence, public gaps, retailer health and storage projections |
+| `pnpm audit:quantity-quality`       | Read-only complete-catalog quantity basis, quality and withheld audit          |
+| `pnpm catalog:budget`               | Read-only catalog counts, storage, candidates and configured request budgets   |
+| `pnpm audit:unit-prices`            | Read-only unit-price coverage, samples and real-search audit                   |
+| `pnpm coverage:report`              | Read-only freshness, category coverage and discovery demand audit              |
+| `pnpm refresh:catalog`              | Refresh validated retailer scopes, normalize and match; optional dry-run       |
+| `pnpm db:generate`                  | Generate reviewed migrations from the schema                                   |
+| `pnpm normalize:catalog`            | Normalize bounded existing listings; requires `DATABASE_URL`                   |
+| `pnpm match:catalog`                | Match bounded fresh normalized listings; optional dry-run                      |
+| `pnpm match:evaluate`               | Evaluate the 66 reviewed real pairs with PostgreSQL similarity                 |
+| `pnpm match:audit`                  | Evaluate 105 independently reviewed pairs, separate from calibration           |
+| `pnpm db:migrate`                   | Apply migrations; requires `DATABASE_URL`                                      |
 
 Turbo caches builds, type checks and unit tests. The root development command starts the single web server directly through pnpm, avoiding Turbo's child-process output interaction with pnpm 12's Node.js fallback launcher. Development is uncached. Repository lint/format run once from the root. Only workspaces with actual tasks declare them.
 
 ## Testing
 
-Unit tests cover source fixtures, money parsing, normalization, persistence SQL contracts, a deterministic price-state reference model and run outcomes without live network/database calls. `pnpm test:integration` separately exercises the real Neon HTTP persistence batch on PostgreSQL, without Turbo caching. It skips clearly when `TEST_DATABASE_URL` is absent and never loads `.env` or falls back to `DATABASE_URL`. Export the test URL explicitly, preferably for a dedicated Neon test database/branch. The suite applies the checked-in migration inside a fresh randomly named schema, sets transaction-local search paths without a public fallback, and drops only its own schema afterwards. It applies journaled table migrations, qualifying foreign keys with that test schema. The target test database must already have pg_trgm from the reviewed migration; the suite excludes extension creation to keep shared public objects untouched. Live tables are untouched. The role needs schema-creation permission. An interrupted process may leave its isolated schema for manual review/cleanup. Browser smoke testing checks functional homepage search, blank/short searches, malformed product IDs and production blocking of developer tooling against `next start` on port 3100. Explicit `DATABASE_URL` in the runner enables two additional persisted-catalog flows; see [public search validation](docs/public-search.md).
+Unit tests cover source fixtures, money parsing, normalization, persistence SQL contracts, a deterministic price-state reference model and run outcomes without live network/database calls. `pnpm test:integration` separately exercises the real Neon HTTP persistence batch on PostgreSQL, without Turbo caching. It skips clearly when `TEST_DATABASE_URL` is absent and never loads `.env` or falls back to `DATABASE_URL`. Use `pnpm test:integration:local` with the [Docker test database](docs/local-testing.md), or export the test URL explicitly for a dedicated Neon test database/branch. The suite applies the checked-in migration inside a fresh randomly named schema, sets transaction-local search paths without a public fallback, and drops only its own schema afterwards. It applies journaled table migrations, qualifying foreign keys with that test schema. The target test database must already have pg_trgm from the reviewed migration; the suite excludes extension creation to keep shared public objects untouched. Live tables are untouched. The role needs schema-creation permission. An interrupted process may leave its isolated schema for manual review/cleanup. Browser smoke testing checks functional homepage search, blank/short searches, malformed product IDs and production blocking of developer tooling against `next start` on port 3100. Explicit `DATABASE_URL` in the runner enables two additional persisted-catalog flows; see [public search validation](docs/public-search.md).
 
 ```sh
 pnpm test
@@ -245,3 +247,7 @@ TEST_DATABASE_URL=... pnpm test:e2e:history
 ```
 
 The history browser runner creates and removes a random schema, checks isolation, seeds controlled fixtures there and launches only the history spec. It passes a validated `COMPRAFINO_E2E_SCHEMA` to its child web server to scope every Neon HTTP batch/direct query transaction. Do not set that test-only override in deployment or normal development. No test URL fallback or automatic `.env` loading is provided. Interrupted runners may leave their random schema. The ordinary `pnpm test:e2e` smoke suite remains unchanged; the fixture-only cases skip clearly without the runner. Details and validation evidence: [price history](docs/price-history.md).
+
+For a disposable Docker PostgreSQL database, run `pnpm test:db:up`, then
+`pnpm test:integration:local` or, after `pnpm build`, `pnpm test:e2e:history:local`.
+Stop it with `pnpm test:db:down`. See [local testing](docs/local-testing.md).

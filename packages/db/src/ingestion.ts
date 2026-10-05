@@ -71,6 +71,17 @@ export function persistenceStatements(
         select u.id, x.observed_at, x.offers from updated u
         join jsonb_to_recordset(${payload}::jsonb) as x(external_id text, observed_at timestamptz, offers jsonb)
         on x.external_id=u.external_id
+      ), covered as (
+        insert into listing_observation_days (listing_id, observation_date, first_observed_at, last_observed_at, observation_count)
+        select u.id, (x.observed_at at time zone 'America/Lima')::date, x.observed_at, x.observed_at, 1
+        from updated u join jsonb_to_recordset(${payload}::jsonb)
+          as x(external_id text, observed_at timestamptz, current_price_cents integer, available boolean)
+          on x.external_id=u.external_id
+        where x.current_price_cents > 0 and x.available is distinct from false
+        on conflict (listing_id, observation_date) do update set
+          first_observed_at=least(listing_observation_days.first_observed_at, excluded.first_observed_at),
+          last_observed_at=greatest(listing_observation_days.last_observed_at, excluded.last_observed_at),
+          observation_count=listing_observation_days.observation_count+1
       ), removed as (
         delete from retailer_listing_offers o using incoming i where o.listing_id=i.id
         and not exists (select 1 from jsonb_array_elements(i.offers) v where v->>'programKey'=o.program_key)

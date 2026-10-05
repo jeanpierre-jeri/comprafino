@@ -43,6 +43,13 @@
       "when": 1791136935257,
       "tag": "0005_redundant_deadpool",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791147201358,
+      "tag": "0006_light_blink",
+      "breakpoints": true
     }
   ]
 }

@@ -93,19 +93,29 @@ test("mobile keyboard chip navigation responds in either theme and respects redu
           .locator('.search-chip[aria-busy="true"], [aria-label="Cargando resultados de búsqueda"]')
           .first(),
       ).toBeVisible({ timeout: 1000 });
-      if (await chip.isVisible()) {
-        await expect(chip).toHaveAttribute("aria-disabled", "true");
-        await chip.evaluate((element) => {
-          if (!(element instanceof HTMLAnchorElement)) throw new Error("Expected search link");
-          element.click();
-          element.click();
-        });
-      }
-      const skeleton = page
-        .locator('[aria-label="Cargando resultados de búsqueda"] [aria-hidden="true"]')
-        .first();
-      if (await skeleton.isVisible())
-        expect(await skeleton.evaluate((e) => getComputedStyle(e).animationName)).toBe("none");
+      // The loading boundary may replace the homepage between Playwright calls.
+      // Inspect and exercise an attached chip in one browser task.
+      const pendingState = await page.evaluate(() => {
+        const link = document.querySelector('.search-chip[href="/search?q=huevos"]');
+        const attributes =
+          link instanceof HTMLAnchorElement
+            ? { busy: link.getAttribute("aria-busy"), disabled: link.getAttribute("aria-disabled") }
+            : null;
+        if (link instanceof HTMLAnchorElement) {
+          link.click();
+          link.click();
+        }
+        const skeleton = document.querySelector(
+          '[aria-label="Cargando resultados de búsqueda"] [aria-hidden="true"]',
+        );
+        return {
+          attributes,
+          animationName: skeleton ? getComputedStyle(skeleton).animationName : null,
+        };
+      });
+      if (pendingState.attributes)
+        expect(pendingState.attributes).toEqual({ busy: "true", disabled: "true" });
+      if (pendingState.animationName !== null) expect(pendingState.animationName).toBe("none");
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
         true,
       );

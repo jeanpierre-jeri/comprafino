@@ -1,6 +1,6 @@
 # Conditional pricing — Milestone 11
 
-Milestone 11 is complete in the provided baseline `6c3a52f`; its original agent build restrictions are historical. Milestone 12 refines presentation only; see [UI polish](ui-polish.md). No price-history UI or accounts are included.
+Milestone 11 is complete in the provided baseline `6c3a52f`; its original agent build restrictions are historical. Milestone 12 refines presentation only; see [UI polish](ui-polish.md). Ordinary history and prospective coverage are now documented separately in [price history](price-history.md); accounts and conditional history remain deferred.
 
 ## Ordinary and conditional prices
 

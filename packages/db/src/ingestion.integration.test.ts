@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { neon, NeonQueryPromise } from "@neondatabase/serverless";
+import { NeonQueryPromise } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
@@ -9,6 +9,7 @@ import { searchFilters } from "@comprafino/core";
 import { normalizeCatalogListing } from "@comprafino/core";
 import type { NormalizedRetailerListing } from "@comprafino/core";
 import { requireDatabaseUrl } from "./env.ts";
+import { createTestQueryClient, closeLocalTestConnections } from "./test-query-client.ts";
 import { catalogRecordSchema, persistCatalogNormalizations } from "./catalog.ts";
 import { evaluateIndependentAudit } from "./matching-independent.ts";
 import { evaluateMatching } from "./matching-evaluate.ts";
@@ -36,6 +37,7 @@ import {
   claimListingRefresh,
   finishListingRefresh,
 } from "./listing-refresh.ts";
+import { observationCoverageReport } from "./observation-coverage.ts";
 import { coverageReport } from "./coverage.ts";
 import { searchGenericProductOffers, searchPublicProducts } from "./generic-offers.ts";
 const publicNow = new Date("2026-10-03T09:10:00Z");
@@ -74,10 +76,11 @@ const stateSchema = z.array(
 );
 
 describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABASE_URL)", () => {
-  const client = neon(
+  const client = createTestQueryClient(
     testUrl
       ? requireDatabaseUrl({ DATABASE_URL: testUrl })
-      : "postgresql://unused@localhost/unused",
+      : "postgresql://unused@localhost/comprafino_test",
+    process.env.COMPRAFINO_TEST_DATABASE_MODE,
   );
   const setPath = () => client.query("select set_config('search_path', $1, true)", [schemaName]);
   // Keep persistListings and Drizzle's real batch transaction intact. The only
@@ -155,7 +158,11 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
   }, 30_000);
   afterAll(async () => {
     // Only the random schema successfully created by this suite can be dropped.
-    if (created) await client.query(`drop schema ${quotedSchema} cascade`);
+    try {
+      if (created) await client.query(`drop schema ${quotedSchema} cascade`);
+    } finally {
+      await closeLocalTestConnections();
+    }
   }, 30_000);
 
   it("distinguishes latest attempt from success and preserves last-good price on failure", async () => {
@@ -251,6 +258,7 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
       "rollback",
     ]);
     const beforeHistory = await states("rollback");
+    const beforeCoverage = await coverageDays("rollback");
     // Force a real constraint failure only in this isolated schema, after the
     // upsert and history-close statements have executed. No production hooks.
     await query(
@@ -267,6 +275,7 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
         await query("select * from retailer_listings where external_id = $1", ["rollback"]),
       ).toEqual(beforeListings);
       expect(await states("rollback")).toEqual(beforeHistory);
+      expect(await coverageDays("rollback")).toEqual(beforeCoverage);
       expect(
         await query("select id from retailer_listings where external_id = $1", ["rollback-new"]),
       ).toEqual([]);
@@ -317,6 +326,7 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
       { current_price_cents: 1090, last_seen_at: observation("concurrent", 2).observedAt },
     ]);
   }, 30_000);
+
   async function catalogRows(externalId: string) {
     return z.array(catalogRecordSchema).parse(
       await query(
@@ -1565,5 +1575,149 @@ describe.skipIf(!testUrl)("PostgreSQL persistence (requires explicit TEST_DATABA
       searchFilters({ priceMode: "benefits" }),
     );
     expect(expired.offers[0]?.currentPriceCents).toBe(990);
+  }, 30000);
+  async function coverageDays(externalId: string) {
+    return z
+      .array(
+        z.object({
+          observation_date: z.string(),
+          first_observed_at: z.coerce.date(),
+          last_observed_at: z.coerce.date(),
+          observation_count: z.number().int(),
+        }),
+      )
+      .parse(
+        await query(
+          `select d.* from listing_observation_days d join retailer_listings l on l.id=d.listing_id
+       where l.external_id=$1 order by observation_date`,
+          [externalId],
+        ),
+      );
+  }
+  it("daily coverage shares category, discovery and targeted persistence with no replay duplication", async () => {
+    await recordDiscoveryForSearch(db, "observation rollup fixture", 0);
+    const demand = (await inspectDiscovery(db)).queries.find(
+      (q) => q.normalizedQuery === "observation rollup fixture",
+    )!;
+    const value = observation("coverage-rollup", 0);
+    await persistListings(db, "tottus", [value], { source: "discovery", queryId: demand.id });
+    await persistListings(db, "tottus", [observation(value.externalId, 1)], { source: "category" });
+    await persistListings(db, "tottus", [observation(value.externalId, 2)], { source: "targeted" });
+    expect(await coverageDays(value.externalId)).toMatchObject([
+      {
+        observation_date: "2026-10-03",
+        first_observed_at: value.observedAt,
+        last_observed_at: observation(value.externalId, 2).observedAt,
+        observation_count: 3,
+      },
+    ]);
+    await persistListings(db, "tottus", [value]);
+    await persistListings(db, "tottus", [observation(value.externalId, 2)]);
+    expect((await coverageDays(value.externalId))[0]!.observation_count).toBe(3);
+    expect(await states(value.externalId)).toHaveLength(1);
+    await persistListings(db, "tottus", [
+      { ...value, currentPriceCents: 1090, observedAt: new Date("2026-10-04T04:59:59Z") },
+    ]);
+    expect(await states(value.externalId)).toHaveLength(2);
+    expect((await coverageDays(value.externalId))[0]!.observation_count).toBe(4);
+    await persistListings(db, "tottus", [
+      { ...value, currentPriceCents: 1090, observedAt: new Date("2026-10-04T05:00:00Z") },
+    ]);
+    expect((await coverageDays(value.externalId)).map((d) => d.observation_date)).toEqual([
+      "2026-10-03",
+      "2026-10-04",
+    ]);
+  }, 30000);
+  it("serializes concurrent daily observations and enforces listing/day uniqueness", async () => {
+    const value = observation("coverage-concurrent", 0);
+    await Promise.all([
+      persistListings(db, "tottus", [value]),
+      persistListings(db, "tottus", [value]),
+    ]);
+    expect((await coverageDays(value.externalId))[0]!.observation_count).toBe(1);
+    const results = await Promise.all(
+      [1, 2, 3].map((n) => persistListings(db, "tottus", [observation(value.externalId, n)])),
+    );
+    const days = await coverageDays(value.externalId);
+    expect(days).toHaveLength(1);
+    expect(days[0]!.observation_count).toBe(1 + results.reduce((sum, r) => sum + r.persisted, 0));
+    expect(days[0]!.first_observed_at).toEqual(value.observedAt);
+    expect(days[0]!.last_observed_at).toEqual(observation(value.externalId, 3).observedAt);
+    await expect(
+      query("insert into listing_observation_days select * from listing_observation_days limit 1"),
+    ).rejects.toMatchObject({ code: "23505" });
+  }, 30000);
+  it("failed, missing, unavailable and malformed observations do not manufacture coverage", async () => {
+    const store = createIngestionStore(db);
+    const value = observation("coverage-failure", 0);
+    await store.persist("tottus", [value]);
+    const before = await coverageDays(value.externalId);
+    const run = await store.start("tottus");
+    await store.finish(run, { status: "failed", fetched: 0, persisted: 0, changed: 0 });
+    const row = (await knownListings(db)).find((r) => r.externalId === value.externalId)!;
+    const at = observation("x", 1).observedAt;
+    await claimListingRefresh(db, row, at);
+    await finishListingRefresh(db, row, at, "unavailable");
+    await finishListingRefresh(db, row, at, "not-found");
+    expect(await coverageDays(value.externalId)).toEqual(before);
+    await expect(
+      persistListings(db, "tottus", [{ ...value, currentPriceCents: -1 }]),
+    ).rejects.toThrow(/Too small/u);
+    expect(await coverageDays(value.externalId)).toEqual(before);
+    await persistListings(db, "tottus", [observation("coverage-zero", 0, 0)]);
+    await persistListings(db, "tottus", [
+      { ...observation("coverage-unavailable", 0), available: false },
+    ]);
+    expect(await coverageDays("coverage-zero")).toEqual([]);
+    expect(await coverageDays("coverage-unavailable")).toEqual([]);
+  }, 30000);
+  it("history range joins daily evidence without multiplying states and breaks a genuine fixture gap", async () => {
+    const { rows, pairs } = await seedMatch("coverage-public");
+    await persistMatching(db, rows, pairs);
+    const links = z
+      .array(z.object({ canonical_product_id: z.uuid() }))
+      .parse(
+        await query(
+          "select canonical_product_id from canonical_product_listings where listing_id=$1",
+          [rows[0]!.id],
+        ),
+      );
+    const id = links[0]!.canonical_product_id;
+    const value = {
+      ...observation("coverage-public-metro", 0),
+      retailer: "metro" as const,
+      title: "Leche Gloria Entera Caja 946ml",
+      sourceBrand: "Gloria",
+    };
+    for (const day of [4, 6, 7])
+      await persistListings(db, "metro", [
+        { ...value, observedAt: new Date(Date.UTC(2026, 9, day, 9)) },
+      ]);
+    const history = await getCanonicalProductPriceHistory(db, id, {
+      range: "7d",
+      now: new Date("2026-10-07T23:00:00Z"),
+    });
+    const metro = history!.retailers.find((r) => r.retailerId === "metro")!;
+    expect(metro.states).toHaveLength(1);
+    expect(metro.coverage.map((d) => d.observationDate)).toEqual([
+      "2026-10-03",
+      "2026-10-04",
+      "2026-10-06",
+      "2026-10-07",
+    ]);
+    expect(metro.summary.segments).toHaveLength(2);
+    expect(metro.summary.verifiedUnchangedDays).toBe(2);
+    const report = await observationCoverageReport(db, new Date("2026-10-07T23:00:00Z"));
+    expect(report.recentPublicGaps).toContainEqual({
+      retailer: "metro",
+      externalId: value.externalId,
+      day: "2026-10-05",
+    });
+    expect(report.publicObservedToday).toBeGreaterThan(0);
+    const later = await getCanonicalProductPriceHistory(db, id, {
+      range: "7d",
+      now: new Date("2026-10-15T23:00:00Z"),
+    });
+    expect(later!.retailers.find((r) => r.retailerId === "metro")!.coverage).toEqual([]);
   }, 30000);
 });

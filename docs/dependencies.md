@@ -41,6 +41,8 @@ Stable exact versions are pinned. Runtime ownership follows use; root owns repos
 | -------------------------- | --------- | --------------- | ---------------------------------------- |
 | `drizzle-orm`              | `0.45.3`  | dependencies    | typed PostgreSQL queries                 |
 | `@neondatabase/serverless` | `1.2.0`   | dependencies    | Neon serverless HTTP driver              |
+| `pg`                       | `8.23.1`  | dependencies    | explicit local PostgreSQL test transport |
+| `@types/pg`                | `8.23.1`  | devDependencies | local PostgreSQL driver types            |
 | `zod`                      | `4.6.5`   | dependencies    | database environment boundary validation |
 | `drizzle-kit`              | `0.31.11` | devDependencies | SQL generation and migration CLI         |
 | `dotenv`                   | `18.0.5`  | devDependencies | root .env loading for migration CLI only |

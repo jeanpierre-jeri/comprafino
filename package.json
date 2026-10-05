@@ -31,7 +31,12 @@
     "catalog:budget": "pnpm --filter @comprafino/scrapers catalog:budget",
     "audit:quantity-quality": "pnpm --filter @comprafino/db audit:quantity-quality",
     "audit:price-history": "pnpm --filter @comprafino/db audit:price-history",
-    "test:e2e:history": "pnpm --filter @comprafino/db test:e2e:history"
+    "test:e2e:history": "pnpm --filter @comprafino/db test:e2e:history",
+    "audit:observation-coverage": "pnpm --filter @comprafino/db audit:observation-coverage",
+    "test:db:up": "docker compose -f compose.test.yaml up -d --wait",
+    "test:db:down": "docker compose -f compose.test.yaml down",
+    "test:integration:local": "node --experimental-strip-types packages/db/src/local-test-cli.ts integration",
+    "test:e2e:history:local": "node --experimental-strip-types packages/db/src/local-test-cli.ts history"
   },
   "devDependencies": {
     "oxfmt": "0.71.0",

@@ -1,0 +1,19 @@
+name: comprafino-tests
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: comprafino_test
+      POSTGRES_DB: comprafino_test
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "127.0.0.1:55432:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    volumes:
+      - ./packages/db/testing/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U comprafino_test -d comprafino_test"]
+      interval: 2s
+      timeout: 5s
+      retries: 30

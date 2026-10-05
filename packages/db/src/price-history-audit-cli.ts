@@ -102,7 +102,7 @@ console.log(
         )
         .parse(transitions.rows),
       gapEvidence:
-        "Only state starts and latest listing observation survive; actual historical coverage/gaps cannot be reconstructed. Widely spaced starts are not verified gaps.",
+        "Daily coverage now verifies prospective observations; pre-coverage gaps remain unknown. Widely spaced state starts are not verified observation gaps.",
       products,
     },
     null,

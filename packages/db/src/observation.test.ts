@@ -61,3 +61,37 @@ it("treats reference price and price-unit changes as meaningful states", () => {
   });
   expect(third.history).toHaveLength(3);
 });
+it("preserves prospective daily coverage independently of ordinary and reference state changes", () => {
+  const first = applyObservation(undefined, listing);
+  const second = applyObservation(first, {
+    ...listing,
+    observedAt: new Date("2026-10-03T18:00:00Z"),
+  });
+  const changed = applyObservation(second, {
+    ...listing,
+    currentPriceCents: 1090,
+    observedAt: new Date("2026-10-03T23:00:00Z"),
+  });
+  expect(changed.history).toHaveLength(2);
+  expect(changed.coverageDays).toEqual([
+    {
+      observationDate: "2026-10-03",
+      firstObservedAt: listing.observedAt,
+      lastObservedAt: changed.listing.observedAt,
+      observationCount: 3,
+    },
+  ]);
+  expect(applyObservation(changed, listing)).toBe(changed);
+  const next = applyObservation(changed, {
+    ...listing,
+    observedAt: new Date("2026-10-04T05:00:00Z"),
+  });
+  expect(next.coverageDays).toHaveLength(2);
+});
+it("does not count unusable or explicitly unavailable price observations", () => {
+  for (const value of [
+    { ...listing, currentPriceCents: 0 },
+    { ...listing, available: false },
+  ])
+    expect(applyObservation(undefined, value).coverageDays).toEqual([]);
+});

@@ -12,6 +12,7 @@ import {
   index,
   foreignKey,
   date,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 const time = (name: string) => timestamp(name, { withTimezone: true });
 export const retailers = pgTable(
@@ -299,6 +300,30 @@ export const retailerListingOffers = pgTable(
     check(
       "listing_offer_window",
       sql`${t.startsAt} is null or ${t.endsAt} is null or ${t.startsAt}<${t.endsAt}`,
+    ),
+  ],
+);
+
+/** Prospective usable ordinary-price coverage, without duplicating price states. */
+export const listingObservationDays = pgTable(
+  "listing_observation_days",
+  {
+    listingId: uuid("listing_id")
+      .notNull()
+      .references(() => retailerListings.id, { onDelete: "cascade" }),
+    observationDate: date("observation_date").notNull(),
+    firstObservedAt: time("first_observed_at").notNull(),
+    lastObservedAt: time("last_observed_at").notNull(),
+    observationCount: integer("observation_count").notNull().default(1),
+  },
+  (t) => [
+    primaryKey({ columns: [t.listingId, t.observationDate] }),
+    check("observation_day_count", sql`${t.observationCount} > 0`),
+    check(
+      "observation_day_times",
+      sql`${t.firstObservedAt} <= ${t.lastObservedAt}
+      and (${t.firstObservedAt} at time zone 'America/Lima')::date = ${t.observationDate}
+      and (${t.lastObservedAt} at time zone 'America/Lima')::date = ${t.observationDate}`,
     ),
   ],
 );

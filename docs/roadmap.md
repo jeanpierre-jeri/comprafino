@@ -118,13 +118,19 @@ Milestone 11 is complete in the user-provided baseline `6c3a52f`. The pending no
 
 Implemented: composed sage home hero and search surface, starter links and short how-it-helps section, retailer strip, distinct exact/generic search sections, responsive toolbar with Base UI custom Select menus, reusable Server Component cards, stronger ordinary-price hierarchy, secondary CMR surfaces, framed images and quieter freshness, product comparison hero/retailer rows, shared colors/radii/shadows, skip link and focus/reduced-motion support. No dependencies, backend expansion, model/migration changes or price-history UI.
 
-The first pass is committed at `bff4659`, with all original validation passing. A focused second iteration replaces numbered home explanations with search shortcuts, compacts desktop/mobile cards, strengthens prices and retailer provenance, adds relative result freshness, reduces framing, and refines the wordmark and product hero. The latest follow-up also adds System/Light/Dark appearance with local preference persistence and shared theme tokens. Milestone 12 is accepted following user visual review. Milestone 13 is implemented with history-specific validation pending below. See [UI polish](ui-polish.md) for acceptance and limitations.
+The first pass is committed at `bff4659`, with all original validation passing. A focused second iteration replaces numbered home explanations with search shortcuts, compacts desktop/mobile cards, strengthens prices and retailer provenance, adds relative result freshness, reduces framing, and refines the wordmark and product hero. The latest follow-up also adds System/Light/Dark appearance with local preference persistence and shared theme tokens. Milestone 12 is accepted following user visual review. Milestone 13 is complete in the user-provided Milestone 14 baseline. See [UI polish](ui-polish.md) for acceptance and limitations.
 
-## Milestone 13 — Public price-history UX (implemented; validation pending)
+## Milestone 13 — Public price-history UX (complete in task baseline)
 
 Exact-product pages now expose ordinary recorded states, retailer summaries, 7/30/90-day URL ranges and a disconnected shadcn/Recharts v3 event chart when ordinary changes exist. The initial default is 7 days based on less than one day of live history. Current CMR offers remain separate. No daily backfill, average, recommendation, alert, schema change or retailer work.
 
-Unit/PostgreSQL checks and a six-product read-only audit are recorded in [price history](price-history.md). The sandbox production build hit the specified Turbopack CSS worker-port restriction. The user subsequently confirmed the local default build passed and supplied the general E2E result: 13 passed, 12 skipped. History-specific fixture Chromium tests and desktop/mobile light/dark chart acceptance remain pending. The user authorized committing the remaining implementation; no push is authorized. Do not mark Milestone 13 complete or begin the next milestone yet.
+Unit/PostgreSQL checks and a six-product read-only audit are recorded in [price history](price-history.md). Historical agent build/browser restrictions remain documented; the user identifies Milestone 13 as complete for this task.
+
+## Milestone 14 — Durable observation coverage and trustworthy price-change insights
+
+Implemented: reviewed prospective listing/day rollup in Peru time, shared atomic persistence for category/discovery/targeted observations, accepted-observation counts with replay protection, verified step segments and explicit gaps, conservative pre-coverage markers, retailer-specific selected-range changes/min/max/count and verified unchanged streaks, developer coverage metrics and read-only audit/storage projections. No backfill, CMR history, recommendation, forecast, alert, AI, dependency or new schedule.
+
+Unit/PostgreSQL, live refresh/repeat, storage and history audit evidence plus remaining local build/Chromium/visual gates are in [Milestone 14 validation](milestone-14-validation.md). The agent hit the specified Turbopack worker-port restriction and retains framework configuration. Stage and await local build/E2E/visual confirmation before committing. Milestone 14 is **not complete** until those gates pass. Do not begin buy/wait work or the next milestone automatically.
 
 ## Later — Promotions
 
