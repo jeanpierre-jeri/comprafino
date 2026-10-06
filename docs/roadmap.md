@@ -6,11 +6,11 @@ Bounded Tottus, Plaza Vea and Metro acquisition; scheduled refresh and demand di
 
 ## Current reliability and technical work
 
-Cleanup A is committed as `15cb5c2`: positive ordinary purchase prices, automatic identity invalidation, resilient session list storage, deterministic PostgreSQL/Chromium CI and Next stream cancellation regressions. Cleanup B reconciles documentation, shared policy ownership, evidence provenance and safe report output. The [October 5 audit](engineering-audit.md) preserves findings and remediation status; this roadmap does not authorize subsequent cleanup work.
+The repository hardening/cleanup program is complete: Cleanups A/B/C and the final unused-route/core-surface review resolve F01–F04, F06–F17 and F19. The [October 5 audit](engineering-audit.md#final-remediation-status--october-5-2026) preserves original evidence and final remediation status. Feature work may resume under separately agreed scope.
 
 ## Next measured work
 
-Existing coverage and audit evidence recommend catalog query-efficiency measurement and a deliberate capacity review while history accumulates. Preserve the 1,000-listing guard until such a review supports a change. Measure actual successful workflow duration and a stable multi-day price-change rate before quota or monthly storage decisions. Further reliability work requires separately agreed scope from the audit.
+F05 remains consciously deferred: review catalog capacity/performance before deliberate growth beyond the current 1,000-listing guard. F18 remains consciously deferred: optional query/read optimization requires measurement before implementation. Measure actual successful workflow duration and a stable multi-day price-change rate before quota or monthly storage decisions. These are future technical work, not unfinished cleanup; preserve the guard until a deliberate review supports a change.
 
 ## Deferred product work
 

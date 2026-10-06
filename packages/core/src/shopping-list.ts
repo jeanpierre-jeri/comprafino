@@ -22,11 +22,6 @@ export const shoppingListPolicy = {
   preferredSavingsCents: 100,
   preferredSavingsFraction: 0.05,
 } as const;
-export const shoppingIntentLabels = {
-  generic: "Cualquier opción equivalente",
-  preferred: "Prefiero este producto",
-  strict: "Solo quiero este producto",
-} as const;
 export const shoppingFrequencyLabels = {
   weekly: "Cada semana",
   biweekly: "Cada 2 semanas",
