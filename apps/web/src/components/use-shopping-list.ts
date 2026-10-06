@@ -2,63 +2,92 @@
 import { useEffect, useState } from "react";
 import { emptyShoppingList } from "@comprafino/core";
 import type { ShoppingList } from "@comprafino/core";
+import { authClient } from "../lib/auth-client";
 import {
   readShoppingStorage,
   shoppingStorageKey,
   writeShoppingStorage,
+  claimShoppingImport,
+  clearShoppingImport,
 } from "../lib/shopping-list-repository";
+import { ShoppingListSyncClient } from "../lib/shopping-list-sync-client";
 
-// Module state preserves the session fallback across client navigation when
-// browser storage is blocked. Effects subscribe only after hydration.
-let sessionList: ShoppingList = emptyShoppingList();
-let sessionWarning = "";
-let loaded = false;
-const listeners = new Set<() => void>();
-function notify() {
-  for (const listener of listeners) listener();
+const syncSignal = "comprafino-shopping-list-sync";
+const client = new ShoppingListSyncClient(
+  {
+    read: readShoppingStorage,
+    write: writeShoppingStorage,
+    claim: claimShoppingImport,
+    clear: clearShoppingImport,
+  },
+  (...args) => fetch(...args),
+  () => {
+    try {
+      window.localStorage.setItem(syncSignal, crypto.randomUUID());
+    } catch {
+      /* Focus/visibility refresh still works when storage is blocked. */
+    }
+  },
+);
+let subscriptions = 0;
+function storage(event: StorageEvent) {
+  if (event.key === shoppingStorageKey || event.key === syncSignal || event.key === null)
+    client.storageChanged();
+}
+function refresh() {
+  if (!document.hidden) void client.refresh(false);
 }
 export function useShoppingList() {
-  const [list, setList] = useState<ShoppingList>(emptyShoppingList);
-  const [warning, setWarning] = useState("");
-  const [ready, setReady] = useState(false);
+  const session = authClient.useSession();
+  const [snapshot, setSnapshot] = useState(client.getSnapshot);
+  // Session identity, not only user identity: old-session responses cannot commit.
+  const key = session.data
+    ? `${session.data.user.id}:${session.data.session.id}`
+    : session.isPending || (session.error && snapshot.accountKnown)
+      ? undefined
+      : null;
   useEffect(() => {
-    if (!loaded) {
-      const stored = readShoppingStorage(sessionList);
-      sessionList = stored.list;
-      sessionWarning = stored.warning;
-      loaded = true;
+    const update = () => setSnapshot(client.getSnapshot());
+    const unsubscribe = client.subscribe(update);
+    if (subscriptions++ === 0) {
+      window.addEventListener("storage", storage);
+      window.addEventListener("focus", refresh);
+      document.addEventListener("visibilitychange", refresh);
     }
-    const update = () => {
-      setList(sessionList);
-      setWarning(sessionWarning);
-      setReady(true);
-    };
-    const storage = (event: StorageEvent) => {
-      if (event.key !== shoppingStorageKey && event.key !== null) return;
-      const stored = readShoppingStorage(sessionList);
-      sessionList = stored.list;
-      sessionWarning = stored.warning;
-      notify();
-    };
-    listeners.add(update);
-    window.addEventListener("storage", storage);
     update();
     return () => {
-      listeners.delete(update);
-      window.removeEventListener("storage", storage);
+      unsubscribe();
+      if (--subscriptions === 0) {
+        window.removeEventListener("storage", storage);
+        window.removeEventListener("focus", refresh);
+        document.removeEventListener("visibilitychange", refresh);
+      }
     };
   }, []);
-  function change(next: (current: ShoppingList) => ShoppingList) {
-    // Read latest persisted state before mutation to reduce cross-tab lost writes.
-    let readWarning = "";
-    if (!sessionWarning) {
-      const stored = readShoppingStorage(sessionList);
-      sessionList = stored.list;
-      readWarning = stored.warning;
-    }
-    sessionList = next(sessionList);
-    sessionWarning = writeShoppingStorage(sessionList) || readWarning;
-    notify();
-  }
-  return { list, warning, ready, change };
+  useEffect(() => {
+    client.setSession(key);
+  }, [key]);
+  // Hide a previous identity's data during render, before effects invalidate requests.
+  const current = key === snapshot.key;
+  return {
+    list: current ? snapshot.list : emptyShoppingList(),
+    warning:
+      session.error && key !== null
+        ? "No pudimos comprobar tu sesión. Intenta nuevamente."
+        : current
+          ? snapshot.warning
+          : "",
+    ready: current && snapshot.ready,
+    busy: !current || snapshot.busy,
+    authenticated: Boolean(key),
+    accountKey: key,
+    change: (next: (list: ShoppingList) => ShoppingList) => {
+      client.setSession(key);
+      return client.change(next);
+    },
+    retry: () => {
+      void session.refetch();
+      void client.refresh();
+    },
+  };
 }

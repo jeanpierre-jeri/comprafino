@@ -21,7 +21,7 @@ import { ShoppingItemEditor } from "./shopping-item-editor";
 
 export function ShoppingListView() {
   const pricingId = useId();
-  const { list, ready, warning, change } = useShoppingList();
+  const { list, ready, warning, change, busy, authenticated, retry } = useShoppingList();
   const [mode, setMode] = useState<PriceMode>("standard");
   const [revision, setRevision] = useState(0);
   const [market, setMarket] = useState<{
@@ -109,10 +109,17 @@ export function ShoppingListView() {
       <p className="eyebrow">Tus compras habituales</p>
       <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Mi lista de compras</h1>
       <p className="mt-3 text-muted-foreground">
-        Guarda lo que necesitas y compara cuánto cuesta hoy. Sin cuenta; se guarda en este
-        navegador.
+        Guarda lo que necesitas y compara cuánto cuesta hoy.{" "}
+        {authenticated
+          ? "Tu lista se sincroniza con tu cuenta."
+          : "Sin cuenta; se guarda en este navegador."}
       </p>
       {warning && <output className="empty-surface mt-4 block">{warning}</output>}
+      {authenticated && warning && (
+        <button className="shopping-button secondary mt-3" disabled={busy} onClick={retry}>
+          Reintentar sincronización
+        </button>
+      )}
       {!ready ? (
         <output className="mt-6 block">Cargando tu lista…</output>
       ) : !list.items.length ? (
@@ -243,14 +250,18 @@ export function ShoppingListView() {
                                 if (button) editButtons.current.set(item.id, button);
                                 else editButtons.current.delete(item.id);
                               }}
+                              disabled={busy}
                               onClick={() => setEditing(item)}
                             >
                               Editar<span className="sr-only"> {item.label}</span>
                             </button>
                             <button
                               className="shopping-button secondary"
+                              disabled={busy}
                               onClick={() =>
-                                change((current) => removeShoppingItem(current, item.id))
+                                void change((current) =>
+                                  removeShoppingItem(current, item.id),
+                                ).catch(() => {})
                               }
                             >
                               Quitar<span className="sr-only"> {item.label}</span>

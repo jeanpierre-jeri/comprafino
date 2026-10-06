@@ -67,7 +67,10 @@ function ShoppingItemForm({
   closing: boolean;
   dismiss: () => void;
 }) {
-  const { list, change } = useShoppingList();
+  const { list, change, ready, busy, accountKey } = useShoppingList();
+  const [editorAccount] = useState(accountKey);
+  const accountChanged = editorAccount !== accountKey;
+  const [saving, setSaving] = useState(false);
   const fieldId = useId();
   const generic = item ? item.intent === "generic" : !seed.canonicalId;
   const [intent, setIntent] = useState<ShoppingListItem["intent"]>(
@@ -120,9 +123,9 @@ function ShoppingItemForm({
     );
   return (
     <form
-      onSubmit={(event) => {
+      onSubmit={async (event) => {
         event.preventDefault();
-        if (closing) return;
+        if (closing || saving || !ready || busy || accountChanged) return;
         setError("");
         const parsed = draft(new Date().toISOString());
         if (!parsed.success) {
@@ -130,11 +133,14 @@ function ShoppingItemForm({
           return;
         }
         try {
-          change((current) => saveShoppingItem(current, parsed.data));
+          setSaving(true);
+          await change((current) => saveShoppingItem(current, parsed.data));
           onSaved?.();
           dismiss();
         } catch (failure) {
           setError(failure instanceof Error ? failure.message : "No pudimos guardar la lista.");
+        } finally {
+          setSaving(false);
         }
       }}
     >
@@ -247,13 +253,18 @@ function ShoppingItemForm({
           Ya tienes esta necesidad. Al guardar actualizarás su cantidad y frecuencia.
         </p>
       )}
+      {accountChanged && <p role="alert">La cuenta cambió. Cierra el editor y vuelve a abrirlo.</p>}
       {error && (
         <p role="alert" className="mt-3">
           {error}
         </p>
       )}
       <div className="mt-5 flex flex-wrap gap-3">
-        <button className="shopping-button" type="submit" disabled={closing}>
+        <button
+          className="shopping-button"
+          type="submit"
+          disabled={closing || saving || !ready || busy || accountChanged}
+        >
           {duplicate && !item ? "Actualizar existente" : item ? "Guardar cambios" : "Agregar"}
         </button>
         <button className="shopping-button secondary" type="button" onClick={dismiss}>
@@ -275,7 +286,7 @@ export function AddShoppingItem({
   const [open, setOpen] = useState(false);
   const [saved, setSaved] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
-  const { ready, warning } = useShoppingList();
+  const { ready, warning, busy } = useShoppingList();
   return (
     <div className={compact ? "mt-2" : "mt-4"}>
       <button
@@ -285,7 +296,7 @@ export function AddShoppingItem({
             ? "card-link inline-flex min-h-11 items-center text-sm"
             : "shopping-button secondary"
         }
-        disabled={!ready}
+        disabled={!ready || busy}
         onClick={() => {
           setOpen(true);
           setSaved(false);

@@ -22,6 +22,7 @@ import { Skeleton } from "@comprafino/ui/components/skeleton";
 import { toast } from "@comprafino/ui/components/toast";
 import { accountInitials, avatarUrl } from "../lib/account-identity";
 import { authClient } from "../lib/auth-client";
+import { useShoppingList } from "./use-shopping-list";
 import { GoogleMark } from "./google-mark";
 
 type SessionUser = NonNullable<ReturnType<typeof authClient.useSession>["data"]>["user"];
@@ -63,15 +64,12 @@ function LoginDialog({ onClose }: { onClose: () => void }) {
         <DialogTitle id={title} className="pr-8">
           Inicia sesión en CompraFino
         </DialogTitle>
-        <p className="mt-5 text-xs font-semibold tracking-wide text-primary uppercase">
-          Próximamente
-        </p>
         <p className="mt-1 text-base leading-relaxed">
           Guarda tu lista y tenla disponible en tus dispositivos.
         </p>
         <DialogDescription className="mt-2 leading-relaxed">
-          La sincronización aún no está disponible. Por ahora, tu lista sigue guardada en este
-          navegador.
+          Al iniciar sesión, combinaremos la lista de este navegador con la de tu cuenta.
+          Conservaremos la versión más reciente de cada necesidad.
         </DialogDescription>
         <Button
           variant="outline"
@@ -105,6 +103,8 @@ function LoginDialog({ onClose }: { onClose: () => void }) {
 }
 
 export function AuthControl() {
+  // Keep session transitions observed even when no list/editor is mounted.
+  useShoppingList();
   const { data, isPending, error: sessionError } = authClient.useSession();
   const [loginOpen, setLoginOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);

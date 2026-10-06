@@ -24,3 +24,29 @@ export function writeShoppingStorage(list: ShoppingList): string {
     return "No podemos guardar en este navegador. Tu lista durará esta sesión.";
   }
 }
+
+const importOwnerKey = "comprafino-shopping-list-import-owner";
+// A pending import stays attached to its first account across navigation/reload.
+export function claimShoppingImport(owner: string): boolean {
+  try {
+    const current = window.localStorage.getItem(importOwnerKey);
+    if (current && current !== owner) return false;
+    window.localStorage.setItem(importOwnerKey, owner);
+    return window.localStorage.getItem(importOwnerKey) === owner;
+  } catch {
+    return false;
+  }
+}
+export function clearShoppingImport(imported: ShoppingList, owner: string): boolean {
+  try {
+    if (window.localStorage.getItem(importOwnerKey) !== owner) return false;
+    const current = readShoppingStorage();
+    if (current.warning || serializeShoppingList(current.list) !== serializeShoppingList(imported))
+      return false;
+    window.localStorage.removeItem(shoppingStorageKey);
+    window.localStorage.removeItem(importOwnerKey);
+    return true;
+  } catch {
+    return false;
+  }
+}

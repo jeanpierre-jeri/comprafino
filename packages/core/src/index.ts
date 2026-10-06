@@ -27,3 +27,4 @@ export * from "./basket-optimization.ts";
 export * from "./catalog-policy.ts";
 
 export * from "./diagnostics.ts";
+export * from "./shopping-list-merge.ts";

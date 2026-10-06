@@ -19,7 +19,7 @@ test("anonymous visitors retain public navigation and a minimal sign-in control"
   expect(await (await request.get("/api/auth/get-session")).json()).toBeNull();
 });
 
-test("real persisted session displays identity, signs out and leaves browser list storage unchanged", async ({
+test("real persisted session imports anonymous items and logout does not expose the account list", async ({
   page,
   context,
   request,
@@ -43,9 +43,6 @@ test("real persisted session displays identity, signs out and leaves browser lis
   try {
     const loggedIn = await ctx.test.login({ userId: user.id });
     await context.addCookies(loggedIn.cookies);
-    await page.goto("/");
-    await expect(page.getByText("Ana", { exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Cuenta de Ana Fixture" })).toBeEnabled();
     const list = JSON.stringify({
       version: 2,
       items: [
@@ -62,14 +59,46 @@ test("real persisted session displays identity, signs out and leaves browser lis
         },
       ],
     });
-    await page.evaluate((value) => localStorage.setItem("comprafino-shopping-list", value), list);
+    await page.addInitScript(
+      (value) => localStorage.setItem("comprafino-shopping-list", value),
+      list,
+    );
+    await page.goto("/");
+    await expect(page.getByText("Ana", { exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Cuenta de Ana Fixture" })).toBeEnabled();
     await page.getByRole("link", { name: "Mi lista", exact: true }).click();
     await expect(page.getByRole("article", { name: "Huevos", exact: true })).toBeVisible();
+    await expect
+      .poll(() => page.evaluate(() => localStorage.getItem("comprafino-shopping-list")))
+      .toBeNull();
+    expect(await (await context.request.get("/api/list/sync")).json()).toMatchObject({
+      revision: 1,
+      list: { items: [{ label: "Huevos" }] },
+    });
+    const other = await context.newPage();
+    await other.goto("/list");
+    await expect(other.getByRole("article", { name: "Huevos", exact: true })).toBeVisible();
+    await page
+      .getByRole("article", { name: "Huevos", exact: true })
+      .getByRole("button", { name: "Editar Huevos" })
+      .click();
+    await page.getByLabel("Cantidad", { exact: true }).fill("60");
+    await page.getByRole("button", { name: "Guardar cambios" }).click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(other.getByRole("article", { name: "Huevos", exact: true })).toContainText(
+      "60 unidades",
+    );
+    await page
+      .getByRole("article", { name: "Huevos", exact: true })
+      .getByRole("button", { name: "Quitar Huevos" })
+      .click();
+    await expect(other.getByRole("article", { name: "Huevos", exact: true })).toHaveCount(0);
+    await other.close();
     await page.getByRole("button", { name: "Cuenta de Ana Fixture" }).click();
     await page.getByRole("menuitem", { name: "Cerrar sesión", exact: true }).click();
     await expect(page.getByRole("button", { name: "Iniciar sesión", exact: true })).toBeEnabled();
-    await expect(page.getByRole("article", { name: "Huevos", exact: true })).toBeVisible();
-    expect(await page.evaluate(() => localStorage.getItem("comprafino-shopping-list"))).toBe(list);
+    await expect(page.getByRole("article", { name: "Huevos", exact: true })).toHaveCount(0);
+    expect(await page.evaluate(() => localStorage.getItem("comprafino-shopping-list"))).toBeNull();
     expect(await (await request.get("/api/auth/get-session")).json()).toBeNull();
     const response = await request.post("/api/list/evaluate", { data: { version: 2, items: [] } });
     expect(response.status()).toBe(200);
@@ -138,7 +167,9 @@ for (const width of [390, 1280]) {
     const dialog = page.getByRole("dialog", { name: "Inicia sesión en CompraFino" });
     await expect(dialog).toBeVisible();
     await expect(dialog).toContainText("Guarda tu lista y tenla disponible en tus dispositivos.");
-    await expect(dialog).toContainText("La sincronización aún no está disponible.");
+    await expect(dialog).toContainText(
+      "Al iniciar sesión, combinaremos la lista de este navegador con la de tu cuenta.",
+    );
     await expect(dialog).toContainText("También puedes seguir usando CompraFino sin una cuenta.");
     const google = dialog.getByRole("button", { name: "Continuar con Google" });
     await expect(google).toBeFocused();
