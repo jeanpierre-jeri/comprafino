@@ -288,6 +288,7 @@ describe("bounded Metro adapter and shared lifecycle", () => {
     const finish = vi.fn<IngestionStore["finish"]>().mockResolvedValue(undefined);
     expect(await ingest(createMetroAdapter(request), 3, { start, persist, finish })).toEqual({
       id: "metro-run",
+      skippedByCapacity: 0,
       fetched: 6,
       persisted: 3,
       changed: 3,

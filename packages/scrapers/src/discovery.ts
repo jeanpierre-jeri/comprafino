@@ -16,7 +16,7 @@ export interface DiscoveryTasks {
     retailer: RetailerId,
     rows: readonly NormalizedRetailerListing[],
     claim: DiscoveryClaim,
-  ): Promise<{ created: number; changed: number }>;
+  ): Promise<{ created: number; changed: number; skippedByCapacity: number }>;
   normalize(): Promise<number>;
   match(): Promise<{ writes: number; created: number }>;
   finish(claim: DiscoveryClaim, outcome: DiscoveryOutcome): Promise<void>;
@@ -37,6 +37,7 @@ export async function processDiscoveryQuery(claim: DiscoveryClaim, tasks: Discov
     listings: number;
     created: number;
     priceStates: number;
+    skippedByCapacity: number;
     diagnostic?: SafeDiagnostic;
   }[] = [];
   for (const adapter of tasks.adapters) {
@@ -50,14 +51,15 @@ export async function processDiscoveryQuery(claim: DiscoveryClaim, tasks: Discov
       stage = "persistence";
       const saved = rows.length
         ? await tasks.persist(adapter.retailer, rows, claim)
-        : { created: 0, changed: 0 };
+        : { created: 0, changed: 0, skippedByCapacity: 0 };
       retailers.push({
         retailer: adapter.retailer,
         status: "success",
         sourceProducts: sample.discovered,
-        listings: rows.length,
+        listings: rows.length - saved.skippedByCapacity,
         created: saved.created,
         priceStates: saved.changed,
+        skippedByCapacity: saved.skippedByCapacity,
       });
     } catch (error) {
       retailers.push({
@@ -67,6 +69,7 @@ export async function processDiscoveryQuery(claim: DiscoveryClaim, tasks: Discov
         listings: 0,
         created: 0,
         priceStates: 0,
+        skippedByCapacity: 0,
         diagnostic: safeDiagnostic(error, {
           stage,
           operation: "discovery",
@@ -78,6 +81,7 @@ export async function processDiscoveryQuery(claim: DiscoveryClaim, tasks: Discov
   }
   const successes = retailers.filter((r) => r.status === "success").length;
   const resultCount = retailers.reduce((n, r) => n + r.listings, 0);
+  const skippedByCapacity = retailers.reduce((n, r) => n + r.skippedByCapacity, 0);
   let normalizationWrites = 0;
   let matchingWrites = 0;
   let canonicalGroupsCreated = 0;
@@ -107,7 +111,7 @@ export async function processDiscoveryQuery(claim: DiscoveryClaim, tasks: Discov
         ? "failed"
         : successes < 3
           ? "partial"
-          : resultCount === 0
+          : resultCount === 0 && skippedByCapacity === 0
             ? "no_results"
             : "completed",
     resultCount,
@@ -133,6 +137,7 @@ export async function processDiscoveryQuery(claim: DiscoveryClaim, tasks: Discov
     retailers,
     retailerSearchCalls: retailers.length,
     listingsDiscovered: resultCount,
+    skippedByCapacity,
     newListings: retailers.reduce((n, r) => n + r.created, 0),
     normalizationWrites,
     matchingWrites,

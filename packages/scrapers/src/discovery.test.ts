@@ -35,7 +35,11 @@ function setup(failures: RetailerId[] = [], empty = false) {
   }));
   const tasks = {
     adapters,
-    persist: vi.fn<DiscoveryTasks["persist"]>(async () => ({ created: 1, changed: 1 })),
+    persist: vi.fn<DiscoveryTasks["persist"]>(async () => ({
+      created: 1,
+      changed: 1,
+      skippedByCapacity: 0,
+    })),
     normalize: vi.fn<DiscoveryTasks["normalize"]>(async () => 3),
     match: vi.fn<DiscoveryTasks["match"]>(async () => ({ writes: 3, created: 1 })),
     finish: vi.fn<DiscoveryTasks["finish"]>(async () => {}),
@@ -122,7 +126,7 @@ describe("bounded discovery processing", () => {
   });
   it("delegates idempotency to existing persistence and derivation APIs", async () => {
     const tasks = setup();
-    tasks.persist.mockResolvedValue({ created: 0, changed: 0 });
+    tasks.persist.mockResolvedValue({ created: 0, changed: 0, skippedByCapacity: 0 });
     tasks.normalize.mockResolvedValue(0);
     tasks.match.mockResolvedValue({ writes: 0, created: 0 });
     expect(await processDiscoveryQuery(claim, tasks)).toMatchObject({
@@ -167,4 +171,43 @@ it("distinguishes source timeout, persistence and derivation failures without ex
     reason: "db_write_failed",
   });
   expect(JSON.stringify(result)).not.toMatch(/private|password|raw retailer/u);
+});
+
+it("reports capacity-limited discovery without treating it as a retailer failure", async () => {
+  const tasks = setup();
+  tasks.persist.mockResolvedValue({ created: 0, changed: 0, skippedByCapacity: 1 });
+  const result = await processDiscoveryQuery(claim, tasks);
+  expect(result).toMatchObject({
+    status: "completed",
+    resultCount: 0,
+    error: null,
+    skippedByCapacity: 3,
+  });
+  expect(result.retailers.every((r) => r.status === "success" && r.skippedByCapacity === 1)).toBe(
+    true,
+  );
+  expect(tasks.normalize).not.toHaveBeenCalled();
+  expect(tasks.match).not.toHaveBeenCalled();
+  expect(tasks.finish).toHaveBeenCalledWith(claim, {
+    status: "completed",
+    resultCount: 0,
+    error: null,
+  });
+});
+
+it("derives accepted listings when part of a discovery batch is skipped at capacity", async () => {
+  const tasks = setup([], true);
+  tasks.adapters[0]!.searchProducts.mockResolvedValue({
+    listings: [listing("tottus", 1), listing("tottus", 2), listing("tottus", 3)],
+    discovered: 3,
+  });
+  tasks.persist.mockResolvedValue({ created: 2, changed: 2, skippedByCapacity: 1 });
+  expect(await processDiscoveryQuery(claim, tasks)).toMatchObject({
+    status: "completed",
+    resultCount: 2,
+    newListings: 2,
+    skippedByCapacity: 1,
+  });
+  expect(tasks.normalize).toHaveBeenCalledOnce();
+  expect(tasks.match).toHaveBeenCalledOnce();
 });

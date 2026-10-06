@@ -12,7 +12,7 @@ export interface Acquisition {
 }
 
 type Database = ReturnType<typeof createDatabase>;
-/** Entire bounded sample commits atomically. Row lock serializes writers for a retailer. */
+/** Capacity-filtered sample commits atomically; shared lock serializes identity admission. */
 export function persistenceStatements(
   retailer: RetailerId,
   input: readonly NormalizedRetailerListing[],
@@ -53,15 +53,21 @@ export function persistenceStatements(
     // Serialize new identity admission across retailers; existing quote updates remain allowed at the cap.
     sql`with catalog_lock as materialized (select pg_advisory_xact_lock(hashtext('comprafino:catalog-admission')))
       select id from retailers cross join catalog_lock where id = ${retailer} for update of retailers`,
-    // The SQL admission guard aborts the whole HTTP batch at capacity. Checking
-    // a returned boolean in JS would be too late to roll back its writes.
+    // Under the preceding admission lock, retain all known identities and only
+    // the first new identities that fit. Source order determines admission.
     sql`
-      with new_identities as (
-        select count(*)::int as total from jsonb_array_elements_text(${ids}::jsonb) incoming(external_id)
-        where not exists(select 1 from retailer_listings l where l.retailer_id=${retailer} and l.external_id=incoming.external_id)
-      ), admission as materialized (
-        select 1 / case when total=0 or (select count(*) from retailer_listings)+total<=${catalogPolicy.retainedListingCap} then 1 else 0 end as allowed
-        from new_identities
+      with incoming_ids as materialized (
+        select external_id, position,
+          exists(select 1 from retailer_listings l where l.retailer_id=${retailer} and l.external_id=incoming.external_id) as known
+        from jsonb_array_elements_text(${ids}::jsonb) with ordinality incoming(external_id, position)
+      ), new_identities as (
+        select external_id, row_number() over (order by position) as priority
+        from incoming_ids where not known
+      ), admitted as materialized (
+        select external_id from incoming_ids where known
+        union all
+        select external_id from new_identities
+        where priority <= greatest(0, ${catalogPolicy.retainedListingCap} - (select count(*) from retailer_listings))
       ), updated as (insert into retailer_listings (retailer_id, external_id, product_id, title, url, image_url,
         current_price_cents, regular_price_cents, currency, price_unit, available, source_brand, source_unit_multiplier, package_text, category, first_seen_at, last_seen_at, first_seen_via, discovery_query_id, last_category_observed_at, availability_verified_at)
       select retailer_id, external_id, product_id, title, url, image_url, current_price_cents,
@@ -70,7 +76,7 @@ export function persistenceStatements(
         case when available is not null then observed_at else null end
       from jsonb_to_recordset(${payload}::jsonb) as x(retailer_id text, external_id text, product_id text,
         title text, url text, image_url text, current_price_cents integer, regular_price_cents integer,
-        currency text, price_unit text, available boolean, source_brand text, source_unit_multiplier numeric, package_text text, category text, observed_at timestamptz) cross join admission where admission.allowed=1
+        currency text, price_unit text, available boolean, source_brand text, source_unit_multiplier numeric, package_text text, category text, observed_at timestamptz) where external_id in (select external_id from admitted)
       on conflict (retailer_id, external_id) do update set
         product_id = excluded.product_id, title = excluded.title, url = excluded.url, image_url = excluded.image_url,
         current_price_cents = excluded.current_price_cents, regular_price_cents = excluded.regular_price_cents,
@@ -128,7 +134,10 @@ export function persistenceStatements(
           starts_at=excluded.starts_at, ends_at=excluded.ends_at
         where (retailer_listing_offers.condition_type,retailer_listing_offers.condition_label,retailer_listing_offers.price_cents,retailer_listing_offers.starts_at,retailer_listing_offers.ends_at)
           is distinct from (excluded.condition_type,excluded.condition_label,excluded.price_cents,excluded.starts_at,excluded.ends_at)
-      ) select id,inserted from updated`,
+      ) select
+        (select count(*)::int from updated) as persisted,
+        (select count(*)::int from updated where inserted) as created,
+        (select count(*)::int from incoming_ids where external_id not in (select external_id from admitted)) as skipped_by_capacity`,
     sql`
       update price_history h set valid_until = l.last_seen_at from retailer_listings l
       where h.listing_id = l.id and h.valid_until is null and ${scope}
@@ -148,8 +157,13 @@ export async function persistListings(
   input: readonly NormalizedRetailerListing[],
   acquisition: Acquisition = { source: "category" },
 ) {
-  const { persisted, changed } = await persistListingsDetailed(db, retailer, input, acquisition);
-  return { persisted, changed };
+  const { persisted, changed, skippedByCapacity } = await persistListingsDetailed(
+    db,
+    retailer,
+    input,
+    acquisition,
+  );
+  return { persisted, changed, skippedByCapacity };
 }
 /** Same atomic ingestion batch, exposing insert counts for discovery metrics. */
 export async function persistListingsDetailed(
@@ -158,7 +172,7 @@ export async function persistListingsDetailed(
   input: readonly NormalizedRetailerListing[],
   acquisition: Acquisition = { source: "category" },
 ) {
-  if (!input.length) return { persisted: 0, changed: 0, created: 0 };
+  if (!input.length) return { persisted: 0, changed: 0, created: 0, skippedByCapacity: 0 };
   const statements = persistenceStatements(retailer, input, acquisition);
   const results = await db.batch([
     db.execute(statements[0]),
@@ -166,11 +180,22 @@ export async function persistListingsDetailed(
     db.execute(statements[2]),
     db.execute(statements[3]),
   ]);
-  const rows = z.array(z.object({ inserted: z.boolean() })).parse(results[1].rows);
+  const [summary] = z
+    .array(
+      z.object({
+        persisted: z.number().int().nonnegative(),
+        created: z.number().int().nonnegative(),
+        skipped_by_capacity: z.number().int().nonnegative(),
+      }),
+    )
+    .length(1)
+    .parse(results[1].rows);
+  if (!summary) throw new Error("Missing persistence summary");
   return {
-    persisted: rows.length,
+    persisted: summary.persisted,
     changed: results[3].rows.length,
-    created: rows.filter((r) => r.inserted).length,
+    created: summary.created,
+    skippedByCapacity: summary.skipped_by_capacity,
   };
 }
 export function createIngestionStore(db = createDatabase()) {

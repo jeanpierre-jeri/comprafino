@@ -21,6 +21,7 @@ it("records discovered, persisted and changed counts separately", async () => {
   };
   expect(await ingest(adapter, 5, store)).toEqual({
     id: "run1",
+    skippedByCapacity: 0,
     fetched: 49,
     persisted: 5,
     changed: 2,
@@ -80,4 +81,24 @@ it("retains persistence stage in safe run metadata and preserves the original ex
   const metadata = finish.mock.calls[0]?.[1].error;
   expect(metadata).toContain('"reason":"db_write_failed"');
   expect(metadata).not.toMatch(/secret|private/u);
+});
+
+it("reports capacity skips without failing category ingestion", async () => {
+  const finish = vi.fn<IngestionStore["finish"]>().mockResolvedValue(undefined);
+  const adapter: RetailerAdapter = {
+    retailer: "tottus",
+    fetchListings: async () => ({ listings: sample.listings, discovered: 49 }),
+  };
+  const result = await ingest(adapter, 5, {
+    start: async () => "capacity",
+    persist: async () => ({ persisted: 2, changed: 1, skippedByCapacity: 3 }),
+    finish,
+  });
+  expect(result).toMatchObject({ persisted: 2, changed: 1, skippedByCapacity: 3 });
+  expect(finish).toHaveBeenCalledWith("capacity", {
+    status: "success",
+    fetched: 49,
+    persisted: 2,
+    changed: 1,
+  });
 });

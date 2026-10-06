@@ -6,7 +6,7 @@ export interface IngestionStore {
   persist(
     retailer: RetailerId,
     listings: readonly NormalizedRetailerListing[],
-  ): Promise<{ persisted: number; changed: number }>;
+  ): Promise<{ persisted: number; changed: number; skippedByCapacity?: number }>;
   finish(
     id: string,
     result: {
@@ -34,14 +34,19 @@ export async function ingest(adapter: RetailerAdapter, limit: number, store: Ing
   let fetched = 0;
   let persisted = 0;
   let changed = 0;
+  let skippedByCapacity = 0;
   try {
     const sample = await adapter.fetchListings(limit);
     fetched = sample.discovered;
     stage = "persistence";
-    ({ persisted, changed } = await store.persist(adapter.retailer, sample.listings));
+    ({
+      persisted,
+      changed,
+      skippedByCapacity = 0,
+    } = await store.persist(adapter.retailer, sample.listings));
     stage = "completion";
     await store.finish(id, { status: "success", fetched, persisted, changed });
-    return { id, fetched, persisted, changed };
+    return { id, fetched, persisted, changed, skippedByCapacity };
   } catch (error) {
     // Persist a safe error code; driver messages may contain connection credentials.
     const context = {

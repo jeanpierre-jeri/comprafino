@@ -85,6 +85,7 @@ try {
         | "retailerSearchCalls"
         | "listingsDiscovered"
         | "newListings"
+        | "skippedByCapacity"
         | "normalizationWrites"
         | "matchingWrites"
         | "canonicalGroupsCreated",
@@ -99,6 +100,7 @@ try {
           retailerSearchCalls: metric("retailerSearchCalls"),
           listingsDiscovered: metric("listingsDiscovered"),
           newListings: metric("newListings"),
+          skippedByCapacity: metric("skippedByCapacity"),
           normalizationWrites: metric("normalizationWrites"),
           matchingWrites: metric("matchingWrites"),
           canonicalGroupsCreated: metric("canonicalGroupsCreated"),

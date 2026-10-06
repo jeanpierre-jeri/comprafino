@@ -78,7 +78,11 @@ describe.skipIf(!testUrl)("PostgreSQL ingestion (explicit TEST_DATABASE_URL)", (
 
   it("keeps unchanged observations idempotent and closes/opens a changed price", async () => {
     const initial = observation("transition", 0);
-    expect(await persistListings(db, "tottus", [initial])).toEqual({ persisted: 1, changed: 1 });
+    expect(await persistListings(db, "tottus", [initial])).toEqual({
+      persisted: 1,
+      changed: 1,
+      skippedByCapacity: 0,
+    });
     expect(await states(initial.externalId)).toEqual([
       {
         current_price_cents: 1290,
@@ -90,10 +94,15 @@ describe.skipIf(!testUrl)("PostgreSQL ingestion (explicit TEST_DATABASE_URL)", (
     expect(await persistListings(db, "tottus", [observation("transition", 1)])).toEqual({
       persisted: 1,
       changed: 0,
+      skippedByCapacity: 0,
     });
     expect(await states("transition")).toHaveLength(1);
     const changed = observation("transition", 2, 1090);
-    expect(await persistListings(db, "tottus", [changed])).toEqual({ persisted: 1, changed: 1 });
+    expect(await persistListings(db, "tottus", [changed])).toEqual({
+      persisted: 1,
+      changed: 1,
+      skippedByCapacity: 0,
+    });
     const history = await states("transition");
     expect(history).toEqual([
       {
@@ -112,7 +121,7 @@ describe.skipIf(!testUrl)("PostgreSQL ingestion (explicit TEST_DATABASE_URL)", (
     expect(history.filter((state) => state.valid_until === null)).toHaveLength(1);
     for (const minute of [0, 2]) {
       expect(await persistListings(db, "tottus", [observation("transition", minute, 990)])).toEqual(
-        { persisted: 0, changed: 0 },
+        { persisted: 0, changed: 0, skippedByCapacity: 0 },
       );
     }
     expect(await states("transition")).toEqual(history);

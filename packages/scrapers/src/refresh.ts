@@ -2,7 +2,9 @@ import { retailerIdSchema, safeIngestionError, safeDiagnostic } from "@comprafin
 import type { RetailerId, SafeDiagnostic } from "@comprafino/core";
 
 export interface RefreshTasks {
-  ingest(retailer: RetailerId): Promise<{ fetched: number; persisted: number; changed: number }>;
+  ingest(
+    retailer: RetailerId,
+  ): Promise<{ fetched: number; persisted: number; changed: number; skippedByCapacity?: number }>;
   targeted?(): Promise<{ observed: number; failures: number; requests: number; changed: number }>;
   normalize(): Promise<{ processed: number; changed: number }>;
   match(): Promise<{ candidates: number; associationsChanged: number; productsChanged: number }>;

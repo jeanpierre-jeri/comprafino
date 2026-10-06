@@ -6,7 +6,7 @@
 
 Category scope/observation totals and request estimates derive from `refreshCoverage` in `packages/scrapers/src/refresh-adapters.ts`. Page maxima are retailer/category acquisition bounds, not source counts. The workflow cadence is read from the checked-in cron configuration. Targeted lookup uses `listingRefreshPolicy.limit`; discovery uses its independent query/run/day budgets and configured retailer identities. The retained catalog guard and complete-reader overflow sentinel come from `catalogPolicy` in core. UI result limits remain separate.
 
-Fresh DB metrics include retained listings, normalized rows, history, candidate work, storage and selected targeted backlog. None of these volatile counts is hardcoded as the current catalog in this guide. The guard remains 1,000 retained listings; bounded acquisition can add new identities through rotation or demand. Observe remaining capacity before further source work.
+Fresh DB metrics include retained listings, normalized rows, history, candidate work, storage and selected targeted backlog. None of these volatile counts is hardcoded as the current catalog in this guide. The guard remains 1,000 retained listings; bounded acquisition can add new identities through rotation or demand. Ingestion updates known listings at capacity and admits new identities in source order up to the remaining slots under the shared admission lock. Excess identities are skipped without writes; category ingestion output and discovery summaries report `skippedByCapacity`. Capacity skips alone do not fail a run. No automatic deletion or cap increase occurs. Observe remaining capacity before further source work.
 
 ## Measurement provenance
 

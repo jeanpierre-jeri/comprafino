@@ -306,6 +306,7 @@ describe("bounded Plaza Vea adapter and generic ingestion", () => {
     const start = vi.fn<IngestionStore["start"]>().mockResolvedValue("pv-run");
     expect(await ingest(createPlazaVeaAdapter(request), 3, { start, persist, finish })).toEqual({
       id: "pv-run",
+      skippedByCapacity: 0,
       fetched: 6,
       persisted: 3,
       changed: 3,
