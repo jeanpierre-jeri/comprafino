@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { authTestEnv } from "./testing/auth-env.ts";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -10,6 +11,7 @@ export default defineConfig({
   use: { baseURL: "http://127.0.0.1:3100", trace: "retain-on-failure" },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
+    env: authTestEnv,
     command: process.env.COMPRAFINO_E2E_PRELOAD
       ? "node --import ../../packages/db/src/testing/http-preload.ts node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3100"
       : "pnpm start --port 3100",

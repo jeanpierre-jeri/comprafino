@@ -1,5 +1,6 @@
 import { NavigationLink } from "./navigation-link";
 import { ThemeControl } from "./theme-control";
+import { AuthControl } from "./auth-control";
 import Link from "next/link";
 
 export function PublicShell({ children }: { children: React.ReactNode }) {
@@ -23,6 +24,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
             Mi lista
           </NavigationLink>
           <ThemeControl />
+          <AuthControl />
         </div>
       </header>
       <main id="main-content" className="min-w-0 flex-1 py-7 sm:py-10">

@@ -10,12 +10,15 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test:e2e": "playwright test",
     "test": "playwright test --config playwright.stream.config.ts",
+    "test:integration": "playwright test --config playwright.auth.config.ts",
     "benchmark:basket": "node --experimental-strip-types testing/basket-benchmark-cli.ts"
   },
   "dependencies": {
+    "@better-auth/drizzle-adapter": "1.7.7",
     "@comprafino/core": "workspace:*",
     "@comprafino/db": "workspace:*",
     "@comprafino/ui": "workspace:*",
+    "better-auth": "1.7.7",
     "next": "16.3.8",
     "react": "19.3.0",
     "react-dom": "19.3.0"

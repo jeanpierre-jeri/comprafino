@@ -43,6 +43,8 @@ Root CLI commands load `.env`. Set `DATABASE_URL` separately in `apps/web/.env.l
 
 Test-only `COMPRAFINO_TEST_DATABASE_MODE`, `COMPRAFINO_E2E_SCHEMA`, `COMPRAFINO_E2E_PRELOAD`, `COMPRAFINO_CONTROLLED_E2E` and fixture-ID variables belong to the harness; do not set them in normal development or deployment. See [local testing](docs/local-testing.md).
 
+Milestone 19A adds Google sign-in through Better Auth 1.7.7. Auth requests require server-only `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` and the existing database URL. Public browsing/builds remain credential-free. The auth migration is generated for review, not applied by this implementation. See [auth setup, schema and version limitations](docs/auth.md).
+
 ## Validation and deterministic fixtures
 
 ```sh
@@ -96,6 +98,6 @@ Frozen installation retains the version-pinned **next@16.3.8** stream-cancellati
 
 Coverage is bounded, with a retained **1,000-listing** admission/read guard. Source ordering and discovery can grow retained rows; no broad crawl or automatic capacity increase exists. Anonymous location/channel stock can be unknown, and observed prices can become stale. Exact comparison requires trusted identity; generic search relevance does not prove safe substitution. Supported substitutions remain conservative. Ordinary purchase prices must be positive; reference prices and conditional benefits have separate meanings.
 
-Shopping lists are stored in this browser, with a session fallback if storage fails. There are no accounts, server list persistence, delivery/travel fees or purchase-timing recommendations. History is sparse and daily coverage is prospective; gaps are disclosed without backfill. No remote quota or live catalog count is promised by repository documentation.
+Shopping lists are stored in this browser, with a session fallback if storage fails. Google authentication does not change list storage; there is no server list persistence, synchronization, account dashboard, delivery/travel fees or purchase-timing recommendations. History is sparse and daily coverage is prospective; gaps are disclosed without backfill. No remote quota or live catalog count is promised by repository documentation.
 
 See [eligibility vocabulary](docs/eligibility.md), [normalization](docs/catalog-normalization.md), [matching](docs/catalog-matching.md), [public search](docs/public-search.md), [quantity quality](docs/quantity-quality.md), [availability](docs/availability.md), [conditional pricing](docs/conditional-pricing.md), [price history](docs/price-history.md), [shopping lists](docs/shopping-list.md), [basket optimization](docs/basket-optimization.md), [catalog budget](docs/catalog-budget.md), [roadmap](docs/roadmap.md) and [dated engineering history](docs/history/README.md).

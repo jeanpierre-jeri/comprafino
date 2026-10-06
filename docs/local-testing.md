@@ -59,6 +59,8 @@ After `pnpm test:db:up`, `pnpm benchmark:basket:local` seeds a separate disposab
 
 ## Test ownership and state
 
+Milestone 19A adds credential-free auth configuration/schema/session tests in `apps/web/testing/auth.spec.ts`, real Better Auth PostgreSQL handler tests in `auth.integration.spec.ts`, and Chromium identity/sign-out regressions in `apps/web/e2e/auth.spec.ts`. Root `pnpm test:integration` runs DB Vitest suites then the web Playwright auth configuration sequentially; `pnpm test:integration:local` supplies the same explicit disposable URL to both. Missing `TEST_DATABASE_URL` clearly skips auth integration tests, without an application URL fallback. Better Auth's privileged test plugin is used only in test source/configuration, with real signed cookies and owned schema persistence. The Chromium test server uses fake server auth credentials, and the OAuth callback test stubs provider network responses. No test requires real Google credentials/requests or a production test endpoint. See [auth limitations and setup](auth.md).
+
 | Location                                   | Requires                                   | Responsibility                                                                          |
 | ------------------------------------------ | ------------------------------------------ | --------------------------------------------------------------------------------------- |
 | `packages/core/src/*.test.ts`              | Neither PostgreSQL nor Chromium            | Pure validation, domain policy and safe diagnostic formatting                           |

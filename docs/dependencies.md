@@ -1,6 +1,6 @@
 # Direct dependency inventory
 
-Exact direct versions are pinned in manifests; the lockfile pins the graph. This inventory describes installed ownership, not a claim about current registry latest versions. No dependency version changes are part of Cleanup B.
+Exact direct versions are pinned in manifests; the lockfile pins the graph. This inventory describes installed ownership, not a claim about current registry latest versions. Milestone 19A adds only the two pinned auth dependencies below.
 
 ## comprafino
 
@@ -14,20 +14,22 @@ Exact direct versions are pinned in manifests; the lockfile pins the graph. This
 
 ## @comprafino/web
 
-| Dependency             | Version       | Kind            | Purpose                                            |
-| ---------------------- | ------------- | --------------- | -------------------------------------------------- |
-| `@comprafino/core`     | `workspace:*` | dependencies    | framework-independent domain validation and policy |
-| `@comprafino/db`       | `workspace:*` | dependencies    | persisted query and transactional write boundaries |
-| `@comprafino/ui`       | `workspace:*` | dependencies    | shared interactive/theme/history primitives        |
-| `next`                 | `16.3.8`      | dependencies    | App Router and production web build                |
-| `react`                | `19.3.0`      | dependencies    | React rendering / UI peer                          |
-| `react-dom`            | `19.3.0`      | dependencies    | DOM rendering / Base UI peer                       |
-| `@playwright/test`     | `1.63.0`      | devDependencies | application Chromium E2E testing                   |
-| `@tailwindcss/postcss` | `4.3.3`       | devDependencies | Next PostCSS integration                           |
-| `@types/node`          | `24.19.1`     | devDependencies | native fetch and CLI types                         |
-| `@types/react`         | `19.3.0`      | devDependencies | React types                                        |
-| `@types/react-dom`     | `19.3.0`      | devDependencies | React DOM types                                    |
-| `tailwindcss`          | `4.3.3`       | devDependencies | Tailwind 4 CSS compilation                         |
+| Dependency                     | Version       | Kind            | Purpose                                            |
+| ------------------------------ | ------------- | --------------- | -------------------------------------------------- |
+| `@comprafino/core`             | `workspace:*` | dependencies    | framework-independent domain validation and policy |
+| `@comprafino/db`               | `workspace:*` | dependencies    | persisted query and transactional write boundaries |
+| `@comprafino/ui`               | `workspace:*` | dependencies    | shared interactive/theme/history primitives        |
+| `better-auth`                  | `1.7.7`       | dependencies    | Google OAuth, PostgreSQL sessions and auth client  |
+| `@better-auth/drizzle-adapter` | `1.7.7`       | dependencies    | Better Auth PostgreSQL/Drizzle integration         |
+| `next`                         | `16.3.8`      | dependencies    | App Router and production web build                |
+| `react`                        | `19.3.0`      | dependencies    | React rendering / UI peer                          |
+| `react-dom`                    | `19.3.0`      | dependencies    | DOM rendering / Base UI peer                       |
+| `@playwright/test`             | `1.63.0`      | devDependencies | application Chromium E2E testing                   |
+| `@tailwindcss/postcss`         | `4.3.3`       | devDependencies | Next PostCSS integration                           |
+| `@types/node`                  | `24.19.1`     | devDependencies | native fetch and CLI types                         |
+| `@types/react`                 | `19.3.0`      | devDependencies | React types                                        |
+| `@types/react-dom`             | `19.3.0`      | devDependencies | React DOM types                                    |
+| `tailwindcss`                  | `4.3.3`       | devDependencies | Tailwind 4 CSS compilation                         |
 
 ## @comprafino/core
 

@@ -14,7 +14,9 @@ F05 remains consciously deferred: review catalog capacity/performance before del
 
 ## Deferred product work
 
-Purchase-timing recommendations require sufficient trustworthy history and a separate design. Accounts, synchronized lists and alerts wait for justified user-specific needs. Further source/category expansion requires validated evidence and reviewed capacity; no expansion is scheduled here. Client caching, complex form tooling, queues, dedicated workers and search infrastructure require demonstrated requirements.
+Milestone 19A implements the [Google auth foundation](auth.md), with its migration generated for review and no remote deployment established. Public browsing and browser-local lists remain unchanged. Synchronized lists, account operations and alerts remain later work.
+
+Purchase-timing recommendations require sufficient trustworthy history and a separate design. Further source/category expansion requires validated evidence and reviewed capacity; no expansion is scheduled here. Client caching, complex form tooling, queues, dedicated workers and search infrastructure require demonstrated requirements.
 
 ## Historical milestones
 
