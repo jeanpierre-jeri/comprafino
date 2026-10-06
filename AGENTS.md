@@ -25,7 +25,16 @@
 - Oxlint lints; Oxfmt formats; TypeScript is the authoritative type checker.
 - Do not introduce ESLint, Prettier or Biome.
 - Vitest tests pure logic and boundaries; Playwright Test tests the web application.
-- Do not add forms, client caching, charts, scraping dependencies or infrastructure speculatively.
+- Do not add forms, additional client caching, charts, scraping dependencies or infrastructure speculatively. TanStack Query is the approved browser server-state boundary.
+
+# Code readability
+
+- Keep short two-way ternaries simple; use explicit branches, switches or named helpers for multi-way decisions. Oxlint enforces no nested ternaries and braces for multi-line control flow.
+- Put an opening control-flow brace after the condition, and put the body and closing brace on separate lines. A short early return may omit braces (`if (!value) return false;`); keep throws and other actions in blocks.
+- Separate imports from implementation, independent declarations, consecutive methods and logical phases with a blank line. Keep related variable declarations together.
+- Use descriptive names outside tiny callbacks. Extract functions/components around a clear responsibility; avoid generic helper collections and arbitrary file-length limits.
+- Use TanStack Query for browser-fetched server state and provider-scoped Zustand stores for shared client state. Keep simple local interaction state in React; never share mutable user state across server requests or persist account lists through Zustand middleware.
+- Preserve domain behavior and safety comments during readability changes. Keep framework-independent decisions in the existing packages.
 
 # Definition of done
 

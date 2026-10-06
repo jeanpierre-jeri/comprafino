@@ -12,6 +12,7 @@ interface Props {
 
 export function ProductImage({ src, name, loading, compact = false }: Props) {
   const [failed, setFailed] = useState(false);
+
   return (
     <div
       className={`product-image relative flex w-full items-center justify-center overflow-hidden rounded-xl bg-white ${compact ? "h-28 sm:h-34" : "h-48 sm:h-64"}`}

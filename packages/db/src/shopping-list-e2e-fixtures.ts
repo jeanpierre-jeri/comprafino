@@ -20,6 +20,7 @@ export async function seedShoppingListFixtures(
 ) {
   const fixtures: Record<string, string> = {};
   const observedAt = new Date();
+
   for (const kind of ["preferred", "alternative"] as const) {
     const id = randomUUID();
     fixtures[kind] = id;
@@ -29,6 +30,7 @@ export async function seedShoppingListFixtures(
       "insert into canonical_products(id,display_name,brand_key,quantity_value,quantity_unit,package_count,total_quantity_value) values($1,$2,$3,30,'unit',1,30)",
       [id, title, brand.toLowerCase()],
     );
+
     for (const [index, retailer] of (["metro", "plaza-vea", "tottus"] as const).entries()) {
       const listing = {
         retailer,
@@ -36,18 +38,12 @@ export async function seedShoppingListFixtures(
         productId: `shopping-${kind}-${retailer}`,
         title,
         sourceBrand: brand,
-        url:
-          retailer === "tottus"
-            ? "https://www.tottus.com.pe/tottus-pe/articulo/1/test"
-            : retailer === "metro"
-              ? "https://www.metro.pe/eggs/p"
-              : "https://www.plazavea.com.pe/eggs/p",
-        currentPriceCents:
-          kind === "preferred"
-            ? 1790 + index * 100
-            : retailer === "tottus"
-              ? 1490
-              : 1590 + index * 100,
+        url: {
+          tottus: "https://www.tottus.com.pe/tottus-pe/articulo/1/test",
+          metro: "https://www.metro.pe/eggs/p",
+          "plaza-vea": "https://www.plazavea.com.pe/eggs/p",
+        }[retailer],
+        currentPriceCents: eggFixturePrice(kind === "preferred", retailer, index),
         currency: "PEN" as const,
         priceUnit: "UN" as const,
         observedAt,
@@ -81,6 +77,7 @@ export async function seedShoppingListFixtures(
       );
     }
   }
+
   for (const [kind, title] of [
     ["independent", "Huevos Independientes Bandeja 30un"],
     ["unsupported", "Huevos de Codorniz Independientes Bandeja 30un"],
@@ -109,24 +106,32 @@ export async function seedShoppingListFixtures(
     fixtures[kind] = row.id;
     await persistCatalogNormalizations(db, [{ ...listing, id: row.id, retailerId: "metro" }]);
   }
+
   const retailerOptions = await searchGenericProductOffers(db, "huevos", "relevance", observedAt);
   const independent = retailerOptions.find((o) => o.id === fixtures.independent);
   const unsupported = retailerOptions.find((o) => o.id === fixtures.unsupported);
   const canonical = retailerOptions.find((o) => o.canonicalId === fixtures.preferred);
+
   if (
     !independent ||
     independent.canonicalId !== null ||
     shoppingSeedForRetailerOffer(independent).substitutionProfile !== "eggs:regular"
-  )
+  ) {
     throw new Error("Independent retailer-option fixture failed");
+  }
+
   if (
     !unsupported ||
     unsupported.canonicalId !== null ||
     shoppingSeedForRetailerOffer(unsupported).substitutionProfile !== null
-  )
+  ) {
     throw new Error("Unsupported retailer-option fixture failed");
-  if (!canonical || shoppingSeedForRetailerOffer(canonical).canonicalId !== fixtures.preferred)
+  }
+
+  if (!canonical || shoppingSeedForRetailerOffer(canonical).canonicalId !== fixtures.preferred) {
     throw new Error("Canonical retailer-option fixture failed");
+  }
+
   const need = shoppingListItemSchema.parse({
     id: randomUUID(),
     intent: "generic",
@@ -139,9 +144,20 @@ export async function seedShoppingListFixtures(
     createdAt: observedAt.toISOString(),
     updatedAt: observedAt.toISOString(),
   });
-  if ((await evaluateCurrentShoppingItem(db, need, "standard")).best?.totalCostCents !== 1490)
+
+  if ((await evaluateCurrentShoppingItem(db, need, "standard")).best?.totalCostCents !== 1490) {
     throw new Error("Shopping standard fixture failed");
-  if ((await evaluateCurrentShoppingItem(db, need, "benefits")).best?.totalCostCents !== 1290)
+  }
+
+  if ((await evaluateCurrentShoppingItem(db, need, "benefits")).best?.totalCostCents !== 1290) {
     throw new Error("Shopping benefits fixture failed");
+  }
+
   return fixtures;
+}
+
+function eggFixturePrice(preferred: boolean, retailer: string, index: number): number {
+  if (preferred) return 1790 + index * 100;
+
+  return retailer === "tottus" ? 1490 : 1590 + index * 100;
 }

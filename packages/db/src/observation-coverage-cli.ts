@@ -1,6 +1,10 @@
 import { observationCoverageReport } from "./observation-coverage.ts";
+
 try {
-  if (process.argv.slice(2).some((arg) => arg !== "--")) throw new Error("No options supported");
+  if (process.argv.slice(2).some((arg) => arg !== "--")) {
+    throw new Error("No options supported");
+  }
+
   console.log(JSON.stringify(await observationCoverageReport(), null, 2));
 } catch {
   console.error(

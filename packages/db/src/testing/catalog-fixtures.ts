@@ -16,7 +16,9 @@ import {
 } from "../public-products.ts";
 
 import { ownedTestDatabase } from "./database.ts";
+
 const publicNow = new Date("2026-10-03T09:10:00Z");
+
 const observation = (
   externalId: string,
   minute: number,
@@ -33,6 +35,7 @@ const observation = (
   priceUnit: "UN",
   observedAt: new Date(Date.UTC(2026, 9, 3, 9, minute)),
 });
+
 const stateSchema = z.array(
   z.object({
     current_price_cents: z.number().int(),
@@ -50,6 +53,7 @@ export function catalogTestContext(env: Record<string, string | undefined> = pro
     queryComparison(args[0], args[1], publicNow);
   const searchCanonicalProducts = (...args: Parameters<typeof querySearch>) =>
     querySearch(args[0], args[1], publicNow);
+
   async function states(externalId: string) {
     return stateSchema.parse(
       await query(
@@ -59,6 +63,7 @@ export function catalogTestContext(env: Record<string, string | undefined> = pro
       ),
     );
   }
+
   async function catalogRows(externalId: string) {
     return z.array(catalogRecordSchema).parse(
       await query(
@@ -69,6 +74,7 @@ export function catalogTestContext(env: Record<string, string | undefined> = pro
       ),
     );
   }
+
   async function matchingRows(externalIds: string[]): Promise<MatchingSnapshot[]> {
     const records = z
       .array(
@@ -82,6 +88,7 @@ export function catalogTestContext(env: Record<string, string | undefined> = pro
           [JSON.stringify(externalIds).replace("[", "{").replace("]", "}")],
         ),
       );
+
     return records.map((r) => {
       const raw = z
         .object({
@@ -92,6 +99,7 @@ export function catalogTestContext(env: Record<string, string | undefined> = pro
           source_brand: z.string().nullable(),
         })
         .parse(JSON.parse(r.raw) as unknown);
+
       return {
         id: raw.id,
         retailer: raw.retailer_id,
@@ -107,6 +115,7 @@ export function catalogTestContext(env: Record<string, string | undefined> = pro
       };
     });
   }
+
   async function seedMatch(prefix: string) {
     for (const retailer of ["metro", "plaza-vea"] as const) {
       const value = {
@@ -118,22 +127,28 @@ export function catalogTestContext(env: Record<string, string | undefined> = pro
       await persistListings(db, retailer, [value]);
       await persistCatalogNormalizations(db, await catalogRows(value.externalId));
     }
+
     const rows = await matchingRows([`${prefix}-metro`, `${prefix}-plaza-vea`]);
     const pairs = await evaluatePairs(db, [[rows[0]!, rows[1]!]]);
+
     return { rows, pairs };
   }
+
   async function cleanupIdentity(prefix: string) {
     await query(
       "delete from canonical_products where id in (select a.canonical_product_id from canonical_product_listings a join retailer_listings l on l.id=a.listing_id where l.external_id in ($1,$2))",
       [`${prefix}-metro`, `${prefix}-plaza-vea`],
     );
   }
+
   async function seedGeneric(title: string, cents: number, priceUnit: "UN" | "KG" = "UN") {
     const value = { ...observation(`generic-${randomUUID()}`, 0, cents), title, priceUnit };
     await persistListings(db, "tottus", [value]);
     await persistCatalogNormalizations(db, await catalogRows(value.externalId));
+
     return (await catalogRows(value.externalId))[0]!;
   }
+
   async function seedPublicProduct(prefix: string, title: string, acquisition?: Acquisition) {
     for (const retailer of ["metro", "plaza-vea"] as const) {
       const value = {
@@ -149,6 +164,7 @@ export function catalogTestContext(env: Record<string, string | undefined> = pro
       await persistListings(db, retailer, [value], acquisition);
       await persistCatalogNormalizations(db, await catalogRows(value.externalId));
     }
+
     const rows = await matchingRows([`${prefix}-metro`, `${prefix}-plaza-vea`]);
     await persistMatching(db, rows, await evaluatePairs(db, [[rows[0]!, rows[1]!]]));
     const links = z
@@ -159,12 +175,15 @@ export function catalogTestContext(env: Record<string, string | undefined> = pro
           [rows[0]!.id],
         ),
       );
+
     return { id: links[0]!.id, rows };
   }
+
   async function resetDiscovery() {
     await query("delete from discovery_queries");
     await query("delete from discovery_daily_budget");
   }
+
   async function coverageDays(externalId: string) {
     return z
       .array(
@@ -183,6 +202,7 @@ export function catalogTestContext(env: Record<string, string | undefined> = pro
         ),
       );
   }
+
   return {
     ...harness,
     query,
@@ -199,4 +219,5 @@ export function catalogTestContext(env: Record<string, string | undefined> = pro
     searchCanonicalProducts,
   };
 }
+
 export { observation, publicNow };

@@ -6,8 +6,10 @@ import { validateLocalTestUrl } from "./test-query-client.ts";
  */
 export function fixtureDatabaseUrl(url: string, mode: string | undefined) {
   if (mode !== "local") return url;
+
   const fixture = new URL(validateLocalTestUrl(url));
   fixture.hostname = "fixture.neon.invalid";
   fixture.port = "";
+
   return fixture.href;
 }

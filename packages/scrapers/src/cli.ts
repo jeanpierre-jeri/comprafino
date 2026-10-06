@@ -6,6 +6,7 @@ import { createMetroAdapter } from "./metro.ts";
 import { ingest } from "./ingestion.ts";
 
 import { parseArguments } from "./cli-options.ts";
+
 async function main() {
   const { dryRun, limit, retailer, category } = parseArguments(process.argv.slice(2));
   const adapters = {
@@ -17,6 +18,7 @@ async function main() {
     retailer === "tottus"
       ? createTottusAdapter(undefined, category === "dairy" ? "dairy" : "meat")
       : adapters[retailer](undefined, category);
+
   if (dryRun) {
     const result = await adapter.fetchListings(limit);
     console.log(
@@ -34,13 +36,16 @@ async function main() {
     );
   } else {
     // Validate the DB before any live requests. Never silently switch to dry-run.
-    if (!process.env.DATABASE_URL)
+    if (!process.env.DATABASE_URL) {
       throw new Error(
         "DATABASE_URL is required for persisted ingestion; use --dry-run to inspect without PostgreSQL",
       );
+    }
+
     console.log(JSON.stringify(await ingest(adapter, limit, createIngestionStore())));
   }
 }
+
 await main().catch((error: unknown) => {
   logDiagnostic(error, {
     stage: "source",

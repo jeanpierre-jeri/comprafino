@@ -21,8 +21,11 @@ export function NavigationLink({
   const [pending, startTransition] = useTransition();
   const navigating = useRef(false);
   useEffect(() => {
-    if (!pending) navigating.current = false;
+    if (!pending) {
+      navigating.current = false;
+    }
   }, [pending]);
+
   return (
     <>
       <Link
@@ -33,7 +36,9 @@ export function NavigationLink({
         aria-disabled={pending || undefined}
         onNavigate={(event) => {
           event.preventDefault();
+
           if (navigating.current) return;
+
           navigating.current = true;
           startTransition(() => router.push(href, { scroll }));
         }}

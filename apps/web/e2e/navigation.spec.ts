@@ -17,6 +17,7 @@ async function holdNavigation(
     const request = route.request();
     const url = new URL(request.url());
     const headers = request.headers();
+
     if (
       (typeof pathname === "string" ? url.pathname === pathname : pathname.test(url.pathname)) &&
       (query === undefined || url.searchParams.get("q") === query) &&
@@ -24,11 +25,17 @@ async function holdNavigation(
       (includePrefetch || !headers["next-router-prefetch"])
     ) {
       requests++;
-      if (!headers["next-router-prefetch"]) navigationRequests++;
+
+      if (!headers["next-router-prefetch"]) {
+        navigationRequests++;
+      }
+
       await held;
     }
+
     await route.continue();
   });
+
   return { release, count: () => requests, navigationCount: () => navigationRequests };
 }
 
@@ -39,6 +46,7 @@ test("search immediately responds, prevents repeated submits, and restores back/
   // loading the homepage so cached partial shells cannot bypass the delay.
   const held = await holdNavigation(page, "/search", undefined, true);
   await page.goto("/");
+
   try {
     await page.getByLabel("¿Qué necesitas comprar?").fill("a");
     await page.getByRole("button", { name: "Buscar", exact: true }).click();
@@ -51,23 +59,36 @@ test("search immediately responds, prevents repeated submits, and restores back/
     // form and exercise repeated submits in one browser task.
     const pendingForm = await page.evaluate(() => {
       const form = document.querySelector('form[aria-busy="true"]');
+
       if (!(form instanceof HTMLFormElement)) return null;
+
       const button = form.querySelector('button[type="submit"]');
-      if (!(button instanceof HTMLButtonElement)) throw new Error("Expected search button");
+
+      if (!(button instanceof HTMLButtonElement)) {
+        throw new Error("Expected search button");
+      }
+
       const state = { disabled: button.disabled, label: button.textContent };
       form.requestSubmit();
       form.requestSubmit();
+
       return state;
     });
-    if (pendingForm) expect(pendingForm).toEqual({ disabled: true, label: "Buscando…" });
+
+    if (pendingForm) {
+      expect(pendingForm).toEqual({ disabled: true, label: "Buscando…" });
+    }
+
     await expect.poll(held.navigationCount).toBe(1);
   } finally {
     held.release();
   }
+
   await expect(page).toHaveURL(/\/search\?q=a$/);
   await expect(page.getByRole("button", { name: "Buscar", exact: true })).toBeEnabled();
   await page.unrouteAll({ behavior: "wait" });
   const next = await holdNavigation(page, "/search", "b");
+
   try {
     await page.getByLabel("¿Qué necesitas comprar?").fill("b");
     await page.getByLabel("¿Qué necesitas comprar?").press("Enter");
@@ -79,6 +100,7 @@ test("search immediately responds, prevents repeated submits, and restores back/
   } finally {
     next.release();
   }
+
   await expect(page).toHaveURL(/\/search\?q=b$/);
   await expect(page.getByRole("button", { name: "Buscar", exact: true })).toBeEnabled();
   await page.goBack();
@@ -102,6 +124,7 @@ for (const theme of ["light", "dark"] as const) {
     await page.goto("/");
     await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
     const chip = page.locator('.search-chip[href="/search?q=huevos"]');
+
     try {
       await chip.focus();
       expect(await chip.evaluate((element) => getComputedStyle(element).transitionDuration)).toBe(
@@ -121,21 +144,30 @@ for (const theme of ["light", "dark"] as const) {
           link instanceof HTMLAnchorElement
             ? { busy: link.getAttribute("aria-busy"), disabled: link.getAttribute("aria-disabled") }
             : null;
+
         if (link instanceof HTMLAnchorElement) {
           link.click();
           link.click();
         }
+
         const skeleton = document.querySelector(
           '[aria-label="Cargando resultados de búsqueda"] [aria-hidden="true"]',
         );
+
         return {
           attributes,
           animationName: skeleton ? getComputedStyle(skeleton).animationName : null,
         };
       });
-      if (pendingState.attributes)
+
+      if (pendingState.attributes) {
         expect(pendingState.attributes).toEqual({ busy: "true", disabled: "true" });
-      if (pendingState.animationName !== null) expect(pendingState.animationName).toBe("none");
+      }
+
+      if (pendingState.animationName !== null) {
+        expect(pendingState.animationName).toBe("none");
+      }
+
       await expect.poll(held.count).toBeGreaterThan(0);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
         true,
@@ -143,6 +175,7 @@ for (const theme of ["light", "dark"] as const) {
     } finally {
       held.release();
     }
+
     await expect(page).toHaveURL(/\/search\?q=huevos$/);
     // URL commit can precede the streamed catalog response. Retry readiness
     // within the test budget rather than treating ordinary query latency as failure.
@@ -167,8 +200,13 @@ test("exact comparison cards immediately respond while detail data is delayed", 
   const card = page.locator(".exact-card a.navigation-link").first();
   await expect(card).toBeVisible();
   const href = await card.getAttribute("href");
-  if (!href) throw new Error("Comparison URL missing");
+
+  if (!href) {
+    throw new Error("Comparison URL missing");
+  }
+
   const pathname = new URL(href, page.url()).pathname;
+
   try {
     await card.click();
     await expect(
@@ -180,6 +218,7 @@ test("exact comparison cards immediately respond while detail data is delayed", 
       const link = Array.from(document.querySelectorAll(".exact-card a.navigation-link")).find(
         (element) => element.getAttribute("href") === destination,
       );
+
       if (link instanceof HTMLAnchorElement) {
         link.click();
         link.click();
@@ -189,6 +228,7 @@ test("exact comparison cards immediately respond while detail data is delayed", 
   } finally {
     held.release();
   }
+
   await expect(page).toHaveURL(new RegExp(pathname, "u"));
   await expect(page.locator("#offers-title")).toBeVisible();
   await page.unrouteAll({ behavior: "wait" });

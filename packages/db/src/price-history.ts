@@ -19,12 +19,14 @@ const stateSchema = z.object({
   previousPriceCents: z.number().int().nonnegative().nullable(),
   previousValidUntil: z.coerce.date().nullable(),
 });
+
 const coverageSchema = z.object({
   observationDate: z.iso.date(),
   firstObservedAt: z.coerce.date(),
   lastObservedAt: z.coerce.date(),
   observationCount: z.number().int().positive(),
 });
+
 const rowSchema = z.object({
   id: z.uuid(),
   displayName: z.string(),
@@ -35,6 +37,7 @@ const rowSchema = z.object({
   states: z.array(stateSchema),
   coverage: z.array(coverageSchema),
 });
+
 /** One bounded query; public exact-product eligibility is shared with comparison. */
 export async function getCanonicalProductPriceHistory(
   db: ReturnType<typeof createDatabase>,
@@ -42,6 +45,7 @@ export async function getCanonicalProductPriceHistory(
   options: { range?: HistoryRange; now?: Date } = {},
 ) {
   if (!isPublicProductId(productId)) return null;
+
   return getScopedPriceHistory(
     db,
     sql`${eligibleProducts}, scoped as (
@@ -94,7 +98,9 @@ export async function getScopedPriceHistory(
     order by s.retailer_id`),
   ]);
   const rows = z.array(rowSchema).parse(result.rows);
+
   if (!rows[0]) return null;
+
   return {
     id: rows[0].id,
     displayName: rows[0].displayName,
@@ -107,6 +113,7 @@ export async function getScopedPriceHistory(
     })),
   };
 }
+
 export type CanonicalProductPriceHistory = NonNullable<
   Awaited<ReturnType<typeof getCanonicalProductPriceHistory>>
 >;

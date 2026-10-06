@@ -1,15 +1,23 @@
 import { expect, test } from "@playwright/test";
+
 const raw: unknown = process.env.PRICE_HISTORY_FIXTURE_IDS
   ? JSON.parse(process.env.PRICE_HISTORY_FIXTURE_IDS)
   : null;
+
 function fixture(name: string): string {
-  if (typeof raw !== "object" || raw === null || !(name in raw))
+  if (typeof raw !== "object" || raw === null || !(name in raw)) {
     throw new Error("History fixtures unavailable");
+  }
+
   const value: unknown = Reflect.get(raw, name);
-  if (typeof value !== "string" || !/^[0-9a-f-]{36}$/u.test(value))
+
+  if (typeof value !== "string" || !/^[0-9a-f-]{36}$/u.test(value)) {
     throw new Error("Invalid fixture ID");
+  }
+
   return value;
 }
+
 test.describe("isolated ordinary-history fixtures", () => {
   test.skip(!raw, "Run pnpm test:e2e:history with explicit TEST_DATABASE_URL after build");
   test("history follows offers, exposes ordinary transitions and keeps CMR separate", async ({
@@ -35,11 +43,14 @@ test.describe("isolated ordinary-history fixtures", () => {
             Node.DOCUMENT_POSITION_FOLLOWING,
         ),
     ).toBeTruthy();
-    for (const name of ["Metro", "Plaza Vea", "Tottus"])
+
+    for (const name of ["Metro", "Plaza Vea", "Tottus"]) {
       await expect(section.getByRole("button", { name, exact: true })).toHaveAttribute(
         "aria-pressed",
         "true",
       );
+    }
+
     await section.getByRole("button", { name: "Metro", exact: true }).click();
     await expect(section.getByRole("button", { name: "Metro", exact: true })).toHaveAttribute(
       "aria-pressed",
@@ -112,8 +123,10 @@ test.describe("isolated ordinary-history fixtures", () => {
   }, testInfo) => {
     for (const width of [390, 1280]) {
       await page.setViewportSize({ width, height: 900 });
+
       for (const theme of ["light", "dark"] as const) {
         await page.emulateMedia({ colorScheme: theme });
+
         for (const kind of ["continuous", "gap", "decrease"]) {
           await page.goto(`/products/${fixture(kind)}`);
           await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
@@ -144,6 +157,7 @@ test.describe("isolated ordinary-history fixtures", () => {
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
+
     for (const theme of ["light", "dark"] as const) {
       await page.emulateMedia({ colorScheme: theme });
       await page.goto(`/products/${fixture("rich")}`);

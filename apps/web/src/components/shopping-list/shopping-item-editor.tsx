@@ -2,19 +2,28 @@
 
 import { shoppingListPolicy } from "@comprafino/core";
 import { useId, useRef, useState } from "react";
-import type { RefObject } from "react";
+import type { FormEvent, RefObject } from "react";
 import {
   saveShoppingItem,
   shoppingFrequencyLabels,
   shoppingItemKey,
   shoppingListItemSchema,
   inferGenericSubstitutionProfile,
-  normalizeSearchQuery,
 } from "@comprafino/core";
 import type { ShoppingListItem, ShoppingCreationSeed } from "@comprafino/core";
 import { Dialog, DialogContent, DialogTitle } from "@comprafino/ui/components/dialog";
 import { useShoppingList } from "./use-shopping-list";
+import { sameShoppingSession } from "../../lib/shopping-list/session";
+
+import {
+  shoppingEditorDefaults,
+  quantityUnitFromInput,
+  frequencyFromInput,
+  editorSaveLabel,
+} from "./editor-values";
+
 export type ShoppingSeed = ShoppingCreationSeed;
+
 export function ShoppingItemEditor(props: {
   seed: ShoppingSeed;
   item?: ShoppingListItem;
@@ -24,12 +33,15 @@ export function ShoppingItemEditor(props: {
   const titleId = useId();
   const [open, setOpen] = useState(true);
   const initialFocus = useRef<HTMLInputElement>(null);
+
   return (
     <Dialog
       open={open}
       onOpenChange={setOpen}
       onOpenChangeComplete={(next) => {
-        if (!next) props.close();
+        if (!next) {
+          props.close();
+        }
       }}
     >
       <DialogContent
@@ -50,6 +62,7 @@ export function ShoppingItemEditor(props: {
     </Dialog>
   );
 }
+
 function ShoppingItemForm({
   seed,
   item,
@@ -67,38 +80,25 @@ function ShoppingItemForm({
   closing: boolean;
   dismiss: () => void;
 }) {
-  const { list, change, ready, busy, accountKey } = useShoppingList();
-  const [editorAccount] = useState(accountKey);
-  const accountChanged = editorAccount !== accountKey;
+  const { list, change, ready, busy, session } = useShoppingList();
+  const [editorSession] = useState(session);
+  const accountChanged = !sameShoppingSession(editorSession, session);
   const [saving, setSaving] = useState(false);
   const fieldId = useId();
-  const generic = item ? item.intent === "generic" : !seed.canonicalId;
-  const [intent, setIntent] = useState<ShoppingListItem["intent"]>(
-    item?.intent ?? (generic ? "generic" : "preferred"),
-  );
-  const label = item?.label ?? seed.label;
-  const query = normalizeSearchQuery(item?.query ?? seed.query);
-  const canonicalId = item?.canonicalId ?? seed.canonicalId;
-  // Old normalized exact needs remain in their original measure until edited
-  // with catalog evidence; never guess how many eggs/bottles a package contains.
-  const quantityMode = item?.quantityMode ?? (generic ? "normalized" : "packages");
-  const packages = quantityMode === "packages";
-  const [amount, setAmount] = useState(
-    String(item?.quantity.amount ?? (generic ? (seed.quantity?.amount ?? 1) : 1)),
-  );
-  const [unit, setUnit] = useState<ShoppingListItem["quantity"]["unit"]>(
-    item?.quantity.unit ?? (generic ? (seed.quantity?.unit ?? "unit") : "unit"),
-  );
-  const [frequency, setFrequency] = useState<ShoppingListItem["frequency"]>(
-    item?.frequency ?? "weekly",
-  );
+  // Existing normalized exact quantities retain their measure; catalog evidence is required to change it.
+  const defaults = shoppingEditorDefaults(seed, item);
+  const { generic, label, query, canonicalId, quantityMode, packages, substitutionsWithheld } =
+    defaults;
+  const [intent, setIntent] = useState<ShoppingListItem["intent"]>(defaults.intent);
+  const [amount, setAmount] = useState(defaults.amount);
+  const [unit, setUnit] = useState<ShoppingListItem["quantity"]["unit"]>(defaults.unit);
+  const [frequency, setFrequency] = useState<ShoppingListItem["frequency"]>(defaults.frequency);
   const [error, setError] = useState("");
   const [identity] = useState(() => ({
     id: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
   }));
-  const substitutionsWithheld =
-    generic && (item ? item.substitutionProfile === null : seed.substitutionProfile === null);
+
   function draft(now = item?.updatedAt ?? identity.createdAt) {
     return shoppingListItemSchema.safeParse({
       id: item?.id ?? identity.id,
@@ -115,35 +115,42 @@ function ShoppingItemForm({
       updatedAt: now,
     });
   }
+
   const parsedDraft = draft();
   const duplicate =
     parsedDraft.success &&
     list.items.find(
       (i) => i.id !== item?.id && shoppingItemKey(i) === shoppingItemKey(parsedDraft.data),
     );
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (closing || saving || !ready || busy || accountChanged) return;
+
+    setError("");
+    const parsed = draft(new Date().toISOString());
+
+    if (!parsed.success) {
+      setError("Revisa la cantidad antes de guardar.");
+
+      return;
+    }
+
+    try {
+      setSaving(true);
+      await change((current) => saveShoppingItem(current, parsed.data));
+      onSaved?.();
+      dismiss();
+    } catch (failure) {
+      setError(failure instanceof Error ? failure.message : "No pudimos guardar la lista.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
-    <form
-      onSubmit={async (event) => {
-        event.preventDefault();
-        if (closing || saving || !ready || busy || accountChanged) return;
-        setError("");
-        const parsed = draft(new Date().toISOString());
-        if (!parsed.success) {
-          setError("Revisa la cantidad antes de guardar.");
-          return;
-        }
-        try {
-          setSaving(true);
-          await change((current) => saveShoppingItem(current, parsed.data));
-          onSaved?.();
-          dismiss();
-        } catch (failure) {
-          setError(failure instanceof Error ? failure.message : "No pudimos guardar la lista.");
-        } finally {
-          setSaving(false);
-        }
-      }}
-    >
+    <form onSubmit={submit}>
       <DialogTitle id={titleId} className="pr-12">
         {item ? `Editar “${label}”` : `Agregar “${label}” a mi lista`}
       </DialogTitle>
@@ -208,9 +215,7 @@ function ShoppingItemForm({
             <select
               id={`${fieldId}-unit`}
               value={unit}
-              onChange={(e) =>
-                setUnit(e.target.value === "kg" ? "kg" : e.target.value === "L" ? "L" : "unit")
-              }
+              onChange={(e) => setUnit(quantityUnitFromInput(e.target.value))}
             >
               <option value="unit">Unidades</option>
               <option value="kg">kg</option>
@@ -224,15 +229,7 @@ function ShoppingItemForm({
         <select
           id={`${fieldId}-frequency`}
           value={frequency}
-          onChange={(e) =>
-            setFrequency(
-              e.target.value === "monthly"
-                ? "monthly"
-                : e.target.value === "biweekly"
-                  ? "biweekly"
-                  : "weekly",
-            )
-          }
+          onChange={(e) => setFrequency(frequencyFromInput(e.target.value))}
         >
           {Object.entries(shoppingFrequencyLabels).map(([value, text]) => (
             <option key={value} value={value}>
@@ -265,7 +262,7 @@ function ShoppingItemForm({
           type="submit"
           disabled={closing || saving || !ready || busy || accountChanged}
         >
-          {duplicate && !item ? "Actualizar existente" : item ? "Guardar cambios" : "Agregar"}
+          {editorSaveLabel(Boolean(item), Boolean(duplicate))}
         </button>
         <button className="shopping-button secondary" type="button" onClick={dismiss}>
           Cancelar
@@ -274,6 +271,7 @@ function ShoppingItemForm({
     </form>
   );
 }
+
 export function AddShoppingItem({
   seed,
   compact = false,
@@ -287,6 +285,7 @@ export function AddShoppingItem({
   const [saved, setSaved] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
   const { ready, warning, busy } = useShoppingList();
+
   return (
     <div className={compact ? "mt-2" : "mt-4"}>
       <button

@@ -11,8 +11,11 @@ export function SearchForm({ query = "" }: { query?: string }) {
   const [pending, startTransition] = useTransition();
   const submitting = useRef(false);
   useEffect(() => {
-    if (!pending) submitting.current = false;
+    if (!pending) {
+      submitting.current = false;
+    }
   }, [pending]);
+
   return (
     <search className="w-full">
       <Form
@@ -20,7 +23,9 @@ export function SearchForm({ query = "" }: { query?: string }) {
         aria-busy={pending}
         onSubmit={(event) => {
           event.preventDefault();
+
           if (submitting.current) return;
+
           const value = new FormData(event.currentTarget).get("q");
           const params = new URLSearchParams({ q: typeof value === "string" ? value : "" });
           submitting.current = true;

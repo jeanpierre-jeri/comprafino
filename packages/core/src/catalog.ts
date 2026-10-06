@@ -2,13 +2,18 @@ import { z } from "zod";
 import { normalizeWhitespace } from "./listing.ts";
 
 export const normalizationVersion = 1;
+
 export const unitSchema = z.enum(["g", "kg", "ml", "l", "unit"]);
+
 export type Unit = z.infer<typeof unitSchema>;
+
 export type Quantity = { value: number; unit: "g" | "ml" | "unit" };
+
 const sourceQuantitySchema = z.object({
   value: z.string().regex(/^\d+(?:[.,]\d{1,6})?$/u),
   unit: unitSchema,
 });
+
 export const catalogInputSchema = z.object({
   title: z.string().trim().min(1),
   priceUnit: z.enum(["KG", "UN"]),
@@ -20,7 +25,9 @@ export const catalogInputSchema = z.object({
   sourceQuantity: sourceQuantitySchema.optional(),
   sourcePackageCount: z.number().int().positive().max(2_147_483_647).optional(),
 });
+
 export type CatalogInput = z.infer<typeof catalogInputSchema>;
+
 export type CatalogAttributes = {
   normalizationVersion: number;
   normalizedTitle: string;
@@ -47,6 +54,7 @@ export function normalizeTitle(value: string): string {
       .replace(/[;|]/gu, " "),
   );
 }
+
 const brands = [
   "Gloria",
   "Laive",
@@ -69,14 +77,18 @@ const brands = [
   "Milkito",
   "Suiza",
 ];
+
 function titleBrands(title: string): string[] {
   return brands.filter((brand) => {
     const key = normalizeTitle(brand).replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+
     return new RegExp(`(?<![\\p{L}\\d])${key}(?![\\p{L}\\d])`, "u").test(title);
   });
 }
+
 function displayBrand(raw: string): string {
   const key = normalizeTitle(raw);
+
   return (
     brands.find((brand) => normalizeTitle(brand) === key) ??
     normalizeWhitespace(raw.normalize("NFKC").replace(/[’‘]/gu, "'"))
@@ -87,50 +99,71 @@ function displayBrand(raw: string): string {
       )
   );
 }
+
 export function normalizeUnit(raw: string): Unit | null {
   const key = normalizeTitle(raw);
+
   if (["g", "gr", "grs", "gramo", "gramos"].includes(key)) return "g";
+
   if (["kg", "kilo", "kilos", "kilogramo", "kilogramos"].includes(key)) return "kg";
+
   if (["ml", "mililitro", "mililitros"].includes(key)) return "ml";
+
   if (["l", "lt", "lts", "litro", "litros"].includes(key)) return "l";
+
   if (["un", "und", "uds", "unidad", "unidades", "unit"].includes(key)) return "unit";
+
   return null;
 }
+
 /** Decimal arithmetic uses integers; sub-base-unit precision remains unknown. */
 export function toBaseQuantity(value: string, unit: Unit): Quantity | null {
   if (!/^\d+(?:[.,]\d{1,6})?$/u.test(value)) return null;
+
   const [whole, fraction = ""] = value.replace(",", ".").split(".");
   const scale = 10n ** BigInt(fraction.length);
   const numerator = BigInt(whole!) * scale + BigInt(fraction || "0");
   const base = numerator * (unit === "kg" || unit === "l" ? 1000n : 1n);
+
   if (base % scale !== 0n || base <= 0n || base / scale > 2_147_483_647n) return null;
-  return { value: Number(base / scale), unit: unit === "kg" ? "g" : unit === "l" ? "ml" : unit };
+
+  return { value: Number(base / scale), unit: baseQuantityUnits[unit] };
 }
+
 const unitPattern =
   "kilogramos?|kilos?|gramos?|mililitros?|litros?|unidades|unidad|unit|kg|grs?|ml|lts?|l|g|und|uds|un";
+
 function quantities(text: string): Quantity[] {
   const pattern = new RegExp(
     `(?<![\\p{L}\\d.,-])(\\d+(?:[.,]\\d{1,6})?)\\s*(${unitPattern})(?![\\p{L}\\d])`,
     "gu",
   );
+
   return [...text.matchAll(pattern)].flatMap((match) => {
     const unit = normalizeUnit(match[2]!);
     const quantity = unit && toBaseQuantity(match[1]!, unit);
+
     return quantity ? [quantity] : [];
   });
 }
+
 function distinctQuantities(values: Quantity[]): Quantity[] {
   return [...new Map(values.map((value) => [`${value.unit}:${value.value}`, value])).values()];
 }
+
 function counts(text: string, hasMeasure: boolean): number[] {
   const values: number[] = [];
+
   for (const [word, count] of [
     ["tripack", 3],
     ["fourpack", 4],
     ["sixpack", 6],
   ] as const) {
-    if (new RegExp(`\\b${word}\\b`, "u").test(text)) values.push(count);
+    if (new RegExp(`\\b${word}\\b`, "u").test(text)) {
+      values.push(count);
+    }
   }
+
   const patterns = [
     /\b(?:pack|paquete)\s*(?:x\s*)?(\d+)\s*(?:cajas?|latas?|botellas?|bolsas?)(?!\p{L})/gu,
     /\bpack\s*x\s*(\d+)(?![\d.,])(?=\s|$)/gu,
@@ -139,21 +172,32 @@ function counts(text: string, hasMeasure: boolean): number[] {
       "gu",
     ),
   ];
+
   if (hasMeasure) {
     patterns.push(/(?<![\d.,-])(\d+)\s*(?:un|und|unidad|unidades)\b/gu);
     patterns.push(/\bx\s*(\d+)(?![\d.,])(?=\s*$)/gu);
   }
+
   for (const pattern of patterns) {
     for (const match of text.matchAll(pattern)) {
       const after = text.slice(match.index + match[0].length);
+
       // `pack x 500 g` is a mass, never five hundred packages.
-      if (new RegExp(`^\\s*(?:${unitPattern})(?![\\p{L}\\d])`, "u").test(after)) continue;
+      if (new RegExp(`^\\s*(?:${unitPattern})(?![\\p{L}\\d])`, "u").test(after)) {
+        continue;
+      }
+
       const value = Number(match[1]);
-      if (Number.isInteger(value) && value > 0 && value <= 2_147_483_647) values.push(value);
+
+      if (Number.isInteger(value) && value > 0 && value <= 2_147_483_647) {
+        values.push(value);
+      }
     }
   }
+
   return [...new Set(values)];
 }
+
 export function normalizeCatalogListing(raw: CatalogInput): CatalogAttributes {
   const input = catalogInputSchema.parse(raw);
   const title = normalizeTitle(input.title);
@@ -162,11 +206,16 @@ export function normalizeCatalogListing(raw: CatalogInput): CatalogAttributes {
     : "";
   const issues: string[] = [];
   const foundBrands = titleBrands(title);
-  const brand = input.sourceBrand?.trim()
-    ? displayBrand(input.sourceBrand)
-    : foundBrands.length === 1
-      ? foundBrands[0]!
-      : null;
+  let brand;
+
+  if (input.sourceBrand?.trim()) {
+    brand = displayBrand(input.sourceBrand);
+  } else if (foundBrands.length === 1) {
+    brand = foundBrands[0]!;
+  } else {
+    brand = null;
+  }
+
   const soldByWeight = input.priceUnit === "KG";
   let quantity: Quantity | null = null;
   let packageCount: number | null = null;
@@ -177,44 +226,72 @@ export function normalizeCatalogListing(raw: CatalogInput): CatalogAttributes {
     "",
   );
   const mixedBundle = /\s\+\s/u.test(title);
-  if (mixedBundle) issues.push("mixed-bundle");
+
+  if (mixedBundle) {
+    issues.push("mixed-bundle");
+  }
+
   if (!soldByWeight && !mixedBundle) {
     const sourceValues = distinctQuantities(quantities(packageText));
     const titleValues = distinctQuantities(quantities(title));
     const sourceMass = sourceValues.filter((q) => q.unit !== "unit");
     const titleMass = titleValues.filter((q) => q.unit !== "unit");
     const approximate = /\b(?:aprox|aproximad[oa]s?)\b/u.test(combined);
-    if (approximate) issues.push("approximate-quantity");
+
+    if (approximate) {
+      issues.push("approximate-quantity");
+    }
+
     const hint = input.sourceQuantity
       ? toBaseQuantity(input.sourceQuantity.value, input.sourceQuantity.unit)
       : null;
     const measures = sourceMass.length ? sourceMass : titleMass;
-    if (hint) quantity = hint;
-    else if (!approximate && measures.length === 1) quantity = measures[0]!;
-    else if (measures.length > 1) issues.push("ambiguous-quantity");
+
+    if (hint) {
+      quantity = hint;
+    } else if (!approximate && measures.length === 1) {
+      quantity = measures[0]!;
+    } else if (measures.length > 1) {
+      issues.push("ambiguous-quantity");
+    }
+
     if (
       sourceMass.length === 1 &&
       titleMass.some((q) => q.unit !== sourceMass[0]!.unit || q.value !== sourceMass[0]!.value)
-    )
+    ) {
       issues.push("source-title-quantity-conflict");
+    }
+
     const hasMeasure = measures.length > 0 || (hint !== null && hint.unit !== "unit");
     const sourceCounts = counts(packageText, hasMeasure);
     const titleCounts = counts(title, hasMeasure);
     const candidates = sourceCounts.length ? sourceCounts : titleCounts;
-    if (input.sourcePackageCount) packageCount = input.sourcePackageCount;
-    else if (candidates.length === 1) packageCount = candidates[0]!;
-    else if (candidates.length > 1) issues.push("ambiguous-package-count");
-    else if (!/\b(?:pack|paquete|tripack|fourpack|sixpack)\b|\bx\s*\d+\s*$/u.test(packSignals))
+
+    if (input.sourcePackageCount) {
+      packageCount = input.sourcePackageCount;
+    } else if (candidates.length === 1) {
+      packageCount = candidates[0]!;
+    } else if (candidates.length > 1) {
+      issues.push("ambiguous-package-count");
+    } else if (!/\b(?:pack|paquete|tripack|fourpack|sixpack)\b|\bx\s*\d+\s*$/u.test(packSignals)) {
       packageCount = 1;
-    if (sourceCounts.length === 1 && titleCounts.some((count) => count !== sourceCounts[0]))
+    }
+
+    if (sourceCounts.length === 1 && titleCounts.some((count) => count !== sourceCounts[0])) {
       issues.push("source-title-count-conflict");
+    }
+
     if (!hasMeasure && !hint) {
       const countValues = sourceValues.length ? sourceValues : titleValues;
+
       if (!approximate && countValues.length === 1 && candidates.length === 0) {
         quantity = countValues[0]!;
         packageCount = 1;
-      } else if (countValues.length > 0) issues.push("ambiguous-count-quantity");
+      } else if (countValues.length > 0) {
+        issues.push("ambiguous-count-quantity");
+      }
     }
+
     if (
       !hasMeasure &&
       !hint &&
@@ -222,24 +299,32 @@ export function normalizeCatalogListing(raw: CatalogInput): CatalogAttributes {
       !quantity &&
       !input.sourcePackageCount &&
       !/\b(?:empaque|bandeja|caja|bolsa|lata|botella|unitario)\b/u.test(combined)
-    )
+    ) {
       packageCount = null;
+    }
+
     // Unknown pack wording must not silently default to a single package.
-    if (packageCount === null && !issues.includes("ambiguous-package-count"))
+    if (packageCount === null && !issues.includes("ambiguous-package-count")) {
       issues.push("unknown-package-count");
+    }
   }
+
   const total = quantity && packageCount ? BigInt(quantity.value) * BigInt(packageCount) : null;
   const totalQuantity =
     total !== null && total <= 2_147_483_647n
       ? { value: Number(total), unit: quantity!.unit }
       : null;
-  if (total !== null && total > 2_147_483_647n) issues.push("total-overflow");
+
+  if (total !== null && total > 2_147_483_647n) {
+    issues.push("total-overflow");
+  }
+
   return {
     normalizationVersion,
     normalizedTitle: title,
     brand,
     brandKey: brand ? normalizeTitle(brand) : null,
-    brandSource: brand ? (input.sourceBrand?.trim() ? "source" : "title") : null,
+    brandSource: brand ? identifiedBrandSource(input.sourceBrand) : null,
     quantity,
     packageCount,
     totalQuantity,
@@ -248,4 +333,16 @@ export function normalizeCatalogListing(raw: CatalogInput): CatalogAttributes {
     sourcePackageDescription: input.packageText ?? null,
     issues,
   };
+}
+
+const baseQuantityUnits: Record<Unit, Quantity["unit"]> = {
+  kg: "g",
+  l: "ml",
+  g: "g",
+  ml: "ml",
+  unit: "unit",
+};
+
+function identifiedBrandSource(sourceBrand: string | null | undefined): "source" | "title" {
+  return sourceBrand?.trim() ? "source" : "title";
 }

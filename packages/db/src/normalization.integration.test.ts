@@ -6,7 +6,9 @@ import { persistCatalogNormalizations } from "./catalog.ts";
 import { persistListings } from "./ingestion.ts";
 
 import { catalogTestContext, observation } from "./testing/catalog-fixtures.ts";
+
 const testUrl = process.env.TEST_DATABASE_URL;
+
 describe.skipIf(!testUrl)("PostgreSQL normalization (explicit TEST_DATABASE_URL)", () => {
   // Keep deliberate contention inside each case; cases start with independent data.
   const harness = catalogTestContext({
@@ -121,13 +123,15 @@ describe.skipIf(!testUrl)("PostgreSQL normalization (explicit TEST_DATABASE_URL)
     expect((await persistCatalogNormalizations(db, fresh)).changed).toBe(1);
   }, 30_000);
   it("rolls back a normalization batch when one derived row fails a constraint", async () => {
-    for (const externalId of ["catalog-good", "catalog-rejected"])
+    for (const externalId of ["catalog-good", "catalog-rejected"]) {
       await persistListings(db, "tottus", [
         {
           ...observation(externalId, 0),
           title: externalId === "catalog-good" ? "Leche Gloria 390g" : "Leche Gloria 946ml",
         },
       ]);
+    }
+
     const rows = [
       ...(await catalogRows("catalog-good")),
       ...(await catalogRows("catalog-rejected")),
@@ -136,6 +140,7 @@ describe.skipIf(!testUrl)("PostgreSQL normalization (explicit TEST_DATABASE_URL)
     await query(
       `alter table listing_normalizations add constraint test_reject_catalog check (listing_id <> '${rows[1]!.id}'::uuid)`,
     );
+
     try {
       await expect(persistCatalogNormalizations(db, rows)).rejects.toMatchObject({
         code: "23514",
@@ -158,6 +163,7 @@ describe.skipIf(!testUrl)("PostgreSQL normalization (explicit TEST_DATABASE_URL)
     ]);
     const rows = await catalogRows("catalog-constraints");
     await persistCatalogNormalizations(db, rows);
+
     for (const change of [
       "quantity_value = -1",
       "quantity_unit = null",

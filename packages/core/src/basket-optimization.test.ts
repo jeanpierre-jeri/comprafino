@@ -3,8 +3,11 @@ import { basketOptionSchema, defaultBasketLimit, optimizeBasket } from "./basket
 import type { BasketOption } from "./basket-optimization.ts";
 import { evaluateShoppingFulfillment, shoppingListItemSchema } from "./shopping-list.ts";
 import type { ShoppingCandidate } from "./shopping-list.ts";
+
 const now = new Date("2026-10-04T12:00:00Z");
+
 const uuid = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
+
 function option(
   retailerId: BasketOption["retailerId"],
   price: number,
@@ -28,9 +31,11 @@ function option(
     condition: null,
   });
 }
+
 function need(n: number, options: BasketOption[]) {
   return { itemId: uuid(n), options };
 }
+
 function item(intent: "generic" | "preferred" | "strict" = "generic") {
   return shoppingListItemSchema.parse({
     id: uuid(1),
@@ -45,6 +50,7 @@ function item(intent: "generic" | "preferred" | "strict" = "generic") {
     updatedAt: now.toISOString(),
   });
 }
+
 function candidate(overrides: Partial<ShoppingCandidate> = {}): ShoppingCandidate {
   return {
     id: "exact",
@@ -62,6 +68,7 @@ function candidate(overrides: Partial<ShoppingCandidate> = {}): ShoppingCandidat
     ...overrides,
   };
 }
+
 const fulfillment = (
   candidates: ShoppingCandidate[],
   intent: "generic" | "preferred" | "strict" = "generic",
@@ -82,6 +89,7 @@ describe("exact current basket optimization", () => {
   });
   it("matches independent exhaustive assignment costs across varied baskets", () => {
     const retailers = ["metro", "plaza-vea", "tottus"] as const;
+
     for (let seed = 0; seed < 30; seed++) {
       const needs = Array.from({ length: 3 }, (_, i) =>
         need(
@@ -256,8 +264,10 @@ describe("basket approval uses Milestone 15.1 fulfillment", () => {
       "Arroz integral 1kg",
       "Aceite de oliva 1L",
       "Huevos orgánicos 30un",
-    ])
+    ]) {
       expect(fulfillment([candidate({ title, ordinaryPriceCents: 1 })]).approved).toEqual([]);
+    }
+
     expect(fulfillment([candidate({ substitutionProfile: null })]).approved).toEqual([]);
     expect(
       evaluateShoppingFulfillment(

@@ -8,10 +8,14 @@ import tottus from "./fixtures/tottus.json";
 
 function requestUrl(input: Parameters<typeof fetch>[0] | undefined): URL {
   if (input instanceof URL) return input;
+
   if (typeof input === "string") return new URL(input);
+
   if (input instanceof Request) return new URL(input.url);
+
   throw new Error("Expected retailer request");
 }
+
 describe("public retailer search adapters", () => {
   for (const [name, create, fixture] of [
     ["metro", createMetroAdapter, metro],
@@ -69,6 +73,7 @@ describe("public retailer search adapters", () => {
       }
     });
   }
+
   it("Tottus searches Ntt through hydration and does not paginate", async () => {
     const fake = vi.fn<typeof fetch>(
       async () => new Response(`<script id="__NEXT_DATA__">${JSON.stringify(tottus)}</script>`),
@@ -92,12 +97,14 @@ describe("public retailer search adapters", () => {
   });
   it("rejects invalid input before retailer requests", async () => {
     const fake = vi.fn<typeof fetch>();
+
     for (const create of [createTottusAdapter, createMetroAdapter, createPlazaVeaAdapter]) {
       await expect(create(fake).searchProducts("??", 10)).rejects.toThrow(
         "Invalid discovery query",
       );
       await expect(create(fake).searchProducts("arroz", 11)).rejects.toThrow(/search/iu);
     }
+
     expect(fake).not.toHaveBeenCalled();
   });
 });

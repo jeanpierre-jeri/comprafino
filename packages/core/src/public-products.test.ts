@@ -29,6 +29,7 @@ describe("public search terms", () => {
     expect(usefulSearchQuery("a".repeat(120))).toBe(true);
   });
 });
+
 describe("ordinary price presentation", () => {
   it.each([
     [620, "S/ 6.20"],

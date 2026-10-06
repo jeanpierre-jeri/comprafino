@@ -1,3 +1,4 @@
+import type { Quantity } from "./catalog.ts";
 import type { FamilyEvidence } from "./product-family.ts";
 import { normalizeSearchQuery } from "./public-products.ts";
 import {
@@ -26,27 +27,30 @@ export function shoppingSeedForRetailerOffer(offer: {
   unitPrice: { quality: string } | null;
   pricingBasis: "unit" | "kg";
 }): ShoppingCreationSeed {
-  if (offer.canonicalId)
+  if (offer.canonicalId) {
     return {
       label: offer.title.slice(0, 120),
       query: shoppingQueryForTitle(offer.title),
       canonicalId: offer.canonicalId,
     };
+  }
+
   const profile = getSubstitutionProfile(offer);
   const context = profile ? genericSubstitutionContexts[profile] : undefined;
-  const q = offer.totalQuantity;
-  const unit = context?.unit ?? (q?.unit === "g" ? "kg" : q?.unit === "ml" ? "L" : "unit");
+  const catalogQuantity = offer.totalQuantity;
+  const unit = context?.unit ?? catalogQuantityToShoppingUnit(catalogQuantity?.unit);
   const normalized = shoppingQuantitySchema.safeParse(
-    q && offer.unitPrice?.quality === "strong" && offer.pricingBasis === "unit"
+    catalogQuantity && offer.unitPrice?.quality === "strong" && offer.pricingBasis === "unit"
       ? {
-          amount: q.value / (q.unit === "unit" ? 1 : 1000),
-          unit: q.unit === "g" ? "kg" : q.unit === "ml" ? "L" : "unit",
+          amount: catalogQuantity.value / (catalogQuantity.unit === "unit" ? 1 : 1000),
+          unit: catalogQuantityToShoppingUnit(catalogQuantity.unit),
         }
       : null,
   );
   const quantity =
     normalized.success && normalized.data.unit === unit ? normalized.data : { amount: 1, unit };
   const query = normalizeSearchQuery(context?.query ?? offer.title).slice(0, 120);
+
   return {
     label: context?.label ?? offer.title.slice(0, 120),
     query,
@@ -55,4 +59,15 @@ export function shoppingSeedForRetailerOffer(offer: {
     substitutionProfile:
       context && inferGenericSubstitutionProfile(query, unit) === profile ? profile : null,
   };
+}
+
+/** Converts known catalog base units; it does not infer a quantity or dimension. */
+export function catalogQuantityToShoppingUnit(
+  unit: Quantity["unit"] | undefined,
+): ShoppingListItem["quantity"]["unit"] {
+  if (unit === "g") return "kg";
+
+  if (unit === "ml") return "L";
+
+  return "unit";
 }

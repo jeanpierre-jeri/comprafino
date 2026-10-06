@@ -4,12 +4,20 @@ import { PassThrough } from "node:stream";
 import { expect, test } from "@playwright/test";
 
 const require = createRequire(import.meta.url);
+
 const nodeEnvironment: unknown = require("next/dist/server/node-environment");
+
 record(nodeEnvironment);
+
 const errorHandlers: unknown = require("next/dist/server/app-render/create-error-handler");
+
 const createReactServerErrorHandler = (() => {
   const handler = record(errorHandlers).createReactServerErrorHandler;
-  if (typeof handler !== "function") throw new Error("Missing Next RSC error handler");
+
+  if (typeof handler !== "function") {
+    throw new Error("Missing Next RSC error handler");
+  }
+
   return handler;
 })();
 
@@ -22,7 +30,10 @@ interface FlightServer {
 }
 
 function record(value: unknown): Record<string, unknown> {
-  if (!isRecord(value)) throw new Error("Invalid Next runtime export");
+  if (!isRecord(value)) {
+    throw new Error("Invalid Next runtime export");
+  }
+
   return value;
 }
 
@@ -54,9 +65,11 @@ for (const variant of variants) {
         ],
       );
       const renderToPipeableStream = server.renderToPipeableStream;
+
       if (typeof renderToPipeableStream !== "function") {
         throw new Error("Missing Next RSC renderer");
       }
+
       return {
         renderToPipeableStream(model, modules, options) {
           const pipeable: unknown = Reflect.apply(renderToPipeableStream, server, [
@@ -66,11 +79,19 @@ for (const variant of variants) {
           ]);
           const result = record(pipeable);
           const pipe = result.pipe;
-          if (typeof pipe !== "function") throw new Error("Missing RSC pipe method");
+
+          if (typeof pipe !== "function") {
+            throw new Error("Missing RSC pipe method");
+          }
+
           return {
             pipe(destination) {
               const stream: unknown = Reflect.apply(pipe, result, [destination]);
-              if (!(stream instanceof PassThrough)) throw new Error("Invalid RSC destination");
+
+              if (!(stream instanceof PassThrough)) {
+                throw new Error("Invalid RSC destination");
+              }
+
               return stream;
             },
           };
@@ -87,7 +108,11 @@ for (const variant of variants) {
         new Map(),
         (error: unknown) => reported.push(error),
       ]);
-      if (typeof handleError !== "function") throw new Error("Invalid RSC error handler");
+
+      if (typeof handleError !== "function") {
+        throw new Error("Invalid RSC error handler");
+      }
+
       const stream = new PassThrough();
       const pipeable = renderer().renderToPipeableStream(
         model,
@@ -96,13 +121,16 @@ for (const variant of variants) {
           onError(error) {
             cancellations.push(error);
             const digest: unknown = Reflect.apply(handleError, undefined, [error]);
+
             if (digest !== undefined && typeof digest !== "string") {
               throw new Error("Invalid RSC error digest");
             }
+
             return digest;
           },
         },
       );
+
       return { stream, pipeable, reported, cancellations };
     }
 

@@ -38,6 +38,7 @@ const auditRow = z.object({
   price: z.number().int().nonnegative(),
   canonicalAssociation: z.boolean(),
 });
+
 const families = [
   ["eggs", "huevos"],
   ["rice", "arroz"],
@@ -78,8 +79,11 @@ export async function auditCatalogCoverage(db = createDatabase(), now = new Date
       sum(observation_count)::int as observations from listing_observation_days
       group by observation_date order by observation_date`),
   ]);
-  if ([base, current, detail].some((r) => r.rows.length > catalogPolicy.retainedListingCap))
+
+  if ([base, current, detail].some((r) => r.rows.length > catalogPolicy.retainedListingCap)) {
     throw new Error("Catalog audit exceeds 1000 guard");
+  }
+
   const offers = current.rows.map((r) => genericProductOffer(r, now)).filter((r) => r !== null);
   const offerIds = new Set(offers.map((o) => o.id));
   const exactIds = new Set(offers.filter((o) => o.canonicalId).map((o) => o.id));
@@ -113,12 +117,16 @@ export async function auditCatalogCoverage(db = createDatabase(), now = new Date
         r.version === normalizationVersion && r.fingerprint === catalogFingerprint(r.listing);
       const safe = offers.find((o) => o.id === r.listing.id);
       const context = profile ? genericSubstitutionContexts[profile] : null;
-      const dimension =
-        safe?.totalQuantity?.unit === "g"
-          ? "kg"
-          : safe?.totalQuantity?.unit === "ml"
-            ? "L"
-            : "unit";
+      let dimension;
+
+      if (safe?.totalQuantity?.unit === "g") {
+        dimension = "kg" as const;
+      } else if (safe?.totalQuantity?.unit === "ml") {
+        dimension = "L" as const;
+      } else {
+        dimension = "unit" as const;
+      }
+
       const shoppingGeneric = Boolean(
         safe &&
         context &&
@@ -127,6 +135,7 @@ export async function auditCatalogCoverage(db = createDatabase(), now = new Date
         dimension === context.unit,
       );
       const shoppingExact = Boolean(safe?.canonicalId && safe.pricingBasis === "unit");
+
       return {
         id: r.listing.id,
         retailer: r.listing.retailerId,
@@ -155,9 +164,11 @@ export async function auditCatalogCoverage(db = createDatabase(), now = new Date
         basket: shoppingGeneric || shoppingExact,
       };
     });
+
   function summarize(selected: typeof rows) {
     const count = (predicate: (r: (typeof rows)[number]) => boolean) =>
       selected.filter(predicate).length;
+
     return {
       known: selected.length,
       fresh: count((r) => r.freshness === "fresh"),
@@ -195,20 +206,25 @@ export async function auditCatalogCoverage(db = createDatabase(), now = new Date
       searchOnly: count((r) => r.publicGeneric && !r.basket),
     };
   }
+
   const familyRows = families.map(([family, label]) => {
     const selected = rows.filter((r) => r.family === family);
     const metrics = summarize(selected);
     const safeRetailers = [
       ...new Set(selected.filter((r) => r.shoppingGeneric).map((r) => r.retailer)),
     ];
-    const classification =
-      metrics.safeProfile === 0 && metrics.known > 0
-        ? "UNSAFE"
-        : metrics.shoppingGeneric < 2
-          ? "POOR"
-          : safeRetailers.length < 3 || metrics.shoppingGeneric < 6
-            ? "LIMITED"
-            : "GOOD";
+    let classification;
+
+    if (metrics.safeProfile === 0 && metrics.known > 0) {
+      classification = "UNSAFE" as const;
+    } else if (metrics.shoppingGeneric < 2) {
+      classification = "POOR" as const;
+    } else if (safeRetailers.length < 3 || metrics.shoppingGeneric < 6) {
+      classification = "LIMITED" as const;
+    } else {
+      classification = "GOOD" as const;
+    }
+
     return {
       family,
       label,
@@ -225,14 +241,10 @@ export async function auditCatalogCoverage(db = createDatabase(), now = new Date
           .filter((o) => selected.some((r) => r.id === o.id) && o.canonicalId)
           .map((o) => o.canonicalId),
       ).size,
-      gaps:
-        metrics.safeProfile === 0
-          ? "Generic substitution unsupported; search coverage does not authorize recommendations"
-          : safeRetailers.length < 3
-            ? "Fresh safe candidates missing from at least one retailer"
-            : "No broad retailer gap; specialty forms remain separate",
+      gaps: coverageGapDescription(metrics.safeProfile, safeRetailers.length),
     };
   });
+
   return {
     observedAt: now.toISOString(),
     readOnly: true,
@@ -293,19 +305,33 @@ export async function coverageQueryTimings(db = createDatabase(), now = new Date
   ]);
   const id = z.object({ id: z.uuid() }).parse(sample.rows[0]).id;
   const runs = [];
+
   for (let i = 0; i < 4; i++) {
     const basket = await evaluateCurrentShoppingList(db, { version: 2, items }, "standard", now);
     const start = performance.now();
     await getPublicRetailerListingDetail(db, id, { now });
-    if (i > 0)
+
+    if (i > 0) {
       runs.push({
         basketQueryMs: basket.timings.queryMs,
         basketEvaluationMs: basket.timings.totalMs,
         listingDetailMs: performance.now() - start,
       });
+    }
   }
+
   return {
     samples: runs,
     note: "One warmup, three sequential samples; 4 generic needs, real configured DB. No HTTP endpoint latency claim.",
   };
+}
+
+function coverageGapDescription(safeProfiles: number, safeRetailers: number): string {
+  if (safeProfiles === 0) {
+    return "Generic substitution unsupported; search coverage does not authorize recommendations";
+  }
+
+  if (safeRetailers < 3) return "Fresh safe candidates missing from at least one retailer";
+
+  return "No broad retailer gap; specialty forms remain separate";
 }

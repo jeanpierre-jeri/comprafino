@@ -7,7 +7,9 @@ import { authOptions } from "./auth-config.ts";
 
 /** Credentials/database are required only when an auth request is made. */
 let instance: ReturnType<typeof betterAuth<ReturnType<typeof authOptions>>> | undefined;
+
 export function getAuth() {
   instance ??= betterAuth(authOptions(createDatabase(), process.env));
+
   return instance;
 }

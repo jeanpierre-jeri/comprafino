@@ -8,15 +8,22 @@ export const listingRefreshPolicy = {
   freshHours: 36,
   visibleHours: 72,
 } as const;
+
 export function offerFreshness(observedAt: Date, now: Date) {
   const age = (now.getTime() - observedAt.getTime()) / 3_600_000;
+
   // Future timestamps cannot safely establish a current observation.
-  return !Number.isFinite(age) || age < 0 || age > listingRefreshPolicy.visibleHours
-    ? "too-stale"
-    : age <= listingRefreshPolicy.freshHours
-      ? "fresh"
-      : "stale";
+  if (!Number.isFinite(age) || age < 0 || age > listingRefreshPolicy.visibleHours) {
+    return "too-stale";
+  }
+
+  if (age <= listingRefreshPolicy.freshHours) {
+    return "fresh";
+  } else {
+    return "stale";
+  }
 }
+
 export const knownListingSchema = z.object({
   id: z.uuid(),
   retailer: retailerIdSchema,
@@ -34,17 +41,23 @@ export const knownListingSchema = z.object({
   lastCategoryObservedAt: z.coerce.date().nullable(),
   lastTargetedAttemptAt: z.coerce.date().nullable(),
 });
+
 export type KnownListing = z.infer<typeof knownListingSchema>;
+
 export function hasTargetedRefreshPath(row: KnownListing): boolean {
   if (!/^\d+$/u.test(row.externalId) || !/^\d+$/u.test(row.productId)) return false;
+
   if (row.retailer !== "tottus") return true;
+
   return row.url.startsWith(`https://www.tottus.com.pe/tottus-pe/articulo/${row.productId}/`);
 }
+
 export function listingNeedsRefresh(row: KnownListing, now: Date): boolean {
   // Unknown category quotes cannot indefinitely prevent verification/recovery
   // after an explicit negative exact observation. Fresh negative evidence waits.
   const evidenceAt =
     row.available === false ? (row.availabilityVerifiedAt ?? row.observedAt) : row.observedAt;
+
   return (
     hasTargetedRefreshPath(row) &&
     evidenceAt.getTime() <= now.getTime() - listingRefreshPolicy.ageHours * 3_600_000 &&
@@ -53,19 +66,24 @@ export function listingNeedsRefresh(row: KnownListing, now: Date): boolean {
         now.getTime() - listingRefreshPolicy.cooldownHours * 3_600_000)
   );
 }
+
 export function selectListingRefresh(rows: readonly KnownListing[], now: Date, limit: number) {
-  if (!Number.isInteger(limit) || limit < 1 || limit > listingRefreshPolicy.limit)
+  if (!Number.isInteger(limit) || limit < 1 || limit > listingRefreshPolicy.limit) {
     throw new Error("Limit must be 1–100");
-  const priority = (row: KnownListing) =>
-    row.public
-      ? 0
-      : row.shoppingRelevant
-        ? 1
-        : row.firstSeenVia === "discovery"
-          ? 2
-          : row.usefulStaple
-            ? 3
-            : 4;
+  }
+
+  function priority(row: KnownListing): number {
+    if (row.public) return 0;
+
+    if (row.shoppingRelevant) return 1;
+
+    if (row.firstSeenVia === "discovery") return 2;
+
+    if (row.usefulStaple) return 3;
+
+    return 4;
+  }
+
   return rows
     .filter((row) => listingNeedsRefresh(row, now))
     .sort(
@@ -76,28 +94,44 @@ export function selectListingRefresh(rows: readonly KnownListing[], now: Date, l
     )
     .slice(0, limit);
 }
+
 export function parseListingRefreshOptions(args: readonly string[]) {
   let limit: number = listingRefreshPolicy.limit;
   let dryRun = false;
   let retailer: z.infer<typeof retailerIdSchema> | undefined;
   let externalId: string | undefined;
   const seen = new Set<string>();
+
   for (const arg of args.filter((value) => value !== "--")) {
     const key = arg.split("=")[0]!;
-    if (seen.has(key)) throw new Error("Duplicate option");
+
+    if (seen.has(key)) {
+      throw new Error("Duplicate option");
+    }
+
     seen.add(key);
-    if (arg === "--dry-run") dryRun = true;
-    else if (/^--limit=\d+$/u.test(arg)) limit = Number(arg.slice(8));
-    else if (arg.startsWith("--retailer=")) retailer = retailerIdSchema.parse(arg.slice(11));
-    else if (/^--external-id=\d+$/u.test(arg)) externalId = arg.slice(14);
-    else throw new Error("Unknown listing refresh option");
+
+    if (arg === "--dry-run") {
+      dryRun = true;
+    } else if (/^--limit=\d+$/u.test(arg)) {
+      limit = Number(arg.slice(8));
+    } else if (arg.startsWith("--retailer=")) {
+      retailer = retailerIdSchema.parse(arg.slice(11));
+    } else if (/^--external-id=\d+$/u.test(arg)) {
+      externalId = arg.slice(14);
+    } else {
+      throw new Error("Unknown listing refresh option");
+    }
   }
+
   if (
     !Number.isInteger(limit) ||
     limit < 1 ||
     limit > listingRefreshPolicy.limit ||
     (externalId && !retailer)
-  )
+  ) {
     throw new Error("Invalid listing refresh scope");
+  }
+
   return { limit, dryRun, retailer, externalId };
 }

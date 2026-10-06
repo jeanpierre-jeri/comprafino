@@ -6,10 +6,16 @@ export const metadata = {
   title: "Developer discovery inspection",
   robots: { index: false, follow: false },
 };
+
 export default async function DiscoveryPage() {
   await connection();
-  if (process.env.NODE_ENV === "production") notFound();
+
+  if (process.env.NODE_ENV === "production") {
+    notFound();
+  }
+
   let data: Awaited<ReturnType<typeof inspectDiscovery>>;
+
   try {
     data = await inspectDiscovery();
   } catch {
@@ -20,8 +26,10 @@ export default async function DiscoveryPage() {
       </main>
     );
   }
+
   const now = data.stats.inspectedAt.getTime();
   const date = (value: Date | null) => value?.toISOString() ?? "—";
+
   return (
     <main className="space-y-6 p-8">
       <h1 className="text-2xl font-semibold">Developer discovery inspection</h1>

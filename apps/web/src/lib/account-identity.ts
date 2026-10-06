@@ -10,13 +10,16 @@ export function accountInitials(name: string, email: string) {
       .join("");
   const value =
     initials(name) || initials((email.split("@")[0] ?? "").replace(/[._-]+/gu, " ")) || "C";
+
   return Array.from(value.toLocaleUpperCase("es-PE")).slice(0, 2).join("");
 }
 
 export function avatarUrl(image: string | null | undefined) {
   if (!image) return undefined;
+
   try {
     const url = new URL(image);
+
     return url.protocol === "https:" && !url.username && !url.password ? url.href : undefined;
   } catch {
     return undefined;

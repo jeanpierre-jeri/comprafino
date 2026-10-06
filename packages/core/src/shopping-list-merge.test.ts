@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { planShoppingImport, shoppingImportOperation } from "./shopping-list-merge.ts";
 import { emptyShoppingList, shoppingListItemSchema } from "./shopping-list.ts";
+
 const item = (n: number, amount = 1, updatedAt = "2026-10-06T00:00:00.000Z") =>
   shoppingListItemSchema.parse({
     id: `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`,
@@ -13,6 +14,7 @@ const item = (n: number, amount = 1, updatedAt = "2026-10-06T00:00:00.000Z") =>
     createdAt: "2026-10-01T00:00:00.000Z",
     updatedAt,
   });
+
 describe("anonymous import policy", () => {
   it("imports into absence and retains remote ordering", () => {
     const a = item(1),

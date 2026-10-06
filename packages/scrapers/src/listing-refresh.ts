@@ -6,6 +6,7 @@ import type {
   SafeDiagnostic,
 } from "@comprafino/core";
 import type { TargetedRetailerAdapter } from "./targeted.ts";
+
 export interface ListingRefreshTasks {
   adapters: Record<RetailerId, TargetedRetailerAdapter>;
   claim(this: void, row: KnownListing, at: Date): Promise<boolean>;
@@ -22,11 +23,15 @@ export interface ListingRefreshTasks {
   ): Promise<void>;
   pause(this: void): Promise<void>;
 }
+
 export async function refreshKnownListings(
   rows: readonly KnownListing[],
   tasks: ListingRefreshTasks,
 ) {
-  if (rows.length > 100) throw new Error("Targeted refresh exceeds budget");
+  if (rows.length > 100) {
+    throw new Error("Targeted refresh exceeds budget");
+  }
+
   const consecutive = new Map<RetailerId, number>();
   const results: {
     retailer: RetailerId;
@@ -36,6 +41,7 @@ export async function refreshKnownListings(
     diagnostic?: SafeDiagnostic;
   }[] = [];
   let requests = 0;
+
   for (const row of rows) {
     if ((consecutive.get(row.retailer) ?? 0) >= 3) {
       results.push({
@@ -46,9 +52,11 @@ export async function refreshKnownListings(
       });
       continue;
     }
+
     const at = new Date();
     // DB failures during admission/recording are fatal; never make unaccounted requests.
     let claimed: boolean;
+
     try {
       claimed = await tasks.claim(row, at);
     } catch (error) {
@@ -59,6 +67,7 @@ export async function refreshKnownListings(
         reason: "db_write_failed",
       });
     }
+
     if (!claimed) {
       results.push({
         retailer: row.retailer,
@@ -68,26 +77,36 @@ export async function refreshKnownListings(
       });
       continue;
     }
-    if (requests > 0) await tasks.pause();
+
+    if (requests > 0) {
+      await tasks.pause();
+    }
+
     requests++;
     let status: "observed" | "unavailable" | "not-found" | "failed" = "failed";
     let priceStates = 0;
     let stage: "source" | "persistence" = "source";
     let diagnostic: SafeDiagnostic | undefined;
+
     try {
       const result = await tasks.adapters[row.retailer].lookupListing(row);
       status = result.status;
+
       if (result.status === "observed") {
         const listing = listingSchema.parse(result.listing);
+
         if (
           listing.retailer !== row.retailer ||
           listing.externalId !== row.externalId ||
           listing.productId !== row.productId
-        )
+        ) {
           throw new Error("Lookup returned another listing");
+        }
+
         stage = "persistence";
         priceStates = (await tasks.persist(row.retailer, [listing])).changed;
       }
+
       consecutive.set(row.retailer, 0);
     } catch (error) {
       diagnostic = safeDiagnostic(error, {
@@ -99,6 +118,7 @@ export async function refreshKnownListings(
       status = "failed";
       consecutive.set(row.retailer, (consecutive.get(row.retailer) ?? 0) + 1);
     }
+
     try {
       await tasks.finish(row, at, status);
     } catch (error) {
@@ -109,6 +129,7 @@ export async function refreshKnownListings(
         reason: "db_write_failed",
       });
     }
+
     results.push({
       retailer: row.retailer,
       externalId: row.externalId,
@@ -117,6 +138,7 @@ export async function refreshKnownListings(
       ...(diagnostic ? { diagnostic } : {}),
     });
   }
+
   return {
     requests,
     results,

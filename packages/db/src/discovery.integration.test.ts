@@ -14,7 +14,9 @@ import {
 } from "./discovery.ts";
 
 import { catalogTestContext } from "./testing/catalog-fixtures.ts";
+
 const testUrl = process.env.TEST_DATABASE_URL;
+
 describe.skipIf(!testUrl)("PostgreSQL discovery (explicit TEST_DATABASE_URL)", () => {
   // Keep deliberate contention inside each case; cases start with independent data.
   const harness = catalogTestContext({
@@ -54,7 +56,11 @@ describe.skipIf(!testUrl)("PostgreSQL discovery (explicit TEST_DATABASE_URL)", (
     await resetDiscovery();
     await recordDiscoveryForSearch(db, "aceite primor", 0);
     const [claim] = await claimDiscoveryQueries(db, 1);
-    if (!claim) throw new Error("Expected claim");
+
+    if (!claim) {
+      throw new Error("Expected claim");
+    }
+
     await finishDiscoveryQuery(db, claim, { status: "no_results", resultCount: 0, error: null });
     expect((await inspectDiscovery(db)).queries[0]?.status).toBe("no_results");
     await recordDiscoveryForSearch(db, "ACEITE PRIMOR", 0);
@@ -66,7 +72,11 @@ describe.skipIf(!testUrl)("PostgreSQL discovery (explicit TEST_DATABASE_URL)", (
       [claim.id],
     );
     const [retry] = await claimDiscoveryQueries(db, 1);
-    if (!retry) throw new Error("Expected retry");
+
+    if (!retry) {
+      throw new Error("Expected retry");
+    }
+
     await finishDiscoveryQuery(db, claim, { status: "completed", resultCount: 1, error: null });
     expect((await inspectDiscovery(db)).queries[0]?.status).toBe("processing");
     await finishDiscoveryQuery(db, retry, {
@@ -117,7 +127,11 @@ describe.skipIf(!testUrl)("PostgreSQL discovery (explicit TEST_DATABASE_URL)", (
       "arroz viejo",
     ]);
     const popular = claims.find((c) => c.query === "arroz popular");
-    if (!popular) throw new Error("Expected claim");
+
+    if (!popular) {
+      throw new Error("Expected claim");
+    }
+
     await finishDiscoveryQuery(db, popular, { status: "completed", resultCount: 2, error: null });
     await query(
       "update discovery_queries set last_attempted_at=statement_timestamp()-interval '25 hours', next_eligible_at=statement_timestamp()-interval '1 hour' where id=$1",
@@ -141,8 +155,10 @@ describe.skipIf(!testUrl)("PostgreSQL discovery (explicit TEST_DATABASE_URL)", (
       "old processing",
       "old cooldown",
       "recent demand",
-    ])
+    ]) {
       await recordDiscoveryForSearch(db, value, 0);
+    }
+
     await query(
       "update discovery_queries set first_requested_at=statement_timestamp()-interval '32 days',last_requested_at=statement_timestamp()-interval '31 days',next_eligible_at=statement_timestamp()-interval '1 day' where normalized_query<>'recent demand'",
     );

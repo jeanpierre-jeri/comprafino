@@ -15,6 +15,7 @@ import {
 } from "./user-shopping-lists.ts";
 
 const url = process.env.TEST_DATABASE_URL;
+
 describe.skipIf(!url)("remote shopping persistence (explicit owned TEST_DATABASE_URL)", () => {
   const harness = ownedTestDatabase({
     ...process.env,
@@ -126,20 +127,25 @@ describe.skipIf(!url)("remote shopping persistence (explicit owned TEST_DATABASE
     await save(0, first);
     const current = await readUserShoppingList(db, userId);
     const before = await db.select().from(schema.userShoppingLists);
+
     for (const expected of [0, 2, 99]) {
       expect(await save(expected)).toEqual({ status: "conflict", current });
       expect(await remove(expected, randomUUID())).toEqual({ status: "conflict", current });
     }
+
     expect(await db.select().from(schema.userShoppingLists)).toEqual(before);
   });
   it("positive revision against absence conflicts without insertion", async () => {
-    for (const result of [await save(5), await remove(5, randomUUID())])
+    for (const result of [await save(5), await remove(5, randomUUID())]) {
       expect(result).toEqual({
         status: "conflict",
         current: { revision: 0, list: { version: 2, items: [] } },
       });
+    }
+
     expect(await db.select().from(schema.userShoppingLists)).toEqual([]);
   });
+
   function barrierDatabase(kind: "insert" | "select") {
     let arrivals = 0;
     let release = () => {};
@@ -149,29 +155,45 @@ describe.skipIf(!url)("remote shopping persistence (explicit owned TEST_DATABASE
     const client = new Proxy(scoped, {
       get(target, property, receiver) {
         if (property !== "query") return Reflect.get(target, property, receiver);
+
         return async (...args: Parameters<typeof scoped.query>) => {
           const intercepted = args[0].startsWith(kind) && args[0].includes('"user_shopping_lists"');
+
           if (kind === "select") {
             const rows = await target.query(...args);
+
             if (intercepted && arrivals < 2) {
               arrivals++;
-              if (arrivals === 2) release();
+
+              if (arrivals === 2) {
+                release();
+              }
+
               await gate;
             }
+
             return rows;
           }
+
           if (intercepted && arrivals < 2) {
             arrivals++;
-            if (arrivals === 2) release();
+
+            if (arrivals === 2) {
+              release();
+            }
+
             await gate;
           }
+
           return target.query(...args);
         };
       },
     });
+
     return drizzle(client, { schema });
   }
-  for (const revision of [0, 5])
+
+  for (const revision of [0, 5]) {
     it(`concurrent revision ${revision} writers have one winner and a fresh loser state`, async () => {
       if (revision) {
         await save(0);
@@ -180,6 +202,7 @@ describe.skipIf(!url)("remote shopping persistence (explicit owned TEST_DATABASE
           .set({ revision })
           .where(eq(schema.userShoppingLists.userId, userId));
       }
+
       // Only test transport is intercepted: inserts meet before execution, positive readers both see revision 5.
       const concurrent = barrierDatabase(revision ? "select" : "insert");
       const results = await Promise.all(
@@ -198,6 +221,8 @@ describe.skipIf(!url)("remote shopping persistence (explicit owned TEST_DATABASE
       expect(losers[0]?.current).toEqual(winners[0]?.state);
       expect(await readUserShoppingList(db, userId)).toEqual(winners[0]?.state);
     });
+  }
+
   it("user FK rejects orphan lists and cascades directly on user deletion", async () => {
     await expect(
       mutateUserShoppingList(db, randomUUID(), {
@@ -212,6 +237,7 @@ describe.skipIf(!url)("remote shopping persistence (explicit owned TEST_DATABASE
   it("corrupt and unsupported JSONB are not erased, including insert conflicts", async () => {
     await save(0);
     const value = item();
+
     for (const data of [
       null,
       { version: 3, items: [] },
@@ -238,7 +264,11 @@ describe.skipIf(!url)("remote shopping persistence (explicit owned TEST_DATABASE
     await expect(save(1, item(51))).rejects.toBeInstanceOf(ShoppingListDomainError);
     expect((await readUserShoppingList(db, userId)).revision).toBe(1);
     const first = items[0];
-    if (!first) throw new Error("Missing item");
+
+    if (!first) {
+      throw new Error("Missing item");
+    }
+
     expect(await save(1, { ...first, id: randomUUID() })).toMatchObject({
       status: "success",
       state: { revision: 2 },

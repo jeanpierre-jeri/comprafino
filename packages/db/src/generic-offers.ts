@@ -36,6 +36,7 @@ import {
   searchCanonicalProducts,
   searchText,
 } from "./public-products.ts";
+
 export {
   calculateUnitPrice,
   formatUnitPrice,
@@ -43,6 +44,7 @@ export {
   unitPriceBases,
   unitPriceBasisLabel,
 } from "@comprafino/core";
+
 const rowSchema = z.object({
   listing: catalogRecordSchema,
   sourceCategory: z.string().nullable().optional(),
@@ -59,14 +61,21 @@ const rowSchema = z.object({
   canonicalId: z.uuid().nullable(),
   retailerCount: z.number().int().nonnegative(),
 });
+
 export function genericProductOffer(raw: unknown, now = new Date(), mode: PriceMode = "standard") {
   const row = rowSchema.parse(raw);
+
   if (row.currentPriceCents <= 0) return null;
-  if (row.version !== normalizationVersion || row.fingerprint !== catalogFingerprint(row.listing))
+
+  if (row.version !== normalizationVersion || row.fingerprint !== catalogFingerprint(row.listing)) {
     return null;
+  }
+
   const retailerId = retailerIdSchema.parse(row.listing.retailerId);
   const url = retailerProductUrl({ retailerId, url: row.url });
+
   if (!url || !row.listing.title.trim()) return null;
+
   const attributes = normalizeCatalogListing(row.listing);
   const family = classifyProductFamily({
     title: row.listing.title,
@@ -86,7 +95,9 @@ export function genericProductOffer(raw: unknown, now = new Date(), mode: PriceM
     },
     now,
   );
+
   if (calculation.reason === "not-fresh" || calculation.reason === "unavailable") return null;
+
   return {
     id: row.listing.id,
     title: row.listing.title,
@@ -115,6 +126,7 @@ export function genericProductOffer(raw: unknown, now = new Date(), mode: PriceM
     unitPriceUnavailableReason: calculation.reason,
   };
 }
+
 export type GenericProductOffer = NonNullable<ReturnType<typeof genericProductOffer>>;
 
 export function sortGenericOffers(offers: readonly GenericProductOffer[], sort: GenericOfferSort) {
@@ -127,33 +139,48 @@ export function sortGenericOffers(offers: readonly GenericProductOffer[], sort: 
         a.ranking.priceCents - b.ranking.priceCents
       );
     }
+
     if (sort !== "unit-price") return 0;
+
     if (!a.unitPrice || !b.unitPrice) return Number(!a.unitPrice) - Number(!b.unitPrice);
+
     return (
       unitPriceBases.indexOf(a.unitPrice.basis) - unitPriceBases.indexOf(b.unitPrice.basis) ||
       compareUnitPrices(a.unitPrice, b.unitPrice)
     );
   });
 }
+
 /** Reserve room for every present dimension and unknown quantities before filling
  * spare capacity. The global bound must not hide all litres behind mass results. */
 export function limitGenericOffers(offers: readonly GenericProductOffer[], sort: GenericOfferSort) {
   const sorted = sortGenericOffers(offers, sort);
+
   if (sort !== "unit-price" || sorted.length <= 30) return sorted.slice(0, 30);
+
   const groups = [...new Set(sorted.map((o) => o.unitPrice?.basis ?? "unknown"))];
   const quota = Math.floor(30 / groups.length);
   const selected = new Set<GenericProductOffer>();
-  for (const group of groups)
+
+  for (const group of groups) {
     for (const offer of sorted
       .filter((o) => (o.unitPrice?.basis ?? "unknown") === group)
-      .slice(0, quota))
+      .slice(0, quota)) {
       selected.add(offer);
+    }
+  }
+
   for (const offer of sorted) {
-    if (selected.size >= 30) break;
+    if (selected.size >= 30) {
+      break;
+    }
+
     selected.add(offer);
   }
+
   return sorted.filter((o) => selected.has(o));
 }
+
 export async function searchGenericProductOffers(
   db: ReturnType<typeof createDatabase>,
   rawQuery: string,
@@ -163,8 +190,10 @@ export async function searchGenericProductOffers(
   unlimited = false,
   canonicalId: string | null = null,
 ): Promise<GenericProductOffer[]> {
-  if (canonicalId ? !z.uuid().safeParse(canonicalId).success : !usefulSearchQuery(rawQuery))
+  if (canonicalId ? !z.uuid().safeParse(canonicalId).success : !usefulSearchQuery(rawQuery)) {
     return [];
+  }
+
   const query = normalizeSearchQuery(rawQuery);
   const interpretation = canonicalId ? null : resolveProductFamilyQuery(rawQuery);
   const requiredQuery = canonicalId ? "" : (interpretation?.remainingQuery ?? query);
@@ -179,17 +208,22 @@ export async function searchGenericProductOffers(
   order by (title_text=${query}) desc, starts_with(title_text,${query}) desc,
     public.similarity(title_text,${query}) desc, title_text collate "C", listing->>'id' limit ${catalogPolicy.overflowSentinel}`),
   ]);
+
   // Current catalog already has a 1000-row operational guard. Refuse truncation:
   // lowest-price modes must consider every admitted candidate before limiting.
-  if (result.rows.length > catalogPolicy.retainedListingCap)
+  if (result.rows.length > catalogPolicy.retainedListingCap) {
     throw new Error("Generic search candidate bound exceeded");
+  }
+
   const offers = result.rows
     .map((row) => genericProductOffer(row, now, filters.priceMode))
     .filter((offer) => offer !== null);
   const relevant = interpretation ? selectFamilyOffers(offers, interpretation.family) : offers;
   const filtered = filterGenericOffers(relevant, filters);
+
   return unlimited ? filtered : limitGenericOffers(filtered, genericOfferSort(sort));
 }
+
 export async function searchPublicProducts(
   db: ReturnType<typeof createDatabase>,
   query: string,
@@ -219,6 +253,7 @@ export async function searchPublicProducts(
       )
     : products;
   const filteredOffers = filterGenericOffers(offers, filters);
+
   return {
     products: relevantProducts
       .map((p) => publicProduct(p, now, filters.priceMode))

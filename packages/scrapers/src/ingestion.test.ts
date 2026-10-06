@@ -4,10 +4,12 @@ import type { IngestionStore } from "./ingestion.ts";
 import type { RetailerAdapter } from "./adapter.ts";
 import fixture from "./fixtures/tottus.json";
 import { parseTottusPage } from "./tottus.ts";
+
 const sample = parseTottusPage(
   `<script id="__NEXT_DATA__">${JSON.stringify(fixture)}</script>`,
   new Date(),
 );
+
 it("records discovered, persisted and changed counts separately", async () => {
   const adapter: RetailerAdapter = {
     retailer: "tottus",
@@ -33,6 +35,7 @@ it("records discovered, persisted and changed counts separately", async () => {
     changed: 2,
   });
 });
+
 it("records a safe failed run without persisting failed source data", async () => {
   const adapter: RetailerAdapter = {
     retailer: "tottus",
@@ -51,6 +54,7 @@ it("records a safe failed run without persisting failed source data", async () =
     expect.objectContaining({ status: "failed", persisted: 0 }),
   );
 });
+
 it("retains persistence stage in safe run metadata and preserves the original exception as cause", async () => {
   const failure = Object.assign(new Error("postgres://secret@host private source"), {
     code: "23514",

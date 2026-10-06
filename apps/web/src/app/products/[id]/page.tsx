@@ -1,5 +1,6 @@
+import { catalogQuantityToShoppingUnit } from "@comprafino/core";
 import { logDiagnostic } from "../../../server/diagnostics.ts";
-import { AddShoppingItem } from "../../../components/shopping-item-editor";
+import { AddShoppingItem } from "../../../components/shopping-list/shopping-item-editor";
 import { shoppingQueryForTitle } from "@comprafino/core";
 import type { Metadata } from "next";
 import { parseHistoryRange } from "@comprafino/core";
@@ -24,7 +25,9 @@ import { PriceNotice, PublicDataError, PublicShell } from "../../../components/p
 // React cache deduplicates metadata/page reads within this request only.
 const loadProduct = cache(async (id: string, mode: "standard" | "benefits" = "standard") => {
   if (!isPublicProductId(id)) return { product: null, failed: false };
+
   await connection();
+
   try {
     return {
       product: await getCanonicalProductComparison(createDatabase(), id, new Date(), mode),
@@ -32,34 +35,45 @@ const loadProduct = cache(async (id: string, mode: "standard" | "benefits" = "st
     };
   } catch (error) {
     logDiagnostic(error, { stage: "public", operation: "comparison", reason: "db_read_failed" });
+
     return { product: null, failed: true };
   }
 });
+
 type Props = {
   params: Promise<{ id: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { product } = await loadProduct((await params).id);
+
   return {
     title: product
       ? `${product.displayName} – precios | CompraFino`
       : "Comparar precios | CompraFino",
   };
 }
+
 export default async function ProductPage({ params, searchParams }: Props) {
   const query = await searchParams;
   const filters = searchFilters(query);
   const range = parseHistoryRange(query.range);
   const { product, failed } = await loadProduct((await params).id, filters.priceMode);
-  if (failed)
+
+  if (failed) {
     return (
       <PublicShell>
         <h1 className="mb-6 text-3xl font-semibold">Comparar precios</h1>
         <PublicDataError />
       </PublicShell>
     );
-  if (!product) notFound();
+  }
+
+  if (!product) {
+    notFound();
+  }
+
   return (
     <PublicShell>
       <Link
@@ -122,8 +136,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
             amount:
               (product.quantityValue * product.packageCount) /
               (product.quantityUnit === "unit" ? 1 : 1000),
-            unit:
-              product.quantityUnit === "g" ? "kg" : product.quantityUnit === "ml" ? "L" : "unit",
+            unit: catalogQuantityToShoppingUnit(product.quantityUnit),
           },
         }}
       />
@@ -139,6 +152,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
               offer.available !== false &&
               offer.currentPriceCents === product.lowestPriceCents;
             const url = retailerProductUrl(offer);
+
             return (
               <li key={offer.retailerId}>
                 <article className={`comparison-row ${best ? "best-offer" : ""}`}>
@@ -154,19 +168,12 @@ export default async function ProductPage({ params, searchParams }: Props) {
                       </p>
                     )}
                     <ObservedAt date={offer.observedAt} />
-                    {offer.available === false ? (
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        No disponible en la última consulta.
-                      </p>
-                    ) : offer.freshness === "stale" ? (
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        Precio pendiente de actualización.
-                      </p>
-                    ) : offer.freshness === "too-stale" ? (
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        Último precio registrado · pendiente de actualización.
-                      </p>
-                    ) : null}
+                    {
+                      <OfferAvailabilityNotice
+                        available={offer.available}
+                        freshness={offer.freshness}
+                      />
+                    }
                   </div>
                   <div className="sm:text-right">
                     <p
@@ -207,4 +214,32 @@ export default async function ProductPage({ params, searchParams }: Props) {
       <PriceNotice />
     </PublicShell>
   );
+}
+
+function OfferAvailabilityNotice({
+  available,
+  freshness,
+}: {
+  available?: boolean | null;
+  freshness: string;
+}) {
+  if (available === false) {
+    return (
+      <p className="mt-1 text-sm text-muted-foreground">No disponible en la última consulta.</p>
+    );
+  }
+
+  if (freshness === "stale") {
+    return <p className="mt-1 text-sm text-muted-foreground">Precio pendiente de actualización.</p>;
+  }
+
+  if (freshness === "too-stale") {
+    return (
+      <p className="mt-1 text-sm text-muted-foreground">
+        Último precio registrado · pendiente de actualización.
+      </p>
+    );
+  }
+
+  return null;
 }

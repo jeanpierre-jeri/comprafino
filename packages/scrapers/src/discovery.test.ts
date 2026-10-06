@@ -9,6 +9,7 @@ const claim = {
   query: "aceite primor",
   attemptedAt: new Date("2026-10-03T00:00:00Z"),
 };
+
 const listing = (retailer: RetailerId, i = 0): NormalizedRetailerListing => ({
   retailer,
   externalId: String(i),
@@ -23,13 +24,17 @@ const listing = (retailer: RetailerId, i = 0): NormalizedRetailerListing => ({
   priceUnit: "UN",
   observedAt: claim.attemptedAt,
 });
+
 function setup(failures: RetailerId[] = [], empty = false) {
   const adapters = (["tottus", "plaza-vea", "metro"] as const).map((retailer) => ({
     retailer,
     lookupListing: async () => ({ status: "not-found" as const }),
     fetchListings: vi.fn<SearchRetailerAdapter["fetchListings"]>(),
     searchProducts: vi.fn<SearchRetailerAdapter["searchProducts"]>(async () => {
-      if (failures.includes(retailer)) throw new Error("postgresql://secret@host/password");
+      if (failures.includes(retailer)) {
+        throw new Error("postgresql://secret@host/password");
+      }
+
       return { listings: empty ? [] : [listing(retailer)], discovered: empty ? 0 : 1 };
     }),
   }));
@@ -44,8 +49,10 @@ function setup(failures: RetailerId[] = [], empty = false) {
     match: vi.fn<DiscoveryTasks["match"]>(async () => ({ writes: 3, created: 1 })),
     finish: vi.fn<DiscoveryTasks["finish"]>(async () => {}),
   } satisfies DiscoveryTasks;
+
   return tasks;
 }
+
 describe("bounded discovery processing", () => {
   it("persists through ingestion, then normalizes and matches", async () => {
     const tasks = setup();
@@ -71,7 +78,10 @@ describe("bounded discovery processing", () => {
       resultCount: 3,
       error: null,
     });
-    for (const a of tasks.adapters) expect(a.searchProducts).toHaveBeenCalledWith(claim.query, 10);
+
+    for (const a of tasks.adapters) {
+      expect(a.searchProducts).toHaveBeenCalledWith(claim.query, 10);
+    }
   });
   it("preserves successful retailers on a partial failure and reports a safe error", async () => {
     const tasks = setup(["plaza-vea"]);
@@ -144,6 +154,7 @@ describe("bounded discovery processing", () => {
     );
   });
 });
+
 it("distinguishes source timeout, persistence and derivation failures without exposing their causes", async () => {
   const tasks = setup();
   const timeout = new Error("private query and URL");

@@ -18,6 +18,7 @@ function ToolbarSkeleton({ comparison = false }: { comparison?: boolean }) {
     </div>
   );
 }
+
 export function SearchPageLoading() {
   return (
     <PublicShell>
@@ -67,6 +68,7 @@ export function SearchPageLoading() {
     </PublicShell>
   );
 }
+
 export function ProductPageLoading({ listing = false }: { listing?: boolean } = {}) {
   return (
     <PublicShell>

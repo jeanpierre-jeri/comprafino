@@ -52,6 +52,7 @@ describe("discovery query boundary", () => {
       dryRun: true,
       limit: 3,
     });
+
     for (const args of [
       ["--limit=0"],
       ["--limit=31"],
@@ -59,10 +60,12 @@ describe("discovery query boundary", () => {
       ["--limit=3", "--limit=4"],
       ["--dry-run", "--dry-run"],
       ["--unknown"],
-    ])
+    ]) {
       expect(() => parseDiscoveryOptions(args)).toThrow(/option|limit/iu);
+    }
   });
 });
+
 it("bounds the retained original spelling before normalized admission", () => {
   // NFKC composes two code points into one: normalized length alone is insufficient.
   expect(validDiscoveryQuery("a\u0301".repeat(80))).toBe(false);

@@ -9,7 +9,9 @@ import {
 import { createDatabase } from "./client.ts";
 
 const now = new Date("2026-10-03T10:00:00Z");
+
 const publicProduct = (raw: unknown) => mapPublicProduct(raw, now);
+
 const offer = {
   retailerId: "metro",
   retailerName: "Metro",
@@ -20,6 +22,7 @@ const offer = {
   regularPriceCents: 590,
   observedAt: "2026-10-03T09:00:00Z",
 };
+
 const raw = {
   id: "69c3625d-2d3e-8624-b483-2323e108f94b",
   displayName: "Leche Gloria Entera 946ml",
@@ -39,6 +42,7 @@ const raw = {
     },
   ],
 };
+
 it("validates the public database boundary, orders prices and preserves retailer provenance", () => {
   const product = publicProduct(raw);
   expect(product.lowestPriceCents).toBe(590);
@@ -56,6 +60,7 @@ it("validates the public database boundary, orders prices and preserves retailer
     /Too small|Invalid option/u,
   );
 });
+
 it("retains tied retailers, drops lower references, chooses images independently of prices", () => {
   const product = publicProduct({
     ...raw,
@@ -73,8 +78,10 @@ it("retains tied retailers, drops lower references, chooses images independently
   expect(product.offers[1]!.regularPriceCents).toBeNull();
   expect(product.imageUrl).toBe(offer.imageUrl);
 });
+
 it("only exposes trusted HTTPS retailer sources and known images", () => {
   expect(retailerProductUrl({ retailerId: "metro", url: offer.url })).toBe(offer.url);
+
   for (const url of [
     "javascript:alert(1)",
     "https://www.metro.pe.evil.test/p",
@@ -86,14 +93,19 @@ it("only exposes trusted HTTPS retailer sources and known images", () => {
   ]) {
     expect(retailerProductUrl({ retailerId: "metro", url })).toBeNull();
   }
+
   expect(productImageUrl("https://evil.test/image.jpg")).toBeNull();
   expect(productImageUrl(null)).toBeNull();
   expect(productImageUrl("https://metroio.vteximg.com.br/unrelated/image.jpg")).toBeNull();
 });
+
 it("blank, short, excessive queries and malformed IDs return without querying PostgreSQL", async () => {
   const db = createDatabase({ DATABASE_URL: "postgresql://unused@localhost/unused" });
-  for (const q of ["", " ", "a", "gloria".repeat(30)])
+
+  for (const q of ["", " ", "a", "gloria".repeat(30)]) {
     expect(await searchCanonicalProducts(db, q)).toEqual([]);
+  }
+
   expect(await getCanonicalProductComparison(db, "not-a-uuid")).toBeNull();
 });
 

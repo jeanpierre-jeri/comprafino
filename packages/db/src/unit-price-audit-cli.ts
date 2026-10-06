@@ -5,6 +5,7 @@ import { formatUnitPrice } from "@comprafino/core";
 import { createDatabase } from "./client.ts";
 import { catalogRecordSchema, catalogFingerprint } from "./catalog.ts";
 import { genericProductOffer, searchPublicProducts } from "./generic-offers.ts";
+
 const auditRowSchema = z.object({
   listing: catalogRecordSchema,
   retailerName: z.string(),
@@ -17,8 +18,12 @@ const auditRowSchema = z.object({
   version: z.number().int().nullable(),
   association: z.uuid().nullable(),
 });
+
 try {
-  if (process.argv.slice(2).some((arg) => arg !== "--")) throw new Error("No options supported");
+  if (process.argv.slice(2).some((arg) => arg !== "--")) {
+    throw new Error("No options supported");
+  }
+
   const db = createDatabase();
   const now = new Date();
   const rows =
@@ -27,27 +32,36 @@ try {
     from retailer_listings l join retailers r on r.id=l.retailer_id join price_history h on h.listing_id=l.id and h.valid_until is null
     left join listing_normalizations n on n.listing_id=l.id left join canonical_product_listings a on a.listing_id=l.id
     where l.active and h.price_unit=l.price_unit and h.currency='PEN' order by l.retailer_id,l.title limit ${catalogPolicy.overflowSentinel}`);
-  if (rows.rows.length > catalogPolicy.retainedListingCap)
+
+  if (rows.rows.length > catalogPolicy.retainedListingCap) {
     throw new Error("Catalog bound exceeded");
+  }
+
   const raw = z.array(auditRowSchema).parse(rows.rows);
   const eligible = raw.flatMap((row) => {
     if (row.fingerprint === null || row.version === null) return [];
+
     const offer = genericProductOffer({ ...row, canonicalId: null, retailerCount: 0 }, now);
+
     return offer ? [{ row, offer }] : [];
   });
   const detail = (entry: (typeof eligible)[number]) => {
     const { row, offer } = entry;
+
     // Independent bigint arithmetic cross-check, before display rounding.
     if (offer.unitPrice) {
       const factor =
         offer.pricingBasis === "kg" || offer.totalQuantity!.unit === "unit" ? 1n : 1000n;
       const divisor = offer.pricingBasis === "kg" ? 1n : BigInt(offer.totalQuantity!.value);
+
       if (
         offer.unitPrice.numerator * divisor !==
         BigInt(row.currentPriceCents) * factor * offer.unitPrice.denominator
-      )
+      ) {
         throw new Error("Audit arithmetic mismatch");
+      }
     }
+
     return {
       title: offer.title,
       brand: offer.brand,
@@ -75,6 +89,7 @@ try {
     "detergente",
   ].map((term) => {
     const matches = eligible.filter((e) => e.offer.title.toLowerCase().includes(term));
+
     return {
       term,
       eligible: matches.length,
@@ -111,6 +126,7 @@ try {
       .map(detail),
   };
   const searches = [];
+
   for (const query of [
     "huevos",
     "arroz",
@@ -127,6 +143,7 @@ try {
     const unit = await searchPublicProducts(db, query, "unit-price", now);
     const cheapestByDimension = ["mass", "volume", "count"].flatMap((dimension) => {
       const first = unit.offers.find((o) => o.unitPrice?.dimension === dimension);
+
       return first
         ? [
             {
@@ -161,11 +178,16 @@ try {
       cheapestByDimension,
     });
   }
+
   const reasons: Record<string, number> = {};
-  for (const e of eligible)
-    if (e.offer.unitPriceUnavailableReason)
+
+  for (const e of eligible) {
+    if (e.offer.unitPriceUnavailableReason) {
       reasons[e.offer.unitPriceUnavailableReason] =
         (reasons[e.offer.unitPriceUnavailableReason] ?? 0) + 1;
+    }
+  }
+
   const staleNormalization = raw.filter(
     (r) => r.fingerprint !== catalogFingerprint(r.listing),
   ).length;

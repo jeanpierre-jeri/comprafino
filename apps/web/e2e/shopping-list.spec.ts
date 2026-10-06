@@ -16,6 +16,7 @@ async function openGeneric(page: Page, query = "huevos") {
   await expect(page.getByLabel("Búsqueda de productos")).toHaveCount(0);
   await expect(page.getByLabel("Nombre en tu lista")).toHaveCount(0);
 }
+
 async function addGeneric(page: Page) {
   await openGeneric(page);
   const quantity = page.getByLabel("Cantidad", { exact: true });
@@ -74,6 +75,7 @@ test("quantity input supports whole units and fractional kg/L without a native s
   const unit = page.getByLabel("Medida", { exact: true });
   await expect(unit).toHaveAccessibleName("Medida");
   await expect(page.getByLabel("Frecuencia", { exact: true })).toHaveAccessibleName("Frecuencia");
+
   for (const measure of ["kg", "L"]) {
     await unit.selectOption(measure);
     await quantity.fill("0.125");
@@ -81,6 +83,7 @@ test("quantity input supports whole units and fractional kg/L without a native s
       await quantity.evaluate((input) => input instanceof HTMLInputElement && input.validity.valid),
     ).toBe(true);
   }
+
   await unit.selectOption("unit");
   await quantity.fill("1.5");
   expect(
@@ -109,6 +112,7 @@ test("malformed and unsupported storage recover; unavailable storage keeps sessi
     ).toBeVisible();
     await expect(page.getByText("Todavía no tienes productos en tu lista.")).toBeVisible();
   }
+
   await page.addInitScript(() => {
     Object.defineProperty(window, "localStorage", {
       get() {
@@ -137,12 +141,15 @@ for (const operation of ["add", "edit", "remove"] as const) {
     const rice = page.getByRole("article", { name: "Arroz blanco", exact: true });
     await expect(eggs).toBeVisible();
     await expect(rice).toBeVisible();
+
     // In controlled runs load the old basket first so removal cannot race past
     // this regression. Credential-free storage smoke still needs no catalog.
-    if (process.env.SHOPPING_LIST_FIXTURE_IDS)
+    if (process.env.SHOPPING_LIST_FIXTURE_IDS) {
       await expect(
         page.getByRole("region", { name: "Comparación de canastas", exact: true }),
       ).toBeVisible();
+    }
+
     const pageErrors: string[] = [];
     page.on("pageerror", (error) => pageErrors.push(error.message));
     // Reads fail only after mount; writes still work so the read warning must survive.
@@ -151,6 +158,7 @@ for (const operation of ["add", "edit", "remove"] as const) {
         throw new Error("Transient read failure");
       };
     });
+
     if (operation === "add") {
       // Use client links: a full page.goto would reload and remove the failing
       // Storage prototype, so it would not exercise the mounted-session bug.
@@ -162,6 +170,7 @@ for (const operation of ["add", "edit", "remove"] as const) {
         await page.evaluate(() => {
           try {
             localStorage.getItem("comprafino-shopping-list");
+
             return false;
           } catch {
             return true;
@@ -183,8 +192,13 @@ for (const operation of ["add", "edit", "remove"] as const) {
       await eggs.getByRole("button", { name: "Quitar Huevos" }).click();
       await expect(eggs).toHaveCount(0);
     }
+
     await expect(rice).toBeVisible();
-    if (operation !== "remove") await expect(eggs).toBeVisible();
+
+    if (operation !== "remove") {
+      await expect(eggs).toBeVisible();
+    }
+
     await expect(
       page.getByText("No podemos guardar en este navegador. Tu lista durará esta sesión."),
     ).toBeVisible();
@@ -223,8 +237,10 @@ test("dialogs animate, close with X/outside/Escape, and respect reduced motion",
   page,
 }) => {
   test.setTimeout(60_000);
+
   for (const width of [390, 1280]) {
     await page.setViewportSize({ width, height: 900 });
+
     for (const reducedMotion of ["no-preference", "reduce"] as const) {
       await page.emulateMedia({ reducedMotion });
       await openGeneric(page);
@@ -243,7 +259,11 @@ test("dialogs animate, close with X/outside/Escape, and respect reduced motion",
       await dialog.getByRole("heading").click();
       await expect(dialog).toBeVisible();
       const bounds = await dialog.boundingBox();
-      if (!bounds) throw new Error("Missing dialog bounds");
+
+      if (!bounds) {
+        throw new Error("Missing dialog bounds");
+      }
+
       // Ending a content-origin drag on the backdrop must not discard edits.
       await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
       await page.mouse.down();
@@ -286,6 +306,7 @@ test("version-one local items retain all intents, custom labels and original amo
     );
   });
   await page.reload();
+
   for (const intent of ["generic", "preferred", "strict"]) {
     const card = page.getByRole("article", { name: `Mis huevos ${intent}`, exact: true });
     await expect(card).toContainText("30 unidades");
@@ -295,6 +316,7 @@ test("version-one local items retain all intents, custom labels and original amo
     );
     await page.getByRole("button", { name: "Guardar cambios" }).click();
   }
+
   const saved = shoppingListSchema.parse(
     JSON.parse(
       (await page.evaluate(() => localStorage.getItem("comprafino-shopping-list"))) ?? "null",
@@ -331,8 +353,10 @@ test("keyboard dialog cancels and returns focus; list and editor fit both themes
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
+
   for (const width of [390, 1280]) {
     await page.setViewportSize({ width, height: 900 });
+
     for (const theme of ["light", "dark"] as const) {
       await page.emulateMedia({ colorScheme: theme });
       await openGeneric(page);
@@ -347,9 +371,12 @@ test("keyboard dialog cancels and returns focus; list and editor fit both themes
       await expect(page.getByRole("button", { name: "Agregar como necesidad" })).toBeFocused();
     }
   }
+
   await addGeneric(page);
+
   for (const width of [390, 1280]) {
     await page.setViewportSize({ width, height: 900 });
+
     for (const theme of ["light", "dark"] as const) {
       await page.emulateMedia({ colorScheme: theme });
       await expect(page.getByRole("article", { name: "Huevos", exact: true })).toBeVisible();
@@ -367,13 +394,21 @@ test("keyboard dialog cancels and returns focus; list and editor fit both themes
 });
 
 const fixtureIds: unknown = JSON.parse(process.env.SHOPPING_LIST_FIXTURE_IDS ?? "{}");
+
 function fixture(name: string): string {
-  if (typeof fixtureIds !== "object" || fixtureIds === null || !(name in fixtureIds))
+  if (typeof fixtureIds !== "object" || fixtureIds === null || !(name in fixtureIds)) {
     throw new Error("Missing shopping fixture");
+  }
+
   const id: unknown = Reflect.get(fixtureIds, name);
-  if (typeof id !== "string") throw new Error("Invalid shopping fixture");
+
+  if (typeof id !== "string") {
+    throw new Error("Invalid shopping fixture");
+  }
+
   return id;
 }
+
 async function addSpecific(page: Page, intent: "preferred" | "strict") {
   await page.goto(`/products/${fixture("preferred")}`);
   await page.getByRole("button", { name: "Agregar a mi lista", exact: true }).click();
@@ -406,8 +441,10 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
     await context.route("https://www.metro.pe/shopping-independent/p", (route) =>
       route.fulfill({ contentType: "text/html", body: "<title>Retailer fixture</title>" }),
     );
+
     for (const width of [390, 1280]) {
       await page.setViewportSize({ width, height: 900 });
+
       for (const linked of [true, false]) {
         await page.goto("/search?q=huevos");
         const card = linked
@@ -422,6 +459,7 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
         expect(
           await add.evaluate((button) => {
             const bounds = button.getBoundingClientRect();
+
             return (
               document
                 .elementFromPoint(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
@@ -451,7 +489,11 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
         // Use a real pointer click instead of forcing the underlying price node.
         await card.locator(".card-amount").scrollIntoViewIfNeeded();
         const background = await card.locator(".card-amount").boundingBox();
-        if (!background) throw new Error("Missing card background target");
+
+        if (!background) {
+          throw new Error("Missing card background target");
+        }
+
         const clickBackground = () =>
           page.mouse.click(
             background.x + background.width / 2,
@@ -629,8 +671,9 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       .first();
     await expect(card).toContainText("S/ 14.90");
     const db = fixtureDatabase();
+
     async function observe(increased: boolean) {
-      for (const [index, retailer] of (["metro", "plaza-vea", "tottus"] as const).entries())
+      for (const [index, retailer] of (["metro", "plaza-vea", "tottus"] as const).entries()) {
         await persistListings(db, retailer, [
           {
             retailer,
@@ -638,19 +681,20 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
             productId: `shopping-alternative-${retailer}`,
             title: "Huevos Tottus Bandeja 30un",
             sourceBrand: "Tottus",
-            url:
-              retailer === "tottus"
-                ? "https://www.tottus.com.pe/tottus-pe/articulo/1/test"
-                : retailer === "metro"
-                  ? "https://www.metro.pe/eggs/p"
-                  : "https://www.plazavea.com.pe/eggs/p",
-            currentPriceCents: increased ? 2090 : retailer === "tottus" ? 1490 : 1590 + index * 100,
+            url: {
+              tottus: "https://www.tottus.com.pe/tottus-pe/articulo/1/test",
+              metro: "https://www.metro.pe/eggs/p",
+              "plaza-vea": "https://www.plazavea.com.pe/eggs/p",
+            }[retailer],
+            currentPriceCents: eggFixturePrice(increased, retailer, index),
             currency: "PEN",
             priceUnit: "UN",
             observedAt: new Date(),
           },
         ]);
+      }
     }
+
     try {
       await observe(true);
       await page.reload();
@@ -668,10 +712,13 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
     page,
   }, testInfo) => {
     test.setTimeout(120_000);
+
     for (const width of [390, 1280]) {
       await page.setViewportSize({ width, height: 900 });
+
       for (const theme of ["light", "dark"] as const) {
         await page.emulateMedia({ colorScheme: theme });
+
         for (const intent of ["preferred", "strict"] as const) {
           await page.goto("/list");
           await page.evaluate(() => localStorage.removeItem("comprafino-shopping-list"));
@@ -814,18 +861,23 @@ test.describe("current basket optimization fixtures", () => {
     page,
   }) => {
     await storeBasket(page, 1);
+
     for (const limit of [1, 2, 3]) {
       const card = page.getByRole("article", { name: `Límite ${limit}`, exact: true });
       await expect(card.getByRole("heading")).toHaveText("1 supermercado");
       await expect(card).toContainText("Metro");
       await expect(card).toContainText("S/ 10.00");
-      if (limit > 1) await expect(card).toContainText("No ahorras más al añadir otra tienda.");
+
+      if (limit > 1) {
+        await expect(card).toContainText("No ahorras más al añadir otra tienda.");
+      }
     }
   });
   test("selects the first complete higher tier when a single store cannot fulfill the list", async ({
     page,
   }) => {
     await restrictBasketFixtureRetailers(true);
+
     try {
       await storeBasket(page, 2);
       const first = page.getByRole("article", { name: "Límite 1", exact: true });
@@ -847,8 +899,10 @@ test.describe("current basket optimization fixtures", () => {
     page,
   }) => {
     await restrictBasketFixtureRetailers(true);
+
     try {
       await storeBasket(page, 3, true);
+
       for (const limit of [1, 2, 3]) {
         const card = page.getByRole("article", { name: `Límite ${limit}`, exact: true });
         await expect(card).toContainText(`${limit} de 4 productos`);
@@ -858,6 +912,7 @@ test.describe("current basket optimization fixtures", () => {
         await expect(card).not.toContainText("menos que");
         await expect(card).not.toContainText("ahorras");
       }
+
       await expect(
         page.getByRole("article", { name: "Límite 3", exact: true }).getByRole("button"),
       ).toHaveAttribute("aria-pressed", "true");
@@ -879,8 +934,10 @@ test.describe("current basket optimization fixtures", () => {
     await page.getByLabel("Precios", { exact: true }).selectOption("benefits");
     await expect(comparison).toContainText("Requiere tarjeta CMR");
     await expect(comparison).toContainText("Para todos, esta selección");
+
     for (const width of [390, 1280]) {
       await page.setViewportSize({ width, height: 900 });
+
       for (const theme of ["light", "dark"] as const) {
         await page.emulateMedia({ colorScheme: theme });
         expect(
@@ -892,6 +949,7 @@ test.describe("current basket optimization fixtures", () => {
         });
       }
     }
+
     await page.route(
       "**/api/list/evaluate?*",
       (route) =>
@@ -910,3 +968,9 @@ test.describe("current basket optimization fixtures", () => {
     await expect(comparison).toBeVisible();
   });
 });
+
+function eggFixturePrice(increased: boolean, retailer: string, index: number): number {
+  if (increased) return 2090;
+
+  return retailer === "tottus" ? 1490 : 1590 + index * 100;
+}

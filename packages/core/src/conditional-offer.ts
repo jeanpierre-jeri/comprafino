@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 /** Only concrete, observed payable amounts; no teaser discount arithmetic. */
 export const conditionalOfferSchema = z
   .object({
@@ -11,4 +12,5 @@ export const conditionalOfferSchema = z
     endsAt: z.coerce.date().nullable().optional(),
   })
   .refine((offer) => !offer.startsAt || !offer.endsAt || offer.startsAt < offer.endsAt);
+
 export type ConditionalOffer = z.infer<typeof conditionalOfferSchema>;

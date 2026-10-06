@@ -3,10 +3,14 @@ import { describe, expect, it } from "vitest";
 import original from "./fixtures/matching.json";
 import independent from "./fixtures/matching-independent.json";
 import { matchingListingSchema, scoreMatch } from "./matching.ts";
+
 const rows = z.record(z.string(), matchingListingSchema).parse(independent.listings);
+
 const baseline = z.record(z.string(), matchingListingSchema).parse(original.listings);
+
 const pairKey = (a: { retailer: string; title: string }, b: { retailer: string; title: string }) =>
   [`${a.retailer}:${a.title}`, `${b.retailer}:${b.title}`].sort().join("|");
+
 describe("frozen independent audit", () => {
   it("keeps all audit pairs separate from the calibration fixture", () => {
     const used = new Set(original.pairs.map((p) => pairKey(baseline[p.a]!, baseline[p.b]!)));
@@ -22,6 +26,7 @@ describe("frozen independent audit", () => {
   );
   it("keeps reviewed groups compatible, with one listing per retailer", () => {
     expect(independent.canonicalGroups).toHaveLength(28);
+
     for (const group of independent.canonicalGroups) {
       const members = group.members.map((id) => rows[id]!);
       expect(new Set(members.map((m) => m.retailer)).size).toBe(members.length);

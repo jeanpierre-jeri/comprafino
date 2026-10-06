@@ -1,5 +1,6 @@
 import { expect, it } from "vitest";
 import { DiagnosticError, safeDiagnostic } from "./diagnostics.ts";
+
 it("allowlists reasons and SQLSTATE without copying arbitrary errors or sensitive causes", () => {
   const context = {
     stage: "persistence",
@@ -25,6 +26,7 @@ it("allowlists reasons and SQLSTATE without copying arbitrary errors or sensitiv
   expect(wrapped.cause).toBe(error);
   expect(safeDiagnostic(wrapped, { ...context, stage: "source" })).toEqual(diagnostic);
 });
+
 it("retains safe timeout and validation distinctions at the failing stage", () => {
   const context = {
     stage: "source",

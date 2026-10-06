@@ -1,4 +1,5 @@
 "use client";
+
 import { useId } from "react";
 import { defaultBasketLimit, formatPen } from "@comprafino/core";
 import type { BasketPlan, ShoppingListItem } from "@comprafino/core";
@@ -36,6 +37,7 @@ export function BasketComparison({
   const detailsId = useId();
   const selected = selectedLimit ?? defaultBasketLimit(plans);
   const plan = plans.find((p) => p.maxRetailers === selected);
+
   return (
     <section aria-label="Comparación de canastas">
       <h2 className="text-xl font-semibold">Tu canasta hoy</h2>
@@ -54,6 +56,7 @@ export function BasketComparison({
               p.assignments.flatMap((a) => (a.option.condition ? [a.option.condition] : [])),
             ),
           ];
+
           return (
             <article
               key={p.maxRetailers}
@@ -140,6 +143,7 @@ export function BasketComparison({
                   .filter((a) => a.option.retailerId === retailerId)
                   .map((a) => {
                     const item = items.find((i) => i.id === a.itemId)!;
+
                     return (
                       <li key={a.itemId}>
                         <p className="font-medium">{item.label}</p>

@@ -5,6 +5,7 @@ import { ownedTestDatabase } from "./testing/database.ts";
 import { closeLocalTestConnections } from "./testing/test-query-client.ts";
 
 const testUrl = process.env.TEST_DATABASE_URL;
+
 describe.skipIf(!testUrl)("production Neon through the explicit fixture preload", () => {
   const harness = ownedTestDatabase({
     ...process.env,

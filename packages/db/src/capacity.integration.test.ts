@@ -8,7 +8,9 @@ import { closeLocalTestConnections } from "./testing/test-query-client.ts";
 import { persistListings, persistListingsDetailed } from "./ingestion.ts";
 
 import { catalogTestContext, observation, publicNow } from "./testing/catalog-fixtures.ts";
+
 const testUrl = process.env.TEST_DATABASE_URL;
+
 describe.skipIf(!testUrl)("PostgreSQL capacity (explicit TEST_DATABASE_URL)", () => {
   // Keep deliberate contention inside each case; cases start with independent data.
   const harness = catalogTestContext({
@@ -29,6 +31,7 @@ describe.skipIf(!testUrl)("PostgreSQL capacity (explicit TEST_DATABASE_URL)", ()
       await closeLocalTestConnections();
     }
   }, 30_000);
+
   async function fillTo(total: number) {
     const count = z
       .object({ count: z.number() })
@@ -110,6 +113,7 @@ describe.skipIf(!testUrl)("PostgreSQL capacity (explicit TEST_DATABASE_URL)", ()
     const count = z
       .object({ count: z.number() })
       .parse((await query("select count(*)::int as count from retailer_listings"))[0]).count;
+
     try {
       await query(
         `insert into retailer_listings(retailer_id,external_id,product_id,title,url,current_price_cents,currency,price_unit,first_seen_at,last_seen_at)
@@ -137,10 +141,16 @@ describe.skipIf(!testUrl)("PostgreSQL capacity (explicit TEST_DATABASE_URL)", ()
         ]),
       ).toMatchObject({ changed: 0, persisted: 1 });
     } finally {
-      for (const table of ["price_history", "listing_observation_days", "retailer_listing_offers"])
+      for (const table of [
+        "price_history",
+        "listing_observation_days",
+        "retailer_listing_offers",
+      ]) {
         await query(
           `delete from ${table} where listing_id in (select id from retailer_listings where title='Catalog guard fixture')`,
         );
+      }
+
       await query("delete from retailer_listings where title='Catalog guard fixture'");
     }
   }, 30000);

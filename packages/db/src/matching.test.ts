@@ -2,6 +2,7 @@ import { expect, it } from "vitest";
 import { PgDialect } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { canonicalGroupId, matchingPersistenceStatements } from "./matching.ts";
+
 it("parameterizes guarded canonical writes and rejects duplicate input", () => {
   const statements = matchingPersistenceStatements([], []);
   const queries = statements.map((s) => new PgDialect().sqlToQuery(s));

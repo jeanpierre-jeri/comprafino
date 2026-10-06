@@ -20,14 +20,20 @@ import {
   listingNormalizations,
   retailerListings,
 } from "./schema.ts";
+
 type Database = ReturnType<typeof createDatabase>;
+
 export type MatchingSnapshot = MatchingListing & {
   rawSnapshot: string;
   normalizedSnapshot: string;
   priorGroupId?: string | null;
 };
+
 export async function readMatchingSample(db: Database, limit: number): Promise<MatchingSnapshot[]> {
-  if (!Number.isInteger(limit) || limit < 1 || limit > 5000) throw new Error("Invalid limit");
+  if (!Number.isInteger(limit) || limit < 1 || limit > 5000) {
+    throw new Error("Invalid limit");
+  }
+
   const records = await db
     .select({
       listing: retailerListings,
@@ -42,14 +48,19 @@ export async function readMatchingSample(db: Database, limit: number): Promise<M
     .where(eq(retailerListings.active, true))
     .orderBy(asc(retailerListings.retailerId), asc(retailerListings.externalId))
     .limit(limit);
+
   return records.map((row) => {
     const input = catalogRecord(row.listing);
+
     if (
       row.normalization.inputFingerprint !== catalogFingerprint(input) ||
       row.normalization.normalizationVersion !== normalizationVersion
-    )
+    ) {
       throw new Error("Stale normalization; normalize selected catalog first");
+    }
+
     const a = normalizeCatalogListing(input);
+
     // Verify stored derived values too; unpublished normalization corrections must be persisted first.
     if (
       JSON.stringify([
@@ -70,8 +81,10 @@ export async function readMatchingSample(db: Database, limit: number): Promise<M
         row.normalization.totalQuantityValue,
         row.normalization.issues,
       ])
-    )
+    ) {
       throw new Error("Derived values differ; normalize first");
+    }
+
     return {
       priorGroupId: row.priorGroupId,
       id: input.id,
@@ -83,11 +96,13 @@ export async function readMatchingSample(db: Database, limit: number): Promise<M
     };
   });
 }
+
 export async function evaluatePairs(
   db: Database,
   pairs: readonly (readonly [MatchingListing, MatchingListing])[],
 ): Promise<MatchPair[]> {
   if (!pairs.length) return [];
+
   const compatibility = pairs.map(([a, b]) => hardConflicts(a, b));
   const payload = JSON.stringify(
     pairs.map(([a, b]) => ({ a: a.id, b: b.id, ta: comparisonTitle(a), tb: comparisonTitle(b) })),
@@ -99,6 +114,7 @@ export async function evaluatePairs(
     .array(z.object({ a: z.string(), b: z.string(), similarity: z.number().min(0).max(1) }))
     .parse(result.rows);
   const indexed = new Map(similarities.map((r) => [`${r.a}|${r.b}`, r.similarity]));
+
   return pairs.map(([a, b], index) => ({
     a: a.id,
     b: b.id,
@@ -112,20 +128,25 @@ export async function evaluatePairs(
       : scoreMatch(a, b, indexed.get(`${a.id}|${b.id}`)!),
   }));
 }
+
 export function canonicalGroupId(ids: readonly string[]): string {
   const hash = createHash("sha256")
     .update(`comprafino:canonical:${[...ids].sort().join("|")}`)
     .digest("hex")
     .slice(0, 32);
+
   return `${hash.slice(0, 8)}-${hash.slice(8, 12)}-${"8" + hash.slice(13, 16)}-${((Number.parseInt(hash[16]!, 16) & 3) | 8).toString(16) + hash.slice(17, 20)}-${hash.slice(20)}`;
 }
+
 export function matchingPersistenceStatements(
   rows: readonly MatchingSnapshot[],
   pairs: readonly MatchPair[],
   priorGroupIds: readonly string[] = [],
 ) {
-  if (new Set(rows.map((r) => r.id)).size !== rows.length)
+  if (new Set(rows.map((r) => r.id)).size !== rows.length) {
     throw new Error("Duplicate matching listing");
+  }
+
   const groups = canonicalGroups(rows, pairs);
   const products = groups.map((ids) => {
     const members = ids.map((id) => rows.find((r) => r.id === id)!);
@@ -133,6 +154,7 @@ export function matchingPersistenceStatements(
       (a, b) => a.title.length - b.title.length || a.id.localeCompare(b.id),
     )[0]!;
     const a = representative.attributes;
+
     return {
       id: canonicalGroupId(ids),
       display_name: representative.title,
@@ -148,6 +170,7 @@ export function matchingPersistenceStatements(
       const supporting = pairs.filter(
         (p) => ids.includes(p.a) && ids.includes(p.b) && (p.a === id || p.b === id),
       );
+
       return {
         listing_id: id,
         canonical_product_id: canonicalGroupId(ids),
@@ -178,6 +201,7 @@ export function matchingPersistenceStatements(
       (c.method='manual' or exists(select 1 from canonical_product_listings other where other.canonical_product_id=c.canonical_product_id and other.listing_id not in (${selected}))))`;
   const desiredLinks = sql`select * from jsonb_to_recordset(${linkJson}::jsonb) x(listing_id uuid,canonical_product_id uuid,retailer_id text,confidence numeric,matching_version integer,method text,reasons text[])`;
   const desiredProducts = sql`select * from jsonb_to_recordset(${productJson}::jsonb) x(id uuid,display_name text,brand_key text,quantity_value integer,quantity_unit text,package_count integer,total_quantity_value integer)`;
+
   return [
     sql`select id from retailers order by id for update`,
     sql`select (${guard}) as eligible`,
@@ -198,12 +222,13 @@ export function matchingPersistenceStatements(
       and p.id in (select jsonb_array_elements_text(${JSON.stringify(priorGroupIds)}::jsonb)::uuid) returning id`,
   ] as const;
 }
+
 export async function persistMatching(
   db: Database,
   rows: readonly MatchingSnapshot[],
   pairs: readonly MatchPair[],
 ) {
-  if (!rows.length)
+  if (!rows.length) {
     return {
       productsCreated: 0,
       productsUpdated: 0,
@@ -212,6 +237,8 @@ export async function persistMatching(
       productsRemoved: 0,
       stale: false,
     };
+  }
+
   const s = matchingPersistenceStatements(
     rows,
     pairs,
@@ -227,6 +254,7 @@ export async function persistMatching(
   ]);
   const [{ eligible }] = z.tuple([z.object({ eligible: z.boolean() })]).parse(r[1].rows);
   const productWrites = z.array(z.object({ id: z.uuid(), inserted: z.boolean() })).parse(r[3].rows);
+
   return {
     productsCreated: productWrites.filter((p) => p.inserted).length,
     productsUpdated: productWrites.filter((p) => !p.inserted).length,
@@ -236,11 +264,13 @@ export async function persistMatching(
     stale: !eligible,
   };
 }
+
 export async function matchCatalog(db: Database, limit = 100, dryRun = false) {
   const rows = await readMatchingSample(db, limit);
   const pairs = await evaluatePairs(db, generateCandidates(rows));
   const groups = canonicalGroups(rows, pairs);
   const persisted = dryRun ? null : await persistMatching(db, rows, pairs);
+
   return {
     version: matchingVersion,
     rows,
@@ -260,6 +290,7 @@ export async function matchCatalog(db: Database, limit = 100, dryRun = false) {
     },
   };
 }
+
 export async function inspectMatching(db = createDatabase()) {
   const evaluation = await matchCatalog(db, 150, true);
   const links = await db
@@ -271,5 +302,6 @@ export async function inspectMatching(db = createDatabase()) {
     )
     .orderBy(asc(canonicalProductListings.canonicalProductId))
     .limit(150);
+
   return { ...evaluation, links };
 }

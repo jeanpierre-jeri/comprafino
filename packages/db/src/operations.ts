@@ -5,11 +5,15 @@ import { createDatabase } from "./client.ts";
 import { ingestionRuns, retailerListings } from "./schema.ts";
 
 type Database = ReturnType<typeof createDatabase>;
+
 export async function assertRefreshScope(db: Database) {
   const [result] = await db.select({ total: count() }).from(retailerListings);
-  if (!result || result.total > catalogPolicy.retainedListingCap)
+
+  if (!result || result.total > catalogPolicy.retainedListingCap) {
     throw new Error("Refresh exceeds validated downstream bound");
+  }
 }
+
 export async function inspectOperations(db = createDatabase(), now = new Date()) {
   return Promise.all(
     retailerIdSchema.options.map(async (retailer) => {
@@ -28,6 +32,7 @@ export async function inspectOperations(db = createDatabase(), now = new Date())
           .orderBy(desc(ingestionRuns.startedAt), desc(ingestionRuns.id))
           .limit(1),
       ]);
+
       return {
         retailer,
         ...retailerFreshness(

@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { ownedTestDatabase } from "./database.ts";
 import { persistListings } from "../ingestion.ts";
 import { persistCatalogNormalizations } from "../catalog.ts";
+
 export async function seedBenchmarkFiller({ db, scoped }: ReturnType<typeof ownedTestDatabase>) {
   const now = new Date();
   const filler = Array.from({ length: 826 }, (_, i) => ({
@@ -29,9 +30,11 @@ export async function seedBenchmarkFiller({ db, scoped }: ReturnType<typeof owne
     filler.map((l) => ({ ...l, id: ids.get(l.externalId)!, retailerId: "metro" })),
   );
 }
+
 export async function benchmarkCatalogCount({ scoped }: ReturnType<typeof ownedTestDatabase>) {
   const rows = z
     .array(z.object({ count: z.coerce.number() }))
     .parse(await scoped.query("select count(*) from retailer_listings"));
+
   return rows[0]!.count;
 }

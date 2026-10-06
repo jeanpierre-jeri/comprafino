@@ -40,6 +40,7 @@ test("real persisted session imports anonymous items and logout does not expose 
       email: `${randomUUID()}@example.com`,
     }),
   );
+
   try {
     const loggedIn = await ctx.test.login({ userId: user.id });
     await context.addCookies(loggedIn.cookies);
@@ -118,9 +119,11 @@ async function capture(page: Page, label: string) {
     animations: "disabled",
   });
 }
+
 async function expectFits(page: Page) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 }
+
 async function signedIn(context: BrowserContext, name: string, image: string | null = null) {
   test.skip(
     !process.env.TEST_DATABASE_URL || !process.env.COMPRAFINO_E2E_SCHEMA,
@@ -136,6 +139,7 @@ async function signedIn(context: BrowserContext, name: string, image: string | n
   );
   const loggedIn = await ctx.test.login({ userId: user.id });
   await context.addCookies(loggedIn.cookies);
+
   return {
     user,
     dispose: async () => {
@@ -204,6 +208,7 @@ for (const width of [390, 1280]) {
   }) => {
     await page.setViewportSize({ width, height: 850 });
     const session = await signedIn(context, "Jean Pierre");
+
     try {
       await page.goto("/");
       const trigger = page.getByRole("button", { name: "Cuenta de Jean Pierre" });
@@ -252,6 +257,7 @@ test("Google initiation is bounded, visibly pending, inline-retryable and never 
   });
   await page.route("https://accounts.google.com/**", (route) => {
     googleCalls++;
+
     return route.abort();
   });
   await page.route("**/api/auth/sign-in/social", async (route) => {
@@ -326,10 +332,12 @@ for (const image of [
           }),
     );
     const session = await signedIn(context, "Jean Pierre", image);
+
     try {
       await page.goto("/");
       const trigger = page.getByRole("button", { name: "Cuenta de Jean Pierre" });
       await expect(trigger).toBeVisible();
+
       if (image.includes("broken")) {
         await expect(trigger).toContainText("JP");
         await expect(trigger.locator("img")).toHaveCount(0);
@@ -355,17 +363,19 @@ test("logout failure retains the real session, shows themed Base UI toast feedba
   });
   await page.route("**/api/auth/sign-out", async (route) => {
     calls++;
-    if (calls === 1)
+
+    if (calls === 1) {
       await route.fulfill({
         status: 500,
         contentType: "application/json",
         body: '{"code":"SERVER_ERROR","message":"Fixture failure"}',
       });
-    else {
+    } else {
       await gate;
       await route.continue();
     }
   });
+
   try {
     await page.goto("/");
     const trigger = page.getByRole("button", { name: "Cuenta de Jean Pierre" });
@@ -415,6 +425,7 @@ test("backend sync route persists only the signed owner's list and leaves browse
   context,
 }) => {
   const session = await signedIn(context, "Sync Fixture");
+
   try {
     await page.goto("/");
     const local = JSON.stringify({ version: 2, items: [] });

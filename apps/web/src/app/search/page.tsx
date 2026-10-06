@@ -1,18 +1,14 @@
 import { logDiagnostic } from "../../server/diagnostics.ts";
-import { AddShoppingItem } from "../../components/shopping-item-editor";
+import { AddShoppingItem } from "../../components/shopping-list/shopping-item-editor";
 import { Suspense } from "react";
 import { SearchPageLoading } from "../../components/page-loading";
-import { ArrowRight } from "@comprafino/ui";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { after } from "next/server";
 import {
   createDatabase,
   maximumSearchLength,
   searchPublicProducts,
   searchFilters,
-  unitPriceBases,
-  unitPriceBasisLabel,
   usefulSearchQuery,
   discoveryQueryForSearch,
   recordDiscoveryForSearch,
@@ -20,12 +16,16 @@ import {
 import type { ProductComparison, GenericProductOffer } from "@comprafino/db";
 import { SearchControls } from "../../components/search-controls";
 import { SearchForm } from "../../components/search-form";
-import { PriceNotice, PublicDataError, PublicShell } from "../../components/public-shell";
-import { ExactProductCard, GenericOfferCard } from "../../components/offer-card";
+import { PriceNotice, PublicShell } from "../../components/public-shell";
+import {
+  SearchResultsContent,
+  shoppingQuantityForSearch,
+} from "../../components/search-results-content";
 
 export const metadata: Metadata = {
   title: "Buscar productos y precios | CompraFino",
 };
+
 async function loadSearchContext(
   searchParams: Promise<Record<string, string | string[] | undefined>>,
 ) {
@@ -38,12 +38,14 @@ export default async function SearchPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { params, observedNow } = await loadSearchContext(searchParams);
+
   return (
     <Suspense key={JSON.stringify(params)} fallback={<SearchPageLoading />}>
       <SearchResults params={params} observedNow={observedNow} />
     </Suspense>
   );
 }
+
 async function SearchResults({
   params,
   observedNow,
@@ -59,6 +61,7 @@ async function SearchResults({
   let products: ProductComparison[] = [];
   let offers: GenericProductOffer[] = [];
   let failed = false;
+
   if (usefulSearchQuery(query)) {
     try {
       const db = createDatabase();
@@ -67,6 +70,7 @@ async function SearchResults({
       offers = results.offers;
       units = results.availableUnits;
       underlyingCount = results.usefulResultCount;
+
       if (discoveryQueryForSearch(query, underlyingCount)) {
         // Database demand recording only, after the response. Retailer work is
         // exclusively performed by the scheduled command, never by this route.
@@ -87,6 +91,7 @@ async function SearchResults({
       failed = true;
     }
   }
+
   return (
     <PublicShell>
       <div className="search-heading">
@@ -110,142 +115,22 @@ async function SearchResults({
             label: query,
             query,
             canonicalId: null,
-            quantity:
-              offers.find((o) => o.unitPrice?.quality === "strong")?.unitPrice?.dimension === "mass"
-                ? { amount: 1, unit: "kg" }
-                : offers.find((o) => o.unitPrice?.quality === "strong")?.unitPrice?.dimension ===
-                    "volume"
-                  ? { amount: 1, unit: "L" }
-                  : { amount: query.toLowerCase().startsWith("huevo") ? 30 : 1, unit: "unit" },
+            quantity: shoppingQuantityForSearch(query, offers),
           }}
         />
       )}
       <section className="mt-6" aria-label="Resultados de búsqueda">
-        {failed ? (
-          <PublicDataError />
-        ) : !usefulSearchQuery(query) ? (
-          <p className="empty-surface">
-            Escribe entre 2 y {maximumSearchLength} caracteres para buscar un producto.
-          </p>
-        ) : !products.length && !offers.length ? (
-          <div className="empty-surface">
-            <h2 className="text-xl font-semibold">
-              {underlyingCount
-                ? "No hay opciones con estos filtros."
-                : "No encontramos ese producto todavía."}
-            </h2>
-            <p className="mt-2 text-muted-foreground">
-              {underlyingCount
-                ? "Prueba otro supermercado o selecciona todas las medidas."
-                : "Tomamos en cuenta las búsquedas sin resultados para ampliar el catálogo. Prueba con otra marca o producto."}
-            </p>
-            <Link
-              href={underlyingCount ? `/search?q=${encodeURIComponent(query)}` : "/search?q=leche"}
-              className="card-link"
-            >
-              {underlyingCount ? "Quitar filtros" : "Explorar leche"}
-              <ArrowRight
-                aria-hidden="true"
-                size={14}
-                className="ml-1 inline-block shrink-0 align-middle"
-              />
-            </Link>
-          </div>
-        ) : (
-          <>
-            {products.length > 0 && (
-              <section className="exact-section" aria-label="Comparaciones del mismo producto">
-                <p className="eyebrow">Entre supermercados</p>
-                <h2 className="mt-2 text-2xl font-semibold tracking-tight">
-                  Compara el mismo producto
-                </h2>
-                <p className="mt-2 mb-4 text-xs text-muted-foreground">
-                  {products.length === 20 ? "Hasta 20" : products.length} productos para «{query}»
-                </p>
-                <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  {products.map((product, index) => (
-                    <li key={product.id}>
-                      <ExactProductCard
-                        product={product}
-                        benefits={filters.priceMode === "benefits"}
-                        eager={index === 0}
-                        observedNow={observedNow}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
-            {offers.length > 0 && (
-              <section className="mt-10" aria-label="Opciones en supermercados">
-                <h2 className="text-2xl font-semibold tracking-tight">Opciones en supermercados</h2>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Compara cantidades y precios. Las marcas, variedades y calidades pueden diferir.
-                </p>
-                {offers.some((offer) => offer.family.family === "toilet_paper") && (
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    El precio por rollo es orientativo: el tamaño y la cantidad de hojas pueden
-                    variar.
-                  </p>
-                )}
-                {offers.some((offer) => offer.family.family === "canned_tuna") && (
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    El peso del atún puede incluir líquido. No mostramos precio por kg sin
-                    distinguir peso neto y escurrido.
-                  </p>
-                )}
-                <p className="mt-2 mb-4 text-xs text-muted-foreground">
-                  {offers.length === 30 ? "Hasta 30" : offers.length} ofertas para «{query}»
-                </p>
-                {(sort === "unit-price"
-                  ? [...unitPriceBases, "unknown"]
-                  : sort === "total-price"
-                    ? ["package", "direct"]
-                    : ["all"]
-                ).map((group) => {
-                  const members = offers.filter(
-                    (offer) =>
-                      group === "all" ||
-                      (group === "package"
-                        ? offer.pricingBasis === "unit"
-                        : group === "direct"
-                          ? offer.pricingBasis === "kg"
-                          : (offer.unitPrice?.basis ?? "unknown") === group),
-                  );
-                  if (!members.length) return null;
-                  const label =
-                    group === "mass" ||
-                    group === "volume" ||
-                    group === "item-count" ||
-                    group === "roll" ||
-                    group === "unknown"
-                      ? unitPriceBasisLabel(group)
-                      : group === "direct"
-                        ? "Precios por kg"
-                        : group === "package"
-                          ? "Precio del paquete"
-                          : null;
-                  return (
-                    <div key={group} className="mb-6">
-                      {label && <h3 className="mb-3 font-semibold">{label}</h3>}
-                      <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                        {members.map((offer) => (
-                          <li key={offer.id}>
-                            <GenericOfferCard
-                              offer={offer}
-                              observedNow={observedNow}
-                              benefits={filters.priceMode === "benefits"}
-                            />
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  );
-                })}
-              </section>
-            )}
-          </>
-        )}
+        {
+          <SearchResultsContent
+            query={query}
+            filters={filters}
+            products={products}
+            offers={offers}
+            failed={failed}
+            underlyingCount={underlyingCount}
+            observedNow={observedNow}
+          />
+        }
       </section>
       <PriceNotice />
     </PublicShell>

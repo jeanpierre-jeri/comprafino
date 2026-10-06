@@ -1,9 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import fixture from "./fixtures/tottus.json";
 import { createTottusAdapter, parseTottusPage } from "./tottus.ts";
+
 const observed = new Date("2026-10-03T14:00:00Z");
+
 const html = (data: unknown) =>
   `<html><script id="__NEXT_DATA__" type="application/json">${JSON.stringify(data)}</script></html>`;
+
 describe("sanitized live Tottus hydration fixture", () => {
   it("keeps SKU identity, internet rather than card price, reference price and weighted unit", () => {
     const { listings } = parseTottusPage(html(fixture), observed);
@@ -27,7 +30,8 @@ describe("sanitized live Tottus hydration fixture", () => {
       const data = structuredClone(fixture);
       const product = data.props.pageProps.results[1]!;
       product.prices = product.prices.filter((price) => price.type !== "normalPrice");
-      if (normalPrice !== undefined)
+
+      if (normalPrice !== undefined) {
         product.prices.push({
           ...product.prices[0]!,
           type: "normalPrice",
@@ -35,6 +39,8 @@ describe("sanitized live Tottus hydration fixture", () => {
           crossed: true,
           price: [normalPrice],
         });
+      }
+
       const listing = parseTottusPage(html(data), observed).listings[1];
       expect(listing?.currentPriceCents).toBe(1450);
       expect(listing?.regularPriceCents).toBe(normalPrice === "16.90" ? 1690 : undefined);
@@ -70,6 +76,7 @@ describe("sanitized live Tottus hydration fixture", () => {
     expect(() => parseTottusPage("<html>Access denied</html>", observed)).toThrow(
       "public listing JSON is missing",
     );
+
     for (const change of [{ symbol: "$" }, { price: ["12.901"] }, { type: "cmrPrice" }]) {
       const data = structuredClone(fixture);
       Object.assign(data.props.pageProps.results[0]!.prices[0]!, change);

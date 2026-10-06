@@ -10,7 +10,9 @@ const messages = {
   listing_not_found: "Listing was not found.",
   availability_ambiguous: "Listing availability was ambiguous.",
 } as const;
+
 export type DiagnosticReason = keyof typeof messages;
+
 export interface DiagnosticContext {
   stage:
     | "source"
@@ -34,6 +36,7 @@ export interface DiagnosticContext {
   reason: DiagnosticReason;
   retailer?: RetailerId;
 }
+
 export interface SafeDiagnostic extends DiagnosticContext {
   message: string;
   databaseCode?: string;
@@ -42,19 +45,25 @@ export interface SafeDiagnostic extends DiagnosticContext {
 /** Allowlisted context and SQLSTATE only. Never copy message, stack, URL or payload. */
 export function safeDiagnostic(error: unknown, context: DiagnosticContext): SafeDiagnostic {
   if (error instanceof DiagnosticError) return error.diagnostic;
+
   let reason = context.reason;
   let databaseCode: string | undefined;
   let current = error;
+
   for (let depth = 0; depth < 3 && typeof current === "object" && current !== null; depth++) {
     if ("name" in current) {
       if (
         context.stage === "source" &&
         (current.name === "TimeoutError" || current.name === "AbortError")
-      )
+      ) {
         reason = "source_timeout";
-      if (current.name === "ZodError" || current.name === "SyntaxError")
+      }
+
+      if (current.name === "ZodError" || current.name === "SyntaxError") {
         reason = context.stage === "source" ? "invalid_source_response" : "validation_failed";
+      }
     }
+
     if (
       "code" in current &&
       typeof current.code === "string" &&
@@ -70,10 +79,13 @@ export function safeDiagnostic(error: unknown, context: DiagnosticContext): Safe
         "57014",
         "08006",
       ].includes(current.code)
-    )
+    ) {
       databaseCode = current.code;
+    }
+
     current = "cause" in current ? current.cause : null;
   }
+
   return {
     ...context,
     reason,
@@ -81,8 +93,10 @@ export function safeDiagnostic(error: unknown, context: DiagnosticContext): Safe
     ...(databaseCode ? { databaseCode } : {}),
   };
 }
+
 export class DiagnosticError extends Error {
   readonly diagnostic: SafeDiagnostic;
+
   constructor(error: unknown, context: DiagnosticContext) {
     const diagnostic = safeDiagnostic(error, context);
     super(diagnostic.message, { cause: error });

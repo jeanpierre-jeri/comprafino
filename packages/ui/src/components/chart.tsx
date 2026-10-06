@@ -9,6 +9,7 @@ import { cn } from "../lib/utils";
  * Only the primitives needed by the public history view are retained.
  */
 export type ChartConfig = Record<string, { label: React.ReactNode; color: string }>;
+
 export function ChartContainer({
   config,
   children,
@@ -23,6 +24,7 @@ export function ChartContainer({
   const colors: React.CSSProperties & Record<`--color-${string}`, string> = Object.fromEntries(
     Object.entries(config).map(([key, item]) => [`--color-${key}`, item.color]),
   );
+
   return (
     <div
       data-slot="chart"
@@ -40,6 +42,7 @@ export function ChartContainer({
     </div>
   );
 }
+
 export {
   Tooltip as ChartTooltip,
   ScatterChart,

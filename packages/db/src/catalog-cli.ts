@@ -1,6 +1,7 @@
 import { createDatabase } from "./client.ts";
 import { normalizeCatalog } from "./catalog.ts";
 import { parseCatalogOptions } from "./catalog-options.ts";
+
 try {
   const options = parseCatalogOptions(process.argv.slice(2));
   const result = await normalizeCatalog(

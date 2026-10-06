@@ -7,8 +7,11 @@ import {
   shoppingListItemSchema,
 } from "./shopping-list.ts";
 import type { ShoppingCandidate } from "./shopping-list.ts";
+
 const now = new Date("2026-10-04T12:00:00Z");
+
 const canonicalId = "00000000-0000-4000-8000-000000000001";
+
 const offer = {
   title: "Huevos Bell's 30un",
   canonicalId: null,
@@ -16,6 +19,7 @@ const offer = {
   unitPrice: { quality: "strong" },
   pricingBasis: "unit" as const,
 };
+
 const candidate: ShoppingCandidate = {
   id: "other",
   canonicalId: null,
@@ -29,6 +33,7 @@ const candidate: ShoppingCandidate = {
   packageQuantity: { amount: 30, unit: "unit" },
   strongQuantity: true,
 };
+
 function makeItem(seed: ReturnType<typeof shoppingSeedForRetailerOffer>) {
   return shoppingListItemSchema.parse({
     ...seed,
@@ -40,11 +45,13 @@ function makeItem(seed: ReturnType<typeof shoppingSeedForRetailerOffer>) {
     updatedAt: now.toISOString(),
   });
 }
+
 describe("retailer-option shopping creation evidence", () => {
   it("retains safely canonicalized identity for preferred/strict creation", () => {
     const seed = shoppingSeedForRetailerOffer({ ...offer, canonicalId });
     expect(seed).toEqual({ canonicalId, label: offer.title, query: "huevos" });
-    for (const intent of ["preferred", "strict"] as const)
+
+    for (const intent of ["preferred", "strict"] as const) {
       expect(
         shoppingListItemSchema.safeParse({
           ...makeItem(shoppingSeedForRetailerOffer(offer)),
@@ -54,6 +61,7 @@ describe("retailer-option shopping creation evidence", () => {
           quantity: { amount: 1, unit: "unit" },
         }).success,
       ).toBe(true);
+    }
   });
   it("saves an independent ordinary listing as a safe generic need", () => {
     const seed = shoppingSeedForRetailerOffer(offer);
@@ -68,8 +76,10 @@ describe("retailer-option shopping creation evidence", () => {
     expect(evaluateShoppingListItem(list.items[0]!, [candidate], "standard", now).best?.id).toBe(
       "other",
     );
-    for (const intent of ["preferred", "strict"] as const)
+
+    for (const intent of ["preferred", "strict"] as const) {
       expect(shoppingListItemSchema.safeParse({ ...list.items[0], intent }).success).toBe(false);
+    }
   });
   it.each([
     ["Arroz Blanco 5kg", "g", 5000, "rice:white", "kg", 5],

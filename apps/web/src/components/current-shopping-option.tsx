@@ -3,11 +3,16 @@ import { formatPen } from "@comprafino/core";
 import type { ShoppingOption } from "@comprafino/core";
 
 export function CurrentOption({ option }: { option: ShoppingOption }) {
-  const measure = option.countsPackages
-    ? "paquetes"
-    : option.quantityUnit === "unit"
-      ? "unidades"
-      : option.quantityUnit;
+  let measure;
+
+  if (option.countsPackages) {
+    measure = "paquetes" as const;
+  } else if (option.quantityUnit === "unit") {
+    measure = "unidades" as const;
+  } else {
+    measure = option.quantityUnit;
+  }
+
   return (
     <div className="mt-3 space-y-2">
       <p className="font-medium">{option.title}</p>

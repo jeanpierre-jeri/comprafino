@@ -7,13 +7,19 @@ import {
 } from "@comprafino/db";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
+
 export const metadata = {
   title: "Developer ingestion inspection",
   robots: { index: false, follow: false },
 };
+
 export default async function IngestionPage() {
   await connection();
-  if (process.env.NODE_ENV === "production") notFound();
+
+  if (process.env.NODE_ENV === "production") {
+    notFound();
+  }
+
   if (!process.env.DATABASE_URL) {
     return (
       <main className="mx-auto max-w-5xl p-8">
@@ -25,10 +31,12 @@ export default async function IngestionPage() {
       </main>
     );
   }
+
   let observations: Awaited<ReturnType<typeof observationCoverageReport>>;
   let coverage: Awaited<ReturnType<typeof coverageReport>>;
   let data: Awaited<ReturnType<typeof inspectIngestion>>;
   let operations: Awaited<ReturnType<typeof inspectOperations>>;
+
   try {
     [data, operations, coverage, observations] = await Promise.all([
       inspectIngestion(),
@@ -44,6 +52,7 @@ export default async function IngestionPage() {
       </main>
     );
   }
+
   return (
     <main className="mx-auto max-w-5xl space-y-6 p-8">
       <h1 className="text-2xl font-semibold">Developer ingestion inspection</h1>
@@ -175,9 +184,7 @@ export default async function IngestionPage() {
                       : (listing.regularPriceCents / 100).toFixed(2)}
                   </td>
                   <td>{listing.priceUnit}</td>
-                  <td>
-                    {listing.available === null ? "Unknown" : listing.available ? "Yes" : "No"}
-                  </td>
+                  <td>{availabilityLabel(listing.available)}</td>
                   <td>{listing.lastSeenAt.toISOString()}</td>
                 </tr>
               ))}
@@ -197,4 +204,10 @@ function formatTime(value: Date | undefined) {
         timeZone: "America/Lima",
       }).format(value)
     : "none";
+}
+
+function availabilityLabel(available: boolean | null): string {
+  if (available === null) return "Unknown";
+
+  return available ? "Yes" : "No";
 }

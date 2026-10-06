@@ -16,12 +16,14 @@ export function ownedTestDatabase(env: Record<string, string | undefined> = proc
   const scoped = testSchemaClient(client, schema);
   const db = drizzle(scoped, { schema: tables });
   let created = false;
+
   async function dispose() {
     if (created) {
       await client.query(`drop schema ${quoted} cascade`);
       created = false;
     }
   }
+
   async function setup() {
     const journal = z
       .object({ entries: z.array(z.object({ tag: z.string().regex(/^\d{4}_[a-z_]+$/u) })) })
@@ -30,13 +32,18 @@ export function ownedTestDatabase(env: Record<string, string | undefined> = proc
           readFileSync(new URL("../../migrations/meta/_journal.json", import.meta.url), "utf8"),
         ) as unknown,
       );
+
     try {
       await client.query(`create schema ${quoted}`);
       created = true;
       const path = z
         .array(z.object({ current_schema: z.string() }))
         .parse(await scoped.query("select current_schema()"));
-      if (path[0]?.current_schema !== schema) throw new Error("Test schema isolation failed");
+
+      if (path[0]?.current_schema !== schema) {
+        throw new Error("Test schema isolation failed");
+      }
+
       await scoped.transaction(
         journal.entries.flatMap(({ tag }) =>
           readFileSync(new URL(`../../migrations/${tag}.sql`, import.meta.url), "utf8")
@@ -47,15 +54,21 @@ export function ownedTestDatabase(env: Record<string, string | undefined> = proc
       );
     } catch (error) {
       await dispose();
+
       throw error;
     }
   }
+
   /** Reset fixture data together, preserving retailer seeds and FK constraints. */
   async function reset() {
-    if (!created) throw new Error("Test schema is not owned");
+    if (!created) {
+      throw new Error("Test schema is not owned");
+    }
+
     await scoped.query(
       "truncate retailer_listings, canonical_products, ingestion_runs, discovery_queries, discovery_daily_budget cascade",
     );
   }
+
   return { url, schema, client, scoped, db, setup, reset, dispose };
 }

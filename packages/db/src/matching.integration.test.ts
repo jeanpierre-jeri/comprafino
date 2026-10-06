@@ -15,7 +15,9 @@ import { persistListings } from "./ingestion.ts";
 
 import { searchGenericProductOffers } from "./generic-offers.ts";
 import { catalogTestContext, observation, publicNow } from "./testing/catalog-fixtures.ts";
+
 const testUrl = process.env.TEST_DATABASE_URL;
+
 describe.skipIf(!testUrl)("PostgreSQL matching (explicit TEST_DATABASE_URL)", () => {
   // Keep deliberate contention inside each case; cases start with independent data.
   const harness = catalogTestContext({
@@ -260,8 +262,11 @@ describe.skipIf(!testUrl)("PostgreSQL matching (explicit TEST_DATABASE_URL)", ()
       "update retailer_listings set title='Leche Entera Gloria Caja 946ml' where id=$1 or id=$2",
       rows.map((r) => r.id),
     );
-    for (const externalId of ["matching-metro", "matching-plaza-vea"])
+
+    for (const externalId of ["matching-metro", "matching-plaza-vea"]) {
       await persistCatalogNormalizations(db, await catalogRows(externalId));
+    }
+
     const renamed = await matchingRows(["matching-metro", "matching-plaza-vea"]);
     const renamedPairs = await evaluatePairs(db, [[renamed[0]!, renamed[1]!]]);
     expect(await persistMatching(db, renamed, renamedPairs)).toMatchObject({
@@ -316,6 +321,7 @@ describe.skipIf(!testUrl)("PostgreSQL matching (explicit TEST_DATABASE_URL)", ()
     await query(
       `alter table canonical_product_listings add constraint test_reject_match check(listing_id<>'${rows[0]!.id}'::uuid)`,
     );
+
     try {
       await expect(persistMatching(db, rows, pairs)).rejects.toMatchObject({ code: "23514" });
       expect(await query("select * from canonical_products order by id")).toEqual(before);

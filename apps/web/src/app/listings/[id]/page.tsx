@@ -13,7 +13,7 @@ import {
   getPublicRetailerListingDetail,
   isPublicProductId,
 } from "@comprafino/db";
-import { AddShoppingItem } from "../../../components/shopping-item-editor";
+import { AddShoppingItem } from "../../../components/shopping-list/shopping-item-editor";
 import { PriceHistoryPresentation } from "../../../components/price-history";
 import { ProductImage } from "../../../components/product-image";
 import { ObservedAt, packageSummary, RetailerBadge } from "../../../components/product-info";
@@ -21,7 +21,9 @@ import { PriceNotice, PublicDataError, PublicShell } from "../../../components/p
 
 const loadListing = cache(async (id: string, range: HistoryRange) => {
   if (!isPublicProductId(id)) return { listing: null, failed: false };
+
   await connection();
+
   try {
     return {
       listing: await getPublicRetailerListingDetail(createDatabase(), id, { range }),
@@ -29,18 +31,22 @@ const loadListing = cache(async (id: string, range: HistoryRange) => {
     };
   } catch (error) {
     logDiagnostic(error, { stage: "public", operation: "listing", reason: "db_read_failed" });
+
     return { listing: null, failed: true };
   }
 });
+
 type Props = {
   params: Promise<{ id: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
+
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { listing } = await loadListing(
     (await params).id,
     parseHistoryRange((await searchParams).range),
   );
+
   return {
     title: listing ? `${listing.title} - precio e historial | CompraFino` : "Producto | CompraFino",
     description: listing
@@ -48,17 +54,24 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
       : undefined,
   };
 }
+
 export default async function ListingPage({ params, searchParams }: Props) {
   const range = parseHistoryRange((await searchParams).range);
   const { listing, failed } = await loadListing((await params).id, range);
-  if (failed)
+
+  if (failed) {
     return (
       <PublicShell>
         <h1 className="mb-6 text-3xl font-semibold">Detalle del producto</h1>
         <PublicDataError />
       </PublicShell>
     );
-  if (!listing) notFound();
+  }
+
+  if (!listing) {
+    notFound();
+  }
+
   return (
     <PublicShell>
       <Link
@@ -87,11 +100,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
           <div className="detail-best-price">
             <RetailerBadge id={listing.retailerId} name={listing.retailerName} />
             <p className="mt-3 text-sm font-medium">
-              {listing.current
-                ? "Precio online para todos"
-                : listing.historicalOnly
-                  ? "Último precio histórico registrado"
-                  : "Último precio registrado · pendiente de actualización"}
+              {listingPriceLabel(listing.current, listing.historicalOnly)}
             </p>
             <p className="mt-2 text-4xl font-semibold tracking-tight text-primary tabular-nums">
               {formatPen(listing.currentPriceCents)}
@@ -163,4 +172,12 @@ export default async function ListingPage({ params, searchParams }: Props) {
       <PriceNotice />
     </PublicShell>
   );
+}
+
+function listingPriceLabel(current: boolean, historicalOnly: boolean): string {
+  if (current) return "Precio online para todos";
+
+  return historicalOnly
+    ? "Último precio histórico registrado"
+    : "Último precio registrado · pendiente de actualización";
 }

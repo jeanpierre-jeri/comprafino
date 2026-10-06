@@ -7,7 +7,9 @@ import {
 } from "./unit-price.ts";
 import type { UnitPriceInput } from "./unit-price.ts";
 import { normalizeCatalogListing } from "./catalog.ts";
+
 const now = new Date("2026-10-03T10:00:00Z");
+
 const input: UnitPriceInput = {
   currentPriceCents: 390,
   pricingBasis: "unit",
@@ -16,11 +18,17 @@ const input: UnitPriceInput = {
   title: "Azúcar 500 g",
   observedAt: now,
 };
+
 function price(override: Partial<UnitPriceInput> = {}) {
   const result = calculateUnitPrice({ ...input, ...override }, now);
-  if (!result.price) throw new Error(result.reason);
+
+  if (!result.price) {
+    throw new Error(result.reason);
+  }
+
   return result.price;
 }
+
 it.each([
   [500, "g", 450, "S/ 9.00 / kg"],
   [1000, "g", 800, "S/ 8.00 / kg"],
@@ -39,6 +47,7 @@ it.each([
     expected,
   );
 });
+
 it("does not divide a direct KG quote by approximate package mass", () => {
   expect(
     formatUnitPrice(
@@ -51,6 +60,7 @@ it("does not divide a direct KG quote by approximate package mass", () => {
     ),
   ).toBe("S/ 18.90 / kg");
 });
+
 it.each(["Huevos Bandeja 30un", "Huevos Bandeja 15un", "Leche 6 × 390 g", "Leche 3 × 946 ml"])(
   "uses total normalized content of %s",
   (title) => {
@@ -59,6 +69,7 @@ it.each(["Huevos Bandeja 30un", "Huevos Bandeja 15un", "Leche 6 × 390 g", "Lech
     expect(result.price?.denominator).toBe(BigInt(attrs.totalQuantity!.value));
   },
 );
+
 it.each([
   [{ totalQuantity: null }, "missing-quantity"],
   [{ issues: ["ambiguous-quantity"] }, "ambiguous-quantity"],
@@ -78,6 +89,7 @@ it.each([
     expect(calculateUnitPrice({ ...input, ...override }, now)).toEqual({ price: null, reason });
   },
 );
+
 it("admits the inclusive freshness boundary and rounds only for presentation", () => {
   expect(
     calculateUnitPrice({ ...input, observedAt: new Date(now.getTime() - 36 * 3600000) }, now).price,
@@ -90,6 +102,7 @@ it("admits the inclusive freshness boundary and rounds only for presentation", (
   expect(compareUnitPrices(a, a)).toBe(0);
   expect(() => compareUnitPrices(a, price())).toThrow("Incompatible");
 });
+
 it("retains precision beyond number multiplication and accepts zero ordinary price", () => {
   const a = price({
     currentPriceCents: 2147483647,
@@ -98,6 +111,7 @@ it("retains precision beyond number multiplication and accepts zero ordinary pri
   expect(formatUnitPrice(a)).toBe("S/ 10.00 / kg");
   expect(formatUnitPrice(price({ currentPriceCents: 0 }))).toBe("S/ 0.00 / kg");
 });
+
 it("defaults malformed or repeated sort parameters to relevance", () => {
   expect(genericOfferSort(["unit-price"])).toBe("relevance");
   expect(genericOfferSort("invalid")).toBe("relevance");
@@ -165,6 +179,7 @@ it.each([
     reason: "ambiguous-semantics",
   });
 });
+
 it.each([
   "Papel Higiénico 12un",
   "Papel Higiénico 65m 12un",
@@ -179,6 +194,7 @@ it.each([
     compareUnitPrices(result.price!, price({ totalQuantity: { value: 12, unit: "unit" } })),
   ).toThrow("Incompatible");
 });
+
 it.each([
   ["Detergente polvo 800 g", "mass", 800n],
   ["Detergente líquido Doypack 3 L", "volume", 3000n],
@@ -192,6 +208,7 @@ it.each([
     quality: "strong",
   });
 });
+
 it("distinguishes conflicting dimensions from missing or ambiguous content", () => {
   const title = "Detergente 800 g 3 L";
   const attrs = normalizeCatalogListing({ title, priceUnit: "UN" });

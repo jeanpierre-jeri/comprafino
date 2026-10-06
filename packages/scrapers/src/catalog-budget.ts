@@ -43,6 +43,7 @@ export function refreshMeasurementEvidence(value: unknown, catalogListings: numb
   const comparable = Boolean(
     measurement.observedAt && successfulRun && sourceScopeMatches && catalogSizeMatches,
   );
+
   return {
     measurement,
     sourceScopeMatches,
@@ -62,9 +63,10 @@ export function categoryRequestBudget() {
       category,
       limit,
       typicalRequests: Math.ceil(limit / (retailer === "tottus" ? 48 : 20)),
-      maximumRequests: retailer === "tottus" ? 12 : category === "dairy" ? 25 : 2,
+      maximumRequests: maximumTargetRequests(retailer, category),
     })),
   );
+
   return {
     sources,
     categorySources: sources.length,
@@ -73,21 +75,29 @@ export function categoryRequestBudget() {
     maximumRequests: sources.reduce((sum, source) => sum + source.maximumRequests, 0),
   };
 }
+
 /** Current workflows use one daily hour-list cron; refuse unsupported schedules. */
 export function workflowCadence(yaml: string) {
   const schedules = [...yaml.matchAll(/cron:\s*"(\d+) ([\d,]+) \* \* \*"/gu)];
-  if (schedules.length !== 1)
+
+  if (schedules.length !== 1) {
     throw new Error("Unsupported workflow cadence; review budget assumptions");
+  }
+
   const cron = schedules[0]![0].split('"')[1]!;
   const hours = schedules[0]![2]!.split(",").map(Number);
+
   if (
     Number(schedules[0]![1]) > 59 ||
     hours.some((hour) => hour > 23) ||
     new Set(hours).size !== hours.length
-  )
+  ) {
     throw new Error("Invalid cadence");
+  }
+
   return { cron, runsPerDay: hours.length };
 }
+
 export function catalogProjection(listings: number, candidates: number, target: number) {
   if (
     !Number.isSafeInteger(listings) ||
@@ -96,8 +106,10 @@ export function catalogProjection(listings: number, candidates: number, target: 
     target < 1 ||
     !Number.isSafeInteger(candidates) ||
     candidates < 0
-  )
+  ) {
     throw new Error("Invalid projection inputs");
+  }
+
   return {
     listings: target,
     matchingCandidateEstimate: Math.round(candidates * (target / listings) ** 2),
@@ -105,4 +117,10 @@ export function catalogProjection(listings: number, candidates: number, target: 
     currentGuardExceeded: target > catalogPolicy.retainedListingCap,
     storageAtSameCompositionFactor: target / listings,
   };
+}
+
+function maximumTargetRequests(retailer: string, category: string): number {
+  if (retailer === "tottus") return 12;
+
+  return category === "dairy" ? 25 : 2;
 }

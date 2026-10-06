@@ -13,7 +13,9 @@
       {
         "allow": ["**/*.css"]
       }
-    ]
+    ],
+    "no-nested-ternary": "error",
+    "curly": ["error", "multi-line"]
   },
   "ignorePatterns": [
     "**/.next/**",

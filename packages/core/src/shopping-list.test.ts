@@ -15,8 +15,11 @@ import {
   shoppingListItemSchema,
 } from "./shopping-list.ts";
 import type { ShoppingCandidate, ShoppingListItem } from "./shopping-list.ts";
+
 const now = new Date("2026-10-04T12:00:00Z");
+
 const canonicalId = "00000000-0000-4000-8000-000000000001";
+
 function item(overrides: Partial<ShoppingListItem> = {}): ShoppingListItem {
   return shoppingListItemSchema.parse({
     id: "00000000-0000-4000-8000-000000000002",
@@ -35,6 +38,7 @@ function item(overrides: Partial<ShoppingListItem> = {}): ShoppingListItem {
     ...overrides,
   });
 }
+
 function candidate(overrides: Partial<ShoppingCandidate> = {}): ShoppingCandidate {
   return {
     id: "bells",
@@ -51,8 +55,10 @@ function candidate(overrides: Partial<ShoppingCandidate> = {}): ShoppingCandidat
     ...overrides,
   };
 }
+
 const evaluate = (i: ShoppingListItem, cs: ShoppingCandidate[]) =>
   evaluateShoppingListItem(i, cs, "standard", now, "Huevos Bell's 30 un");
+
 describe("versioned shopping persistence", () => {
   it.each([
     ["huevos tottus", "Huevos", "huevos", "eggs:regular", "unit"],
@@ -100,14 +106,16 @@ describe("versioned shopping persistence", () => {
     const serialized = serializeShoppingList(list);
     expect(parseShoppingList(serialized)).toEqual({ list, invalid: false });
     expect(serializeShoppingList(parseShoppingList(serialized).list)).toBe(serialized);
+
     for (const raw of [
       "{",
       "null",
       '{"version":0,"items":[]}',
       '{"version":3,"items":[]}',
       '{"version":1,"items":[{}]}',
-    ])
+    ]) {
       expect(parseShoppingList(raw)).toEqual({ list: emptyShoppingList(), invalid: true });
+    }
   });
   it("adds, edits, removes and preserves identity on duplicate add", () => {
     let list = saveShoppingItem(emptyShoppingList(), item());
@@ -148,11 +156,14 @@ describe("versioned shopping persistence", () => {
       { amount: 1.5, unit: "unit" },
       { amount: 1, unit: "roll" },
       { amount: 1.1234, unit: "kg" },
-    ])
+    ]) {
       expect(shoppingListItemSchema.safeParse({ ...item(), quantity }).success).toBe(false);
+    }
+
     expect(shoppingListItemSchema.safeParse({ ...item(), intent: "strict" }).success).toBe(false);
   });
 });
+
 describe("shopping quantity and ranking", () => {
   it("uses integer packages for exact fit, multiples and unavoidable overbuy", () => {
     expect(evaluate(item(), [candidate()]).best).toMatchObject({
@@ -228,8 +239,9 @@ describe("shopping quantity and ranking", () => {
       candidate({ observedAt: new Date("2026-10-01T12:00:00Z") }),
       candidate({ observedAt: new Date("2026-10-05T12:00:00Z") }),
       candidate({ available: false }),
-    ])
+    ]) {
       expect(evaluate(item(), [c]).best).toBeNull();
+    }
   });
   it("lets supported conditional prices compete only in benefits mode", () => {
     const c = candidate({
@@ -259,6 +271,7 @@ describe("shopping quantity and ranking", () => {
     ).toBe(1790);
   });
 });
+
 describe("flexible intentions and compatibility", () => {
   const alternative = candidate({
     id: "tottus",
@@ -322,8 +335,10 @@ describe("flexible intentions and compatibility", () => {
       "Leche Gloria 946ml",
       "Detergente pods 30un",
       "Aceite de oliva 1L",
-    ])
+    ]) {
       expect(shoppingCompatibilityKey(title)).toBeNull();
+    }
+
     expect(evaluate(item(), [candidate({ title: "Huevos premium 30un" })]).best).toBeNull();
     expect(shoppingCompatibilityKey("Detergente líquido 1L")).not.toBe(
       shoppingCompatibilityKey("Detergente en polvo 1kg"),
@@ -343,8 +358,10 @@ describe("flexible intentions and compatibility", () => {
       "Detergente en Polvo Baby Kids 1kg",
       "Detergente en Polvo Cuidado Bebés 1kg",
       "Detergente en Polvo Cuidado Micelar 1kg",
-    ])
+    ]) {
       expect(shoppingCompatibilityKey(title)).toBeNull();
+    }
+
     expect(shoppingCompatibilityKey("Detergente Líquido Matic 1L")).not.toBe(
       shoppingCompatibilityKey("Detergente Líquido 1L"),
     );

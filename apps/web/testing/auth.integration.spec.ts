@@ -12,6 +12,7 @@ import { authHandlers } from "../src/server/auth-handler.ts";
 import { authTestEnv as env } from "./auth-env.ts";
 
 const testURL = process.env.TEST_DATABASE_URL;
+
 test.describe("Better Auth with explicit TEST_DATABASE_URL and an owned schema", () => {
   test.skip(!testURL, "Requires explicit TEST_DATABASE_URL; never falls back to DATABASE_URL");
   const harness = ownedTestDatabase({
@@ -25,9 +26,11 @@ test.describe("Better Auth with explicit TEST_DATABASE_URL and an owned schema",
   test.beforeAll(async () => {
     globalThis.fetch = (input, init) => {
       const url = new URL(input instanceof Request ? input.url : String(input));
+
       if (url.hostname === "accounts.google.com" || url.hostname.endsWith(".googleapis.com")) {
         throw new Error("Real Google OAuth is forbidden in tests");
       }
+
       return originalFetch(input, init);
     };
     await harness.setup();
@@ -37,6 +40,7 @@ test.describe("Better Auth with explicit TEST_DATABASE_URL and an owned schema",
   });
   test.afterAll(async () => {
     globalThis.fetch = originalFetch;
+
     try {
       await harness.dispose();
     } finally {
@@ -49,15 +53,19 @@ test.describe("Better Auth with explicit TEST_DATABASE_URL and an owned schema",
     const user = await ctx.test.saveUser(
       ctx.test.createUser({ id: randomUUID(), name: "Ana Test", email: "ana@example.com" }),
     );
+
     return ctx.test.login({ userId: user.id });
   }
+
   function lookup(headers = new Headers()) {
     return handlers.GET(new Request(`${env.BETTER_AUTH_URL}/api/auth/get-session`, { headers }));
   }
+
   function post(path: string, headers: Headers, body: unknown = {}) {
     const requestHeaders = new Headers(headers);
     requestHeaders.set("origin", env.BETTER_AUTH_URL);
     requestHeaders.set("content-type", "application/json");
+
     return handlers.POST(
       new Request(`${env.BETTER_AUTH_URL}/api/auth/${path}`, {
         method: "POST",
@@ -116,13 +124,16 @@ test.describe("Better Auth with explicit TEST_DATABASE_URL and an owned schema",
     });
     expect(response.status).toBe(200);
     const result: unknown = await response.json();
+
     if (
       !result ||
       typeof result !== "object" ||
       !("url" in result) ||
       typeof result.url !== "string"
-    )
+    ) {
       throw new Error("Missing authorization URL");
+    }
+
     const url = new URL(result.url);
     expect(url.origin).toBe("https://accounts.google.com");
     expect(url.searchParams.get("scope")?.split(" ").sort()).toEqual([
@@ -155,12 +166,15 @@ test.describe("Better Auth with explicit TEST_DATABASE_URL and an owned schema",
         data: { sub: "google-fixture-subject" },
       }),
     }));
+
     function cookieHeaders(cookieResponse: Response) {
       const cookies = parseSetCookieHeader(cookieResponse.headers.get("set-cookie") ?? "");
+
       return new Headers({
         cookie: [...cookies].map(([name, cookie]) => `${name}=${cookie.value}`).join("; "),
       });
     }
+
     try {
       const callback = await handlers.GET(
         new Request(
@@ -173,7 +187,11 @@ test.describe("Better Auth with explicit TEST_DATABASE_URL and an owned schema",
       const accounts = await harness.db.select().from(accountTable);
       expect(accounts).toHaveLength(1);
       const account = accounts[0];
-      if (!account?.accessToken || !account.idToken) throw new Error("OAuth tokens not persisted");
+
+      if (!account?.accessToken || !account.idToken) {
+        throw new Error("OAuth tokens not persisted");
+      }
+
       expect(account.accountId).toBe("google-fixture-subject");
       expect(account.accessToken).not.toBe("fixture-access-token");
       // 1.7.7 encrypts access/refresh tokens, but stores ID tokens unchanged.
@@ -233,6 +251,7 @@ test.describe("Better Auth with explicit TEST_DATABASE_URL and an owned schema",
         ).status,
       ).toBe(400);
     }
+
     expect(await harness.scoped.query('select id from "verification"')).toEqual([]);
   });
 

@@ -11,5 +11,6 @@ export function fixtureDatabase(env: Record<string, string | undefined> = proces
   const url = requireDatabaseUrl({ DATABASE_URL: env.TEST_DATABASE_URL });
   const client = createTestQueryClient(url, env.COMPRAFINO_TEST_DATABASE_MODE);
   const scoped = testSchemaClient(client, env.COMPRAFINO_E2E_SCHEMA ?? "");
+
   return drizzle(scoped, { schema });
 }

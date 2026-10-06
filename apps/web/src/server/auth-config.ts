@@ -11,13 +11,23 @@ export function authOptions(
 ) {
   function required(key: string) {
     const value = env[key]?.trim();
-    if (!value) throw new Error(`Missing ${key}`);
+
+    if (!value) {
+      throw new Error(`Missing ${key}`);
+    }
+
     return value;
   }
+
   const secret = required("BETTER_AUTH_SECRET");
-  if (secret.length < 32) throw new Error("BETTER_AUTH_SECRET requires at least 32 characters");
+
+  if (secret.length < 32) {
+    throw new Error("BETTER_AUTH_SECRET requires at least 32 characters");
+  }
+
   const baseURL = required("BETTER_AUTH_URL");
   const url = new URL(baseURL);
+
   if (
     url.origin !== baseURL ||
     url.username ||
@@ -28,6 +38,7 @@ export function authOptions(
   ) {
     throw new Error("BETTER_AUTH_URL requires an HTTPS origin (HTTP is allowed on loopback)");
   }
+
   return {
     appName: "CompraFino",
     secret,

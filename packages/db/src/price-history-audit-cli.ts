@@ -3,8 +3,11 @@ import { z } from "zod";
 import { createDatabase } from "./client.ts";
 import { getCanonicalProductComparison, eligibleProducts } from "./public-products.ts";
 import { getCanonicalProductPriceHistory } from "./price-history.ts";
+
 const db = createDatabase();
+
 const now = new Date();
+
 const [depth, candidates, counts, transitions, sparse] = await db.batch([
   db.execute(sql`select count(*)::int as states,count(distinct listing_id)::int as listings,
     min(valid_from) as oldest,max(valid_from) as newest,count(*) filter(where valid_until is null)::int as open
@@ -32,6 +35,7 @@ const [depth, candidates, counts, transitions, sparse] = await db.batch([
     join price_history h on h.listing_id=a.listing_id group by p.id,p."displayName"
     having count(h.id)=count(distinct a.listing_id) order by p.id limit 1`),
 ]);
+
 const depthRow = z
   .object({
     states: z.number(),
@@ -41,6 +45,7 @@ const depthRow = z
     open: z.number(),
   })
   .parse(depth.rows[0]);
+
 const countRow = z
   .object({
     ordinary_changes: z.number(),
@@ -49,26 +54,41 @@ const countRow = z
     single_state_listings: z.number(),
   })
   .parse(counts.rows[0]);
+
 const ids = z
   .array(z.object({ id: z.uuid(), displayName: z.string(), states: z.number() }))
   .parse([...candidates.rows, ...sparse.rows]);
+
 const products = [];
+
 for (const product of ids) {
   const comparison = await getCanonicalProductComparison(db, product.id, now);
   const ranges = [];
+
   for (const range of ["7d", "30d", "90d"] as const) {
     const history = await getCanonicalProductPriceHistory(db, product.id, { range, now });
-    if (!history || !comparison) throw new Error("Audited product is no longer public");
+
+    if (!history || !comparison) {
+      throw new Error("Audited product is no longer public");
+    }
+
     for (const retailer of history.retailers) {
       const offer = comparison.offers.find((o) => o.retailerId === retailer.retailerId);
-      if (!offer) throw new Error("History retailer missing from comparison");
+
+      if (!offer) {
+        throw new Error("History retailer missing from comparison");
+      }
+
       const expectedCurrent =
         offer.observedAt >= history.start && offer.observedAt <= history.end
           ? offer.currentPriceCents
           : null;
-      if (retailer.summary.currentPriceCents !== expectedCurrent)
+
+      if (retailer.summary.currentPriceCents !== expectedCurrent) {
         throw new Error("History/current comparison mismatch");
+      }
     }
+
     ranges.push({
       range,
       retailers: history.retailers.map((r) => ({
@@ -80,8 +100,10 @@ for (const product of ids) {
       })),
     });
   }
+
   products.push({ ...product, ranges });
 }
+
 console.log(
   JSON.stringify(
     {

@@ -7,6 +7,7 @@ import { parseTottusProduct } from "./targeted.ts";
 import metro from "./fixtures/metro.json";
 import plaza from "./fixtures/plaza-vea.json";
 import tottus from "./fixtures/tottus-product.json";
+
 function known(
   externalId: string,
   productId: string,
@@ -25,6 +26,7 @@ function known(
     lastTargetedAttemptAt: null,
   };
 }
+
 it.each([
   ["metro", metro, createMetroAdapter],
   ["plaza-vea", plaza, createPlazaVeaAdapter],
@@ -45,35 +47,48 @@ it.each([
       listing: { retailer, externalId: item.itemId, available: true },
     });
     const input = fetcher.mock.calls[0]![0];
-    if (!(input instanceof URL)) throw new Error("Expected URL request");
+
+    if (!(input instanceof URL)) {
+      throw new Error("Expected URL request");
+    }
+
     const url = input;
     expect(url.searchParams.get("fq")).toBe(`skuId:${item.itemId}`);
     expect(url.searchParams.get("_to")).toBe("0");
     expect(fetcher).toHaveBeenCalledOnce();
   },
 );
+
 it("distinguishes VTEX empty/404, unavailable seller and malformed/system errors", async () => {
   const product = structuredClone(metro[0]!);
   const item = product.items[0]!;
   const row = known(item.itemId, product.productId);
-  for (const response of [Response.json([]), new Response(null, { status: 404 })])
+
+  for (const response of [Response.json([]), new Response(null, { status: 404 })]) {
     expect(await createMetroAdapter(async () => response).lookupListing(row)).toEqual({
       status: "not-found",
     });
-  for (const seller of item.sellers)
+  }
+
+  for (const seller of item.sellers) {
     if (seller.sellerId === "1") {
       seller.commertialOffer.IsAvailable = false;
       seller.commertialOffer.Price = 0;
     }
+  }
+
   expect(await createMetroAdapter(async () => Response.json([product])).lookupListing(row)).toEqual(
     { status: "unavailable" },
   );
+
   for (const response of [
     Response.json({ bad: true }),
     new Response(null, { status: 429 }),
     new Response(null, { status: 503 }),
-  ])
+  ]) {
     await expect(createMetroAdapter(async () => response).lookupListing(row)).rejects.toThrow(/./u);
+  }
+
   await expect(
     createMetroAdapter(async () => Response.json(metro.slice(0, 1))).lookupListing({
       ...row,
@@ -81,9 +96,13 @@ it("distinguishes VTEX empty/404, unavailable seller and malformed/system errors
     }),
   ).rejects.toThrow("identity");
 });
+
 const product = tottus.props.pageProps.productData;
+
 const tottusKnown = known(product.variants[0]!.id, product.id, "tottus");
+
 const html = (value: unknown) => `<script id="__NEXT_DATA__">${JSON.stringify(value)}</script>`;
+
 it("maps Tottus exact variant using ordinary internet/reference price and quote unit", async () => {
   const at = new Date("2026-10-04T12:00:00Z");
   expect(parseTottusProduct(html(tottus), tottusKnown, at)).toMatchObject({
@@ -102,6 +121,7 @@ it("maps Tottus exact variant using ordinary internet/reference price and quote 
   expect((await createTottusAdapter(fetcher).lookupListing(tottusKnown)).status).toBe("observed");
   expect(fetcher).toHaveBeenCalledOnce();
 });
+
 it("Tottus unavailable does not fabricate prices and missing exact variants are not found", () => {
   const unavailable = structuredClone(tottus);
   unavailable.props.pageProps.productData.variants[0]!.isPurchaseable = false;
@@ -116,6 +136,7 @@ it("Tottus unavailable does not fabricate prices and missing exact variants are 
   ).toThrow("identity");
   expect(() => parseTottusProduct("blocked", tottusKnown, new Date())).toThrow(/./u);
 });
+
 it("rejects untrusted Tottus URL before a request and does not retry system failures", async () => {
   const fetcher = vi.fn<typeof fetch>().mockResolvedValue(new Response(null, { status: 403 }));
   await expect(

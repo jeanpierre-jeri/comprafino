@@ -19,6 +19,7 @@ const treatment = {
   "plaza-vea": { color: "var(--plaza-text)", shape: "diamond", symbol: "◆" },
   metro: { color: "var(--metro-text)", shape: "square", symbol: "■" },
 } as const;
+
 const date = (at: number, detailed = false) =>
   new Intl.DateTimeFormat("es-PE", {
     timeZone: "America/Lima",
@@ -26,6 +27,7 @@ const date = (at: number, detailed = false) =>
     month: "short",
     ...(detailed ? ({ year: "numeric", hour: "2-digit", minute: "2-digit" } as const) : {}),
   }).format(at);
+
 type Series = {
   retailerId: RetailerId;
   retailerName: string;
@@ -43,6 +45,7 @@ function EventTooltip({
   payload?: readonly { payload?: unknown }[];
 }) {
   const raw = payload?.[0]?.payload;
+
   if (
     !active ||
     typeof raw !== "object" ||
@@ -53,8 +56,10 @@ function EventTooltip({
     typeof raw.priceCents !== "number" ||
     !("retailerName" in raw) ||
     typeof raw.retailerName !== "string"
-  )
+  ) {
     return null;
+  }
+
   return (
     <div role="tooltip" className="max-w-60 rounded-lg border bg-surface p-3 text-xs shadow-soft">
       <p className="font-semibold">
@@ -69,6 +74,7 @@ function EventTooltip({
     </div>
   );
 }
+
 export function PriceHistoryChart({
   series,
   start,
@@ -88,6 +94,7 @@ export function PriceHistoryChart({
       },
     ]),
   );
+
   return (
     <div>
       <div className="my-4 flex flex-wrap gap-2" aria-label="Supermercados del historial">

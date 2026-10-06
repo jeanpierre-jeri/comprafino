@@ -16,7 +16,9 @@ import {
 import { catalogRecordSchema, catalogFingerprint } from "./catalog.ts";
 import type { KnownListing } from "@comprafino/core";
 import type { createDatabase } from "./client.ts";
+
 type Database = ReturnType<typeof createDatabase>;
+
 export async function knownListings(db: Database) {
   const result =
     await db.execute(sql`select l.id,l.retailer_id as retailer,l.external_id as "externalId",
@@ -62,6 +64,7 @@ export async function knownListings(db: Database) {
       },
       at,
     );
+
     return {
       ...row,
       shoppingRelevant:
@@ -72,10 +75,14 @@ export async function knownListings(db: Database) {
       usefulStaple: currentNormalization && family.family !== null && quantity.price !== null,
     };
   });
-  if (rows.length > catalogPolicy.retainedListingCap)
+
+  if (rows.length > catalogPolicy.retainedListingCap) {
     throw new Error("Known listing refresh exceeds complete catalog bound");
+  }
+
   return rows;
 }
+
 export async function previewListingRefresh(
   db: Database,
   options: ReturnType<typeof parseListingRefreshOptions>,
@@ -86,9 +93,11 @@ export async function previewListingRefresh(
       (!options.retailer || row.retailer === options.retailer) &&
       (!options.externalId || row.externalId === options.externalId),
   );
+
   // Explicit one-SKU inspection permits live repeat validation without changing scheduler policy.
   return options.externalId ? rows.slice(0, 1) : selectListingRefresh(rows, now, options.limit);
 }
+
 export async function claimListingRefresh(db: Database, row: KnownListing, at: Date) {
   const results = await db.batch([
     db.execute(sql`select id from retailers where id=${row.retailer} for update`),
@@ -96,8 +105,10 @@ export async function claimListingRefresh(db: Database, row: KnownListing, at: D
       where id=${row.id}::uuid and last_seen_at=${row.observedAt.toISOString()}::timestamptz
       and last_targeted_attempt_at is not distinct from ${row.lastTargetedAttemptAt?.toISOString() ?? null}::timestamptz returning id`),
   ]);
+
   return results[1].rows.length === 1;
 }
+
 export async function finishListingRefresh(
   db: Database,
   row: KnownListing,

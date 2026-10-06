@@ -20,11 +20,13 @@ const catalogAuditRow = z.object({
   normalization_version: z.number().int().nullable(),
   input_fingerprint: z.string().nullable(),
 });
+
 const demandAuditRow = z.object({
   normalized_query: z.string(),
   request_count: z.number().int().nonnegative(),
   status: z.string(),
 });
+
 const historyAuditRow = z.object({
   states: z.number().int().nonnegative(),
   open: z.number().int().nonnegative(),
@@ -33,6 +35,7 @@ const historyAuditRow = z.object({
     .regex(/^[a-f0-9]{32}$/u)
     .nullable(),
 });
+
 const queries = [
   "huevos",
   "arroz",
@@ -45,15 +48,22 @@ const queries = [
   "detergente",
   "papel higiénico",
 ];
+
 try {
-  if (process.argv.slice(2).some((arg) => arg !== "--")) throw new Error("No options supported");
+  if (process.argv.slice(2).some((arg) => arg !== "--")) {
+    throw new Error("No options supported");
+  }
+
   const db = createDatabase();
   const now = new Date();
   const catalog =
     await db.execute(sql`select l.id,l.retailer_id,l.external_id,l.title,l.category,l.package_text,l.source_brand,l.current_price_cents,l.last_seen_at,
     n.normalization_version,n.input_fingerprint from retailer_listings l left join listing_normalizations n on n.listing_id=l.id order by l.retailer_id,l.title limit ${catalogPolicy.overflowSentinel}`);
-  if (catalog.rows.length > catalogPolicy.retainedListingCap)
+
+  if (catalog.rows.length > catalogPolicy.retainedListingCap) {
     throw new Error("Catalog bound exceeded");
+  }
+
   const demand = await db.execute(
     sql`select normalized_query,request_count,status from discovery_queries order by request_count desc,normalized_query limit 20`,
   );
@@ -61,6 +71,7 @@ try {
     await db.execute(sql`select count(*)::integer as states,count(*) filter(where valid_until is null)::integer as open,
     md5(string_agg(row(id,listing_id,current_price_cents,regular_price_cents,currency,price_unit,valid_from,valid_until)::text,'' order by id)) as digest from price_history`);
   const searches = [];
+
   for (const query of queries) {
     const result = await searchPublicProducts(db, query, "relevance", now);
     searches.push({
@@ -83,6 +94,7 @@ try {
       })),
     });
   }
+
   console.log(
     JSON.stringify(
       {

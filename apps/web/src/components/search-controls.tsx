@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@comprafino/ui/lib/utils";
 import { ChoiceSelect } from "@comprafino/ui/components/select";
 import { useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -20,38 +21,47 @@ export function SearchControls({
   const router = useRouter();
   const currentParams = useSearchParams();
   const [pending, startTransition] = useTransition();
+
   function change(key: string, value: string) {
     const next = searchFilters({ ...filters, [key]: value });
     const historyRange = currentParams.get("range");
-    const suffix = comparisonPath
-      ? next.priceMode === "benefits"
-        ? `?priceMode=benefits${historyRange ? `&range=${encodeURIComponent(historyRange)}` : ""}`
-        : historyRange
-          ? `?range=${encodeURIComponent(historyRange)}`
-          : ""
-      : `?${searchFilterQuery(query, next)}`;
+    let suffix;
+
+    if (comparisonPath) {
+      if (next.priceMode === "benefits") {
+        suffix = `?priceMode=benefits${historyRange ? `&range=${encodeURIComponent(historyRange)}` : ""}`;
+      } else if (historyRange) {
+        suffix = `?range=${encodeURIComponent(historyRange)}`;
+      } else {
+        suffix = "" as const;
+      }
+    } else {
+      suffix = `?${searchFilterQuery(query, next)}`;
+    }
+
     startTransition(() =>
       router.push(`${comparisonPath ?? "/search"}${suffix}`, { scroll: false }),
     );
   }
+
   const unitOptions = [...new Set([...units, ...(filters.unit ? [filters.unit] : [])])].map(
     (unit) => ({
       value: unit,
-      label:
-        unit === "kg"
-          ? "kg"
-          : unit === "L"
-            ? "litro"
-            : unit === "roll"
-              ? "rollo · orientativo"
-              : "unidad",
+      label: unitOptionLabel(unit),
     }),
   );
+
+  const showUnitFilter = units.length > 1 || Boolean(filters.unit);
+  const searchColumns = showUnitFilter ? "lg:grid-cols-4" : "lg:grid-cols-3";
+  const fieldsetLayout = comparisonPath
+    ? "sm:max-w-sm"
+    : cn("grid-cols-1 min-[380px]:grid-cols-2", searchColumns);
+
   return (
     <div className="filter-surface" aria-busy={pending}>
       <fieldset
         disabled={pending}
-        className={`grid items-end gap-x-3 gap-y-2.5 ${comparisonPath ? "sm:max-w-sm" : `grid-cols-1 min-[380px]:grid-cols-2 ${units.length > 1 || filters.unit ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}`}
+        className={cn("grid items-end gap-x-3 gap-y-2.5", fieldsetLayout)}
       >
         <legend className="sr-only">Filtros de precios</legend>
         {!comparisonPath && (
@@ -107,12 +117,29 @@ export function SearchControls({
         />
       </fieldset>
       <output className="mt-2.5 block text-xs leading-relaxed text-muted-foreground">
-        {pending
-          ? "Actualizando resultados…"
-          : filters.priceMode === "benefits"
-            ? "Incluye ofertas que requieren tarjeta CMR. Verifica la condición antes de comprar."
-            : "Beneficios separados del precio para todos."}
+        {filterStatusMessage(pending, filters.priceMode)}
       </output>
     </div>
   );
+}
+
+function unitOptionLabel(unit: string): string {
+  switch (unit) {
+    case "kg":
+      return "kg";
+    case "L":
+      return "litro";
+    case "roll":
+      return "rollo · orientativo";
+    default:
+      return "unidad";
+  }
+}
+
+function filterStatusMessage(pending: boolean, priceMode: SearchFilters["priceMode"]): string {
+  if (pending) return "Actualizando resultados…";
+
+  return priceMode === "benefits"
+    ? "Incluye ofertas que requieren tarjeta CMR. Verifica la condición antes de comprar."
+    : "Beneficios separados del precio para todos.";
 }

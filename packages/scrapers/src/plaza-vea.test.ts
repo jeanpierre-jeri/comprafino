@@ -5,8 +5,10 @@ import { ingest } from "./ingestion.ts";
 import type { IngestionStore } from "./ingestion.ts";
 
 const observed = new Date("2026-10-03T15:00:00Z");
+
 const requestedUrl = (input: Parameters<typeof fetch>[0]) =>
   input instanceof Request ? new URL(input.url) : new URL(input);
+
 const response = (data: unknown, range = "0-5/6") =>
   new Response(JSON.stringify(data), { status: 206, headers: { resources: range } });
 
@@ -146,8 +148,11 @@ describe("sanitized live Plaza Vea public catalog fixture", () => {
       currentPriceCents: 29,
       url: p.link,
     });
-    for (const key of ["imageUrl", "regularPriceCents", "packageText", "category"] as const)
+
+    for (const key of ["imageUrl", "regularPriceCents", "packageText", "category"] as const) {
       expect(result.listings[0]?.[key]).toBeUndefined();
+    }
+
     // A real captured listing has no presentation field.
     expect(parsePlazaVeaPage(fixture, observed).listings[4]?.packageText).toBeUndefined();
   });
@@ -253,9 +258,11 @@ describe("bounded Plaza Vea adapter and generic ingestion", () => {
 
   it("caps duplicate-only source coverage at 500 products and 25 requests", async () => {
     vi.useFakeTimers();
+
     try {
       const request = vi.fn<typeof fetch>().mockImplementation(async (input) => {
         const from = Number(requestedUrl(input).searchParams.get("_from"));
+
         return response(
           Array.from({ length: 20 }, () => fixture[0]),
           `${from}-${from + 19}/1000`,
@@ -290,10 +297,13 @@ describe("bounded Plaza Vea adapter and generic ingestion", () => {
 
   it("validates bounds before fetching", async () => {
     const request = vi.fn<typeof fetch>();
-    for (const limit of [0, 501, 1.5, NaN])
+
+    for (const limit of [0, 501, 1.5, NaN]) {
       await expect(createPlazaVeaAdapter(request).fetchListings(limit)).rejects.toThrow(
         "Limit must",
       );
+    }
+
     expect(request).not.toHaveBeenCalled();
   });
 

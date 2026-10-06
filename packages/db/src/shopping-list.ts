@@ -1,3 +1,4 @@
+import { catalogQuantityToShoppingUnit } from "@comprafino/core";
 import { catalogPolicy } from "@comprafino/core";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
@@ -39,18 +40,28 @@ export async function evaluateCurrentShoppingItem(
     item.intent === "generic"
       ? null
       : await getCanonicalProductComparison(db, item.canonicalId, now, mode);
+
   if (product) {
     const exactOffers = await getCanonicalCurrentProductOffers(db, product.id, now, mode);
-    for (const offer of exactOffers) candidates.push(shoppingCandidate(offer));
+
+    for (const offer of exactOffers) {
+      candidates.push(shoppingCandidate(offer));
+    }
   }
+
   if (item.intent !== "strict") {
     // Derive the family from the current canonical identity, never a saved brand
     // query, so a preference cannot hide another brand's market opportunity.
-    const query = product
-      ? shoppingQueryForTitle(product.displayName)
-      : item.intent === "generic"
-        ? shoppingMarketQuery(item)
-        : null;
+    let query;
+
+    if (product) {
+      query = shoppingQueryForTitle(product.displayName);
+    } else if (item.intent === "generic") {
+      query = shoppingMarketQuery(item);
+    } else {
+      query = null;
+    }
+
     if (query) {
       const offers = await searchGenericProductOffers(
         db,
@@ -60,14 +71,19 @@ export async function evaluateCurrentShoppingItem(
         searchFilters({ priceMode: mode }),
         true,
       );
+
       for (const o of offers) {
         // Independent normalized offers are valid generic options. A null public
         // canonical ID must never become an exact-product/history association.
-        if (product && o.canonicalId === product.id) continue;
+        if (product && o.canonicalId === product.id) {
+          continue;
+        }
+
         candidates.push(shoppingCandidate(o));
       }
     }
   }
+
   return evaluateShoppingListItem(item, candidates, mode, now, product?.displayName);
 }
 
@@ -75,6 +91,7 @@ function shoppingCandidate(
   o: Awaited<ReturnType<typeof searchGenericProductOffers>>[number],
 ): ShoppingCandidate {
   const q = o.totalQuantity;
+
   return {
     id: o.id,
     canonicalId: o.canonicalId,
@@ -90,7 +107,7 @@ function shoppingCandidate(
       q && o.pricingBasis === "unit"
         ? {
             amount: q.value / (q.unit === "unit" ? 1 : 1000),
-            unit: q.unit === "g" ? "kg" : q.unit === "ml" ? "L" : "unit",
+            unit: catalogQuantityToShoppingUnit(q.unit),
           }
         : null,
     strongQuantity: o.unitPrice?.quality === "strong",
@@ -111,6 +128,7 @@ export async function evaluateCurrentShoppingList(
   let queryMs = 0;
   let candidates: ShoppingCandidate[] = [];
   const titles = new Map<string, string>();
+
   if (list.items.length) {
     const ids = [
       ...new Set(list.items.flatMap((i) => (i.intent === "generic" ? [] : [i.canonicalId]))),
@@ -140,17 +158,25 @@ export async function evaluateCurrentShoppingList(
         listings: z.array(z.unknown()),
       })
       .parse(result.rows[0]?.snapshot);
-    if (snapshot.listings.length > catalogPolicy.retainedListingCap)
+
+    if (snapshot.listings.length > catalogPolicy.retainedListingCap) {
       throw new Error("Shopping catalog snapshot bound exceeded");
-    for (const product of snapshot.products) titles.set(product.id, product.title);
+    }
+
+    for (const product of snapshot.products) {
+      titles.set(product.id, product.title);
+    }
+
     candidates = snapshot.listings
       .map((raw) => genericProductOffer(raw, now, mode))
       .filter((offer) => offer !== null)
       .map(shoppingCandidate);
   }
+
   const fulfillments = list.items.map((item) => {
     // Missing public identity cannot authorize either exact purchase or preference fallback.
     const title = item.intent === "generic" ? undefined : titles.get(item.canonicalId);
+
     return evaluateShoppingFulfillment(
       item,
       item.intent !== "generic" && !title ? [] : candidates,
@@ -159,6 +185,7 @@ export async function evaluateCurrentShoppingList(
       title,
     );
   });
+
   return {
     evaluations: fulfillments.map((f) => f.evaluation),
     baskets: optimizeBasket(

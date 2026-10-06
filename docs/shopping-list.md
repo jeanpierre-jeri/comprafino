@@ -56,7 +56,7 @@ Basket optimization consumes shared approved fulfillment options and preserves s
 
 ## Transient browser-storage failure (Cleanup A)
 
-Storage rereads use the latest module/session list as their fallback when localStorage access throws. Mutations and storage-event handling preserve that list instead of replacing it with an empty list. A read warning survives the same mutation even if its subsequent write succeeds. Session state continues across client navigation; a full reload without working storage cannot recover an unpersisted session.
+Storage rereads use the latest provider/session list as their fallback when localStorage access throws. Mutations and storage-event handling preserve that list instead of replacing it with an empty list. A read warning survives the same mutation even if its subsequent write succeeds. The root Zustand provider keeps session state across client navigation; a full reload without working storage cannot recover an unpersisted session.
 
 Working storage still supplies the latest persisted state before mutation and cross-tab events still synchronize it, including removal/clear. Missing or malformed/incompatible stored data retains the existing empty-list recovery semantics; it is distinct from inaccessible storage. No state-management dependency was added.
 

@@ -4,6 +4,7 @@ import {
   getSubstitutionProfile,
   inferGenericSubstitutionProfile,
 } from "./substitution-compatibility.ts";
+
 describe("conservative substitution policy", () => {
   it.each([
     ["Huevos Blancos Bell's 30un", "Huevos Pardos La Calera 15un", true],
@@ -43,7 +44,8 @@ describe("conservative substitution policy", () => {
       "arroz basmati",
       "aceite de oliva",
       "detergente pods",
-    ])
+    ]) {
       expect(inferGenericSubstitutionProfile(query, "unit")).toBeNull();
+    }
   });
 });

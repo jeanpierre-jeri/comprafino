@@ -1,4 +1,4 @@
-import { AddShoppingItem } from "./shopping-item-editor";
+import { AddShoppingItem } from "./shopping-list/shopping-item-editor";
 import { shoppingQueryForTitle, shoppingSeedForRetailerOffer } from "@comprafino/core";
 import { ArrowRight, ArrowUpRight } from "@comprafino/ui";
 import { NavigationLink } from "./navigation-link";
@@ -123,6 +123,7 @@ export function ExactProductCard({
       (oldest, offer) => (!oldest || offer.observedAt < oldest ? offer.observedAt : oldest),
       null,
     );
+
   return (
     <article className="product-card exact-card">
       <NavigationLink

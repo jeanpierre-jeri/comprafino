@@ -14,22 +14,26 @@ Exact direct versions are pinned in manifests; the lockfile pins the graph. This
 
 ## @comprafino/web
 
-| Dependency                     | Version       | Kind            | Purpose                                            |
-| ------------------------------ | ------------- | --------------- | -------------------------------------------------- |
-| `@comprafino/core`             | `workspace:*` | dependencies    | framework-independent domain validation and policy |
-| `@comprafino/db`               | `workspace:*` | dependencies    | persisted query and transactional write boundaries |
-| `@comprafino/ui`               | `workspace:*` | dependencies    | shared interactive/theme/history primitives        |
-| `better-auth`                  | `1.7.7`       | dependencies    | Google OAuth, PostgreSQL sessions and auth client  |
-| `@better-auth/drizzle-adapter` | `1.7.7`       | dependencies    | Better Auth PostgreSQL/Drizzle integration         |
-| `next`                         | `16.3.8`      | dependencies    | App Router and production web build                |
-| `react`                        | `19.3.0`      | dependencies    | React rendering / UI peer                          |
-| `react-dom`                    | `19.3.0`      | dependencies    | DOM rendering / Base UI peer                       |
-| `@playwright/test`             | `1.63.0`      | devDependencies | application Chromium E2E testing                   |
-| `@tailwindcss/postcss`         | `4.3.3`       | devDependencies | Next PostCSS integration                           |
-| `@types/node`                  | `24.19.1`     | devDependencies | native fetch and CLI types                         |
-| `@types/react`                 | `19.3.0`      | devDependencies | React types                                        |
-| `@types/react-dom`             | `19.3.0`      | devDependencies | React DOM types                                    |
-| `tailwindcss`                  | `4.3.3`       | devDependencies | Tailwind 4 CSS compilation                         |
+| Dependency                     | Version       | Kind            | Purpose                                                         |
+| ------------------------------ | ------------- | --------------- | --------------------------------------------------------------- |
+| `@comprafino/core`             | `workspace:*` | dependencies    | framework-independent domain validation and policy              |
+| `@comprafino/db`               | `workspace:*` | dependencies    | persisted query and transactional write boundaries              |
+| `@comprafino/ui`               | `workspace:*` | dependencies    | shared interactive/theme/history primitives                     |
+| `better-auth`                  | `1.7.7`       | dependencies    | Google OAuth, PostgreSQL sessions and auth client               |
+| `@better-auth/drizzle-adapter` | `1.7.7`       | dependencies    | Better Auth PostgreSQL/Drizzle integration                      |
+| `next`                         | `16.3.8`      | dependencies    | App Router and production web build                             |
+| `react`                        | `19.3.0`      | dependencies    | React rendering / UI peer                                       |
+| `@tanstack/react-query`        | `5.104.1`     | dependencies    | browser server state, query cancellation and mutation lifecycle |
+| `zustand`                      | `5.0.15`      | dependencies    | provider-scoped shopping lists and browser theme state          |
+| `react-dom`                    | `19.3.0`      | dependencies    | DOM rendering / Base UI peer                                    |
+| `@playwright/test`             | `1.63.0`      | devDependencies | application Chromium E2E testing                                |
+| `@tailwindcss/postcss`         | `4.3.3`       | devDependencies | Next PostCSS integration                                        |
+| `@types/node`                  | `24.19.1`     | devDependencies | native fetch and CLI types                                      |
+| `@types/react`                 | `19.3.0`      | devDependencies | React types                                                     |
+| `@types/react-dom`             | `19.3.0`      | devDependencies | React DOM types                                                 |
+| `tailwindcss`                  | `4.3.3`       | devDependencies | Tailwind 4 CSS compilation                                      |
+
+Zustand **5.0.15** is pinned in `apps/web` for anonymous shopping data, local synchronization status and theme selection. Stores are created per provider/control instance and initialized without browser reads during server rendering. TanStack Query **5.104.1** owns remote shopping documents and public evaluations, with one QueryClient per root provider. Account changes cancel and clear this cache; retries and offline mutation resumption are disabled. Anonymous storage keeps its existing validated repository boundary; Zustand persist middleware is not used. See [readability and frontend state](code-readability.md).
 
 ## @comprafino/core
 

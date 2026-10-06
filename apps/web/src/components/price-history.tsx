@@ -15,6 +15,7 @@ const date = (at: Date) =>
     hour: "2-digit",
     minute: "2-digit",
   }).format(at);
+
 export async function PriceHistory({
   productId,
   range,
@@ -25,11 +26,13 @@ export async function PriceHistory({
   benefits: boolean;
 }) {
   let history;
+
   try {
     history = await getCanonicalProductPriceHistory(createDatabase(), productId, { range });
   } catch (error) {
     logDiagnostic(error, { stage: "public", operation: "history", reason: "db_read_failed" });
   }
+
   return (
     <PriceHistoryPresentation
       history={history ?? null}
@@ -113,6 +116,7 @@ export function PriceHistoryPresentation({
           >
             {history.retailers.map((r) => {
               const s = r.summary;
+
               return (
                 <article
                   key={r.retailerId}
@@ -157,35 +161,11 @@ export function PriceHistoryPresentation({
                       <dt className="text-xs text-muted-foreground">
                         Desde el primer estado del rango
                       </dt>
-                      <dd className="mt-1">
-                        {s.differenceCents === null
-                          ? "—"
-                          : `${s.differenceCents > 0 ? "+" : s.differenceCents < 0 ? "−" : ""}${formatPen(Math.abs(s.differenceCents))}`}
-                      </dd>
+                      <dd className="mt-1">{priceDifferenceLabel(s.differenceCents)}</dd>
                     </div>
                   </dl>
-                  <p className="mt-4 text-sm leading-relaxed">
-                    {s.lastChange
-                      ? `Último cambio: ${s.lastChange.toCents < s.lastChange.fromCents ? "bajó" : "subió"} de ${formatPen(s.lastChange.fromCents)} a ${formatPen(s.lastChange.toCents)} el ${date(s.lastChange.at)}.`
-                      : s.status === "empty"
-                        ? "Sin registros en este rango."
-                        : "Sin cambios observados en este rango."}
-                  </p>
-                  {s.lastChange ? (
-                    <p className="mt-2 text-sm font-medium" data-testid="price-change-insight">
-                      {s.lastChange.direction === "down" ? "↓ Bajó" : "↑ Subió"}{" "}
-                      {formatPen(s.lastChange.absoluteDifferenceCents)} en el último cambio del
-                      rango
-                      {s.lastChange.percentDifference !== null
-                        ? ` (${Math.abs(s.lastChange.percentDifference)}%)`
-                        : ""}
-                      .
-                    </p>
-                  ) : s.verifiedUnchangedDays !== null ? (
-                    <p className="mt-2 text-sm font-medium" data-testid="unchanged-insight">
-                      Sin cambios observados durante {s.verifiedUnchangedDays} días.
-                    </p>
-                  ) : null}
+                  <p className="mt-4 text-sm leading-relaxed">{lastChangeDescription(s)}</p>
+                  {<PriceChangeInsight summary={s} />}
                   <p className="mt-2 text-xs text-muted-foreground">
                     {r.coverage.length} días con observaciones en el rango. Un día observado no
                     garantiza un precio constante entre consultas.
@@ -220,4 +200,58 @@ export function PriceHistoryPresentation({
       )}
     </section>
   );
+}
+
+type HistorySummary = ReturnType<typeof import("@comprafino/core").summarizePriceHistory>;
+
+function priceDifferenceLabel(difference: number | null): string {
+  if (difference === null) return "—";
+
+  let prefix = "";
+
+  if (difference > 0) {
+    prefix = "+";
+  } else if (difference < 0) {
+    prefix = "−";
+  }
+
+  return `${prefix}${formatPen(Math.abs(difference))}`;
+}
+
+function lastChangeDescription(summary: HistorySummary): string {
+  if (summary.lastChange) {
+    const change = summary.lastChange;
+    const direction = change.toCents < change.fromCents ? "bajó" : "subió";
+
+    return `Último cambio: ${direction} de ${formatPen(change.fromCents)} a ${formatPen(change.toCents)} el ${date(change.at)}.`;
+  }
+
+  return summary.status === "empty"
+    ? "Sin registros en este rango."
+    : "Sin cambios observados en este rango.";
+}
+
+function PriceChangeInsight({ summary }: { summary: HistorySummary }) {
+  if (summary.lastChange) {
+    return (
+      <p className="mt-2 text-sm font-medium" data-testid="price-change-insight">
+        {summary.lastChange.direction === "down" ? "↓ Bajó" : "↑ Subió"}{" "}
+        {formatPen(summary.lastChange.absoluteDifferenceCents)} en el último cambio del rango
+        {summary.lastChange.percentDifference !== null
+          ? ` (${Math.abs(summary.lastChange.percentDifference)}%)`
+          : ""}
+        .
+      </p>
+    );
+  }
+
+  if (summary.verifiedUnchangedDays !== null) {
+    return (
+      <p className="mt-2 text-sm font-medium" data-testid="unchanged-insight">
+        Sin cambios observados durante {summary.verifiedUnchangedDays} días.
+      </p>
+    );
+  }
+
+  return null;
 }

@@ -58,6 +58,7 @@ test.describe("persisted public catalog (explicit DATABASE_URL)", () => {
     await expect(
       page.getByRole("heading", { name: `Compara en ${product!.retailerCount} supermercados` }),
     ).toBeVisible();
+
     for (const offer of product!.offers) {
       const row = page
         .getByRole("region", { name: `Compara en ${product!.retailerCount} supermercados` })
@@ -72,6 +73,7 @@ test.describe("persisted public catalog (explicit DATABASE_URL)", () => {
       ).toHaveAttribute("href", offer.url);
       await expect(row.locator("s")).toHaveCount(offer.regularPriceCents === null ? 0 : 1);
     }
+
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
     ).toBe(true);
@@ -225,11 +227,13 @@ test.describe("immediate filters and CMR (explicit DATABASE_URL)", () => {
       .filter({ has: page.getByRole("heading", { name: "Tottus", exact: true }) });
     const offer = product!.offers.find((o) => o.retailerId === "tottus")!;
     await expect(row.getByText(formatPen(offer.currentPriceCents), { exact: true })).toBeVisible();
+
     if (offer.regularPriceCents === null) {
       await expect(row.locator("s")).toHaveCount(0);
     } else {
       await expect(row.locator("s")).toHaveText(formatPen(offer.regularPriceCents));
     }
+
     await expect(
       row.getByText(`${formatPen(offer.conditionalOffers[0]!.priceCents)} con CMR`, {
         exact: true,

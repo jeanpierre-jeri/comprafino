@@ -2,8 +2,11 @@ import { conditionalOfferSchema } from "./conditional-offer.ts";
 import { z } from "zod";
 
 export const retailerIdSchema = z.enum(["tottus", "plaza-vea", "metro"]);
+
 export type RetailerId = z.infer<typeof retailerIdSchema>;
+
 const cents = z.number().int().min(0).max(2_147_483_647);
+
 export const listingSchema = z.object({
   retailer: retailerIdSchema,
   externalId: z.string().trim().min(1),
@@ -23,7 +26,9 @@ export const listingSchema = z.object({
   observedAt: z.date(),
   conditionalOffers: z.array(conditionalOfferSchema).max(1).optional(),
 });
+
 export type NormalizedRetailerListing = z.infer<typeof listingSchema>;
+
 export function normalizeWhitespace(value: string): string {
   return value.replace(/\s+/gu, " ").trim();
 }
@@ -34,17 +39,27 @@ export function parsePenCents(value: string | number): number {
     .trim()
     .replace(/^S\/\s*/u, "");
   const match = /^(\d+)(?:\.(\d{1,2}))?$/u.exec(text);
-  if (!match) throw new Error("Invalid PEN decimal amount");
+
+  if (!match) {
+    throw new Error("Invalid PEN decimal amount");
+  }
+
   const result = BigInt(match[1]!) * 100n + BigInt((match[2] ?? "").padEnd(2, "0"));
-  if (result > 2_147_483_647n) throw new Error("PEN amount exceeds database integer range");
+
+  if (result > 2_147_483_647n) {
+    throw new Error("PEN amount exceeds database integer range");
+  }
+
   return Number(result);
 }
+
 export type PriceState = {
   currentPriceCents: number;
   regularPriceCents?: number | null;
   currency: "PEN";
   priceUnit: "KG" | "UN";
 };
+
 export function priceStateChanged(previous: PriceState | undefined, next: PriceState): boolean {
   return (
     !previous ||

@@ -22,6 +22,7 @@ import type { createDatabase } from "./client.ts";
 import { userShoppingLists } from "./schema.ts";
 
 type Database = ReturnType<typeof createDatabase>;
+
 export type UserShoppingListMutation =
   | { status: "success"; state: RemoteShoppingListState }
   | { status: "conflict"; current: RemoteShoppingListState };
@@ -31,20 +32,26 @@ export class ShoppingListDomainError extends Error {
     super("Shopping list operation rejected", { cause });
   }
 }
+
 export class ShoppingListRevisionExhaustedError extends Error {
   constructor() {
     super("Shopping list revision exhausted");
   }
 }
+
 const stored = z.object({ revision: shoppingListRevisionSchema.min(1), data: z.unknown() });
+
 function state(row: unknown): RemoteShoppingListState {
   const parsed = stored.parse(row);
+
   return remoteShoppingListStateSchema.parse({
     revision: parsed.revision,
     list: remoteShoppingListSchema.parse(parsed.data),
   });
 }
+
 const absent = (): RemoteShoppingListState => ({ revision: 0, list: emptyShoppingList() });
+
 export async function readUserShoppingList(
   db: Database,
   rawUserId: string,
@@ -54,8 +61,10 @@ export async function readUserShoppingList(
     .select({ revision: userShoppingLists.revision, data: userShoppingLists.data })
     .from(userShoppingLists)
     .where(eq(userShoppingLists.userId, userId));
+
   return rows[0] ? state(rows[0]) : absent();
 }
+
 function apply(list: ShoppingList, operation: ShoppingListSyncOperation): ShoppingList {
   try {
     return shoppingListSchema.parse(
@@ -80,6 +89,7 @@ export async function mutateUserShoppingList(
     status: "conflict",
     current: await readUserShoppingList(db, userId),
   });
+
   if (expectedRevision === 0 && operation.type === "save") {
     const data = apply(emptyShoppingList(), operation);
     const rows = await db
@@ -87,17 +97,25 @@ export async function mutateUserShoppingList(
       .values({ userId, revision: 1, data })
       .onConflictDoNothing({ target: userShoppingLists.userId })
       .returning({ revision: userShoppingLists.revision, data: userShoppingLists.data });
+
     // A separate SELECT sees a concurrently committed winner, unlike a shared CTE snapshot.
     return rows[0] ? { status: "success", state: state(rows[0]) } : conflict();
   }
+
   const current = await readUserShoppingList(db, userId);
+
   if (current.revision !== expectedRevision) return { status: "conflict", current };
+
   if (operation.type === "remove" && !current.list.items.some((item) => item.id === operation.id)) {
     return { status: "success", state: current };
   }
+
   const data = apply(current.list, operation);
-  if (current.revision === shoppingListRevisionMaximum)
+
+  if (current.revision === shoppingListRevisionMaximum) {
     throw new ShoppingListRevisionExhaustedError();
+  }
+
   const rows = await db
     .update(userShoppingLists)
     .set({
@@ -109,5 +127,6 @@ export async function mutateUserShoppingList(
       and(eq(userShoppingLists.userId, userId), eq(userShoppingLists.revision, expectedRevision)),
     )
     .returning({ revision: userShoppingLists.revision, data: userShoppingLists.data });
+
   return rows[0] ? { status: "success", state: state(rows[0]) } : conflict();
 }

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { generateCandidates, matchingListingSchema, matchingVersion } from "@comprafino/core";
 import { createDatabase } from "./client.ts";
 import { evaluatePairs } from "./matching.ts";
+
 const independentFixtureSchema = z.object({
   matchingVersion: z.literal(1),
   listings: z.record(z.string(), matchingListingSchema),
@@ -23,6 +24,7 @@ const independentFixtureSchema = z.object({
     }),
   ),
 });
+
 export function readIndependentAudit() {
   const f = independentFixtureSchema.parse(
     JSON.parse(
@@ -33,28 +35,45 @@ export function readIndependentAudit() {
     ) as unknown,
   );
   const seen = new Set<string>();
+
   for (const p of f.pairs) {
     const a = f.listings[p.a],
       b = f.listings[p.b];
-    if (!a || !b || a.retailer === b.retailer) throw new Error("Invalid independent audit pair");
+
+    if (!a || !b || a.retailer === b.retailer) {
+      throw new Error("Invalid independent audit pair");
+    }
+
     const key = [p.a, p.b].sort().join("|");
-    if (seen.has(key)) throw new Error("Duplicate independent audit pair");
+
+    if (seen.has(key)) {
+      throw new Error("Duplicate independent audit pair");
+    }
+
     seen.add(key);
   }
+
   for (const g of f.canonicalGroups) {
     const members = g.members.map((id) => f.listings[id]);
+
     if (
       members.some((m) => !m) ||
       new Set(members.map((m) => m!.retailer)).size !== g.members.length
-    )
+    ) {
       throw new Error("Invalid reviewed canonical group");
+    }
   }
+
   return f;
 }
+
 export async function evaluateIndependentAudit(db = createDatabase()) {
   const f = readIndependentAudit();
-  if (f.matchingVersion !== matchingVersion)
+
+  if (f.matchingVersion !== matchingVersion) {
     throw new Error("Independent audit targets frozen version 1");
+  }
+
   const results = await evaluatePairs(
     db,
     f.pairs.map((p) => [f.listings[p.a]!, f.listings[p.b]!]),
@@ -79,6 +98,7 @@ export async function evaluateIndependentAudit(db = createDatabase()) {
       (p) => p.expected === "match" && p.result.decision !== "auto_match",
     ).length;
     const tn = pairs.length - tp - fp - fn;
+
     return {
       stratum,
       pairs: pairs.length,
@@ -91,6 +111,7 @@ export async function evaluateIndependentAudit(db = createDatabase()) {
       candidatesNotGenerated: pairs.filter((p) => !p.candidateGenerated).length,
     };
   });
+
   return {
     version: matchingVersion,
     canonicalGroupsReviewed: f.canonicalGroups.length,

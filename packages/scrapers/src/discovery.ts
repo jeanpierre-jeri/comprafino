@@ -21,6 +21,7 @@ export interface DiscoveryTasks {
   match(): Promise<{ writes: number; created: number }>;
   finish(claim: DiscoveryClaim, outcome: DiscoveryOutcome): Promise<void>;
 }
+
 export async function processDiscoveryQuery(claim: DiscoveryClaim, tasks: DiscoveryTasks) {
   // Explicitly require all existing retailers; accidental missing coverage must
   // never be reported as complete success.
@@ -28,8 +29,10 @@ export async function processDiscoveryQuery(claim: DiscoveryClaim, tasks: Discov
     tasks.adapters.length !== 3 ||
     new Set(tasks.adapters.map((a) => a.retailer)).size !== 3 ||
     tasks.adapters.some((a) => !retailerIdSchema.safeParse(a.retailer).success)
-  )
+  ) {
     throw new Error("Discovery requires the three existing retailers");
+  }
+
   const retailers: {
     retailer: RetailerId;
     status: "success" | "failed";
@@ -40,14 +43,20 @@ export async function processDiscoveryQuery(claim: DiscoveryClaim, tasks: Discov
     skippedByCapacity: number;
     diagnostic?: SafeDiagnostic;
   }[] = [];
+
   for (const adapter of tasks.adapters) {
     let stage: "source" | "persistence" = "source";
+
     try {
       const sample = await adapter.searchProducts(claim.query, discoveryRetailerLimit);
       const rows = boundedSearchListings(sample.listings, discoveryRetailerLimit).map((r) =>
         listingSchema.parse(r),
       );
-      if (rows.some((row) => row.retailer !== adapter.retailer)) throw new Error("Mixed retailers");
+
+      if (rows.some((row) => row.retailer !== adapter.retailer)) {
+        throw new Error("Mixed retailers");
+      }
+
       stage = "persistence";
       const saved = rows.length
         ? await tasks.persist(adapter.retailer, rows, claim)
@@ -79,6 +88,7 @@ export async function processDiscoveryQuery(claim: DiscoveryClaim, tasks: Discov
       });
     }
   }
+
   const successes = retailers.filter((r) => r.status === "success").length;
   const resultCount = retailers.reduce((n, r) => n + r.listings, 0);
   const skippedByCapacity = retailers.reduce((n, r) => n + r.skippedByCapacity, 0);
@@ -88,6 +98,7 @@ export async function processDiscoveryQuery(claim: DiscoveryClaim, tasks: Discov
   let derivationFailed = false;
   let diagnostic: SafeDiagnostic | undefined;
   let stage: "normalization" | "matching" = "normalization";
+
   if (resultCount > 0) {
     try {
       normalizationWrites = await tasks.normalize();
@@ -104,23 +115,13 @@ export async function processDiscoveryQuery(claim: DiscoveryClaim, tasks: Discov
       derivationFailed = true;
     }
   }
+
   const outcome: DiscoveryOutcome = {
-    status: derivationFailed
-      ? "failed"
-      : successes === 0
-        ? "failed"
-        : successes < 3
-          ? "partial"
-          : resultCount === 0 && skippedByCapacity === 0
-            ? "no_results"
-            : "completed",
+    status: discoveryStatus(derivationFailed, successes, resultCount, skippedByCapacity),
     resultCount,
-    error: derivationFailed
-      ? "Catalog derivation failed."
-      : successes < 3
-        ? "Retailer discovery failed."
-        : null,
+    error: discoveryFailureMessage(derivationFailed, successes),
   };
+
   try {
     await tasks.finish(claim, outcome);
   } catch (error) {
@@ -130,6 +131,7 @@ export async function processDiscoveryQuery(claim: DiscoveryClaim, tasks: Discov
       reason: "db_write_failed",
     });
   }
+
   return {
     query: claim.query,
     ...(diagnostic ? { diagnostic } : {}),
@@ -143,4 +145,30 @@ export async function processDiscoveryQuery(claim: DiscoveryClaim, tasks: Discov
     matchingWrites,
     canonicalGroupsCreated,
   };
+}
+
+function discoveryStatus(
+  derivationFailed: boolean,
+  successes: number,
+  resultCount: number,
+  skippedByCapacity: number,
+): DiscoveryOutcome["status"] {
+  if (derivationFailed || successes === 0) return "failed";
+
+  if (successes < 3) return "partial";
+
+  if (resultCount === 0 && skippedByCapacity === 0) return "no_results";
+
+  return "completed";
+}
+
+function discoveryFailureMessage(
+  derivationFailed: boolean,
+  successes: number,
+): DiscoveryOutcome["error"] {
+  if (derivationFailed) return "Catalog derivation failed.";
+
+  if (successes < 3) return "Retailer discovery failed.";
+
+  return null;
 }

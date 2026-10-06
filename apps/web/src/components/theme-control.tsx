@@ -1,52 +1,18 @@
 "use client";
 
 import { Monitor, Moon, Sun } from "@comprafino/ui";
-import { useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
+import { useStore } from "zustand";
+import { createThemeStore, connectThemeStore } from "../lib/theme-store";
 import { ChoiceSelect } from "@comprafino/ui/components/select";
 
-type Theme = "system" | "light" | "dark";
-const storageKey = "comprafino-theme";
-function preference(value: string | null): Theme {
-  return value === "light" || value === "dark" ? value : "system";
-}
-function applyTheme(choice: Theme) {
-  document.documentElement.dataset.themePreference = choice;
-  document.documentElement.dataset.theme =
-    choice === "system"
-      ? window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light"
-      : choice;
-}
-function subscribe(callback: () => void) {
-  const media = window.matchMedia("(prefers-color-scheme: dark)");
-  const update = () => {
-    applyTheme(preference(document.documentElement.dataset.themePreference ?? null));
-    callback();
-  };
-  const storage = (event: StorageEvent) => {
-    if (event.key !== storageKey && event.key !== null) return;
-    applyTheme(preference(event.newValue));
-    callback();
-  };
-  media.addEventListener("change", update);
-  window.addEventListener("comprafino-theme", update);
-  window.addEventListener("storage", storage);
-  return () => {
-    media.removeEventListener("change", update);
-    window.removeEventListener("comprafino-theme", update);
-    window.removeEventListener("storage", storage);
-  };
-}
-function snapshot(): Theme {
-  return preference(document.documentElement.dataset.themePreference ?? null);
-}
-function serverSnapshot(): Theme {
-  return "system";
-}
-
 export function ThemeControl() {
-  const choice = useSyncExternalStore(subscribe, snapshot, serverSnapshot);
+  const [store] = useState(createThemeStore);
+  const choice = useStore(store, (state) => state.choice);
+  const selectTheme = useStore(store, (state) => state.select);
+
+  useEffect(() => connectThemeStore(store), [store]);
+
   return (
     <ChoiceSelect
       compact
@@ -69,17 +35,7 @@ export function ThemeControl() {
           icon: <Moon aria-hidden="true" size={16} strokeWidth={1.6} className="shrink-0" />,
         },
       ]}
-      onValueChange={(value) => {
-        const next = preference(value);
-        try {
-          if (next === "system") localStorage.removeItem(storageKey);
-          else localStorage.setItem(storageKey, next);
-        } catch {
-          /* Theme still works when browser storage is unavailable. */
-        }
-        applyTheme(next);
-        window.dispatchEvent(new Event("comprafino-theme"));
-      }}
+      onValueChange={selectTheme}
     />
   );
 }

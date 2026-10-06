@@ -21,9 +21,13 @@ import { seedBasketFixtures } from "../../../packages/db/src/basket-fixtures.ts"
 
 // Explicit test DB only; never reads .env or falls back to the application DB.
 const outputPath = reportOutputPath(process.argv.slice(2));
+
 const harness = ownedTestDatabase();
+
 const { scoped, db } = harness;
+
 const POST = shoppingListPost(() => db);
+
 try {
   await harness.setup();
   await seedShoppingListFixtures(db, scoped);
@@ -36,6 +40,7 @@ try {
     createdAt: now.toISOString(),
     updatedAt: now.toISOString(),
   };
+
   for (const [query, unit, amount] of [
     ["huevos", "unit", 30],
     ["arroz", "kg", 5],
@@ -43,7 +48,7 @@ try {
     ["detergente", "kg", 3],
     ["leche", "unit", 6],
     ["huevos de codorniz", "unit", 30],
-  ] as const)
+  ] as const) {
     items.push(
       shoppingListItemSchema.parse({
         ...common,
@@ -57,8 +62,10 @@ try {
         quantity: { amount, unit },
       }),
     );
-  for (const [index, canonicalId] of Object.values(fixtures).entries())
-    for (const intent of ["strict", "preferred"] as const)
+  }
+
+  for (const [index, canonicalId] of Object.values(fixtures).entries()) {
+    for (const intent of ["strict", "preferred"] as const) {
       items.push(
         shoppingListItemSchema.parse({
           ...common,
@@ -71,6 +78,9 @@ try {
           quantity: { amount: (index % 3) + 1, unit: "unit" },
         }),
       );
+    }
+  }
+
   // The 5-item sample has supported staples and exact/preferred milk; larger
   // samples also include deliberately unsupported generic needs.
   const ordered = [
@@ -80,10 +90,13 @@ try {
     ...items.slice(8),
   ];
   const measurements = [];
+
   for (const count of [5, 20, 50]) {
     const list = shoppingListSchema.parse({ version: 2, items: ordered.slice(0, count) });
+
     for (const mode of ["standard", "benefits"] satisfies PriceMode[]) {
       const samples: { queryMs: number; totalMs: number; handlerResponseMs: number }[] = [];
+
       for (let run = 0; run < 6; run++) {
         const request = new Request(`http://localhost/api/list/evaluate?priceMode=${mode}`, {
           method: "POST",
@@ -92,13 +105,22 @@ try {
         });
         const start = performance.now();
         const response = await POST(request);
-        if (!response.ok) throw new Error(`Benchmark API failed: ${response.status}`);
+
+        if (!response.ok) {
+          throw new Error(`Benchmark API failed: ${response.status}`);
+        }
+
         const body = shoppingListEvaluationSchema.parse(await response.json());
         const wallMs = performance.now() - start;
-        if (run > 0) samples.push({ ...body.timings, handlerResponseMs: wallMs });
+
+        if (run > 0) {
+          samples.push({ ...body.timings, handlerResponseMs: wallMs });
+        }
       }
+
       const stats = (key: keyof (typeof samples)[number]) => {
         const values = samples.map((s) => s[key]).sort((a, b) => a - b);
+
         return { min: values[0], median: values[2], max: values[4] };
       };
       measurements.push({
@@ -111,6 +133,7 @@ try {
       });
     }
   }
+
   const report = {
     measuredAt: new Date().toISOString(),
     environment:

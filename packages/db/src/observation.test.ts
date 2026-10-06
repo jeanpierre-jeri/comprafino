@@ -2,6 +2,7 @@ import { expect, it } from "vitest";
 import { applyObservation } from "./observation.ts";
 import type { ListingObservation } from "./observation.ts";
 import type { NormalizedRetailerListing } from "@comprafino/core";
+
 const listing: NormalizedRetailerListing = {
   retailer: "tottus",
   externalId: "sku1",
@@ -13,8 +14,10 @@ const listing: NormalizedRetailerListing = {
   priceUnit: "UN",
   observedAt: new Date("2026-10-03T09:00:00Z"),
 };
+
 it("keeps one listing and one history state across unchanged observations", () => {
   const rows = new Map<string, ListingObservation>();
+
   for (const hour of [9, 12, 18]) {
     const next = {
       ...listing,
@@ -22,6 +25,7 @@ it("keeps one listing and one history state across unchanged observations", () =
     };
     rows.set(next.externalId, applyObservation(rows.get(next.externalId), next));
   }
+
   expect(rows.size).toBe(1);
   const result = rows.get("sku1")!;
   expect(result.history).toHaveLength(1);
@@ -29,6 +33,7 @@ it("keeps one listing and one history state across unchanged observations", () =
   expect(result.firstSeenAt).toEqual(listing.observedAt);
   expect(result.listing.observedAt.getUTCHours()).toBe(18);
 });
+
 it("closes changed prices, ignores stale/replayed observations and permits a return to an old price", () => {
   const first = applyObservation(undefined, listing);
   const at = new Date("2026-10-05T09:00:00Z");
@@ -46,6 +51,7 @@ it("closes changed prices, ignores stale/replayed observations and permits a ret
   expect(third.history.filter((state) => !state.validUntil)).toHaveLength(1);
   expect(first.history[0]?.validUntil).toBeUndefined();
 });
+
 it("treats reference price and price-unit changes as meaningful states", () => {
   const first = applyObservation(undefined, listing);
   const second = applyObservation(first, {
@@ -61,6 +67,7 @@ it("treats reference price and price-unit changes as meaningful states", () => {
   });
   expect(third.history).toHaveLength(3);
 });
+
 it("preserves prospective daily coverage independently of ordinary and reference state changes", () => {
   const first = applyObservation(undefined, listing);
   const second = applyObservation(first, {
@@ -88,10 +95,12 @@ it("preserves prospective daily coverage independently of ordinary and reference
   });
   expect(next.coverageDays).toHaveLength(2);
 });
+
 it("does not count unusable or explicitly unavailable price observations", () => {
   for (const value of [
     { ...listing, currentPriceCents: 0 },
     { ...listing, available: false },
-  ])
+  ]) {
     expect(applyObservation(undefined, value).coverageDays).toEqual([]);
+  }
 });

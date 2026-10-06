@@ -8,13 +8,15 @@ describe("local test database boundary", () => {
       const url = `postgresql://comprafino_test@${host}:55432/comprafino_test`;
       expect(validateLocalTestUrl(url)).toBe(url);
     }
+
     for (const url of [
       "postgresql://user@production.example/comprafino_test",
       "postgresql://user@localhost/production",
       "https://localhost/comprafino_test",
       "postgresql://user@localhost/comprafino_test?host=production.example",
-    ])
+    ]) {
       expect(() => validateLocalTestUrl(url)).toThrow(/Local tests/u);
+    }
   });
   it("requires explicit local mode and an isolated schema for web requests", () => {
     expect(() =>

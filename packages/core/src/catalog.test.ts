@@ -6,8 +6,10 @@ import {
   toBaseQuantity,
 } from "./catalog.ts";
 import type { CatalogInput } from "./catalog.ts";
+
 const normalize = (title: string, hints: Partial<CatalogInput> = {}) =>
   normalizeCatalogListing({ title, priceUnit: "UN", ...hints });
+
 // Titles from persisted listings/fixtures; additional syntax cases are explicitly synthetic.
 describe("catalog quantities and packs", () => {
   it.each([
@@ -122,6 +124,7 @@ describe("catalog quantities and packs", () => {
     expect(a.issues).toContain("total-overflow");
   });
 });
+
 describe("brand and title normalization", () => {
   it.each([
     ["GLORIA Leche 390g", "Gloria"],
@@ -154,6 +157,7 @@ describe("brand and title normalization", () => {
     expect(() => normalize("Leche", { sourcePackageCount: 1.5 })).toThrow(/.+/u);
   });
 });
+
 it.each([
   ["GR", "g"],
   ["gramos", "g"],
@@ -169,6 +173,7 @@ it.each([
 ])("normalizes unit %s", (raw, expected) => {
   expect(normalizeUnit(raw)).toBe(expected);
 });
+
 it.each([
   ["0.001", "kg", 1, "g"],
   ["1.5", "l", 1500, "ml"],
@@ -177,6 +182,7 @@ it.each([
 ] as const)("converts %s %s exactly", (value, unit, expected, base) => {
   expect(toBaseQuantity(value, unit)).toEqual({ value: expected, unit: base });
 });
+
 it.each(["0", "-1", "1e3", "0.0001", "2147483648"])(
   "rejects invalid/nonintegral base quantities %s",
   (value) => {

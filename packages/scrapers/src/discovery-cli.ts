@@ -22,6 +22,7 @@ try {
   const { limit, dryRun } = parseDiscoveryOptions(process.argv.slice(2));
   const db = createDatabase();
   const { stats } = await inspectDiscovery(db);
+
   if (dryRun) {
     console.log(
       JSON.stringify(
@@ -53,13 +54,21 @@ try {
       async normalize() {
         await assertRefreshScope(db);
         const r = await normalizeCatalog(db, catalogPolicy.retainedListingCap);
-        if (!r.persisted || r.persisted.stale) throw new Error("Stale normalization");
+
+        if (!r.persisted || r.persisted.stale) {
+          throw new Error("Stale normalization");
+        }
+
         return r.persisted.changed;
       },
       async match() {
         await assertRefreshScope(db);
         const r = await matchCatalog(db, catalogPolicy.retainedListingCap);
-        if (!r.persisted || r.persisted.stale) throw new Error("Stale matching");
+
+        if (!r.persisted || r.persisted.stale) {
+          throw new Error("Stale matching");
+        }
+
         return {
           writes:
             r.persisted.linksCreated +
@@ -75,11 +84,13 @@ try {
         outcome: Parameters<typeof finishDiscoveryQuery>[2],
       ) => finishDiscoveryQuery(db, claim, outcome),
     };
+
     for (const claim of claims) {
       const result = await processDiscoveryQuery(claim, tasks);
       results.push(result);
       console.log(JSON.stringify(result));
     }
+
     const metric = (
       key:
         | "retailerSearchCalls"
@@ -109,7 +120,10 @@ try {
         2,
       ),
     );
-    if (results.some((r) => r.status === "failed" || r.status === "partial")) process.exitCode = 1;
+
+    if (results.some((r) => r.status === "failed" || r.status === "partial")) {
+      process.exitCode = 1;
+    }
   }
 } catch (error) {
   logDiagnostic(error, { stage: "admission", operation: "discovery", reason: "db_read_failed" });

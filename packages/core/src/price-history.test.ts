@@ -7,7 +7,9 @@ import {
   summarizePriceHistory,
 } from "./price-history.ts";
 import type { OrdinaryPriceState } from "./price-history.ts";
+
 const day = (n: number) => new Date(Date.UTC(2026, 8, n));
+
 const state = (
   priceCents: number,
   from: number,
@@ -20,13 +22,18 @@ const state = (
   previousPriceCents,
   previousValidUntil: previousPriceCents === null ? null : day(from),
 });
+
 const summary = (states: OrdinaryPriceState[], start = day(10), end = day(20), seen = day(19)) =>
   summarizePriceHistory(states, start, end, seen);
+
 describe("ordinary state history", () => {
   it("uses the audited 7-day default and rejects repeated/invalid URL values", () => {
     expect(defaultHistoryRange).toBe("7d");
-    for (const raw of [undefined, "", "365d", "7", ["30d"], null])
+
+    for (const raw of [undefined, "", "365d", "7", ["30d"], null]) {
       expect(parseHistoryRange(raw)).toBe("7d");
+    }
+
     for (const range of ["7d", "30d", "90d"] as const) {
       expect(parseHistoryRange(range)).toBe(range);
       expect(historyWindow(range, day(20)).end).toEqual(day(20));

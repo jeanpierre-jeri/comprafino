@@ -1,4 +1,5 @@
 import { evaluateIndependentAudit } from "./matching-independent.ts";
+
 try {
   const { version, canonicalGroupsReviewed, metrics } = await evaluateIndependentAudit();
   console.log(JSON.stringify({ version, canonicalGroupsReviewed, metrics }, null, 2));

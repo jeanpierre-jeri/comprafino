@@ -15,6 +15,7 @@ import {
   primaryKey,
   jsonb,
 } from "drizzle-orm/pg-core";
+
 const time = (name: string) => timestamp(name, { withTimezone: true });
 
 // Better Auth 1.7.7 core models (getAuthTables), with supported UUID generation.
@@ -31,6 +32,7 @@ export const user = pgTable("user", {
     .$onUpdate(() => new Date())
     .notNull(),
 });
+
 /** One active remote document per authenticated user; absence is revision zero. */
 export const userShoppingLists = pgTable(
   "user_shopping_lists",
@@ -45,6 +47,7 @@ export const userShoppingLists = pgTable(
   },
   (t) => [check("user_shopping_lists_revision", sql`${t.revision} >= 1`)],
 );
+
 export const session = pgTable(
   "session",
   {
@@ -63,6 +66,7 @@ export const session = pgTable(
   },
   (t) => [index("session_user_id_idx").on(t.userId)],
 );
+
 export const account = pgTable(
   "account",
   {
@@ -91,6 +95,7 @@ export const account = pgTable(
     uniqueIndex("account_provider_subject_uidx").on(t.providerId, t.accountId),
   ],
 );
+
 export const verification = pgTable(
   "verification",
   {
@@ -163,6 +168,7 @@ export const discoveryDailyBudget = pgTable(
   },
   (t) => [check("discovery_daily_cap", sql`${t.processed} between 0 and 30`)],
 );
+
 export const retailerListings = pgTable(
   "retailer_listings",
   {
@@ -215,6 +221,7 @@ export const retailerListings = pgTable(
     check("listing_missing_count", sql`${t.exactMissingCount} >= 0`),
   ],
 );
+
 export const priceHistory = pgTable(
   "price_history",
   {
@@ -243,6 +250,7 @@ export const priceHistory = pgTable(
     check("history_unit", sql`${t.priceUnit} in ('KG', 'UN')`),
   ],
 );
+
 export const ingestionRuns = pgTable(
   "ingestion_runs",
   {
@@ -338,6 +346,7 @@ export const canonicalProducts = pgTable(
     ),
   ],
 );
+
 export const canonicalProductListings = pgTable(
   "canonical_product_listings",
   {

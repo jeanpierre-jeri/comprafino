@@ -12,20 +12,32 @@ export interface Acquisition {
 }
 
 type Database = ReturnType<typeof createDatabase>;
+
 /** Capacity-filtered sample commits atomically; shared lock serializes identity admission. */
 export function persistenceStatements(
   retailer: RetailerId,
   input: readonly NormalizedRetailerListing[],
   acquisition: Acquisition = { source: "category" },
 ) {
-  if (acquisition.source === "discovery") z.uuid().parse(acquisition.queryId);
+  if (acquisition.source === "discovery") {
+    z.uuid().parse(acquisition.queryId);
+  }
+
   const origin = acquisition.source === "targeted" ? "unknown" : acquisition.source;
   const listings = input.map((listing) => listingSchema.parse(listing));
-  if (listings.some((listing) => listing.retailer !== retailer))
+
+  if (listings.some((listing) => listing.retailer !== retailer)) {
     throw new Error("Mixed retailers in ingestion");
-  if (new Set(listings.map((listing) => listing.externalId)).size !== listings.length)
+  }
+
+  if (new Set(listings.map((listing) => listing.externalId)).size !== listings.length) {
     throw new Error("Duplicate listing identities in batch");
-  if (!listings.length) throw new Error("Empty persistence batch");
+  }
+
+  if (!listings.length) {
+    throw new Error("Empty persistence batch");
+  }
+
   const payload = JSON.stringify(
     listings.map((listing) => ({
       retailer_id: listing.retailer,
@@ -49,6 +61,7 @@ export function persistenceStatements(
   );
   const ids = JSON.stringify(listings.map((listing) => listing.externalId));
   const scope = sql`l.retailer_id = ${retailer} and l.external_id in (select jsonb_array_elements_text(${ids}::jsonb))`;
+
   return [
     // Serialize new identity admission across retailers; existing quote updates remain allowed at the cap.
     sql`with catalog_lock as materialized (select pg_advisory_xact_lock(hashtext('comprafino:catalog-admission')))
@@ -151,6 +164,7 @@ export function persistenceStatements(
       returning id`,
   ] as const;
 }
+
 export async function persistListings(
   db: Database,
   retailer: RetailerId,
@@ -163,8 +177,10 @@ export async function persistListings(
     input,
     acquisition,
   );
+
   return { persisted, changed, skippedByCapacity };
 }
+
 /** Same atomic ingestion batch, exposing insert counts for discovery metrics. */
 export async function persistListingsDetailed(
   db: Database,
@@ -173,6 +189,7 @@ export async function persistListingsDetailed(
   acquisition: Acquisition = { source: "category" },
 ) {
   if (!input.length) return { persisted: 0, changed: 0, created: 0, skippedByCapacity: 0 };
+
   const statements = persistenceStatements(retailer, input, acquisition);
   const results = await db.batch([
     db.execute(statements[0]),
@@ -190,7 +207,11 @@ export async function persistListingsDetailed(
     )
     .length(1)
     .parse(results[1].rows);
-  if (!summary) throw new Error("Missing persistence summary");
+
+  if (!summary) {
+    throw new Error("Missing persistence summary");
+  }
+
   return {
     persisted: summary.persisted,
     changed: results[3].rows.length,
@@ -198,6 +219,7 @@ export async function persistListingsDetailed(
     skippedByCapacity: summary.skipped_by_capacity,
   };
 }
+
 export function createIngestionStore(db = createDatabase()) {
   return {
     async start(retailer: RetailerId) {
@@ -205,7 +227,11 @@ export function createIngestionStore(db = createDatabase()) {
         .insert(ingestionRuns)
         .values({ retailerId: retailer })
         .returning({ id: ingestionRuns.id });
-      if (!run) throw new Error("Failed to create ingestion run");
+
+      if (!run) {
+        throw new Error("Failed to create ingestion run");
+      }
+
       return run.id;
     },
     persist: (retailer: RetailerId, listings: readonly NormalizedRetailerListing[]) =>
@@ -234,10 +260,12 @@ export function createIngestionStore(db = createDatabase()) {
     },
   };
 }
+
 export async function inspectIngestion(db = createDatabase()) {
   const [runs, listings] = await Promise.all([
     db.select().from(ingestionRuns).orderBy(desc(ingestionRuns.startedAt)).limit(10),
     db.select().from(retailerListings).orderBy(desc(retailerListings.lastSeenAt)).limit(30),
   ]);
+
   return { runs, listings };
 }

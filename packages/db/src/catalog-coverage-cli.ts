@@ -1,7 +1,12 @@
 import { auditCatalogCoverage, coverageQueryTimings } from "./catalog-coverage.ts";
+
 try {
   const args = process.argv.slice(2).filter((arg) => arg !== "--");
-  if (args.some((arg) => arg !== "--timings")) throw new Error("Unsupported option");
+
+  if (args.some((arg) => arg !== "--timings")) {
+    throw new Error("Unsupported option");
+  }
+
   const audit = await auditCatalogCoverage();
   console.log(
     JSON.stringify(

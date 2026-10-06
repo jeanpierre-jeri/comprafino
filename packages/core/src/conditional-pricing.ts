@@ -1,11 +1,16 @@
 import { offerFreshness } from "./listing-refresh.ts";
 import type { ConditionalOffer } from "./conditional-offer.ts";
+
 export { conditionalOfferSchema } from "./conditional-offer.ts";
+
 export type { ConditionalOffer } from "./conditional-offer.ts";
+
 export type PriceMode = "standard" | "benefits";
+
 export function priceMode(value: unknown): PriceMode {
   return value === "benefits" ? "benefits" : "standard";
 }
+
 export function currentConditionalOffers(offers: readonly ConditionalOffer[], now = new Date()) {
   return offers.filter(
     (offer) =>
@@ -14,6 +19,7 @@ export function currentConditionalOffers(offers: readonly ConditionalOffer[], no
       (!offer.endsAt || offer.endsAt > now),
   );
 }
+
 export function rankedPrice(
   currentPriceCents: number,
   offers: readonly ConditionalOffer[],
@@ -28,5 +34,6 @@ export function rankedPrice(
             (a, b) => a.priceCents - b.priceCents || a.programKey.localeCompare(b.programKey),
           )[0]
       : undefined;
+
   return { priceCents: best?.priceCents ?? currentPriceCents, condition: best ?? null };
 }

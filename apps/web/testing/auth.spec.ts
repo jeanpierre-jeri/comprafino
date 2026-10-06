@@ -24,10 +24,12 @@ test("account initials and image boundaries handle empty, Unicode and odd input"
     expect(initials).toBe(expected);
     expect(Array.from(initials).length).toBeLessThanOrEqual(2);
   }
+
   expect(accountInitials("", "")).toBe("C");
   expect(avatarUrl("https://lh3.googleusercontent.com/avatar")).toBe(
     "https://lh3.googleusercontent.com/avatar",
   );
+
   for (const image of [
     null,
     "",
@@ -36,15 +38,18 @@ test("account initials and image boundaries handle empty, Unicode and odd input"
     "data:image/png;base64,x",
     "http://example.com/a",
     "https://user:pass@example.com/a",
-  ])
+  ]) {
     expect(avatarUrl(image)).toBeUndefined();
+  }
 });
 
 test("auth configuration validates explicit secrets and exact origins", () => {
   for (const key of Object.keys(env)) {
     expect(() => authOptions(db, { ...env, [key]: "" })).toThrow(`Missing ${key}`);
   }
+
   expect(() => authOptions(db, { ...env, BETTER_AUTH_SECRET: "short" })).toThrow();
+
   for (const url of [
     "https://example.com/path",
     "https://example.com/",
@@ -54,6 +59,7 @@ test("auth configuration validates explicit secrets and exact origins", () => {
   ]) {
     expect(() => authOptions(db, { ...env, BETTER_AUTH_URL: url })).toThrow();
   }
+
   const options = authOptions(db, env);
   expect(options.advanced.database.generateId).toBe("uuid");
   expect(options.account.encryptOAuthTokens).toBe(true);
@@ -69,6 +75,7 @@ test("auth configuration validates explicit secrets and exact origins", () => {
   const models = { user, session, account, verification };
   const tables = getAuthTables(options);
   expect(Object.keys(tables).sort()).toEqual(Object.keys(models).sort());
+
   for (const [name, model] of Object.entries(models)) {
     for (const field of Object.keys(tables[name]?.fields ?? {})) {
       expect(Object.hasOwn(model, field), `${name}.${field}`).toBe(true);
@@ -79,6 +86,7 @@ test("auth configuration validates explicit secrets and exact origins", () => {
 test("anonymous and malformed-cookie lookups use real Better Auth validation without a DB query", async () => {
   const auth = betterAuth(authOptions(db, env));
   const { GET } = authHandlers(() => auth);
+
   for (const cookie of ["", "better-auth.session_token=forged.unsigned"]) {
     const response = await GET(
       new Request(`${env.BETTER_AUTH_URL}/api/auth/get-session`, {

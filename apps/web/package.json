@@ -18,10 +18,12 @@
     "@comprafino/core": "workspace:*",
     "@comprafino/db": "workspace:*",
     "@comprafino/ui": "workspace:*",
+    "@tanstack/react-query": "5.104.1",
     "better-auth": "1.7.7",
     "next": "16.3.8",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "zustand": "5.0.15"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",

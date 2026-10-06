@@ -5,9 +5,11 @@ import { normalizeTottusProduct } from "./tottus-parser.ts";
 export type TargetedResult =
   | { status: "observed"; listing: NormalizedRetailerListing }
   | { status: "not-found" | "unavailable" };
+
 export interface TargetedRetailerAdapter {
   lookupListing(this: void, listing: KnownListing): Promise<TargetedResult>;
 }
+
 const vtexIdentity = z
   .array(
     z.object({
@@ -29,6 +31,7 @@ const vtexIdentity = z
     }),
   )
   .max(1);
+
 /** Exact SKU admission precedes the existing full product/price validator. */
 export async function lookupVtex(
   fetchPage: typeof fetch,
@@ -36,32 +39,61 @@ export async function lookupVtex(
   known: KnownListing,
   parse: (raw: unknown, at: Date) => { listings: NormalizedRetailerListing[] },
 ): Promise<TargetedResult> {
-  if (!/^\d+$/u.test(known.externalId)) throw new Error("Invalid SKU");
+  if (!/^\d+$/u.test(known.externalId)) {
+    throw new Error("Invalid SKU");
+  }
+
   const url = new URL(endpoint);
   url.searchParams.set("fq", `skuId:${known.externalId}`);
   url.searchParams.set("sc", "1");
   url.searchParams.set("_from", "0");
   url.searchParams.set("_to", "0");
   const response = await fetchPage(url, requestOptions("application/json"));
+
   if (response.status === 404) return { status: "not-found" };
-  if (!response.ok) throw new Error("Targeted retailer request failed");
+
+  if (!response.ok) {
+    throw new Error("Targeted retailer request failed");
+  }
+
   const raw: unknown = await response.json();
   const products = vtexIdentity.parse(raw);
+
   if (!products.length) return { status: "not-found" };
-  if (products[0]!.productId !== known.productId) throw new Error("Product identity changed");
+
+  if (products[0]!.productId !== known.productId) {
+    throw new Error("Product identity changed");
+  }
+
   const matching = products[0]!.items.filter((item) => item.itemId === known.externalId);
+
   if (!matching.length) return { status: "not-found" };
-  if (matching.length !== 1) throw new Error("Ambiguous SKU");
+
+  if (matching.length !== 1) {
+    throw new Error("Ambiguous SKU");
+  }
+
   const sellers = matching[0]!.sellers.filter((seller) => seller.sellerId === "1");
+
   // Missing or malformed seller evidence is unknown, never verified stock absence.
-  if (sellers.length !== 1) throw new Error("Missing or ambiguous availability evidence");
+  if (sellers.length !== 1) {
+    throw new Error("Missing or ambiguous availability evidence");
+  }
+
   const offer = sellers[0]!.commertialOffer;
+
   if (!offer.IsAvailable || offer.AvailableQuantity === 0) return { status: "unavailable" };
+
   const parsed = parse(raw, new Date());
   const listing = parsed.listings.find((row) => row.externalId === known.externalId);
-  if (!listing) throw new Error("Available SKU lacks a usable quote");
+
+  if (!listing) {
+    throw new Error("Available SKU lacks a usable quote");
+  }
+
   return { status: "observed", listing };
 }
+
 function requestOptions(accept: string): RequestInit {
   return {
     headers: { "User-Agent": "CompraFino/0.1 (bounded known listing refresh)", Accept: accept },
@@ -69,6 +101,7 @@ function requestOptions(accept: string): RequestInit {
     redirect: "error",
   };
 }
+
 const productPage = z.object({
   props: z.object({
     pageProps: z.object({
@@ -98,26 +131,49 @@ const productPage = z.object({
     }),
   }),
 });
+
 export function parseTottusProduct(html: string, known: KnownListing, at: Date): TargetedResult {
   const script = /<script\b[^>]*\bid=["']__NEXT_DATA__["'][^>]*>([\s\S]*?)<\/script>/u.exec(html);
-  if (!script) throw new Error("Product hydration missing");
+
+  if (!script) {
+    throw new Error("Product hydration missing");
+  }
+
   const raw: unknown = JSON.parse(script[1]!);
   const product = productPage.parse(raw).props.pageProps.productData;
-  if (product.id !== known.productId) throw new Error("Product identity changed");
+
+  if (product.id !== known.productId) {
+    throw new Error("Product identity changed");
+  }
+
   const variants = product.variants.filter((v) => v.id === known.externalId);
+
   if (!variants.length) return { status: "not-found" };
-  if (variants.length !== 1) throw new Error("Ambiguous SKU");
+
+  if (variants.length !== 1) {
+    throw new Error("Ambiguous SKU");
+  }
+
   const variant = variants[0]!;
   const sellers = variant.offerings.filter((o) => o.sellerId === "TOTTUS_PERU");
-  if (sellers.length > 1) throw new Error("Ambiguous seller");
+
+  if (sellers.length > 1) {
+    throw new Error("Ambiguous seller");
+  }
+
   if (
     !product.isPublished ||
     !variant.isPurchaseable ||
     !variant.isOnlineSellable ||
     sellers[0]?.isActive === false
-  )
+  ) {
     return { status: "unavailable" };
-  if (!sellers[0]) throw new Error("Missing availability seller evidence");
+  }
+
+  if (!sellers[0]) {
+    throw new Error("Missing availability seller evidence");
+  }
+
   // Reuse category/search price, unit and listing validation exactly.
   const mapped = {
     productId: product.id,
@@ -135,24 +191,34 @@ export function parseTottusProduct(html: string, known: KnownListing, at: Date):
     prices: variant.prices,
   };
   const listing = { ...normalizeTottusProduct(mapped, at), available: true };
+
   return { status: "observed", listing };
 }
+
 export async function lookupTottus(
   fetchPage: typeof fetch,
   known: KnownListing,
 ): Promise<TargetedResult> {
   const url = new URL(known.url);
+
   if (
     url.origin !== "https://www.tottus.com.pe" ||
     url.username ||
     url.password ||
     !url.pathname.startsWith(`/tottus-pe/articulo/${known.productId}/`)
-  )
+  ) {
     throw new Error("Untrusted product URL");
+  }
+
   url.search = "";
   url.hash = "";
   const response = await fetchPage(url, requestOptions("text/html"));
+
   if (response.status === 404 || response.status === 410) return { status: "not-found" };
-  if (!response.ok) throw new Error("Targeted retailer request failed");
+
+  if (!response.ok) {
+    throw new Error("Targeted retailer request failed");
+  }
+
   return parseTottusProduct(await response.text(), known, new Date());
 }

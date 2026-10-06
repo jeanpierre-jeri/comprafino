@@ -1,6 +1,6 @@
 # CompraFino
 
-Milestone 19B adds an authenticated, operation-based remote-list persistence API. The browser list remains local-only; no client synchronization is wired. Its migration is generated for review and is not applied to application databases by this implementation. See [backend contracts and boundaries](docs/shopping-list-persistence.md).
+Milestones 19B–19C provide authenticated list persistence and client synchronization, with safe anonymous import and account transitions. Signed-out lists remain browser-local. The reviewed migration is not applied to application databases by this implementation. See [persistence and synchronization](docs/shopping-list-persistence.md).
 
 CompraFino compares observed grocery and household prices from Tottus, Plaza Vea and Metro in Peru. It provides exact product comparisons, independent retailer search options, ordinary price history with observation gaps, and browser-local recurring shopping lists with current basket comparisons across up to three supermarkets. Concrete Tottus CMR benefits are shown separately from ordinary prices. Prices are observations, not checkout guarantees.
 
@@ -16,7 +16,7 @@ Next.js App Router serves the public UI from persisted PostgreSQL data. GitHub A
 | `packages/scrapers` | Isolated public-data retailer adapters and bounded acquisition orchestration                          |
 | `packages/ui`       | Shared Base UI components, theme and Recharts primitives                                              |
 
-Dependencies flow `web → ui, db, core`, `scrapers → core, db`, `db → core`. Internal dependencies use `workspace:*`; packages export typed source. See [architecture](docs/architecture.md) and [dependencies](docs/dependencies.md).
+Dependencies flow `web → ui, db, core`, `scrapers → core, db`, `db → core`. Internal dependencies use `workspace:*`; packages export typed source. See [architecture](docs/architecture.md), [dependencies](docs/dependencies.md) and [code readability/frontend state](docs/code-readability.md).
 
 ## Install and develop
 

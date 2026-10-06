@@ -1,13 +1,19 @@
 import { expect, test } from "@playwright/test";
+
 const raw: unknown = process.env.PRICE_HISTORY_FIXTURE_IDS
   ? JSON.parse(process.env.PRICE_HISTORY_FIXTURE_IDS)
   : null;
+
 function fixture(name: string): string {
   const value: unknown = typeof raw === "object" && raw !== null ? Reflect.get(raw, name) : null;
-  if (typeof value !== "string" || !/^[0-9a-f-]{36}$/u.test(value))
+
+  if (typeof value !== "string" || !/^[0-9a-f-]{36}$/u.test(value)) {
     throw new Error("Run isolated listing fixtures");
+  }
+
   return value;
 }
+
 for (const id of ["invalid", "00000000-0000-4000-8000-000000000000"]) {
   test(`listing ID ${id} has safe not-found behavior`, async ({ page }) => {
     test.skip(
@@ -18,6 +24,7 @@ for (const id of ["invalid", "00000000-0000-4000-8000-000000000000"]) {
     await expect(page.getByRole("heading", { name: "No encontramos ese producto." })).toBeVisible();
   });
 }
+
 test.describe("isolated listing details", () => {
   test.skip(!raw, "Run pnpm test:e2e:history:local --listings after build");
   test("independent card, add control, separate source and delayed internal navigation", async ({
@@ -28,7 +35,10 @@ test.describe("isolated listing details", () => {
       release = resolve;
     });
     await page.route(`**/listings/${fixture("independent")}*`, async (route) => {
-      if (route.request().headers().rsc === "1") await held;
+      if (route.request().headers().rsc === "1") {
+        await held;
+      }
+
       await route.continue();
     });
     await page.goto("/search?q=huevos+pardos");
@@ -58,6 +68,7 @@ test.describe("isolated listing details", () => {
     await expect(page).toHaveURL(/\/search/);
     await page.keyboard.press("Escape");
     await expect(page.getByRole("dialog")).toHaveCount(0);
+
     try {
       await card.getByRole("link").filter({ hasText: "Huevos Pardos Tottus Bandeja 30un" }).click();
       await expect(
@@ -70,6 +81,7 @@ test.describe("isolated listing details", () => {
     } finally {
       release();
     }
+
     await expect(page).toHaveURL(`/listings/${fixture("independent")}`);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       "Huevos Pardos Tottus Bandeja 30un",
@@ -111,6 +123,7 @@ test.describe("isolated listing details", () => {
   test("URL ranges clip multi-state history and retain browser navigation", async ({ page }) => {
     await page.goto(`/listings/${fixture("listing-rich-metro")}`);
     const history = page.getByRole("region", { name: "Historial del precio para todos" });
+
     for (const [days, maximum] of [
       [7, "6.10"],
       [30, "6.20"],
@@ -120,6 +133,7 @@ test.describe("isolated listing details", () => {
       await expect(page).toHaveURL(new RegExp(`range=${days}d`));
       await expect(history).toContainText(`Máximo registradoS/ ${maximum}`);
     }
+
     await page.goBack();
     await expect(history.getByRole("link", { name: "30 días", exact: true })).toHaveAttribute(
       "aria-current",
@@ -139,7 +153,7 @@ test.describe("isolated listing details", () => {
     }
   });
   test("listing pages fit mobile and desktop in light and dark", async ({ page }, testInfo) => {
-    for (const width of [390, 1440])
+    for (const width of [390, 1440]) {
       for (const theme of ["light", "dark"] as const) {
         await page.setViewportSize({ width, height: 900 });
         await page.emulateMedia({ colorScheme: theme });
@@ -160,6 +174,7 @@ test.describe("isolated listing details", () => {
           fullPage: true,
         });
       }
+    }
   });
 });
 

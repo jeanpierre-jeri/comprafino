@@ -9,9 +9,13 @@ import {
   publicListingDetailRows,
   publicRetailerListing,
 } from "./listing-detail.ts";
+
 const db = createDatabase();
+
 const now = new Date();
+
 const started = performance.now();
+
 const [rows, depths] = await db.batch([
   db.execute(
     sql`${eligibleProducts} ${publicListingDetailRows(sql`true`, now)} limit ${catalogPolicy.overflowSentinel}`,
@@ -20,24 +24,43 @@ const [rows, depths] = await db.batch([
     count(distinct current_price_cents)::int as prices from price_history
     where currency='PEN' and price_unit in ('UN','KG') group by listing_id`),
 ]);
-if (rows.rows.length > catalogPolicy.retainedListingCap)
+
+if (rows.rows.length > catalogPolicy.retainedListingCap) {
   throw new Error("Audit catalog bound exceeded");
+}
+
 const listings = rows.rows.map((r) => publicRetailerListing(r, now)).filter((r) => r !== null);
+
 const depth = z
   .array(z.object({ id: z.uuid(), states: z.number(), prices: z.number() }))
   .parse(depths.rows);
+
 const queryMs = performance.now() - started;
+
 const selected = new Set(listings.filter((l) => l.canonicalId).slice(0, 4));
-for (const retailer of ["tottus", "plaza-vea", "metro"])
+
+for (const retailer of ["tottus", "plaza-vea", "metro"]) {
   for (const l of listings
     .filter((candidate) => candidate.retailerId === retailer && !candidate.canonicalId)
-    .slice(0, 3))
+    .slice(0, 3)) {
     selected.add(l);
+  }
+}
+
 const transition = listings.find((l) => depth.some((d) => d.id === l.id && d.prices > 1));
+
 const cmr = listings.find((l) => l.conditionalOffers.length);
-if (transition) selected.add(transition);
-if (cmr) selected.add(cmr);
+
+if (transition) {
+  selected.add(transition);
+}
+
+if (cmr) {
+  selected.add(cmr);
+}
+
 const samples = [];
+
 for (const listing of selected) {
   const start = performance.now();
   const detail = await getPublicRetailerListingDetail(db, listing.id, { now });
@@ -57,10 +80,12 @@ for (const listing of selected) {
     queryMs: Math.round(performance.now() - start),
   });
 }
+
 const statuses: Record<
   string,
   { sparse: number; empty: number; events: number; verified: number }
 > = {};
+
 for (const range of ["7d", "30d", "90d"] as const) {
   const history = await getScopedPriceHistory(
     db,
@@ -78,6 +103,7 @@ for (const range of ["7d", "30d", "90d"] as const) {
     verified: summaries.filter((s) => s.segments.length > 0).length,
   };
 }
+
 console.log(
   JSON.stringify(
     {

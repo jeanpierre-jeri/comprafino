@@ -23,7 +23,9 @@ import { previewListingRefresh } from "./listing-refresh.ts";
 import { coverageReport } from "./coverage.ts";
 import { searchGenericProductOffers, searchPublicProducts } from "./generic-offers.ts";
 import { catalogTestContext, observation, publicNow } from "./testing/catalog-fixtures.ts";
+
 const testUrl = process.env.TEST_DATABASE_URL;
+
 describe.skipIf(!testUrl)("PostgreSQL public-search (explicit TEST_DATABASE_URL)", () => {
   // Keep deliberate contention inside each case; cases start with independent data.
   const harness = catalogTestContext({
@@ -320,6 +322,7 @@ describe.skipIf(!testUrl)("PostgreSQL public-search (explicit TEST_DATABASE_URL)
     const { id, rows } = await seedPublicProduct("listing-associated", "Leche Gloria Entera 946ml");
     const read = () => getPublicRetailerListingDetail(db, rows[0]!.id, { now: publicNow });
     expect((await read())?.canonicalId).toBe(id);
+
     for (const change of ["confidence=0.89", "method='manual'", "matching_version=99"]) {
       await query(`update canonical_product_listings set ${change} where listing_id=$1`, [
         rows[1]!.id,
@@ -530,6 +533,7 @@ describe.skipIf(!testUrl)("PostgreSQL public-search (explicit TEST_DATABASE_URL)
       "Yogurt Gloria Griego Con Miel 800g",
     );
     const listingId = rows[0]!.id;
+
     for (const update of ["method='manual'", "matching_version=99", "confidence=0.89"]) {
       await query(`update canonical_product_listings set ${update} where listing_id=$1::uuid`, [
         listingId,
@@ -543,6 +547,7 @@ describe.skipIf(!testUrl)("PostgreSQL public-search (explicit TEST_DATABASE_URL)
         [listingId],
       );
     }
+
     for (const update of ["active=false", "available=false"]) {
       await query(`update retailer_listings set ${update} where id=$1::uuid`, [listingId]);
       const filtered = await getCanonicalProductComparison(db, id);
@@ -551,6 +556,7 @@ describe.skipIf(!testUrl)("PostgreSQL public-search (explicit TEST_DATABASE_URL)
         listingId,
       ]);
     }
+
     await query(
       "update price_history set valid_until=valid_from+interval '1 minute' where listing_id=$1::uuid and valid_until is null",
       [listingId],
@@ -565,6 +571,7 @@ describe.skipIf(!testUrl)("PostgreSQL public-search (explicit TEST_DATABASE_URL)
     expect((await searchCanonicalProducts(db, "gloria 946")).map((p) => p.id)).toEqual(
       beforeUnmatched,
     );
+
     // A realistic high-scoring review remains outside the public catalog.
     for (const retailer of ["metro", "plaza-vea"] as const) {
       const value = {
@@ -579,6 +586,7 @@ describe.skipIf(!testUrl)("PostgreSQL public-search (explicit TEST_DATABASE_URL)
       await persistListings(db, retailer, [value]);
       await persistCatalogNormalizations(db, await catalogRows(value.externalId));
     }
+
     const review = await matchingRows(["public-review-metro", "public-review-plaza-vea"]);
     const decisions = await evaluatePairs(db, [[review[0]!, review[1]!]]);
     expect(decisions[0]!.result.decision).toBe("review");

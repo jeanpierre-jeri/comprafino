@@ -22,7 +22,6 @@ import { Skeleton } from "@comprafino/ui/components/skeleton";
 import { toast } from "@comprafino/ui/components/toast";
 import { accountInitials, avatarUrl } from "../lib/account-identity";
 import { authClient } from "../lib/auth-client";
-import { useShoppingList } from "./use-shopping-list";
 import { GoogleMark } from "./google-mark";
 
 type SessionUser = NonNullable<ReturnType<typeof authClient.useSession>["data"]>["user"];
@@ -34,30 +33,38 @@ function LoginDialog({ onClose }: { onClose: () => void }) {
   const [pending, setPending] = useState(false);
   const [failed, setFailed] = useState(false);
   const inFlight = useRef(false);
+
   async function signIn() {
     if (inFlight.current) return;
+
     inFlight.current = true;
     setPending(true);
     setFailed(false);
+
     try {
       const result = await authClient.signIn.social({
         provider: "google",
         callbackURL: window.location.href,
       });
+
       if (!result.error) return; // Keep loading until the successful redirect leaves the page.
     } catch {
       // Both transport and API failures remain retryable inside this dialog.
     }
+
     inFlight.current = false;
     setPending(false);
     setFailed(true);
   }
+
   return (
     <Dialog
       open={open}
       onOpenChange={setOpen}
       onOpenChangeComplete={(next) => {
-        if (!next) onClose();
+        if (!next) {
+          onClose();
+        }
       }}
     >
       <DialogContent className="auth-dialog gap-0" initialFocus={google}>
@@ -103,8 +110,6 @@ function LoginDialog({ onClose }: { onClose: () => void }) {
 }
 
 export function AuthControl() {
-  // Keep session transitions observed even when no list/editor is mounted.
-  useShoppingList();
   const { data, isPending, error: sessionError } = authClient.useSession();
   const [loginOpen, setLoginOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -113,14 +118,21 @@ export function AuthControl() {
   const inFlight = useRef(false);
   const trigger = useRef<HTMLButtonElement>(null);
   const user = retainedUser ?? data?.user;
+
   async function signOut() {
     if (inFlight.current || !user) return;
+
     inFlight.current = true;
     setRetainedUser(user);
     setLoggingOut(true);
+
     try {
       const result = await authClient.signOut();
-      if (result.error) throw new Error("Sign-out failed");
+
+      if (result.error) {
+        throw new Error("Sign-out failed");
+      }
+
       setMenuOpen(false);
       setRetainedUser(null);
     } catch {
@@ -131,6 +143,7 @@ export function AuthControl() {
       setRetainedUser(null);
     }
   }
+
   if (isPending && !user) {
     return (
       <output aria-label="Cargando sesión">
@@ -138,6 +151,7 @@ export function AuthControl() {
       </output>
     );
   }
+
   return (
     <div className="shrink-0">
       {user ? (

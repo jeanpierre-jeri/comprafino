@@ -23,9 +23,15 @@ try {
   const categoryRequests = { tottus: 0, "plaza-vea": 0, metro: 0 };
   const measuredFetch: typeof fetch = (input, init) => {
     const hostname = new URL(input instanceof Request ? input.url : input).hostname;
-    if (hostname === "www.tottus.com.pe") categoryRequests.tottus++;
-    else if (hostname === "www.plazavea.com.pe") categoryRequests["plaza-vea"]++;
-    else if (hostname === "www.metro.pe") categoryRequests.metro++;
+
+    if (hostname === "www.tottus.com.pe") {
+      categoryRequests.tottus++;
+    } else if (hostname === "www.plazavea.com.pe") {
+      categoryRequests["plaza-vea"]++;
+    } else if (hostname === "www.metro.pe") {
+      categoryRequests.metro++;
+    }
+
     return fetch(input, init);
   };
   const adapters = createRefreshAdapters(measuredFetch);
@@ -33,12 +39,18 @@ try {
     {
       async ingest(retailer) {
         const { adapter, limit } = adapters[retailer];
+
         if (store) return ingest(adapter, limit, store);
+
         const sample = await adapter.fetchListings(limit);
+
         return { fetched: sample.discovered, persisted: 0, changed: 0 };
       },
       async targeted() {
-        if (!db) throw new Error("Database required");
+        if (!db) {
+          throw new Error("Database required");
+        }
+
         return refreshKnownListings(
           await previewListingRefresh(db, {
             limit: listingRefreshPolicy.limit,
@@ -50,17 +62,31 @@ try {
         );
       },
       async normalize() {
-        if (!db) throw new Error("Database required");
+        if (!db) {
+          throw new Error("Database required");
+        }
+
         await assertRefreshScope(db);
         const r = await normalizeCatalog(db, catalogPolicy.retainedListingCap);
-        if (!r.persisted || r.persisted.stale) throw new Error("Stale normalization");
+
+        if (!r.persisted || r.persisted.stale) {
+          throw new Error("Stale normalization");
+        }
+
         return { processed: r.coverage.processed, changed: r.persisted.changed };
       },
       async match() {
-        if (!db) throw new Error("Database required");
+        if (!db) {
+          throw new Error("Database required");
+        }
+
         await assertRefreshScope(db);
         const r = await matchCatalog(db, catalogPolicy.retainedListingCap);
-        if (!r.persisted || r.persisted.stale) throw new Error("Stale matching");
+
+        if (!r.persisted || r.persisted.stale) {
+          throw new Error("Stale matching");
+        }
+
         return {
           candidates: r.metrics.candidatePairs,
           associationsChanged: r.persisted.linksCreated + r.persisted.linksRemoved,
@@ -75,7 +101,10 @@ try {
   console.log(
     JSON.stringify({ ...summary, observedAt: new Date().toISOString(), categoryRequests }, null, 2),
   );
-  if (summary.status === "failed") process.exitCode = 1;
+
+  if (summary.status === "failed") {
+    process.exitCode = 1;
+  }
 } catch (error) {
   logDiagnostic(error, { stage: "admission", operation: "refresh", reason: "db_read_failed" });
   process.exitCode = 1;

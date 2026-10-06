@@ -21,6 +21,7 @@ export const vtexCategories = {
     "toilet-paper": "1900/1001195/1001196",
   },
 } as const;
+
 export type VtexCategory = keyof typeof vtexCategories.metro;
 
 export const vtexCategoryKeys = [
@@ -32,6 +33,7 @@ export const vtexCategoryKeys = [
   "oats",
   "toilet-paper",
 ] as const;
+
 export function isVtexCategory(value: string): value is VtexCategory {
   return Object.hasOwn(vtexCategories.metro, value);
 }

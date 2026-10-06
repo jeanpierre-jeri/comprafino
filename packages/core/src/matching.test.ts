@@ -11,7 +11,9 @@ import {
 } from "./matching.ts";
 import type { MatchingListing } from "./matching.ts";
 import fixture from "./fixtures/matching.json";
+
 const rows = z.record(z.string(), matchingListingSchema).parse(fixture.listings);
+
 const listing = (
   id: string,
   title = "Leche Gloria Entera 946ml",
@@ -22,6 +24,7 @@ const listing = (
   retailer,
   attributes: normalizeCatalogListing({ title, priceUnit: "UN", sourceBrand: "Gloria" }),
 });
+
 describe("deterministic matching", () => {
   it.each(fixture.pairs.filter((p) => p.expected !== "match"))(
     "never auto-matches reviewed negative/uncertain $a / $b: $rationale",
@@ -38,11 +41,27 @@ describe("deterministic matching", () => {
   ] as const)("hard %s conflict beats perfect similarity", (change, reason) => {
     const a = listing("a"),
       b = listing("b", undefined, "plaza-vea");
-    if (change === "brand") b.retailer = "metro";
-    if (change === "dimension") b.attributes.quantity = { value: 946, unit: "g" };
-    if (change === "quantity") b.attributes.quantity = { value: 1500, unit: "ml" };
-    if (change === "count") b.attributes.packageCount = 3;
-    if (change === "total") b.attributes.totalQuantity = { value: 2838, unit: "ml" };
+
+    if (change === "brand") {
+      b.retailer = "metro";
+    }
+
+    if (change === "dimension") {
+      b.attributes.quantity = { value: 946, unit: "g" };
+    }
+
+    if (change === "quantity") {
+      b.attributes.quantity = { value: 1500, unit: "ml" };
+    }
+
+    if (change === "count") {
+      b.attributes.packageCount = 3;
+    }
+
+    if (change === "total") {
+      b.attributes.totalQuantity = { value: 2838, unit: "ml" };
+    }
+
     expect(scoreMatch(a, b, 1)).toMatchObject({
       score: 0,
       decision: "incompatible",

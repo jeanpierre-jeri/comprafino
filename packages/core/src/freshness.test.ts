@@ -1,7 +1,9 @@
 import { expect, it } from "vitest";
 import { retailerFreshness, operationalRunSchema, safeIngestionError } from "./freshness.ts";
 import type { OperationalRun } from "./freshness.ts";
+
 const now = new Date("2026-10-03T23:00:00Z");
+
 function run(hours: number, status: OperationalRun["status"] = "success"): OperationalRun {
   return {
     id: "00000000-0000-4000-8000-000000000001",
@@ -14,6 +16,7 @@ function run(hours: number, status: OperationalRun["status"] = "success"): Opera
     listingsChanged: 0,
   };
 }
+
 it.each([
   [0, "healthy"],
   [18, "healthy"],
@@ -24,6 +27,7 @@ it.each([
   const success = run(hours);
   expect(retailerFreshness(success, success, now).freshness).toBe(expected);
 });
+
 it("keeps latest failed attempt distinct from successful observation age and counts", () => {
   const result = retailerFreshness(run(1, "failed"), run(24), now);
   expect(result).toMatchObject({
@@ -34,6 +38,7 @@ it("keeps latest failed attempt distinct from successful observation age and cou
   });
   expect(result.latestSuccess?.status).toBe("success");
 });
+
 it("handles missing history and interrupted running attempts", () => {
   expect(retailerFreshness(null, null, now)).toMatchObject({
     freshness: "unknown",
@@ -46,6 +51,7 @@ it("handles missing history and interrupted running attempts", () => {
     latestFailure: null,
   });
 });
+
 it("rejects invalid database operational values and strips arbitrary stored errors", () => {
   expect(() => operationalRunSchema.parse({ ...run(1), status: "oops" })).toThrow(
     /Invalid|Too small/u,

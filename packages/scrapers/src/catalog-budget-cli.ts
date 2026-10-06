@@ -15,7 +15,10 @@ import {
 } from "./catalog-budget.ts";
 
 try {
-  if (process.argv.slice(2).some((arg) => arg !== "--")) throw new Error("No options supported");
+  if (process.argv.slice(2).some((arg) => arg !== "--")) {
+    throw new Error("No options supported");
+  }
+
   const metrics = await catalogBudget();
   const refreshWorkflow = readFileSync(
     new URL("../../../.github/workflows/refresh-catalog.yml", import.meta.url),

@@ -1,5 +1,6 @@
 import { expect, it } from "vitest";
 import { parseArguments } from "./cli-options.ts";
+
 it("selects only the observed allowlisted dairy category and preserves existing defaults", () => {
   expect(parseArguments([])).toEqual({
     retailer: "tottus",

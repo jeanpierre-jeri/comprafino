@@ -17,6 +17,7 @@ export async function seedBasketFixtures(
   const fixtures: Record<string, string> = {};
   const now = new Date();
   const retailers: RetailerId[] = ["metro", "plaza-vea", "tottus"];
+
   for (let i = 0; i < count; i++) {
     const id = randomUUID();
     fixtures[`basket-${i}`] = id;
@@ -25,6 +26,7 @@ export async function seedBasketFixtures(
       "insert into canonical_products(id,display_name,brand_key,quantity_value,quantity_unit,package_count,total_quantity_value) values($1,$2,'basket',1000,'ml',1,1000)",
       [id, title],
     );
+
     for (const [index, retailer] of retailers.entries()) {
       const listing = {
         retailer,
@@ -32,12 +34,11 @@ export async function seedBasketFixtures(
         productId: `basket-${i}-${retailer}`,
         title,
         sourceBrand: "Basket",
-        url:
-          retailer === "tottus"
-            ? "https://www.tottus.com.pe/tottus-pe/articulo/1/test"
-            : retailer === "metro"
-              ? "https://www.metro.pe/basket/p"
-              : "https://www.plazavea.com.pe/basket/p",
+        url: {
+          tottus: "https://www.tottus.com.pe/tottus-pe/articulo/1/test",
+          metro: "https://www.metro.pe/basket/p",
+          "plaza-vea": "https://www.plazavea.com.pe/basket/p",
+        }[retailer],
         currentPriceCents: index === i % 3 ? 1000 : 2500,
         currency: "PEN" as const,
         priceUnit: "UN" as const,
@@ -59,6 +60,7 @@ export async function seedBasketFixtures(
       );
     }
   }
+
   if (count >= 3) {
     const list = shoppingListSchema.parse({
       version: 2,
@@ -78,9 +80,12 @@ export async function seedBasketFixtures(
         })),
     });
     const result = await evaluateCurrentShoppingList(db, list, "standard");
-    if (result.baskets.map((b) => b.totalCostCents).join(",") !== "6000,4500,3000")
+
+    if (result.baskets.map((b) => b.totalCostCents).join(",") !== "6000,4500,3000") {
       throw new Error("Basket fixture optima mismatch");
+    }
   }
+
   return fixtures;
 }
 
@@ -88,10 +93,14 @@ export async function seedBasketFixtures(
 export async function restrictBasketFixtureRetailers(restricted: boolean) {
   const { sql } = await import("drizzle-orm");
   const { fixtureDatabase: create } = await import("./testing/fixture-client.ts");
-  if (!/^comprafino_e2e_[0-9a-f]{32}$/u.test(process.env.COMPRAFINO_E2E_SCHEMA ?? ""))
+
+  if (!/^comprafino_e2e_[0-9a-f]{32}$/u.test(process.env.COMPRAFINO_E2E_SCHEMA ?? "")) {
     throw new Error("Basket fixture mutation requires an isolated E2E schema");
+  }
+
   const db = create();
   const { closeLocalTestConnections } = await import("./testing/test-query-client.ts");
+
   try {
     await db.batch([
       db.execute(sql`update retailer_listings set available = ${

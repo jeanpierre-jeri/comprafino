@@ -11,7 +11,9 @@ import { knownListings, claimListingRefresh, finishListingRefresh } from "./list
 
 import { searchGenericProductOffers } from "./generic-offers.ts";
 import { catalogTestContext, observation, publicNow } from "./testing/catalog-fixtures.ts";
+
 const testUrl = process.env.TEST_DATABASE_URL;
+
 describe.skipIf(!testUrl)("PostgreSQL availability (explicit TEST_DATABASE_URL)", () => {
   // Keep deliberate contention inside each case; cases start with independent data.
   const harness = catalogTestContext({
@@ -124,6 +126,7 @@ describe.skipIf(!testUrl)("PostgreSQL availability (explicit TEST_DATABASE_URL)"
     const externalId = (await knownListings(db)).find((r) => r.id === row.id)!.externalId;
     const history = await states(externalId);
     const coverage = await coverageDays(externalId);
+
     for (const minute of [1, 2]) {
       const known = (await knownListings(db)).find((r) => r.id === row.id)!;
       const at = observation("unused", minute).observedAt;
@@ -131,6 +134,7 @@ describe.skipIf(!testUrl)("PostgreSQL availability (explicit TEST_DATABASE_URL)"
       await finishListingRefresh(db, known, at, "not-found");
       await finishListingRefresh(db, known, at, "not-found");
     }
+
     expect(
       (
         await query(

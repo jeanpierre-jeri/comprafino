@@ -3,6 +3,7 @@ import { z } from "zod";
 import { matchingListingSchema, matchingVersion } from "@comprafino/core";
 import { createDatabase } from "./client.ts";
 import { evaluatePairs } from "./matching.ts";
+
 export async function evaluateMatching(db = createDatabase()) {
   const fixture = z
     .object({
@@ -39,6 +40,7 @@ export async function evaluateMatching(db = createDatabase()) {
       (p) => p.expected === "match" && p.result.decision !== "auto_match",
     ).length;
     const tn = labels.length - tp - fp - fn;
+
     return {
       split,
       pairs: labels.length,
@@ -50,5 +52,6 @@ export async function evaluateMatching(db = createDatabase()) {
       recall: tp + fn ? tp / (tp + fn) : null,
     };
   });
+
   return { version: matchingVersion, metrics };
 }

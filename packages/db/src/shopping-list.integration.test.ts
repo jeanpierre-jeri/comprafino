@@ -14,6 +14,7 @@ import { persistListings } from "./ingestion.ts";
 import { persistCatalogNormalizations } from "./catalog.ts";
 
 const url = process.env.TEST_DATABASE_URL;
+
 describe.skipIf(!url)("batched current shopping snapshot", () => {
   const harness = ownedTestDatabase({
     ...process.env,
@@ -70,10 +71,13 @@ describe.skipIf(!url)("batched current shopping snapshot", () => {
     expect(batch).toHaveBeenCalledTimes(1);
     batch.mockRestore();
     expect(shoppingListEvaluationSchema.safeParse(result).success).toBe(true);
-    for (const item of list.items)
+
+    for (const item of list.items) {
       expect(result.evaluations.find((e) => e.itemId === item.id)).toEqual(
         await evaluateCurrentShoppingItem(db, item, "standard"),
       );
+    }
+
     expect(result.baskets[0]).toMatchObject({
       status: "complete",
       totalCostCents: 4970,
@@ -105,6 +109,7 @@ describe.skipIf(!url)("batched current shopping snapshot", () => {
         ),
       );
     expect(changed).toHaveLength(1);
+
     try {
       for (const mode of ["standard", "benefits"] as const) {
         const list = shoppingListSchema.parse({
@@ -112,19 +117,23 @@ describe.skipIf(!url)("batched current shopping snapshot", () => {
           items: [make("generic"), make("preferred"), make("strict")],
         });
         const result = await evaluateCurrentShoppingList(db, list, mode);
+
         for (const evaluation of result.evaluations) {
           expect(evaluation.options.every((o) => o.ordinaryTotalCents > 0)).toBe(true);
           expect(evaluation.options.some((o) => o.id === changed[0]!.listingId)).toBe(false);
         }
+
         expect(
           result.baskets
             .flatMap((p) => p.assignments)
             .every((a) => a.option.ordinaryTotalCents > 0),
         ).toBe(true);
-        for (const item of list.items)
+
+        for (const item of list.items) {
           expect(result.evaluations.find((e) => e.itemId === item.id)).toEqual(
             await evaluateCurrentShoppingItem(db, item, mode),
           );
+        }
       }
     } finally {
       await scoped.query("update price_history set current_price_cents=$1 where id=$2", [
@@ -161,6 +170,7 @@ describe.skipIf(!url)("batched current shopping snapshot", () => {
       "update canonical_product_listings set confidence=0.85 where canonical_product_id=$1",
       [fixtures.alternative!],
     );
+
     try {
       const list = shoppingListSchema.parse({
         version: 2,
@@ -186,6 +196,7 @@ describe.skipIf(!url)("batched current shopping snapshot", () => {
     await scoped.query(
       "update retailer_listings set active=false where external_id='shopping-preferred-plaza-vea'",
     );
+
     try {
       const result = await evaluateCurrentShoppingList(
         db,

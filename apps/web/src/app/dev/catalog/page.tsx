@@ -1,14 +1,20 @@
 import { inspectCatalog, formatPen, formatUnitPrice } from "@comprafino/db";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
+
 export const metadata = {
   title: "Developer catalog inspection",
   robots: { index: false, follow: false },
 };
+
 export default async function CatalogPage() {
   await connection();
-  if (process.env.NODE_ENV === "production") notFound();
-  if (!process.env.DATABASE_URL)
+
+  if (process.env.NODE_ENV === "production") {
+    notFound();
+  }
+
+  if (!process.env.DATABASE_URL) {
     return (
       <main className="p-8">
         <h1>Developer catalog inspection</h1>
@@ -18,7 +24,10 @@ export default async function CatalogPage() {
         </p>
       </main>
     );
+  }
+
   let rows: Awaited<ReturnType<typeof inspectCatalog>>;
+
   try {
     rows = await inspectCatalog();
   } catch {
@@ -29,6 +38,7 @@ export default async function CatalogPage() {
       </main>
     );
   }
+
   return (
     <main className="space-y-6 p-8">
       <h1 className="text-2xl font-semibold">Developer catalog inspection</h1>
@@ -93,15 +103,9 @@ export default async function CatalogPage() {
                         : (unitPriceCalculation?.reason ??
                           "Missing / stale normalization or price")}
                     </td>
-                    <td>{a ? (a.soldByWeight ? "Yes" : "No") : "—"}</td>
+                    <td>{soldByWeightLabel(a?.soldByWeight)}</td>
                     <td>{listing.packageText ?? "—"}</td>
-                    <td>
-                      {!a
-                        ? "Not normalized"
-                        : stale
-                          ? "Stale"
-                          : `v${a.normalizationVersion} ${a.issues.join(", ")}`}
-                    </td>
+                    <td>{normalizationLabel(a, stale)}</td>
                   </tr>
                 ),
               )}
@@ -111,4 +115,21 @@ export default async function CatalogPage() {
       )}
     </main>
   );
+}
+
+function soldByWeightLabel(soldByWeight: boolean | undefined): string {
+  if (soldByWeight === undefined) return "—";
+
+  return soldByWeight ? "Yes" : "No";
+}
+
+function normalizationLabel(
+  attributes: { normalizationVersion: number; issues: string[] } | null | undefined,
+  stale: boolean,
+): string {
+  if (!attributes) return "Not normalized";
+
+  if (stale) return "Stale";
+
+  return `v${attributes.normalizationVersion} ${attributes.issues.join(", ")}`;
 }

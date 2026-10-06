@@ -7,6 +7,7 @@ import { readMatchingSample } from "./matching.ts";
 import { knownListings } from "./listing-refresh.ts";
 
 const countRow = z.object({ rows: z.number().int().nonnegative() });
+
 const tables = [
   "retailer_listings",
   "listing_normalizations",
@@ -19,6 +20,7 @@ const tables = [
   "discovery_queries",
   "discovery_daily_budget",
 ] as const;
+
 /** Internal metadata only; never expose SQL text, connection identities or credentials. */
 export async function catalogBudget(db = createDatabase(), now = new Date()) {
   const counts = await Promise.all(
@@ -26,6 +28,7 @@ export async function catalogBudget(db = createDatabase(), now = new Date()) {
       const result = await db.execute(
         sql`select count(*)::integer as rows from ${sql.identifier(table)}`,
       );
+
       return [table, countRow.parse(result.rows[0]).rows] as const;
     }),
   );
@@ -49,8 +52,11 @@ export async function catalogBudget(db = createDatabase(), now = new Date()) {
       sql`select pg_database_size(current_database())::float8 as "databaseBytes",(select count(*)::integer from pg_stat_activity where datname=current_database()) as "visibleConnections"`,
     ),
   ]);
-  if ((rowCounts.retailer_listings ?? 0) > catalogPolicy.retainedListingCap)
+
+  if ((rowCounts.retailer_listings ?? 0) > catalogPolicy.retainedListingCap) {
     throw new Error("Catalog bound exceeded; review capacity before derivation");
+  }
+
   return {
     observedAt: now.toISOString(),
     rowCounts,

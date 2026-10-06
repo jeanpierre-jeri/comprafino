@@ -9,15 +9,18 @@ export interface RefreshTasks {
   normalize(): Promise<{ processed: number; changed: number }>;
   match(): Promise<{ candidates: number; associationsChanged: number; productsChanged: number }>;
 }
+
 type Outcome<T> =
   | { status: "success"; result: T }
   | { status: "failed"; error: string; diagnostic: SafeDiagnostic }
   | { status: "skipped" };
+
 export interface RefreshEvent {
   stage: RetailerId | "targeted" | "normalization" | "matching" | "overall";
   status: "started" | "success" | "failed" | "skipped";
   at: string;
 }
+
 export async function refreshCatalog(
   tasks: RefreshTasks,
   dryRun = false,
@@ -30,8 +33,10 @@ export async function refreshCatalog(
     retailer: RetailerId;
     outcome: Outcome<Awaited<ReturnType<RefreshTasks["ingest"]>>>;
   }[] = [];
+
   for (const retailer of retailerIdSchema.options) {
     event(retailer, "started");
+
     try {
       const result = await tasks.ingest(retailer);
       retailers.push({ retailer, outcome: { status: "success", result } });
@@ -53,10 +58,13 @@ export async function refreshCatalog(
       event(retailer, "failed");
     }
   }
+
   let targeted: Outcome<{ observed: number; failures: number; requests: number; changed: number }> =
     { status: "skipped" };
+
   if (!dryRun && tasks.targeted) {
     event("targeted", "started");
+
     try {
       targeted = { status: "success", result: await tasks.targeted() };
     } catch (error) {
@@ -70,15 +78,18 @@ export async function refreshCatalog(
         }),
       };
     }
+
     event(
       "targeted",
       targeted.status === "success" && targeted.result.failures > 0 ? "failed" : targeted.status,
     );
   }
+
   let normalization: Outcome<Awaited<ReturnType<RefreshTasks["normalize"]>>> = {
     status: "skipped",
   };
   let matching: Outcome<Awaited<ReturnType<RefreshTasks["match"]>>> = { status: "skipped" };
+
   if (
     !dryRun &&
     (retailers.some((r) => r.outcome.status === "success") ||
@@ -86,6 +97,7 @@ export async function refreshCatalog(
       targeted.status === "failed")
   ) {
     event("normalization", "started");
+
     try {
       normalization = { status: "success", result: await tasks.normalize() };
     } catch (error) {
@@ -99,9 +111,11 @@ export async function refreshCatalog(
         }),
       };
     }
+
     if (normalization.status === "success") {
       event("normalization", "success");
       event("matching", "started");
+
       try {
         matching = { status: "success", result: await tasks.match() };
       } catch (error) {
@@ -115,9 +129,15 @@ export async function refreshCatalog(
           }),
         };
       }
-    } else event("normalization", "failed");
+    } else {
+      event("normalization", "failed");
+    }
   }
-  if (normalization.status === "skipped") event("normalization", "skipped");
+
+  if (normalization.status === "skipped") {
+    event("normalization", "skipped");
+  }
+
   event("matching", matching.status);
   const status =
     retailers.every((r) => r.outcome.status === "success") &&
@@ -128,6 +148,7 @@ export async function refreshCatalog(
       ? "success"
       : "failed";
   event("overall", status);
+
   return {
     dryRun,
     retailers,
@@ -138,9 +159,13 @@ export async function refreshCatalog(
     durationMs: Date.now() - startedAt,
   };
 }
+
 export function parseRefreshOptions(args: readonly string[]) {
   const options = args.filter((arg) => arg !== "--");
-  if (options.length > 1 || options.some((arg) => arg !== "--dry-run"))
+
+  if (options.length > 1 || options.some((arg) => arg !== "--dry-run")) {
     throw new Error("Use pnpm refresh:catalog -- --dry-run (optional)");
+  }
+
   return { dryRun: options.includes("--dry-run") };
 }

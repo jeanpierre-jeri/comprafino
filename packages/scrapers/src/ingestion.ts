@@ -1,6 +1,7 @@
 import { safeDiagnostic, DiagnosticError } from "@comprafino/core";
 import type { NormalizedRetailerListing, RetailerId } from "@comprafino/core";
 import type { RetailerAdapter } from "./adapter.ts";
+
 export interface IngestionStore {
   start(retailer: RetailerId): Promise<string>;
   persist(
@@ -18,8 +19,10 @@ export interface IngestionStore {
     },
   ): Promise<void>;
 }
+
 export async function ingest(adapter: RetailerAdapter, limit: number, store: IngestionStore) {
   let id: string;
+
   try {
     id = await store.start(adapter.retailer);
   } catch (error) {
@@ -30,11 +33,13 @@ export async function ingest(adapter: RetailerAdapter, limit: number, store: Ing
       reason: "db_write_failed",
     });
   }
+
   let stage: "source" | "persistence" | "completion" = "source";
   let fetched = 0;
   let persisted = 0;
   let changed = 0;
   let skippedByCapacity = 0;
+
   try {
     const sample = await adapter.fetchListings(limit);
     fetched = sample.discovered;
@@ -46,6 +51,7 @@ export async function ingest(adapter: RetailerAdapter, limit: number, store: Ing
     } = await store.persist(adapter.retailer, sample.listings));
     stage = "completion";
     await store.finish(id, { status: "success", fetched, persisted, changed });
+
     return { id, fetched, persisted, changed, skippedByCapacity };
   } catch (error) {
     // Persist a safe error code; driver messages may contain connection credentials.
@@ -57,6 +63,7 @@ export async function ingest(adapter: RetailerAdapter, limit: number, store: Ing
         stage === "source" ? ("source_request_failed" as const) : ("db_write_failed" as const),
     };
     const diagnostic = safeDiagnostic(error, context);
+
     try {
       await store.finish(id, {
         status: "failed",
@@ -73,6 +80,7 @@ export async function ingest(adapter: RetailerAdapter, limit: number, store: Ing
         reason: "db_write_failed",
       });
     }
+
     throw new DiagnosticError(error, context);
   }
 }

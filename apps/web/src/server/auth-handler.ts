@@ -13,5 +13,6 @@ export function authHandlers(auth: () => Pick<ReturnType<typeof betterAuth>, "ha
       );
     }
   };
+
   return { GET: handler, POST: handler };
 }

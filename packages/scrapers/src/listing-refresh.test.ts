@@ -2,6 +2,7 @@ import { expect, it, vi } from "vitest";
 import type { KnownListing } from "@comprafino/core";
 import { refreshKnownListings } from "./listing-refresh.ts";
 import type { ListingRefreshTasks } from "./listing-refresh.ts";
+
 function row(index: number, retailer: KnownListing["retailer"] = "metro"): KnownListing {
   return {
     id: `00000000-0000-4000-8000-${String(index).padStart(12, "0")}`,
@@ -16,6 +17,7 @@ function row(index: number, retailer: KnownListing["retailer"] = "metro"): Known
     lastTargetedAttemptAt: null,
   };
 }
+
 function tasks(): ListingRefreshTasks {
   return {
     adapters: {
@@ -41,6 +43,7 @@ function tasks(): ListingRefreshTasks {
     pause: vi.fn<ListingRefreshTasks["pause"]>().mockResolvedValue(undefined),
   };
 }
+
 it("retains expected missing/unavailable listings without price writes or failures", async () => {
   const t = tasks();
   const result = await refreshKnownListings([row(1), row(2, "tottus")], t);
@@ -49,6 +52,7 @@ it("retains expected missing/unavailable listings without price writes or failur
   expect(t.finish).toHaveBeenCalledTimes(2);
   expect(t.pause).toHaveBeenCalledOnce();
 });
+
 it("isolates individual system failures and continues remaining lookups", async () => {
   const t = tasks();
   vi.mocked(t.adapters.metro.lookupListing).mockRejectedValueOnce(new Error("secret"));
@@ -57,6 +61,7 @@ it("isolates individual system failures and continues remaining lookups", async 
   expect(result.results.map((r) => r.status)).toEqual(["failed", "not-found", "not-found"]);
   expect(JSON.stringify(result)).not.toContain("secret");
 });
+
 it("stops a broadly failing retailer after three consecutive errors and continues other retailers", async () => {
   const t = tasks();
   vi.mocked(t.adapters.metro.lookupListing).mockRejectedValue(new Error("offline"));
@@ -73,6 +78,7 @@ it("stops a broadly failing retailer after three consecutive errors and continue
     "not-found",
   ]);
 });
+
 it("validates exact listing identity and never persists unrelated results", async () => {
   const t = tasks();
   vi.mocked(t.adapters.metro.lookupListing).mockResolvedValue({
@@ -92,12 +98,14 @@ it("validates exact listing identity and never persists unrelated results", asyn
   expect((await refreshKnownListings([row(1)], t)).failures).toBe(1);
   expect(t.persist).not.toHaveBeenCalled();
 });
+
 it("skips concurrent or newer observations refused by admission", async () => {
   const t = tasks();
   vi.mocked(t.claim).mockResolvedValue(false);
   expect((await refreshKnownListings([row(1)], t)).requests).toBe(0);
   expect(t.adapters.metro.lookupListing).not.toHaveBeenCalled();
 });
+
 it("retains source timeout diagnostics and leaves fatal admission/finish failures fatal", async () => {
   const t = tasks();
   const failure = new Error("private source");

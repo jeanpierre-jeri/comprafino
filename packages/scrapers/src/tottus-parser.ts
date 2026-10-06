@@ -8,6 +8,7 @@ const sourcePrice = z.object({
   crossed: z.boolean(),
   price: z.array(z.union([z.string(), z.number()])).length(1),
 });
+
 const sourceProduct = z.object({
   brand: z.string().trim().min(1).optional(),
   productId: z.string().regex(/^\d+$/u),
@@ -23,6 +24,7 @@ const sourceProduct = z.object({
       Array.isArray(raw)
         ? raw.filter((value: unknown) => {
             const type = z.object({ type: z.string() }).safeParse(value);
+
             return type.success && type.data.type === "cmrPrice"
               ? sourcePrice.safeParse(value).success
               : true;
@@ -31,6 +33,7 @@ const sourceProduct = z.object({
     z.array(sourcePrice),
   ),
 });
+
 const sourcePage = z.object({
   props: z.object({
     pageProps: z.object({
@@ -47,14 +50,18 @@ const sourcePage = z.object({
 /** Read only the site's explicit hydration JSON; no general HTML parser required. */
 export function parseTottusPage(html: string, observedAt: Date) {
   const script = /<script\b[^>]*\bid=["']__NEXT_DATA__["'][^>]*>([\s\S]*?)<\/script>/u.exec(html);
-  if (!script)
+
+  if (!script) {
     throw new Error("Tottus public listing JSON is missing; stop and inspect the source");
+  }
+
   const raw: unknown = JSON.parse(script[1]!);
   const page = sourcePage.parse(raw).props.pageProps;
   // An omitted quote unit cannot safely become a package or per-KG price.
   // Skip that source row; explicit unsupported units still fail schema validation.
   const eligible = page.results.filter((product) => product.measurements.unit !== undefined);
   const listings = eligible.map((product) => normalizeTottusProduct(product, observedAt));
+
   return {
     listings,
     pagination: page.pagination,
@@ -66,30 +73,42 @@ export function parseTottusPage(html: string, observedAt: Date) {
 /** Shared price/unit mapping for category, search and an exact PDP variant. */
 export function normalizeTottusProduct(input: unknown, observedAt: Date) {
   const product = sourceProduct.parse(input);
-  if (!product.measurements.unit) throw new Error("Missing Tottus quote unit");
+
+  if (!product.measurements.unit) {
+    throw new Error("Missing Tottus quote unit");
+  }
 
   const current = product.prices.filter(
     (price) => price.type === "internetPrice" && !price.crossed,
   );
   const regular = product.prices.filter((price) => price.type === "normalPrice");
-  if (current.length !== 1 || regular.length > 1)
+
+  if (current.length !== 1 || regular.length > 1) {
     throw new Error("Ambiguous or missing Tottus internet/regular price");
-  for (const price of [...current, ...regular]) {
-    if (price.symbol.trim() !== "S/") throw new Error("Unexpected Tottus currency");
   }
+
+  for (const price of [...current, ...regular]) {
+    if (price.symbol.trim() !== "S/") {
+      throw new Error("Unexpected Tottus currency");
+    }
+  }
+
   const url = new URL(product.url);
+
   if (
     url.origin !== "https://www.tottus.com.pe" ||
     !url.pathname.startsWith(`/tottus-pe/articulo/${product.productId}/`)
   ) {
     throw new Error("Unexpected Tottus product URL");
   }
+
   url.search = "";
   url.hash = "";
   const currentPriceCents = parsePenCents(current[0]!.price[0]!);
   const normalPriceCents = regular[0] ? parsePenCents(regular[0].price[0]!) : undefined;
   const cmr = product.prices.filter((price) => price.type === "cmrPrice");
   const conditionalOffers = [];
+
   if (
     cmr.length === 1 &&
     !cmr[0]!.crossed &&
@@ -98,7 +117,8 @@ export function normalizeTottusProduct(input: unknown, observedAt: Date) {
   ) {
     try {
       const priceCents = parsePenCents(cmr[0]!.price[0]!);
-      if (priceCents > 0 && priceCents < currentPriceCents)
+
+      if (priceCents > 0 && priceCents < currentPriceCents) {
         conditionalOffers.push({
           conditionType: "payment_card",
           programKey: "cmr",
@@ -106,10 +126,12 @@ export function normalizeTottusProduct(input: unknown, observedAt: Date) {
           priceCents,
           observedAt,
         });
+      }
     } catch {
       /* An invalid benefit never replaces or discards a valid ordinary price. */
     }
   }
+
   return listingSchema.parse({
     conditionalOffers,
     retailer: "tottus",

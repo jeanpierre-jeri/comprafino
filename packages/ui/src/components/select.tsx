@@ -35,7 +35,9 @@ export function ChoiceSelect({
         value={value}
         disabled={disabled}
         onValueChange={(next) => {
-          if (next !== null) onValueChange(next);
+          if (next !== null) {
+            onValueChange(next);
+          }
         }}
       >
         <Select.Label className={compact ? "sr-only" : "filter-label"}>{label}</Select.Label>

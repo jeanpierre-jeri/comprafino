@@ -160,9 +160,7 @@ function ToastIcon({ type }: { type: string | undefined }) {
     icon = <Loader2Icon className="animate-spin" aria-hidden="true" />;
   }
 
-  if (!icon) {
-    return null;
-  }
+  if (!icon) return null;
 
   return (
     <span
@@ -206,6 +204,7 @@ function Toaster({ children, toastManager = toast, ...props }: ToastPrimitive.Pr
 }
 
 const createToastManager = ToastPrimitive.createToastManager;
+
 const useToastManager = ToastPrimitive.useToastManager;
 
 export {

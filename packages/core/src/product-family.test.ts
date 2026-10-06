@@ -7,6 +7,7 @@ import {
   selectFamilyOffers,
 } from "./product-family.ts";
 import { retailerIdSchema } from "./listing.ts";
+
 const cases = z
   .array(
     z.object({
@@ -17,11 +18,13 @@ const cases = z
     }),
   )
   .parse(fixture);
+
 it.each(cases)("reviewed staple: $title → $expected", (row) => {
   expect(classifyProductFamily({ ...row, retailerId: row.retailerId ?? undefined }).family).toBe(
     row.expected,
   );
 });
+
 it("structured leaf evidence wins over an incidental title noun; mixed parent categories do not", () => {
   expect(
     classifyProductFamily({
@@ -42,6 +45,7 @@ it("structured leaf evidence wins over an incidental title noun; mixed parent ca
     origin: "title",
   });
 });
+
 it.each([
   ["huevo", "eggs", ""],
   ["azucar rubia 1kg", "sugar", "rubia 1 kg"],
@@ -53,12 +57,14 @@ it.each([
 ])("preserves specificity for %s", (query, family, remainingQuery) => {
   expect(resolveProductFamilyQuery(query)).toEqual({ family, remainingQuery });
 });
+
 it.each(["leche gloria", "bebida sin azúcar", "coca cola zero"])(
   "unknown or property query %s retains lexical behavior",
   (query) => {
     expect(resolveProductFamilyQuery(query)).toBeNull();
   },
 );
+
 it("strong family evidence beats incidental lexical occurrence and preserves lexical order within a tier", () => {
   const offers = [
     { id: "incidental", family: classifyProductFamily({ title: "Gaseosa sin azúcar 1L" }) },
@@ -100,6 +106,7 @@ it.each(["pasta dental colgate", "aceite corporal", "arroz con pollo", "avena be
     expect(resolveProductFamilyQuery(query)).toBeNull();
   },
 );
+
 it("an oat beverage product noun is insufficient evidence for dry oats", () => {
   expect(classifyProductFamily({ title: "Avena bebida 1L" }).family).toBeNull();
 });

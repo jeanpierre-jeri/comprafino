@@ -10,7 +10,9 @@ import { catalogFingerprint } from "./catalog.ts";
 import { searchFilters } from "@comprafino/core";
 import { normalizationVersion } from "@comprafino/core";
 import { createDatabase } from "./client.ts";
+
 const now = new Date("2026-10-03T10:00:00Z");
+
 const listing = {
   id: "00000000-0000-4000-8000-000000000001",
   retailerId: "metro",
@@ -18,6 +20,7 @@ const listing = {
   priceUnit: "UN" as const,
   sourceBrand: "Metro",
 };
+
 const raw = {
   listing,
   retailerName: "Metro",
@@ -31,12 +34,14 @@ const raw = {
   canonicalId: null,
   retailerCount: 0,
 };
+
 it("includes single-store offers with explicit independent identity", () => {
   const offer = genericProductOffer(raw, now)!;
   expect(offer.canonicalId).toBeNull();
   expect(offer.totalQuantity).toEqual({ value: 30, unit: "unit" });
   expect(offer.unitPrice?.denominator).toBe(30n);
 });
+
 it("rejects stale normalization, unsafe sources, stale/unavailable prices and invalid boundary values", () => {
   for (const patch of [
     { fingerprint: "old" },
@@ -44,12 +49,15 @@ it("rejects stale normalization, unsafe sources, stale/unavailable prices and in
     { url: "https://evil.test/p" },
     { available: false },
     { observedAt: new Date("2026-09-01") },
-  ])
+  ]) {
     expect(genericProductOffer({ ...raw, ...patch }, now)).toBeNull();
+  }
+
   expect(() => genericProductOffer({ ...raw, currentPriceCents: 0.5 }, now)).toThrow(
     /integer|Invalid input/u,
   );
 });
+
 it("retains unknown quantities and exact metadata without inventing unit prices", () => {
   const unknown = { ...listing, title: "Huevos premium bandeja" };
   expect(
@@ -62,6 +70,7 @@ it("retains unknown quantities and exact metadata without inventing unit prices"
     genericProductOffer({ ...raw, canonicalId: listing.id, retailerCount: 2 }, now)?.canonicalId,
   ).toBe(listing.id);
 });
+
 it("orders precise unit prices within dimensions, missing last, preserving relevance ties", () => {
   const a = genericProductOffer(raw, now)!;
   const b = genericProductOffer({ ...raw, currentPriceCents: 1800 }, now)!;
@@ -75,6 +84,7 @@ it("orders precise unit prices within dimensions, missing last, preserving relev
   expect(sortGenericOffers([b, a], "total-price")).toEqual([a, b]);
   expect(sortGenericOffers([b, a], "relevance")).toEqual([b, a]);
 });
+
 it("does not treat direct KG quotes as package totals", () => {
   const kgListing = { ...listing, title: "Arroz Metro por kg", priceUnit: "KG" as const };
   const kg = genericProductOffer(
@@ -89,6 +99,7 @@ it("does not treat direct KG quotes as package totals", () => {
   const packageOffer = genericProductOffer(raw, now)!;
   expect(sortGenericOffers([kg, packageOffer], "total-price")).toEqual([packageOffer, kg]);
 });
+
 it("invalid searches return without a database call", async () => {
   const db = createDatabase({ DATABASE_URL: "postgresql://unused@localhost/unused" });
   expect(await searchGenericProductOffers(db, " ")).toEqual([]);
@@ -176,20 +187,17 @@ it("unit and retailer filters never mix mass, litres, physical items or approxim
         ...base.unitPrice!,
         basis,
         quality: basis === "roll" ? ("approximate" as const) : ("strong" as const),
-        displayUnit:
-          basis === "mass"
-            ? ("kg" as const)
-            : basis === "volume"
-              ? ("l" as const)
-              : ("roll" as const),
+        displayUnit: displayUnitForBasis(basis),
       },
     })),
   ];
+
   for (const unit of ["kg", "L", "unit", "roll"]) {
     const result = filterGenericOffers(variants, searchFilters({ unit }));
     expect(result).toHaveLength(1);
     expect(result[0]?.unitPrice?.displayUnit).toBe(unit === "L" ? "l" : unit);
   }
+
   expect(filterGenericOffers(variants, searchFilters({ retailer: "tottus" }))).toEqual([
     variants[0],
   ]);
@@ -197,6 +205,15 @@ it("unit and retailer filters never mix mass, litres, physical items or approxim
 });
 
 it("withholds zero ordinary offers from generic ranking in both modes", () => {
-  for (const mode of ["standard", "benefits"] as const)
+  for (const mode of ["standard", "benefits"] as const) {
     expect(genericProductOffer({ ...raw, currentPriceCents: 0 }, now, mode)).toBeNull();
+  }
 });
+
+function displayUnitForBasis(basis: string): "kg" | "l" | "roll" {
+  if (basis === "mass") return "kg";
+
+  if (basis === "volume") return "l";
+
+  return "roll";
+}

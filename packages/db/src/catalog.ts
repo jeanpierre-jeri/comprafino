@@ -14,15 +14,19 @@ import { createDatabase } from "./client.ts";
 import { listingNormalizations, retailerListings, priceHistory } from "./schema.ts";
 
 type Database = ReturnType<typeof createDatabase>;
+
 export const catalogRecordSchema = catalogInputSchema
   .omit({ sourceQuantity: true, sourcePackageCount: true })
   .extend({
     id: z.uuid(),
     retailerId: retailerIdSchema,
   });
+
 export type CatalogRecord = z.infer<typeof catalogRecordSchema>;
+
 export function catalogFingerprint(input: CatalogInput): string {
   const value = catalogInputSchema.parse(input);
+
   return createHash("sha256")
     .update(
       JSON.stringify({
@@ -35,6 +39,7 @@ export function catalogFingerprint(input: CatalogInput): string {
     )
     .digest("hex");
 }
+
 export function catalogRecord(row: typeof retailerListings.$inferSelect): CatalogRecord {
   return catalogRecordSchema.parse({
     ...row,
@@ -42,14 +47,22 @@ export function catalogRecord(row: typeof retailerListings.$inferSelect): Catalo
       row.sourceUnitMultiplier === null ? null : Number(row.sourceUnitMultiplier),
   });
 }
+
 export function catalogPersistenceStatements(raw: readonly CatalogRecord[]) {
   const records = raw.map((row) => catalogRecordSchema.parse(row));
-  if (!records.length) throw new Error("Empty catalog batch");
-  if (new Set(records.map((row) => row.id)).size !== records.length)
+
+  if (!records.length) {
+    throw new Error("Empty catalog batch");
+  }
+
+  if (new Set(records.map((row) => row.id)).size !== records.length) {
     throw new Error("Duplicate catalog listing");
+  }
+
   const payload = JSON.stringify(
     records.map((row) => {
       const a = normalizeCatalogListing(row);
+
       return {
         id: row.id,
         retailer_id: row.retailerId,
@@ -84,6 +97,7 @@ export function catalogPersistenceStatements(raw: readonly CatalogRecord[]) {
     where l.retailer_id = x.retailer_id and (l.title, l.price_unit, l.package_text, l.source_brand, l.source_unit_multiplier)
       is not distinct from (x.title, x.price_unit, x.package_text, x.source_brand, x.source_unit_multiplier)`;
   const retailers = JSON.stringify([...new Set(records.map((row) => row.retailerId))]);
+
   return [
     // Same locks as ingestion, in a stable order, so stale reads never overwrite current metadata.
     sql`select id from retailers where id in (select jsonb_array_elements_text(${retailers}::jsonb)) order by id for update`,
@@ -118,8 +132,10 @@ export function catalogPersistenceStatements(raw: readonly CatalogRecord[]) {
       ) select listing_id from normalized`,
   ] as const;
 }
+
 export async function persistCatalogNormalizations(db: Database, rows: readonly CatalogRecord[]) {
   if (!rows.length) return { changed: 0, unchanged: 0, stale: 0 };
+
   const statements = catalogPersistenceStatements(rows);
   const results = await db.batch([
     db.execute(statements[0]),
@@ -130,19 +146,25 @@ export async function persistCatalogNormalizations(db: Database, rows: readonly 
     .tuple([z.object({ eligible: z.number().int().nonnegative() })])
     .parse(results[1].rows);
   const changed = results[2].rows.length;
+
   return { changed, unchanged: eligible - changed, stale: rows.length - eligible };
 }
+
 export async function readCatalogSample(db: Database, limit: number, retailer?: RetailerId) {
-  if (!Number.isInteger(limit) || limit < 1 || limit > 5000)
+  if (!Number.isInteger(limit) || limit < 1 || limit > 5000) {
     throw new Error("Limit must be an integer from 1 to 5000");
+  }
+
   const rows = await db
     .select()
     .from(retailerListings)
     .where(retailer ? eq(retailerListings.retailerId, retailer) : undefined)
     .orderBy(asc(retailerListings.retailerId), asc(retailerListings.externalId))
     .limit(limit);
+
   return rows.map(catalogRecord);
 }
+
 export async function normalizeCatalog(
   db: Database,
   limit: number,
@@ -169,8 +191,10 @@ export async function normalizeCatalog(
         s.attributes.issues.length,
     ).length,
   };
+
   return { persisted, coverage, samples };
 }
+
 export async function inspectCatalog(db = createDatabase()) {
   // Bound inspection independently per retailer so one store cannot hide the others.
   const groups = await Promise.all(
@@ -192,6 +216,7 @@ export async function inspectCatalog(db = createDatabase()) {
         .limit(20),
     ),
   );
+
   return groups.flat().map((row) => ({
     ...row,
     family: classifyProductFamily({

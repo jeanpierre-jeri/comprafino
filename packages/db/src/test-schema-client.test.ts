@@ -30,6 +30,7 @@ describe("explicit browser-test schema boundary", () => {
     ).not.toThrow(/comprafino_/u);
   });
 });
+
 it("fixture mutations require explicit test configuration and a validated parent schema", async () => {
   const { fixtureDatabase } = await import("./testing/fixture-client.ts");
   expect(() =>

@@ -4,7 +4,9 @@ import { z } from "zod";
 import { observationDay, retailerIdSchema } from "@comprafino/core";
 import { createDatabase } from "./client.ts";
 import { eligibleProducts } from "./public-products.ts";
+
 const count = z.number().int().nonnegative();
+
 /** Read-only health snapshot. Public means eligible exact-product offers, including stale ones. */
 export async function observationCoverageReport(db = createDatabase(), now = new Date()) {
   const today = observationDay(now);
@@ -69,6 +71,7 @@ export async function observationCoverageReport(db = createDatabase(), now = new
       }),
     )
     .parse(retailers.rows);
+
   return {
     inspectedAt: now,
     today,

@@ -29,9 +29,11 @@ export const refreshCoverage = {
     "toilet-paper": 20,
   },
 } as const;
+
 export function scheduledObservationLimit(retailer: keyof typeof refreshCoverage): number {
   return Object.values(refreshCoverage[retailer]).reduce((sum: number, limit) => sum + limit, 0);
 }
+
 export function combineTottusCoverage(
   meat: RetailerAdapter = createTottusAdapter(),
   dairy: RetailerAdapter = createTottusAdapter(undefined, "dairy"),
@@ -43,10 +45,12 @@ export function combineTottusCoverage(
       const a = await meat.fetchListings(refreshCoverage.tottus.meat);
       const b = await dairy.fetchListings(refreshCoverage.tottus.dairy);
       const listings = new Map([...a.listings, ...b.listings].map((row) => [row.externalId, row]));
+
       return { listings: [...listings.values()], discovered: a.discovered + b.discovered };
     },
   };
 }
+
 /** All category fetches complete before the single atomic retailer write. */
 export function combineVtexCoverage(
   retailer: "plaza-vea" | "metro",
@@ -60,26 +64,42 @@ export function combineVtexCoverage(
     retailer,
     async fetchListings(limit) {
       const expectedLimit = scheduledObservationLimit(retailer);
-      if (limit !== expectedLimit)
+
+      if (limit !== expectedLimit) {
         throw new Error(`Scheduled VTEX coverage requires limit ${expectedLimit}`);
+      }
+
       const listings = new Map<string, NormalizedRetailerListing>();
       let discovered = 0;
       const categories: readonly VtexCategory[] =
         retailer === "metro" ? [...vtexCategoryKeys, "eggs"] : vtexCategoryKeys;
+
       for (const [index, category] of categories.entries()) {
         const categoryLimit =
           category === "eggs" ? refreshCoverage.metro.eggs : refreshCoverage[retailer][category];
-        if (index > 0) await pause();
+
+        if (index > 0) {
+          await pause();
+        }
+
         const result = await createAdapter(category).fetchListings(categoryLimit);
-        if (result.listings.length > categoryLimit)
+
+        if (result.listings.length > categoryLimit) {
           throw new Error("Category exceeded listing limit");
+        }
+
         discovered += result.discovered;
-        for (const row of result.listings) listings.set(row.externalId, row);
+
+        for (const row of result.listings) {
+          listings.set(row.externalId, row);
+        }
       }
+
       return { listings: [...listings.values()], discovered };
     },
   };
 }
+
 export function createRefreshAdapters(fetchPage: typeof fetch = fetch) {
   return {
     tottus: {

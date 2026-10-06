@@ -1,21 +1,30 @@
 import { inspectMatching } from "@comprafino/db";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
+
 export const metadata = {
   title: "Developer matching inspection",
   robots: { index: false, follow: false },
 };
+
 export default async function MatchingPage() {
-  if (process.env.NODE_ENV === "production") notFound();
+  if (process.env.NODE_ENV === "production") {
+    notFound();
+  }
+
   await connection();
-  if (!process.env.DATABASE_URL)
+
+  if (!process.env.DATABASE_URL) {
     return (
       <main className="p-8">
         <h1>Developer matching inspection</h1>
         <p>Configure DATABASE_URL in apps/web/.env.local and apply migrations.</p>
       </main>
     );
+  }
+
   let data: Awaited<ReturnType<typeof inspectMatching>>;
+
   try {
     data = await inspectMatching();
   } catch {
@@ -29,10 +38,15 @@ export default async function MatchingPage() {
       </main>
     );
   }
+
   const groups = new Map<string, typeof data.links>();
-  for (const row of data.links)
+
+  for (const row of data.links) {
     groups.set(row.product.id, [...(groups.get(row.product.id) ?? []), row]);
+  }
+
   const rows = new Map(data.rows.map((row) => [row.id, row]));
+
   return (
     <main className="space-y-6 p-8">
       <h1 className="text-2xl font-semibold">Developer matching inspection</h1>
@@ -48,6 +62,7 @@ export default async function MatchingPage() {
           <p className="text-sm">{id}</p>
           {members.map(({ link }) => {
             const row = rows.get(link.listingId);
+
             return (
               <div key={link.listingId}>
                 <p>
@@ -82,6 +97,7 @@ export default async function MatchingPage() {
           <section className="rounded border p-4" key={`${p.a}-${p.b}`}>
             {[p.a, p.b].map((id) => {
               const row = rows.get(id)!;
+
               return (
                 <p key={id}>
                   {row.retailer}: {row.title} | {row.attributes.brandKey} |{" "}

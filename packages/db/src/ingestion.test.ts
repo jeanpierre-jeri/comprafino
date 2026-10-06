@@ -5,6 +5,7 @@ import { catalogPolicy, listingRefreshPolicy, matchingThresholds } from "@compra
 import { currentGenericOfferRows } from "./generic-offers.ts";
 import { eligibleProducts } from "./public-products.ts";
 import type { NormalizedRetailerListing } from "@comprafino/core";
+
 const listing: NormalizedRetailerListing = {
   retailer: "tottus",
   externalId: "1",
@@ -16,6 +17,7 @@ const listing: NormalizedRetailerListing = {
   priceUnit: "UN",
   observedAt: new Date("2026-10-03T09:00:00Z"),
 };
+
 it("uses shared policy in SQL admission, confidence and current observation bounds", () => {
   const dialect = new PgDialect();
   const admission = persistenceStatements("tottus", [listing]).map((query) =>
@@ -32,6 +34,7 @@ it("uses shared policy in SQL admission, confidence and current observation boun
     new Date(now.getTime() - listingRefreshPolicy.freshHours * 3_600_000).toISOString(),
   );
 });
+
 it("builds one transactional lock/upsert/close/open batch with parameterized source data", () => {
   const queries = persistenceStatements("tottus", [listing]).map((statement) =>
     new PgDialect().sqlToQuery(statement),
@@ -55,6 +58,7 @@ it("builds one transactional lock/upsert/close/open batch with parameterized sou
   expect(queries[3]?.sql).toContain("not exists");
   expect(queries[3]?.sql).toContain("h.valid_until is null");
 });
+
 it("rejects duplicate identity, mixed retailers and invalid money before SQL", () => {
   expect(() => persistenceStatements("tottus", [listing, listing])).toThrow(
     "Duplicate listing identities",

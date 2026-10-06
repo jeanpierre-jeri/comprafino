@@ -10,7 +10,9 @@ import { recordDiscoveryForSearch, inspectDiscovery } from "./discovery.ts";
 import { knownListings, claimListingRefresh, finishListingRefresh } from "./listing-refresh.ts";
 
 import { catalogTestContext, observation } from "./testing/catalog-fixtures.ts";
+
 const testUrl = process.env.TEST_DATABASE_URL;
+
 describe.skipIf(!testUrl)("PostgreSQL ingestion (explicit TEST_DATABASE_URL)", () => {
   // Keep deliberate contention inside each case; cases start with independent data.
   const harness = catalogTestContext({
@@ -119,11 +121,13 @@ describe.skipIf(!testUrl)("PostgreSQL ingestion (explicit TEST_DATABASE_URL)", (
       },
     ]);
     expect(history.filter((state) => state.valid_until === null)).toHaveLength(1);
+
     for (const minute of [0, 2]) {
       expect(await persistListings(db, "tottus", [observation("transition", minute, 990)])).toEqual(
         { persisted: 0, changed: 0, skippedByCapacity: 0 },
       );
     }
+
     expect(await states("transition")).toEqual(history);
   }, 30_000);
 
@@ -139,6 +143,7 @@ describe.skipIf(!testUrl)("PostgreSQL ingestion (explicit TEST_DATABASE_URL)", (
     await query(
       "alter table price_history add constraint test_reject_changed_price check (current_price_cents <> 990)",
     );
+
     try {
       await expect(
         persistListings(db, "tottus", [
@@ -177,12 +182,14 @@ describe.skipIf(!testUrl)("PostgreSQL ingestion (explicit TEST_DATABASE_URL)", (
     expect(history).toHaveLength(1 + attempts.reduce((sum, result) => sum + result.changed, 0));
     expect(history.filter((state) => state.valid_until === null)).toHaveLength(1);
     expect(history.at(-1)).toMatchObject({ current_price_cents: 1090, valid_until: null });
+
     for (let index = 0; index < history.length - 1; index++) {
       expect(history[index]?.valid_until).toEqual(history[index + 1]?.valid_from);
       expect(history[index]!.valid_until!.getTime()).toBeGreaterThan(
         history[index]!.valid_from.getTime(),
       );
     }
+
     expect(
       await query(
         "select current_price_cents, last_seen_at from retailer_listings where external_id = $1",

@@ -11,13 +11,16 @@ it("defaults outside reviewed docs and supports explicit destinations", () => {
     /\/\.artifacts\/local\.json$/u,
   );
   expect(reportOutputPath(["--output=/tmp/explicit.json"])).toBe("/tmp/explicit.json");
-  for (const args of [["--output="], ["--unknown"], ["--output=a", "--output=b"]])
+
+  for (const args of [["--output="], ["--unknown"], ["--output=a", "--output=b"]]) {
     expect(() => reportOutputPath(args)).toThrow(/Output path|Use --output/u);
+  }
 });
 
 it("creates new reports and refuses to replace reviewed evidence", () => {
   const directory = mkdtempSync(join(tmpdir(), "comprafino-report-"));
   const path = join(directory, "nested", "baseline.json");
+
   try {
     writeReport(path, { measuredAt: "original", durationMs: 100 });
     const original = readFileSync(path, "utf8");

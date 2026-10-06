@@ -11,6 +11,7 @@ import { createDatabase } from "./client.ts";
 import { knownListings } from "./listing-refresh.ts";
 import { inspectDiscovery } from "./discovery.ts";
 import { searchCanonicalProducts } from "./public-products.ts";
+
 export async function coverageReport(db = createDatabase(), now = new Date()) {
   const [rows, discovery, states, themesResult] = await Promise.all([
     knownListings(db),
@@ -38,6 +39,7 @@ export async function coverageReport(db = createDatabase(), now = new Date()) {
   const retailers = retailerIdSchema.options.map((retailer) => {
     const known = rows.filter((row) => row.retailer === retailer);
     const linked = known.filter((row) => row.public);
+
     return {
       retailer,
       known: known.length,
@@ -82,6 +84,7 @@ export async function coverageReport(db = createDatabase(), now = new Date()) {
     };
   });
   const demand = [];
+
   // Small sequential DB report: source requests never occur here.
   for (const query of discovery.queries.slice(0, 20)) {
     const linked =
@@ -99,6 +102,7 @@ export async function coverageReport(db = createDatabase(), now = new Date()) {
         .length,
     });
   }
+
   return {
     inspectedAt: now,
     knownListings: rows.length,

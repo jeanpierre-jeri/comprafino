@@ -6,8 +6,11 @@ import {
 } from "./listing-refresh.ts";
 import type { KnownListing } from "./listing-refresh.ts";
 import { cheapestOffers } from "./public-products.ts";
+
 const now = new Date("2026-10-04T12:00:00Z");
+
 const ago = (hours: number) => new Date(now.getTime() - hours * 3_600_000);
+
 function row(index: number, hours: number, publicListing = false, discovery = false): KnownListing {
   return {
     id: `00000000-0000-4000-8000-${String(index).padStart(12, "0")}`,
@@ -22,6 +25,7 @@ function row(index: number, hours: number, publicListing = false, discovery = fa
     lastTargetedAttemptAt: null,
   };
 }
+
 it("prioritizes public listings, then discovery, then other known listings by oldest observation", () => {
   const rows = [
     row(1, 200),
@@ -39,6 +43,7 @@ it("prioritizes public listings, then discovery, then other known listings by ol
   ]);
   expect(rows.map((r) => r.externalId)).toEqual(["1", "2", "3", "4", "5"]);
 });
+
 it("enforces age, attempt cooldown and per-run bounds including exact boundaries", () => {
   const a = row(1, 24, true);
   const b = { ...row(2, 100, true), lastTargetedAttemptAt: ago(11) };
@@ -49,6 +54,7 @@ it("enforces age, attempt cooldown and per-run bounds including exact boundaries
   expect(selectListingRefresh([a, b, c], now, 100).map((r) => r.externalId)).toEqual(["3", "1"]);
   expect(() => selectListingRefresh([], now, 101)).toThrow(/./u);
 });
+
 it.each([
   [0, "fresh"],
   [36, "fresh"],
@@ -59,6 +65,7 @@ it.each([
 ] as const)("classifies %s observation hours as %s", (hours, expected) =>
   expect(offerFreshness(ago(hours), now)).toBe(expected),
 );
+
 it("stale, too stale and unavailable offers cannot win against current offers", () => {
   const offers = [
     { currentPriceCents: 1, observedAt: ago(73) },
@@ -69,11 +76,13 @@ it("stale, too stale and unavailable offers cannot win against current offers", 
   expect(cheapestOffers(offers, now)).toEqual([offers[3]]);
   expect(cheapestOffers(offers.slice(0, 3), now)).toEqual([]);
 });
+
 it("validates CLI bounds and explicit one-SKU scopes", () => {
   expect(
     parseListingRefreshOptions(["--", "--retailer=metro", "--external-id=428", "--dry-run"])
       .externalId,
   ).toBe("428");
+
   for (const args of [
     ["--limit=0"],
     ["--limit=101"],
@@ -82,8 +91,9 @@ it("validates CLI bounds and explicit one-SKU scopes", () => {
     ["--dry-run", "--dry-run"],
     ["--force"],
     ["--limit=1.5"],
-  ])
+  ]) {
     expect(() => parseListingRefreshOptions(args)).toThrow(/./u);
+  }
 });
 
 it("prioritizes exact, safe shopping candidates, discovery, useful staples and other rows deterministically", () => {
@@ -100,6 +110,7 @@ it("prioritizes exact, safe shopping candidates, discovery, useful staples and o
   expect(selectListingRefresh(rows, now, 100).map((r) => r.externalId)).toEqual(ids);
   expect(selectListingRefresh([...rows].reverse(), now, 100).map((r) => r.externalId)).toEqual(ids);
 });
+
 it("unknown stock remains eligible under freshness rules while explicit unavailability is excluded", () => {
   const unknown = { currentPriceCents: 1, observedAt: ago(1), available: null };
   const available = { currentPriceCents: 2, observedAt: ago(1), available: true };

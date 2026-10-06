@@ -16,7 +16,9 @@ import { knownListings, claimListingRefresh, finishListingRefresh } from "./list
 import { observationCoverageReport } from "./observation-coverage.ts";
 
 import { catalogTestContext, observation } from "./testing/catalog-fixtures.ts";
+
 const testUrl = process.env.TEST_DATABASE_URL;
+
 describe.skipIf(!testUrl)("PostgreSQL history (explicit TEST_DATABASE_URL)", () => {
   // Keep deliberate contention inside each case; cases start with independent data.
   const harness = catalogTestContext({
@@ -275,10 +277,13 @@ describe.skipIf(!testUrl)("PostgreSQL history (explicit TEST_DATABASE_URL)", () 
       title: "Leche Gloria Entera Caja 946ml",
       sourceBrand: "Gloria",
     };
-    for (const day of [4, 6, 7])
+
+    for (const day of [4, 6, 7]) {
       await persistListings(db, "metro", [
         { ...value, observedAt: new Date(Date.UTC(2026, 9, day, 9)) },
       ]);
+    }
+
     const history = await getCanonicalProductPriceHistory(db, id, {
       range: "7d",
       now: new Date("2026-10-07T23:00:00Z"),

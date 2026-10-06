@@ -4,15 +4,21 @@ import { shoppingListBodyBytes } from "../src/server/request-body.ts";
 import { createDatabase } from "@comprafino/db";
 import { randomUUID } from "node:crypto";
 import { optimizeBasket } from "@comprafino/core";
+
 test.beforeEach(() => {
   calls = 0;
 });
+
 let calls = 0;
+
 let invalid = false;
+
 const database = () => {
   calls++;
+
   return createDatabase({ DATABASE_URL: "postgresql://unused@localhost/comprafino_test" });
 };
+
 function request(body: string, mode = "standard") {
   return new Request(`http://localhost/api/list/evaluate?priceMode=${mode}`, {
     method: "POST",
@@ -20,12 +26,17 @@ function request(body: string, mode = "standard") {
     headers: { "Content-Type": "application/json" },
   });
 }
+
 test("validates external list bodies before accessing the catalog", async () => {
   const POST = shoppingListPost(database);
-  for (const body of ["{", "null", '{"version":3,"items":[]}', '{"version":2,"items":[{}]}'])
+
+  for (const body of ["{", "null", '{"version":3,"items":[]}', '{"version":2,"items":[{}]}']) {
     expect((await POST(request(body))).status).toBe(400);
+  }
+
   expect(calls).toBe(0);
 });
+
 test("valid normal and maximum payloads use the HTTP handler and preserve mode/timings", async () => {
   const item = () => ({
     id: randomUUID(),
@@ -40,6 +51,7 @@ test("valid normal and maximum payloads use the HTTP handler and preserve mode/t
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   });
+
   for (const items of [
     [],
     [
@@ -60,6 +72,7 @@ test("valid normal and maximum payloads use the HTTP handler and preserve mode/t
     const POST = shoppingListPost(database, async (_db, list, selectedMode) => {
       mode = selectedMode;
       expect(list.items).toHaveLength(items.length);
+
       return {
         evaluations: [],
         baskets: optimizeBasket([]),
@@ -74,18 +87,22 @@ test("valid normal and maximum payloads use the HTTP handler and preserve mode/t
     expect(mode).toBe("standard");
   }
 });
+
 test("bounds actual UTF-8 bytes, declared length, logical items and huge fields before DB work", async () => {
   let evaluations = 0;
   const POST = shoppingListPost(database, async () => {
     evaluations++;
+
     throw new Error("Rejected body reached evaluation");
   });
+
   for (const body of [
     " ".repeat(shoppingListBodyBytes + 1),
     '"' + "🥚".repeat(shoppingListBodyBytes / 4) + '"',
   ]) {
     expect((await POST(request(body))).status).toBe(413);
   }
+
   const understated = request(" ".repeat(shoppingListBodyBytes + 1));
   understated.headers.set("content-length", "1");
   expect((await POST(understated)).status).toBe(413);
@@ -103,17 +120,21 @@ test("bounds actual UTF-8 bytes, declared length, logical items and huge fields 
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
+
   for (const items of [
     Array.from({ length: 51 }, () => ({ ...item, id: randomUUID() })),
     [{ ...item, label: "x".repeat(121) }],
     [{ ...item, query: "x".repeat(121) }],
     [{ ...item, query: "x".repeat(100_000) }],
     [{ ...item, label: "x".repeat(100_000) }],
-  ])
+  ]) {
     expect((await POST(request(JSON.stringify({ version: 2, items })))).status).toBe(400);
+  }
+
   expect(calls).toBe(0);
   expect(evaluations).toBe(0);
 });
+
 test("query failures and malformed domain responses remain safe 503 errors", async () => {
   const POST = shoppingListPost(database, async () => {
     if (invalid) {
@@ -124,10 +145,13 @@ test("query failures and malformed domain responses remain safe 503 errors", asy
         timings: { queryMs: 12, totalMs: 15 },
       };
       Reflect.deleteProperty(result, "baskets");
+
       return result;
     }
+
     throw new Error("postgres://secret@host raw payload");
   });
+
   for (invalid of [false, true]) {
     const response = await POST(request('{"version":2,"items":[]}'));
     expect(response.status).toBe(503);

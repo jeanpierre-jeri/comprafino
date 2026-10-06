@@ -10,15 +10,22 @@ import {
 } from "@comprafino/core";
 import { createDatabase } from "./client.ts";
 import { catalogRecordSchema, catalogFingerprint } from "./catalog.ts";
+
 try {
-  if (process.argv.slice(2).some((arg) => arg !== "--")) throw new Error("No options supported");
+  if (process.argv.slice(2).some((arg) => arg !== "--")) {
+    throw new Error("No options supported");
+  }
+
   const db = createDatabase();
   const now = new Date();
   const result = await db.execute(
     sql`select jsonb_build_object('id',l.id,'retailerId',l.retailer_id,'title',l.title,'priceUnit',l.price_unit,'packageText',l.package_text,'sourceBrand',l.source_brand,'sourceUnitMultiplier',l.source_unit_multiplier::float8) as listing,l.category,n.normalization_version as version,n.input_fingerprint as fingerprint,l.available,l.last_seen_at as "observedAt",h.current_price_cents as "priceCents" from retailer_listings l left join listing_normalizations n on n.listing_id=l.id left join price_history h on h.listing_id=l.id and h.valid_until is null where l.active order by l.retailer_id,l.title limit ${catalogPolicy.overflowSentinel}`,
   );
-  if (result.rows.length > catalogPolicy.retainedListingCap)
+
+  if (result.rows.length > catalogPolicy.retainedListingCap) {
     throw new Error("Catalog bound exceeded");
+  }
+
   const rows = z
     .array(
       z.object({
@@ -54,6 +61,7 @@ try {
         row.version !== normalizationVersion || row.fingerprint !== catalogFingerprint(row.listing)
           ? "stale-normalization"
           : calc.reason;
+
       return {
         retailer: row.listing.retailerId,
         title: row.listing.title,
@@ -97,6 +105,7 @@ try {
           "sugar",
         ].map((family) => {
           const sample = rows.filter((r) => r.family === family);
+
           return {
             family,
             ...summarize(sample),

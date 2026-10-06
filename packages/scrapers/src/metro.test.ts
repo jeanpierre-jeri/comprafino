@@ -5,10 +5,13 @@ import { ingest } from "./ingestion.ts";
 import type { IngestionStore } from "./ingestion.ts";
 
 const observed = new Date("2026-10-03T17:00:00Z");
+
 const requestedUrl = (input: Parameters<typeof fetch>[0]) =>
   input instanceof Request ? new URL(input.url) : new URL(input);
+
 const response = (data: unknown, range = "0-5/6") =>
   new Response(JSON.stringify(data), { status: 206, headers: { resources: range } });
+
 const sample = () => structuredClone(fixture[0]!);
 
 describe("sanitized captured Metro catalog", () => {
@@ -106,8 +109,10 @@ describe("sanitized captured Metro catalog", () => {
       title: "Sixpack Milk 390g",
       url: product.link,
     });
-    for (const key of ["packageText", "imageUrl", "category", "regularPriceCents"] as const)
+
+    for (const key of ["packageText", "imageUrl", "category", "regularPriceCents"] as const) {
       expect(listing?.[key]).toBeUndefined();
+    }
   });
 
   it("preserves separate SKU variants and ignores cheaper non-retailer sellers", () => {
@@ -208,6 +213,7 @@ describe("bounded Metro adapter and shared lifecycle", () => {
 
   it("advances actual inclusive offsets past skipped and duplicate products", async () => {
     vi.useFakeTimers();
+
     try {
       const unavailable = sample();
       unavailable.items[0]!.sellers[0]!.commertialOffer.IsAvailable = false;
@@ -235,9 +241,11 @@ describe("bounded Metro adapter and shared lifecycle", () => {
 
   it("bounds duplicate-only traversal to 25 requests and 500 source products", async () => {
     vi.useFakeTimers();
+
     try {
       const request = vi.fn<typeof fetch>().mockImplementation(async (input) => {
         const from = Number(requestedUrl(input).searchParams.get("_from"));
+
         return response(
           Array.from({ length: 20 }, () => fixture[0]),
           `${from}-${from + 19}/1000`,
@@ -274,8 +282,11 @@ describe("bounded Metro adapter and shared lifecycle", () => {
 
   it("rejects invalid limits before requests", async () => {
     const request = vi.fn<typeof fetch>();
-    for (const limit of [0, 501, 1.5, NaN])
+
+    for (const limit of [0, 501, 1.5, NaN]) {
       await expect(createMetroAdapter(request).fetchListings(limit)).rejects.toThrow("Limit must");
+    }
+
     expect(request).not.toHaveBeenCalled();
   });
 

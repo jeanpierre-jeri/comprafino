@@ -43,33 +43,56 @@ const sourcePage = z.array(
 export function parsePlazaVeaPage(raw: unknown, observedAt: Date) {
   const products = sourcePage.parse(raw);
   const listings: NormalizedRetailerListing[] = [];
+
   for (const product of products) {
     const url = new URL(product.link, "https://www.plazavea.com.pe");
-    if (url.origin !== "https://www.plazavea.com.pe" || !/^\/[^/]+\/p$/u.test(url.pathname))
+
+    if (url.origin !== "https://www.plazavea.com.pe" || !/^\/[^/]+\/p$/u.test(url.pathname)) {
       throw new Error("Unexpected Plaza Vea product URL");
+    }
+
     url.search = "";
     url.hash = "";
+
     for (const item of product.items) {
       const sellers = item.sellers.filter((seller) => seller.sellerId === "1");
-      if (sellers.length > 1) throw new Error("Ambiguous Plaza Vea seller offer");
+
+      if (sellers.length > 1) {
+        throw new Error("Ambiguous Plaza Vea seller offer");
+      }
+
       const offer = sellers[0]?.commertialOffer;
+
       // Unavailable offers often have zero placeholders, not an obtainable price.
-      if (!offer || !offer.IsAvailable || offer.AvailableQuantity === 0) continue;
+      if (!offer || !offer.IsAvailable || offer.AvailableQuantity === 0) {
+        continue;
+      }
+
       const currentPriceCents = parsePenCents(offer.Price);
-      if (currentPriceCents === 0) throw new Error("Unexpected Plaza Vea available zero price");
+
+      if (currentPriceCents === 0) {
+        throw new Error("Unexpected Plaza Vea available zero price");
+      }
+
       const listPriceCents =
         offer.ListPrice === undefined ? undefined : parsePenCents(offer.ListPrice);
       const regularPriceCents =
         listPriceCents !== undefined && listPriceCents > currentPriceCents
           ? listPriceCents
           : undefined;
-      if (item.measurementUnit === "un" && item.unitMultiplier !== 1)
+
+      if (item.measurementUnit === "un" && item.unitMultiplier !== 1) {
         throw new Error("Unexpected Plaza Vea unit multiplier; review price basis");
+      }
+
       const packageParts = (product["Presentación unitarios vitrina"] ?? [])
         .map(normalizeWhitespace)
         .filter(Boolean);
-      if (item.measurementUnit === "kg")
+
+      if (item.measurementUnit === "kg") {
         packageParts.push(`unitMultiplier: ${item.unitMultiplier} kg`);
+      }
+
       listings.push(
         listingSchema.parse({
           retailer: "plaza-vea",
@@ -92,6 +115,7 @@ export function parsePlazaVeaPage(raw: unknown, observedAt: Date) {
       );
     }
   }
+
   return { listings, discovered: products.length };
 }
 
@@ -102,8 +126,10 @@ export function createPlazaVeaAdapter(
   fetchPage: typeof fetch = fetch,
   category: VtexCategory = "dairy",
 ): SearchRetailerAdapter {
-  if (category === "eggs" || !Object.hasOwn(vtexCategories["plaza-vea"], category))
+  if (category === "eggs" || !Object.hasOwn(vtexCategories["plaza-vea"], category)) {
     throw new Error("Unsupported PlazaVea category");
+  }
+
   return {
     retailer: "plaza-vea",
     lookupListing: (known) => lookupVtex(fetchPage, plazaVeaCatalogUrl, known, parsePlazaVeaPage),
@@ -116,19 +142,28 @@ export function createPlazaVeaAdapter(
       url.searchParams.set("_to", "19");
       // VTEX expects URI-encoded whitespace, rather than form-style plus separators.
       url.search = url.search.replaceAll("+", "%20");
+
       return fetchVtexSearch(fetchPage, url, parsePlazaVeaPage, limit);
     },
     async fetchListings(limit) {
-      if (!Number.isInteger(limit) || limit < 1 || limit > 500)
+      if (!Number.isInteger(limit) || limit < 1 || limit > 500) {
         throw new Error("Limit must be an integer from 1 to 500");
-      if (category !== "dairy" && limit > 20)
+      }
+
+      if (category !== "dairy" && limit > 20) {
         throw new Error("Limit must be at most 20 for staple categories");
+      }
+
       const maxPages = category === "dairy" ? 25 : 2;
       const listings = new Map<string, NormalizedRetailerListing>();
       let discovered = 0;
+
       // Bound source coverage too: at most 500 products / 25 sequential pages.
       for (let from = 0, page = 0; from < 500 && page < maxPages && listings.size < limit; page++) {
-        if (page > 0) await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+        if (page > 0) {
+          await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+        }
+
         const to = Math.min(from + 19, 499);
         const url = new URL(plazaVeaCatalogUrl);
         url.searchParams.set("fq", `C:/${vtexCategories["plaza-vea"][category]}/`);
@@ -143,13 +178,21 @@ export function createPlazaVeaAdapter(
           signal: AbortSignal.timeout(30_000),
           redirect: "error",
         });
-        if (!response.ok)
+
+        if (!response.ok) {
           throw new Error(`Plaza Vea HTTP ${response.status}; ingestion stopped without retries`);
+        }
+
         const range = /^(\d+)-(\d+)\/(\d+)$/u.exec(response.headers.get("resources") ?? "");
-        if (!range) throw new Error("Plaza Vea pagination range missing or invalid");
+
+        if (!range) {
+          throw new Error("Plaza Vea pagination range missing or invalid");
+        }
+
         const start = Number(range[1]);
         const end = Number(range[2]);
         const total = Number(range[3]);
+
         if (
           ![start, end, total].every(Number.isSafeInteger) ||
           start !== from ||
@@ -157,21 +200,36 @@ export function createPlazaVeaAdapter(
           end > to ||
           total <= start ||
           (total <= end && end !== to)
-        )
+        ) {
           throw new Error("Plaza Vea pagination did not advance or returned an invalid range");
+        }
+
         const raw: unknown = await response.json();
         const parsed = parsePlazaVeaPage(raw, new Date());
-        if (parsed.discovered !== Math.min(end + 1, total) - start)
+
+        if (parsed.discovered !== Math.min(end + 1, total) - start) {
           throw new Error("Plaza Vea pagination range does not match product count");
-        discovered += parsed.discovered;
-        for (const listing of parsed.listings) {
-          if (!listings.has(listing.externalId) && listings.size < limit)
-            listings.set(listing.externalId, listing);
         }
-        if (end + 1 >= total) break;
+
+        discovered += parsed.discovered;
+
+        for (const listing of parsed.listings) {
+          if (!listings.has(listing.externalId) && listings.size < limit) {
+            listings.set(listing.externalId, listing);
+          }
+        }
+
+        if (end + 1 >= total) {
+          break;
+        }
+
         from = end + 1;
       }
-      if (!listings.size) throw new Error("Plaza Vea returned no useful listings");
+
+      if (!listings.size) {
+        throw new Error("Plaza Vea returned no useful listings");
+      }
+
       return { listings: [...listings.values()], discovered };
     },
   };

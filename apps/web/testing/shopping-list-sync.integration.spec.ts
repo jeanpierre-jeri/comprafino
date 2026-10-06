@@ -12,6 +12,7 @@ import { shoppingListPost } from "../src/server/shopping-list-handler.ts";
 import { shoppingListBodyBytes } from "../src/server/request-body.ts";
 
 const url = process.env.TEST_DATABASE_URL;
+
 test.describe("sync HTTP with real Better Auth and explicit owned TEST_DATABASE_URL", () => {
   test.skip(!url, "Requires explicit TEST_DATABASE_URL; no application DATABASE_URL fallback");
   const harness = ownedTestDatabase({
@@ -28,8 +29,11 @@ test.describe("sync HTTP with real Better Auth and explicit owned TEST_DATABASE_
   test.beforeAll(async () => {
     globalThis.fetch = (input, init) => {
       const hostname = new URL(input instanceof Request ? input.url : String(input)).hostname;
-      if (hostname === "accounts.google.com" || hostname.endsWith(".googleapis.com"))
+
+      if (hostname === "accounts.google.com" || hostname.endsWith(".googleapis.com")) {
         throw new Error("Google forbidden in sync tests");
+      }
+
       return originalFetch(input, init);
     };
     await harness.setup();
@@ -39,19 +43,23 @@ test.describe("sync HTTP with real Better Auth and explicit owned TEST_DATABASE_
   });
   test.afterAll(async () => {
     globalThis.fetch = originalFetch;
+
     try {
       await harness.dispose();
     } finally {
       await closeLocalTestConnections();
     }
   });
+
   async function login() {
     const ctx = await auth.$context;
     const user = await ctx.test.saveUser(
       ctx.test.createUser({ id: randomUUID(), email: `${randomUUID()}@example.com` }),
     );
+
     return ctx.test.login({ userId: user.id });
   }
+
   const item = () =>
     shoppingListItemSchema.parse({
       id: randomUUID(),
@@ -64,9 +72,11 @@ test.describe("sync HTTP with real Better Auth and explicit owned TEST_DATABASE_
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
+
   function get(headers = new Headers()) {
     return handlers.GET(new Request(`${env.BETTER_AUTH_URL}/api/list/sync`, { headers }));
   }
+
   function post(
     headers: Headers,
     input: unknown,
@@ -75,10 +85,15 @@ test.describe("sync HTTP with real Better Auth and explicit owned TEST_DATABASE_
     const merged = new Headers(headers);
     merged.set("origin", env.BETTER_AUTH_URL);
     merged.set("content-type", "application/json");
+
     for (const [name, value] of Object.entries(overrides)) {
-      if (value) merged.set(name, value);
-      else merged.delete(name);
+      if (value) {
+        merged.set(name, value);
+      } else {
+        merged.delete(name);
+      }
     }
+
     return handlers.POST(
       new Request(`${env.BETTER_AUTH_URL}/api/list/sync`, {
         method: "POST",
@@ -87,6 +102,7 @@ test.describe("sync HTTP with real Better Auth and explicit owned TEST_DATABASE_
       }),
     );
   }
+
   const remove = (expectedRevision: number, id: string = randomUUID()) => ({
     expectedRevision,
     operation: { type: "remove", id },
@@ -95,10 +111,12 @@ test.describe("sync HTTP with real Better Auth and explicit owned TEST_DATABASE_
     const loggedIn = await login();
     const tampered = new Headers(loggedIn.headers);
     tampered.set("cookie", `${loggedIn.headers.get("cookie")}x`);
+
     for (const headers of [new Headers(), tampered]) {
       expect((await get(headers)).status).toBe(401);
       expect((await post(headers, remove(0))).status).toBe(401);
     }
+
     await auth.api.signOut({ headers: loggedIn.headers });
     expect((await get(loggedIn.headers)).status).toBe(401);
     expect((await post(loggedIn.headers, remove(0))).status).toBe(401);
@@ -165,18 +183,22 @@ test.describe("sync HTTP with real Better Auth and explicit owned TEST_DATABASE_
   });
   test("POST origin, content type, byte limit and strict payload boundaries protect actual persistence", async () => {
     const loggedIn = await login();
+
     for (const headers of [
       { origin: "" },
       { origin: "null" },
       { origin: "https://attacker.invalid" },
-    ])
+    ]) {
       expect((await post(loggedIn.headers, remove(0), headers)).status).toBe(403);
+    }
+
     for (const contentType of ["text/plain", "application/xml", ""]) {
       const response = await post(loggedIn.headers, remove(0), { "content-type": contentType });
       expect(response.status).toBe(415);
       expect(await response.json()).toEqual({ error: "unsupported_media_type" });
       expect(response.headers.get("cache-control")).toBe("no-store");
     }
+
     expect(
       (
         await post(loggedIn.headers, remove(0), {
@@ -216,6 +238,7 @@ test.describe("sync HTTP with real Better Auth and explicit owned TEST_DATABASE_
       (await post(loggedIn.headers, remove(shoppingListRevisionMaximum, value.id))).status,
     ).toBe(503);
     expect(await harness.scoped.query("select * from user_shopping_lists")).toEqual(before);
+
     for (const data of [
       { version: 3, items: [] },
       { version: 2, items: [], extra: true },
@@ -226,6 +249,7 @@ test.describe("sync HTTP with real Better Auth and explicit owned TEST_DATABASE_
         JSON.stringify(data),
       ]);
       const corrupt = await harness.scoped.query("select * from user_shopping_lists");
+
       for (const response of [
         await get(loggedIn.headers),
         await post(loggedIn.headers, remove(shoppingListRevisionMaximum)),
@@ -237,6 +261,7 @@ test.describe("sync HTTP with real Better Auth and explicit owned TEST_DATABASE_
         expect(response.status).toBe(503);
         expect(await response.json()).toEqual({ error: "list_unavailable" });
       }
+
       expect(await harness.scoped.query("select * from user_shopping_lists")).toEqual(corrupt);
     }
   });

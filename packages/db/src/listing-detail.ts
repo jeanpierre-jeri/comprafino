@@ -40,21 +40,29 @@ const detailSchema = z.object({
   canonicalId: z.uuid().nullable(),
   conditionalOffers: z.array(conditionalOfferSchema),
 });
+
 /** Safe public metadata only. Review status and normalization internals never leave this boundary. */
 export function publicRetailerListing(raw: unknown, now = new Date()) {
   const parsed = detailSchema.safeParse(raw);
+
   if (!parsed.success) return null;
+
   const row = parsed.data;
+
   if (
     !row.active ||
     row.version !== normalizationVersion ||
     row.fingerprint !== catalogFingerprint(row.listing) ||
     !row.listing.title.trim()
-  )
+  ) {
     return null;
+  }
+
   const retailerId = retailerIdSchema.parse(row.listing.retailerId);
   const url = retailerProductUrl({ retailerId, url: row.url });
+
   if (!url) return null;
+
   const attributes = normalizeCatalogListing(row.listing);
   const family = classifyProductFamily({
     title: row.listing.title,
@@ -75,6 +83,7 @@ export function publicRetailerListing(raw: unknown, now = new Date()) {
     },
     now,
   );
+
   return {
     id: row.listing.id,
     title: row.listing.title,
@@ -109,6 +118,7 @@ export async function getPublicRetailerListingDetail(
   options: { range?: HistoryRange; now?: Date } = {},
 ) {
   if (!isPublicProductId(listingId)) return null;
+
   const now = options.now ?? new Date();
   const [result] = await db.batch([
     db.execute(
@@ -116,7 +126,9 @@ export async function getPublicRetailerListingDetail(
     ),
   ]);
   const listing = publicRetailerListing(result.rows[0], now);
+
   if (!listing) return null;
+
   const history = await getScopedPriceHistory(
     db,
     sql`with scoped as (
@@ -126,6 +138,7 @@ export async function getPublicRetailerListingDetail(
   )`,
     { ...options, now },
   );
+
   return { ...listing, history };
 }
 

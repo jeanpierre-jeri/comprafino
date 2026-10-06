@@ -4,6 +4,7 @@ import pasta from "./fixtures/staple-metro.json";
 import { createPlazaVeaAdapter } from "./plaza-vea.ts";
 import { createMetroAdapter } from "./metro.ts";
 import { parseArguments } from "./cli-options.ts";
+
 it("uses the allowlisted complete sugar path and accepts observed short terminal VTEX ranges", async () => {
   const request = vi
     .fn<typeof fetch>()
@@ -17,6 +18,7 @@ it("uses the allowlisted complete sugar path and accepts observed short terminal
   expect(url.searchParams.get("fq")).toBe("C:/431/434/444/");
   expect(request).toHaveBeenCalledOnce();
 });
+
 it("stops after twenty usable pasta listings without an extra request", async () => {
   const request = vi
     .fn<typeof fetch>()
@@ -30,6 +32,7 @@ it("stops after twenty usable pasta listings without an extra request", async ()
   ).toBe("C:/1700/1711/1000743/");
   expect(request).toHaveBeenCalledOnce();
 });
+
 it("refuses excessive or arbitrary scopes before requests", async () => {
   const request = vi.fn<typeof fetch>();
   await expect(createMetroAdapter(request, "oats").fetchListings(21)).rejects.toThrow("at most 20");
@@ -64,7 +67,11 @@ it("keeps the new eggs source Metro-only and stops at the requested bounded samp
   const result = await createMetroAdapter(request, "eggs").fetchListings(10);
   expect(result.listings).toHaveLength(10);
   const input = request.mock.calls[0]![0];
-  if (!(input instanceof URL)) throw new Error("Expected category URL");
+
+  if (!(input instanceof URL)) {
+    throw new Error("Expected category URL");
+  }
+
   expect(input.searchParams.get("fq")).toBe("C:/1001327/1001347/1001348/");
   expect(request).toHaveBeenCalledOnce();
   expect(() => parseArguments(["--retailer=plaza-vea", "--category=eggs", "--limit=10"])).toThrow(

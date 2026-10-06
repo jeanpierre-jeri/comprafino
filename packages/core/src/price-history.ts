@@ -1,15 +1,21 @@
 import { coveredPeriods, observationDay, shiftObservationDay } from "./observation-coverage.ts";
 import type { ObservationDay } from "./observation-coverage.ts";
+
 export const historyRanges = ["7d", "30d", "90d"] as const;
+
 export type HistoryRange = (typeof historyRanges)[number];
+
 // Initial catalog audit: less than one day of history. Keep the default explicit.
 export const defaultHistoryRange: HistoryRange = "7d";
+
 export function parseHistoryRange(raw: unknown): HistoryRange {
   return historyRanges.find((range) => range === raw) ?? defaultHistoryRange;
 }
+
 export function historyWindow(range: HistoryRange, now = new Date()) {
   return { start: new Date(now.getTime() - Number.parseInt(range, 10) * 86_400_000), end: now };
 }
+
 export type OrdinaryPriceState = {
   priceCents: number;
   validFrom: Date;
@@ -17,6 +23,7 @@ export type OrdinaryPriceState = {
   previousPriceCents: number | null;
   previousValidUntil: Date | null;
 };
+
 /** Stored intervals are half-open. Open states are bounded by actual last verification. */
 export function intersectsHistoryRange(
   state: OrdinaryPriceState,
@@ -25,8 +32,10 @@ export function intersectsHistoryRange(
   lastObservedAt: Date,
 ): boolean {
   const until = state.validUntil ?? lastObservedAt;
+
   return state.validFrom <= end && until >= start && (state.validUntil === null || until > start);
 }
+
 export function summarizePriceHistory(
   input: readonly OrdinaryPriceState[],
   start: Date,
@@ -51,9 +60,11 @@ export function summarizePriceHistory(
   // Each path is a state step sequence inside a covered run. Unsupported/missing
   // state intervals split paths too. Never extend beyond actual observation endpoints.
   const segments: { at: number; priceCents: number }[][] = [];
+
   for (const period of periods) {
     let path: { at: number; priceCents: number }[] = [];
     let previousUntil: number | undefined;
+
     for (const state of states) {
       const from = Math.max(period.first.getTime(), state.validFrom.getTime(), start.getTime());
       const until = Math.min(
@@ -61,27 +72,44 @@ export function summarizePriceHistory(
         (state.validUntil ?? lastObservedAt).getTime(),
         end.getTime(),
       );
-      if (from > until || (from === until && state.validUntil !== null)) continue;
+
+      if (from > until || (from === until && state.validUntil !== null)) {
+        continue;
+      }
+
       if (previousUntil !== undefined && previousUntil !== from) {
-        if (path.length > 1) segments.push(path);
+        if (path.length > 1) {
+          segments.push(path);
+        }
+
         path = [];
       }
+
       path.push(
         { at: from, priceCents: state.priceCents },
         { at: until, priceCents: state.priceCents },
       );
       previousUntil = until;
     }
-    if (path.length > 1 && path[0]!.at < path.at(-1)!.at) segments.push(path);
+
+    if (path.length > 1 && path[0]!.at < path.at(-1)!.at) {
+      segments.push(path);
+    }
   }
+
   let unchangedDays = 0;
   // Anchored to today: yesterday's missing verification cannot imply continuity today.
   const today = observationDay(end);
   const dayMap = new Map(coverage.map((d) => [d.observationDate, d]));
+
   if (current && observationDay(lastObservedAt) === today) {
     for (let key = today; key >= observationDay(start); key = shiftObservationDay(key, -1)) {
       const day = dayMap.get(key);
-      if (!day || day.firstObservedAt < start || day.lastObservedAt > end) break;
+
+      if (!day || day.firstObservedAt < start || day.lastObservedAt > end) {
+        break;
+      }
+
       const first = day.firstObservedAt.getTime();
       const streakEnd =
         unchangedDays === 0 ? day.lastObservedAt.getTime() : lastObservedAt.getTime();
@@ -92,6 +120,7 @@ export function summarizePriceHistory(
             ? lastObservedAt.getTime() >= first
             : s.validUntil.getTime() > first),
       );
+
       if (
         !spanning.length ||
         spanning[0]!.validFrom.getTime() > first ||
@@ -100,11 +129,14 @@ export function summarizePriceHistory(
           (s, i) => i > 0 && spanning[i - 1]!.validUntil?.getTime() !== s.validFrom.getTime(),
         ) ||
         changes.some((s) => observationDay(s.validFrom) === key)
-      )
+      ) {
         break;
+      }
+
       unchangedDays++;
     }
   }
+
   return {
     states,
     coveragePeriods: periods,
@@ -137,12 +169,7 @@ export function summarizePriceHistory(
                 : null,
           }
         : null,
-    status:
-      states.length === 0
-        ? ("empty" as const)
-        : changes.length === 0
-          ? ("insufficient" as const)
-          : ("events" as const),
+    status: historyStatus(states.length, changes.length),
     // Event markers remain actual known observation instants; coverage paths are separate.
     points: [
       ...states
@@ -163,4 +190,15 @@ export function summarizePriceHistory(
         : []),
     ].sort((a, b) => a.at - b.at),
   };
+}
+
+function historyStatus(
+  stateCount: number,
+  changeCount: number,
+): "empty" | "insufficient" | "events" {
+  if (stateCount === 0) return "empty";
+
+  if (changeCount === 0) return "insufficient";
+
+  return "events";
 }

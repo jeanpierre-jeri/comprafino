@@ -39,6 +39,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
 export function PriceNotice() {
   return (
     <p className="price-notice">
@@ -48,6 +49,7 @@ export function PriceNotice() {
     </p>
   );
 }
+
 export function PublicDataError() {
   return (
     <div className="empty-surface">

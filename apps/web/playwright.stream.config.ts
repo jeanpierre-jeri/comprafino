@@ -8,6 +8,7 @@ export default defineConfig({
     "testing/auth.spec.ts",
     "testing/shopping-list-sync.spec.ts",
     "testing/shopping-list-client.spec.ts",
+    "testing/shopping-query.spec.ts",
   ],
   workers: 1,
   reporter: "list",

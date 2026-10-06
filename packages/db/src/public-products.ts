@@ -23,7 +23,9 @@ export {
   normalizeSearchQuery,
   usefulSearchQuery,
 } from "@comprafino/core";
+
 type Database = ReturnType<typeof createDatabase>;
+
 const offerSchema = z.object({
   retailerId: retailerIdSchema,
   retailerName: z.string().min(1),
@@ -36,6 +38,7 @@ const offerSchema = z.object({
   available: z.boolean().nullable().optional(),
   conditionalOffers: z.array(conditionalOfferSchema).default([]),
 });
+
 const productSchema = z.object({
   id: z.uuid(),
   displayName: z.string().min(1),
@@ -45,10 +48,12 @@ const productSchema = z.object({
   packageCount: z.number().int().positive(),
   offers: z.array(offerSchema).min(2),
 });
+
 export type RetailerOffer = z.infer<typeof offerSchema> & {
   freshness: ReturnType<typeof offerFreshness>;
   ranking: ReturnType<typeof rankedPrice>;
 };
+
 export type ProductComparison = Omit<z.infer<typeof productSchema>, "offers"> & {
   offers: RetailerOffer[];
   imageUrl: string | null;
@@ -58,20 +63,25 @@ export type ProductComparison = Omit<z.infer<typeof productSchema>, "offers"> & 
   bestRanking: { priceCents: number; retailers: string[]; conditions: string[] } | null;
   lowestBenefit: { priceCents: number; retailers: string[]; conditions: string[] } | null;
 };
+
 const retailerHosts: Record<RetailerId, string> = {
   tottus: "www.tottus.com.pe",
   "plaza-vea": "www.plazavea.com.pe",
   metro: "www.metro.pe",
 };
+
 const productImageHosts = [
   "media.tottus.com.pe",
   "plazavea.vteximg.com.br",
   "metroio.vteximg.com.br",
 ] as const;
+
 function trustedUrl(raw: string | null, hosts: readonly string[]): string | null {
   if (!raw) return null;
+
   try {
     const url = new URL(raw);
+
     return url.protocol === "https:" &&
       !url.username &&
       !url.password &&
@@ -83,18 +93,24 @@ function trustedUrl(raw: string | null, hosts: readonly string[]): string | null
     return null;
   }
 }
+
 export function retailerProductUrl(
   offer: Pick<RetailerOffer, "retailerId" | "url">,
 ): string | null {
   return trustedUrl(offer.url, [retailerHosts[offer.retailerId]]);
 }
+
 export function productImageUrl(raw: string | null): string | null {
   const trusted = trustedUrl(raw, productImageHosts);
+
   if (!trusted) return null;
+
   const url = new URL(trusted);
   const prefix = url.hostname === "media.tottus.com.pe" ? "/tottusPE/" : "/arquivos/ids/";
+
   return url.pathname.startsWith(prefix) ? trusted : null;
 }
+
 export function publicProduct(
   raw: unknown,
   now = new Date(),
@@ -141,6 +157,7 @@ export function publicProduct(
     .sort((a, b) => a.priceCents - b.priceCents);
   const lowest = benefits[0]?.priceCents;
   const ties = benefits.filter((b) => b.priceCents === lowest);
+
   return {
     ...product,
     bestRanking: ranked[0]
@@ -171,12 +188,14 @@ export function publicProduct(
     cheapestRetailers: cheapest.map((offer) => offer.retailerName),
   };
 }
+
 /** SQL counterpart of normalizeSearchQuery; letters, accents and numbers survive. */
 export function searchText(text: SQL): SQL {
   return sql`trim(regexp_replace(regexp_replace(regexp_replace(lower(normalize(${text}, NFKC)),
     '([0-9])([[:alpha:]])', '\\1 \\2', 'g'), '([[:alpha:]])([0-9])', '\\1 \\2', 'g'),
     '[^[:alnum:]]+', ' ', 'g'))`;
 }
+
 // No review table or unmatched listing participates. Reject groups with a manual,
 // obsolete-version or below-auto-confidence link, even if two other links qualify.
 export const eligibleProducts = sql`with offers as (
@@ -207,13 +226,16 @@ export const eligibleProducts = sql`with offers as (
     and (a.method<>'automatic' or a.matching_version<>${matchingVersion} or a.confidence<${matchingThresholds.auto}))
   group by c.id having count(distinct o.retailer_id)>=2
 )`;
+
 const publicColumns = sql`id,"displayName",brand,"quantityValue","quantityUnit","packageCount",offers`;
+
 export async function searchCanonicalProducts(
   db: Database,
   rawQuery: string,
   now = new Date(),
 ): Promise<ProductComparison[]> {
   if (!usefulSearchQuery(rawQuery)) return [];
+
   const query = normalizeSearchQuery(rawQuery);
   const tokens = [...new Set(query.split(" "))];
   // All terms must be present. Prefixes are allowed for words; numbers are exact.
@@ -233,14 +255,17 @@ export async function searchCanonicalProducts(
         (select max(public.similarity(t,${query})) from unnest(retailer_titles) t)) desc,
       "displayName" collate "C", id limit 20`),
   ]);
+
   return z
     .array(z.unknown())
     .parse(result.rows)
     .map((row) => publicProduct(row, now));
 }
+
 export function isPublicProductId(id: string): boolean {
   return z.uuid().safeParse(id).success;
 }
+
 export async function getCanonicalProductComparison(
   db: Database,
   id: string,
@@ -248,10 +273,12 @@ export async function getCanonicalProductComparison(
   mode: PriceMode = "standard",
 ): Promise<ProductComparison | null> {
   if (!isPublicProductId(id)) return null;
+
   const [result] = await db.batch([
     db.execute(sql`${eligibleProducts}
     select ${publicColumns} from products where id=${id}::uuid`),
   ]);
   const rows = z.array(z.unknown()).parse(result.rows);
+
   return rows.length ? publicProduct(rows[0], now, mode) : null;
 }

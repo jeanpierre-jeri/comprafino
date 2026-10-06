@@ -18,13 +18,16 @@ import type { NormalizedRetailerListing } from "@comprafino/core";
 
 // Explicit opt-in only. All test writes and the web server are scoped to this schema.
 const harness = ownedTestDatabase();
+
 const { url, schema, scoped: scopedClient, db } = harness;
+
 try {
   await harness.setup();
   const all = process.argv.includes("--all");
   const listings = all || process.argv.includes("--listings");
   const now = Date.now();
   const fixtures: Record<string, string> = {};
+
   for (const kind of ["rich", "sparse", "old", "continuous", "gap", "decrease"] as const) {
     const productId = randomUUID();
     fixtures[kind] = productId;
@@ -32,20 +35,26 @@ try {
       "insert into canonical_products(id,display_name,brand_key,quantity_value,quantity_unit,package_count,total_quantity_value) values($1,$2,'gloria',946,'ml',1,946)",
       [productId, `Leche Gloria Entera 946ml · fixture ${kind}`],
     );
+
     for (const retailer of ["metro", "plaza-vea", "tottus"] as const) {
-      const ages =
-        kind === "continuous" || kind === "decrease"
-          ? [5, 4, 3, 2, 1, 0]
-          : kind === "gap"
-            ? [5, 4, 1, 0]
-            : kind === "rich" && retailer === "metro"
-              ? [80, 40, 8, 0.01]
-              : [kind === "old" ? 100 : 0.02];
+      let ages;
+
+      if (kind === "continuous" || kind === "decrease") {
+        ages = [5, 4, 3, 2, 1, 0];
+      } else if (kind === "gap") {
+        ages = [5, 4, 1, 0];
+      } else if (kind === "rich" && retailer === "metro") {
+        ages = [80, 40, 8, 0.01];
+      } else {
+        ages = [kind === "old" ? 100 : 0.02];
+      }
+
       const prices =
         kind === "rich" && retailer === "metro"
           ? [700, 620, 590, 610]
           : [retailer === "tottus" ? 640 : 650];
       let last: NormalizedRetailerListing | undefined;
+
       for (const [index, age] of ages.entries()) {
         const observedAt = new Date(now - age * 86_400_000);
         last = {
@@ -54,20 +63,12 @@ try {
           productId: `${kind}-${retailer}`,
           title: "Leche Gloria Entera Caja 946ml",
           sourceBrand: "Gloria",
-          url:
-            retailer === "tottus"
-              ? "https://www.tottus.com.pe/tottus-pe/articulo/1/test"
-              : retailer === "metro"
-                ? "https://www.metro.pe/test/p"
-                : "https://www.plazavea.com.pe/test/p",
-          currentPriceCents:
-            kind === "decrease"
-              ? index < 4
-                ? 750
-                : 600
-              : kind === "continuous" || kind === "gap"
-                ? 650
-                : prices[index]!,
+          url: {
+            tottus: "https://www.tottus.com.pe/tottus-pe/articulo/1/test",
+            metro: "https://www.metro.pe/test/p",
+            "plaza-vea": "https://www.plazavea.com.pe/test/p",
+          }[retailer],
+          currentPriceCents: observedFixturePrice(kind, index, prices),
           currency: "PEN",
           priceUnit: "UN",
           observedAt,
@@ -87,6 +88,7 @@ try {
         };
         await persistListings(db, retailer, [last]);
       }
+
       const ids = z
         .array(z.object({ id: z.uuid() }))
         .parse(
@@ -96,8 +98,15 @@ try {
           ),
         );
       const id = ids[0]!.id;
-      if (listings) fixtures[`listing-${kind}-${retailer}`] = id;
-      if (!last) throw new Error("Missing fixture observation");
+
+      if (listings) {
+        fixtures[`listing-${kind}-${retailer}`] = id;
+      }
+
+      if (!last) {
+        throw new Error("Missing fixture observation");
+      }
+
       const listing = {
         id,
         retailerId: retailer,
@@ -115,6 +124,7 @@ try {
       );
     }
   }
+
   if (listings) {
     const value: NormalizedRetailerListing = {
       retailer: "tottus",
@@ -150,6 +160,7 @@ try {
       },
     ]);
   }
+
   if (listings) {
     for (const state of ["unavailable", "recovered"] as const) {
       const value: NormalizedRetailerListing = {
@@ -167,21 +178,30 @@ try {
       await persistListings(db, "metro", [value]);
       const known = (await knownListings(db)).find((r) => r.externalId === value.externalId)!;
       const at = new Date(now - 30000);
-      if (!(await claimListingRefresh(db, known, at)))
+
+      if (!(await claimListingRefresh(db, known, at))) {
         throw new Error("Availability fixture admission failed");
+      }
+
       await finishListingRefresh(db, known, at, "unavailable");
-      if (state === "recovered")
+
+      if (state === "recovered") {
         await persistListings(db, "metro", [{ ...value, observedAt: new Date(now - 1000) }]);
+      }
+
       await persistCatalogNormalizations(db, [{ ...value, id: known.id, retailerId: "metro" }]);
       fixtures[`listing-${state}`] = known.id;
       const detail = await getPublicRetailerListingDetail(db, known.id);
       const offers = await searchGenericProductOffers(db, "huevos availability", "relevance");
+
       if (
         !detail?.history ||
         detail.current !== (state === "recovered") ||
         offers.some((o) => o.id === known.id) !== (state === "recovered")
-      )
+      ) {
         throw new Error("Availability fixture current/history mismatch");
+      }
+
       const history = z
         .object({ count: z.number() })
         .parse(
@@ -192,43 +212,67 @@ try {
             )
           )[0],
         );
-      if (history.count !== 1) throw new Error("Availability fixture modified ordinary history");
+
+      if (history.count !== 1) {
+        throw new Error("Availability fixture modified ordinary history");
+      }
     }
   }
+
   for (const [kind, id] of Object.entries(fixtures).filter(
     ([key]) => !key.startsWith("listing-") && key !== "independent",
   )) {
     const history = await getCanonicalProductPriceHistory(db, id);
-    if (history?.retailers.length !== 3) throw new Error("Fixture history eligibility failed");
+
+    if (history?.retailers.length !== 3) {
+      throw new Error("Fixture history eligibility failed");
+    }
+
     const metro = history.retailers.find((r) => r.retailerId === "metro");
+
     if (
       kind === "rich" &&
       (metro?.summary.minimumPriceCents !== 590 ||
         metro.summary.maximumPriceCents !== 610 ||
         metro.summary.changeCount !== 1)
-    )
+    ) {
       throw new Error("Rich fixture history mismatch");
+    }
+
     if (
       kind === "continuous" &&
       (metro?.summary.segments.length !== 1 || metro.summary.verifiedUnchangedDays !== 6)
-    )
+    ) {
       throw new Error("Continuous fixture mismatch");
+    }
+
     if (
       kind === "gap" &&
       (metro?.summary.segments.length !== 2 || metro.summary.verifiedUnchangedDays !== 2)
-    )
+    ) {
       throw new Error("Gap fixture mismatch");
-    if (kind === "decrease" && metro?.summary.lastChange?.differenceCents !== -150)
+    }
+
+    if (kind === "decrease" && metro?.summary.lastChange?.differenceCents !== -150) {
       throw new Error("Decrease fixture mismatch");
-    if (kind === "sparse" && metro?.summary.status !== "insufficient")
+    }
+
+    if (kind === "sparse" && metro?.summary.status !== "insufficient") {
       throw new Error("Sparse fixture mismatch");
-    if (kind === "old" && metro?.summary.status !== "empty")
+    }
+
+    if (kind === "old" && metro?.summary.status !== "empty") {
       throw new Error("Old fixture mismatch");
+    }
   }
+
   if (listings) {
     const unmatched = await getPublicRetailerListingDetail(db, fixtures.independent!);
-    if (!unmatched || unmatched.canonicalId || !unmatched.current)
+
+    if (!unmatched || unmatched.canonicalId || !unmatched.current) {
       throw new Error("Unmatched listing fixture failed");
+    }
+
     for (const [range, maximum] of [
       ["7d", 610],
       ["30d", 620],
@@ -237,28 +281,37 @@ try {
       const rich = await getPublicRetailerListingDetail(db, fixtures["listing-rich-metro"]!, {
         range,
       });
+
       if (
         rich?.canonicalId !== fixtures.rich ||
         rich?.history?.retailers[0]?.summary.maximumPriceCents !== maximum
-      )
+      ) {
         throw new Error("Listing range fixture failed");
+      }
     }
+
     const cmr = await getPublicRetailerListingDetail(db, fixtures["listing-rich-tottus"]!);
+
     if (
       cmr?.conditionalOffers[0]?.priceCents !== 540 ||
       cmr.history?.retailers[0]?.summary.minimumPriceCents !== 640
-    )
+    ) {
       throw new Error("Listing CMR fixture failed");
+    }
+
     for (const [kind, days, segments] of [
       ["continuous", 6, 1],
       ["gap", 2, 2],
     ] as const) {
       const detail = await getPublicRetailerListingDetail(db, fixtures[`listing-${kind}-metro`]!);
       const summary = detail?.history?.retailers[0]?.summary;
-      if (summary?.verifiedUnchangedDays !== days || summary.segments.length !== segments)
+
+      if (summary?.verifiedUnchangedDays !== days || summary.segments.length !== segments) {
         throw new Error("Listing coverage fixture failed");
+      }
     }
   }
+
   const shopping = all || process.argv.includes("--shopping-list");
   const shoppingFixtures = shopping
     ? {
@@ -266,6 +319,7 @@ try {
         ...(await seedBasketFixtures(db, scopedClient)),
       }
     : {};
+
   if (process.argv.includes("--validate-fixtures")) {
     console.log(
       shopping
@@ -286,15 +340,7 @@ try {
                   arg,
                 ),
             ),
-          ...(all
-            ? []
-            : [
-                listings
-                  ? "listing-detail.spec.ts"
-                  : shopping
-                    ? "shopping-list.spec.ts"
-                    : "price-history.spec.ts",
-              ]),
+          ...(all ? [] : [browserFixtureSpec(listings, shopping)]),
         ],
         {
           cwd: new URL("../../../", import.meta.url),
@@ -313,7 +359,10 @@ try {
       child.on("error", reject);
       child.on("exit", (code) => resolve(code ?? 1));
     });
-    if (exitCode) process.exitCode = exitCode;
+
+    if (exitCode) {
+      process.exitCode = exitCode;
+    }
   }
 } finally {
   try {
@@ -321,4 +370,18 @@ try {
   } finally {
     await closeLocalTestConnections();
   }
+}
+
+function observedFixturePrice(kind: string, index: number, prices: readonly number[]): number {
+  if (kind === "decrease") return index < 4 ? 750 : 600;
+
+  if (kind === "continuous" || kind === "gap") return 650;
+
+  return prices[index]!;
+}
+
+function browserFixtureSpec(listings: boolean, shopping: boolean): string {
+  if (listings) return "listing-detail.spec.ts";
+
+  return shopping ? "shopping-list.spec.ts" : "price-history.spec.ts";
 }

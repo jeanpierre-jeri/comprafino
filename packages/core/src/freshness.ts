@@ -2,7 +2,9 @@ import { z } from "zod";
 import { retailerIdSchema } from "./listing.ts";
 
 export const freshnessHours = { healthy: 18, delayed: 30 } as const;
+
 export const safeIngestionError = "Ingestion failed; inspect CLI stage and source availability.";
+
 export const operationalRunSchema = z.object({
   id: z.uuid(),
   retailerId: retailerIdSchema,
@@ -13,7 +15,9 @@ export const operationalRunSchema = z.object({
   listingsPersisted: z.number().int().nonnegative(),
   listingsChanged: z.number().int().nonnegative(),
 });
+
 export type OperationalRun = z.infer<typeof operationalRunSchema>;
+
 export function retailerFreshness(
   latestAttempt: OperationalRun | null,
   latestSuccess: OperationalRun | null,
@@ -23,14 +27,18 @@ export function retailerFreshness(
   const ageHours = latestSuccess
     ? Math.max(0, (now.getTime() - latestSuccess.startedAt.getTime()) / 3_600_000)
     : null;
-  const freshness =
-    ageHours === null
-      ? "unknown"
-      : ageHours <= freshnessHours.healthy
-        ? "healthy"
-        : ageHours <= freshnessHours.delayed
-          ? "delayed"
-          : "stale";
+  let freshness;
+
+  if (ageHours === null) {
+    freshness = "unknown" as const;
+  } else if (ageHours <= freshnessHours.healthy) {
+    freshness = "healthy" as const;
+  } else if (ageHours <= freshnessHours.delayed) {
+    freshness = "delayed" as const;
+  } else {
+    freshness = "stale" as const;
+  }
+
   return {
     latestAttempt,
     latestSuccess,

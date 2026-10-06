@@ -4,6 +4,7 @@ import { createTottusAdapter } from "./tottus.ts";
 import { createPlazaVeaAdapter } from "./plaza-vea.ts";
 import { createMetroAdapter } from "./metro.ts";
 import type { ListingRefreshTasks } from "./listing-refresh.ts";
+
 export function listingRefreshTasks(db: ReturnType<typeof createDatabase>): ListingRefreshTasks {
   return {
     adapters: {

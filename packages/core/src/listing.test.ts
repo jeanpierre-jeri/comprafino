@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { listingSchema, normalizeWhitespace, parsePenCents, priceStateChanged } from "./listing.ts";
+
 describe("exact PEN cents", () => {
   it.each([
     ["S/ 10", 1000],
@@ -15,9 +16,11 @@ describe("exact PEN cents", () => {
     expect(() => parsePenCents(value)).toThrow(/Invalid PEN|exceeds database/u);
   });
 });
+
 it("normalizes whitespace without guessing package quantities", () => {
   expect(normalizeWhitespace("  Pack\n 3  Cajas\u00a0 946 mL ")).toBe("Pack 3 Cajas 946 mL");
 });
+
 it("compares regular prices, units and missing reference prices", () => {
   const state = { currentPriceCents: 1290, currency: "PEN", priceUnit: "UN" } as const;
   expect(priceStateChanged(undefined, state)).toBe(true);
@@ -26,6 +29,7 @@ it("compares regular prices, units and missing reference prices", () => {
   expect(priceStateChanged(state, { ...state, priceUnit: "KG" })).toBe(true);
   expect(priceStateChanged(state, { ...state, currentPriceCents: 1090 })).toBe(true);
 });
+
 it("rejects invalid normalized boundary values", () => {
   expect(listingSchema.safeParse({}).success).toBe(false);
 });
