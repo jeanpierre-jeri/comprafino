@@ -2,6 +2,16 @@
 
 Google sign-in/sign-out is available in the public shell through Better Auth **1.7.7** and `@better-auth/drizzle-adapter` **1.7.7**. Browsing, `/list` and `/api/list/evaluate` remain public. Shopping lists remain localStorage-only with the existing in-memory fallback; sign-in/out does not transfer, claim, clear or synchronize them. No remote list persistence or account dashboard is implemented.
 
+## Auth UX (Milestone 19A.1)
+
+The public shell uses the shared outline Button for sign-in and the official shadcn Base UI Dialog for Google login, with managed focus, Escape/close controls and an inline retryable error. The dialog labels cross-device lists as **Próximamente** and explicitly says synchronization is unavailable; sign-in does not change browser list storage. A local decorative Google G avoids runtime logo requests. Session loading reserves header space, and pending Google initiation prevents duplicate calls.
+
+Authenticated users have a compact avatar/name trigger and a shadcn Base UI Dropdown Menu containing name/email and sign-out only. HTTPS avatar URLs use a fixed-size image without Next remote-host permissions; broken/missing images fall back to at most two Unicode letter/number initials, using email when needed. The menu supports keyboard navigation, Escape and outside dismissal. Pending logout retains the account control; a failed request preserves the session and displays a Spanish shadcn Base UI Toast error. A single shared Base UI Toaster mounts in the root layout; semantic tokens inherit the existing light/dark/system theme. Shared Buttons use pointer cursors when enabled and a non-interactive disabled cursor.
+
+Deterministic Chromium cases cover dialog/menu focus, loading/retries, real persisted session cookies, avatar success/fallback, toast behavior, localStorage preservation and 390/1280px sizing. Provider initiation failures and avatar requests are intercepted locally; Google is never contacted. Screenshots are generated only in the existing ignored Playwright results directory, without permanent snapshot infrastructure.
+
+See the [component audit and migration decisions](ui-component-audit.md) for the Base UI correction.
+
 ## Configuration and boundaries
 
 Set these **server-only** variables in `apps/web/.env.local` for development, or the intended hosting environment after review:

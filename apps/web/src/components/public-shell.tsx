@@ -16,11 +16,14 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
             Fino<span className="wordmark-dot">.</span>
           </span>
         </Link>
-        <div className="flex items-center gap-3">
-          <span className="hidden text-xs text-muted-foreground sm:inline sm:text-sm">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <span className="hidden text-sm text-muted-foreground lg:inline">
             Hecho para comprar en Perú
           </span>
-          <NavigationLink href="/list" className="text-sm font-medium text-primary">
+          <NavigationLink
+            href="/list"
+            className="inline-flex min-h-11 items-center text-sm font-medium text-primary"
+          >
             Mi lista
           </NavigationLink>
           <ThemeControl />

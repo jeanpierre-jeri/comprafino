@@ -6,8 +6,39 @@ import { authOptions } from "../src/server/auth-config.ts";
 import { authHandlers } from "../src/server/auth-handler.ts";
 import { ownedTestDatabase } from "../../../packages/db/src/testing/database.ts";
 import { authTestEnv as env } from "./auth-env.ts";
+import { accountInitials, avatarUrl } from "../src/lib/account-identity.ts";
 
 const db = createDatabase({ DATABASE_URL: "postgresql://unused@localhost/unused" });
+
+test("account initials and image boundaries handle empty, Unicode and odd input", () => {
+  for (const [name, expected] of [
+    ["Jean Pierre", "JP"],
+    ["Jean", "J"],
+    ["  Jean   Pierre López ", "JP"],
+    ["!!!", "AL"],
+    ["", "AL"],
+    ["éloïse 王", "É王"],
+    ["ß", "SS"],
+  ]) {
+    const initials = accountInitials(name ?? "", "ana.lopez@example.com");
+    expect(initials).toBe(expected);
+    expect(Array.from(initials).length).toBeLessThanOrEqual(2);
+  }
+  expect(accountInitials("", "")).toBe("C");
+  expect(avatarUrl("https://lh3.googleusercontent.com/avatar")).toBe(
+    "https://lh3.googleusercontent.com/avatar",
+  );
+  for (const image of [
+    null,
+    "",
+    "broken",
+    "javascript:alert(1)",
+    "data:image/png;base64,x",
+    "http://example.com/a",
+    "https://user:pass@example.com/a",
+  ])
+    expect(avatarUrl(image)).toBeUndefined();
+});
 
 test("auth configuration validates explicit secrets and exact origins", () => {
   for (const key of Object.keys(env)) {

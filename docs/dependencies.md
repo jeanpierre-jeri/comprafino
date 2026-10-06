@@ -1,6 +1,6 @@
 # Direct dependency inventory
 
-Exact direct versions are pinned in manifests; the lockfile pins the graph. This inventory describes installed ownership, not a claim about current registry latest versions. Milestone 19A adds only the two pinned auth dependencies below.
+Exact direct versions are pinned in manifests; the lockfile pins the graph. This inventory describes installed ownership, not a claim about current registry latest versions. Milestone 19A added the two pinned auth dependencies. The 19A.1 consistency correction uses existing Base UI Toast and removes Sonner.
 
 ## comprafino
 

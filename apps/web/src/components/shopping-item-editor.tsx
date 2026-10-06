@@ -2,6 +2,7 @@
 
 import { shoppingListPolicy } from "@comprafino/core";
 import { useId, useRef, useState } from "react";
+import type { RefObject } from "react";
 import {
   saveShoppingItem,
   shoppingFrequencyLabels,
@@ -11,7 +12,7 @@ import {
   normalizeSearchQuery,
 } from "@comprafino/core";
 import type { ShoppingListItem, ShoppingCreationSeed } from "@comprafino/core";
-import { ModalDialog, useModalDialog } from "@comprafino/ui/components/modal-dialog";
+import { Dialog, DialogContent, DialogTitle } from "@comprafino/ui/components/dialog";
 import { useShoppingList } from "./use-shopping-list";
 export type ShoppingSeed = ShoppingCreationSeed;
 export function ShoppingItemEditor(props: {
@@ -21,15 +22,32 @@ export function ShoppingItemEditor(props: {
   onSaved?: () => void;
 }) {
   const titleId = useId();
+  const [open, setOpen] = useState(true);
+  const initialFocus = useRef<HTMLInputElement>(null);
   return (
-    <ModalDialog className="shopping-dialog" labelledBy={titleId} onClose={props.close}>
-      <ShoppingItemForm
-        seed={props.seed}
-        item={props.item}
-        onSaved={props.onSaved}
-        titleId={titleId}
-      />
-    </ModalDialog>
+    <Dialog
+      open={open}
+      onOpenChange={setOpen}
+      onOpenChangeComplete={(next) => {
+        if (!next) props.close();
+      }}
+    >
+      <DialogContent
+        className="shopping-dialog gap-0"
+        initialFocus={initialFocus}
+        aria-describedby={undefined}
+      >
+        <ShoppingItemForm
+          seed={props.seed}
+          item={props.item}
+          onSaved={props.onSaved}
+          titleId={titleId}
+          initialFocus={initialFocus}
+          closing={!open}
+          dismiss={() => setOpen(false)}
+        />
+      </DialogContent>
+    </Dialog>
   );
 }
 function ShoppingItemForm({
@@ -37,13 +55,18 @@ function ShoppingItemForm({
   item,
   onSaved,
   titleId,
+  initialFocus,
+  closing,
+  dismiss,
 }: {
   seed: ShoppingSeed;
   item?: ShoppingListItem;
   onSaved?: () => void;
   titleId: string;
+  initialFocus: RefObject<HTMLInputElement | null>;
+  closing: boolean;
+  dismiss: () => void;
 }) {
-  const { dismiss, closing } = useModalDialog();
   const { list, change } = useShoppingList();
   const fieldId = useId();
   const generic = item ? item.intent === "generic" : !seed.canonicalId;
@@ -115,9 +138,9 @@ function ShoppingItemForm({
         }
       }}
     >
-      <h2 id={titleId} className="pr-12 text-xl font-semibold">
+      <DialogTitle id={titleId} className="pr-12">
         {item ? `Editar “${label}”` : `Agregar “${label}” a mi lista`}
-      </h2>
+      </DialogTitle>
       {!generic && (
         <fieldset className="mt-4 space-y-3">
           <legend className="mb-2 font-medium">¿Cómo quieres guardar este producto?</legend>
@@ -163,7 +186,7 @@ function ShoppingItemForm({
         <label className="shopping-field">
           {packages ? "Paquetes" : "Cantidad"}
           <input
-            data-modal-initial-focus
+            ref={initialFocus}
             type="number"
             min={unit === "unit" ? 1 : shoppingListPolicy.quantityStep}
             max={shoppingListPolicy.maximumAmount}

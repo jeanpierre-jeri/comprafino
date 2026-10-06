@@ -1,4 +1,5 @@
 import { themeInit } from "../components/theme-init";
+import { Toaster } from "@comprafino/ui/components/toast";
 import type { Metadata } from "next";
 import "@comprafino/ui/globals.css";
 
@@ -13,7 +14,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>
-      <body className="min-h-screen font-sans antialiased">{children}</body>
+      <body className="min-h-screen font-sans antialiased">
+        {children}
+        <Toaster />
+      </body>
     </html>
   );
 }
