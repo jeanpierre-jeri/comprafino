@@ -1,5 +1,7 @@
 # Shopping lists
 
+[Milestone 19B](shopping-list-persistence.md) adds backend remote-list capability for authenticated users. The current browser list still uses localStorage; it is not imported, cleared or synchronized. Missing-item remote removal is read-only after revision comparison; stale operations return 409 with current state.
+
 Current domain guidance. Dated audits, measurements and acceptance narratives are preserved in [engineering history](history/engineering-notes-2026-10-05.md).
 
 ## Contextual creation and editing
@@ -42,7 +44,7 @@ Evaluation reuses normalized family/category and strong quantity evidence. Indep
 
 Shopping lists remain browser-local (with a session fallback). Evaluation requests transiently send list labels, queries, amounts and item metadata to the server. Evaluation does not persist the list or create discovery demand; no account/IP identity is attached.
 
-[Milestone 19A authentication](auth.md) does not change these boundaries. Sign-in/sign-out leaves localStorage untouched; `/list` and `/api/list/evaluate` remain public. No authenticated list ownership, backup or synchronization is implemented.
+[Milestone 19A authentication](auth.md) does not change these boundaries. Sign-in/sign-out leaves localStorage untouched; `/list` and `/api/list/evaluate` remain public. The browser list has no authenticated ownership, backup or synchronization; 19B backend documents remain separate.
 
 `/api/list/evaluate` accepts at most **128 KiB of UTF-8 body bytes**, including JSON escaping. This accommodates 50 items with maximum label/query/profile fields and conservative metadata headroom. Both declared length and actual streamed bytes are checked before JSON parsing; no streaming JSON parser is used. Oversized bodies return safe 413, malformed JSON/schema or more than 50 items return 400, and rejected requests never access market evaluation. Within the byte cap, labels/queries remain limited to 120 characters.
 

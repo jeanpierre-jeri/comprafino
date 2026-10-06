@@ -13,6 +13,7 @@ import {
   foreignKey,
   date,
   primaryKey,
+  jsonb,
 } from "drizzle-orm/pg-core";
 const time = (name: string) => timestamp(name, { withTimezone: true });
 
@@ -30,6 +31,20 @@ export const user = pgTable("user", {
     .$onUpdate(() => new Date())
     .notNull(),
 });
+/** One active remote document per authenticated user; absence is revision zero. */
+export const userShoppingLists = pgTable(
+  "user_shopping_lists",
+  {
+    userId: uuid("user_id")
+      .primaryKey()
+      .references(() => user.id, { onDelete: "cascade" }),
+    revision: integer("revision").notNull(),
+    data: jsonb("data").notNull(),
+    createdAt: time("created_at").notNull().defaultNow(),
+    updatedAt: time("updated_at").notNull().defaultNow(),
+  },
+  (t) => [check("user_shopping_lists_revision", sql`${t.revision} >= 1`)],
+);
 export const session = pgTable(
   "session",
   {

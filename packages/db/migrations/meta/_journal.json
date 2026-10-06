@@ -71,6 +71,13 @@
       "when": 1791258599007,
       "tag": "0009_grey_husk",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791310176581,
+      "tag": "0010_natural_switch",
+      "breakpoints": true
     }
   ]
 }

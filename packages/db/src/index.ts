@@ -20,4 +20,5 @@ export * from "./price-history.ts";
 export * from "./observation-coverage.ts";
 
 export * from "./shopping-list.ts";
+export * from "./user-shopping-lists.ts";
 export * from "./listing-detail.ts";

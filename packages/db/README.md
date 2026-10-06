@@ -1,5 +1,7 @@
 # Database
 
+Milestone 19B adds `user_shopping_lists` and `readUserShoppingList` / `mutateUserShoppingList`, with validated JSONB, one document/user, insert-only first-write CAS, conditional positive-revision updates, fresh conflict reads and read-only missing-item removals. Migration 0010 is generated for review, not applied to an application database. See [persistence backend](../../docs/shopping-list-persistence.md).
+
 Lazy Drizzle/Neon HTTP client; importing opens no connection. Schema: retailers, retailer listings, meaningful price history, ingestion runs derived listing normalizations, canonical products and canonical associations, plus Better Auth user/session/account/verification models. Generate with `pnpm db:generate`, review SQL, and explicitly apply with `pnpm db:migrate` using root `.env`/`DATABASE_URL`. The first migration seeds all three retailer identities. No migrations run on build/startup. Repository state does not verify remote migration status.
 
 Milestone 19A generated `0009_grey_husk.sql` for review without applying it to an application database. Auth row IDs/user FKs use supported UUID types/defaults; email and session tokens are unique, provider/subject pairs have composite uniqueness, and user deletion cascades to sessions/accounts. Auth configuration/handlers and PostgreSQL-backed session tests belong to `apps/web`. No shopping-list tables were added. See [auth setup and schema review](../../docs/auth.md).

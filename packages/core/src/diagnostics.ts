@@ -29,7 +29,8 @@ export interface DiagnosticContext {
     | "listing"
     | "history"
     | "search"
-    | "evaluation";
+    | "evaluation"
+    | "list_sync";
   reason: DiagnosticReason;
   retailer?: RetailerId;
 }

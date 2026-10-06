@@ -1,5 +1,7 @@
 # CompraFino
 
+Milestone 19B adds an authenticated, operation-based remote-list persistence API. The browser list remains local-only; no client synchronization is wired. Its migration is generated for review and is not applied to application databases by this implementation. See [backend contracts and boundaries](docs/shopping-list-persistence.md).
+
 CompraFino compares observed grocery and household prices from Tottus, Plaza Vea and Metro in Peru. It provides exact product comparisons, independent retailer search options, ordinary price history with observation gaps, and browser-local recurring shopping lists with current basket comparisons across up to three supermarkets. Concrete Tottus CMR benefits are shown separately from ordinary prices. Prices are observations, not checkout guarantees.
 
 ## Architecture and packages
@@ -98,6 +100,6 @@ Frozen installation retains the version-pinned **next@16.3.8** stream-cancellati
 
 Coverage is bounded, with a retained **1,000-listing** admission/read guard. Source ordering and discovery can grow retained rows; no broad crawl or automatic capacity increase exists. Anonymous location/channel stock can be unknown, and observed prices can become stale. Exact comparison requires trusted identity; generic search relevance does not prove safe substitution. Supported substitutions remain conservative. Ordinary purchase prices must be positive; reference prices and conditional benefits have separate meanings.
 
-Shopping lists are stored in this browser, with a session fallback if storage fails. Google authentication does not change list storage; there is no server list persistence, synchronization, account dashboard, delivery/travel fees or purchase-timing recommendations. History is sparse and daily coverage is prospective; gaps are disclosed without backfill. No remote quota or live catalog count is promised by repository documentation.
+Shopping lists are stored in this browser, with a session fallback if storage fails. Google authentication does not change list storage; remote persistence is available only through the backend API, with no browser synchronization or account dashboard, delivery/travel fees or purchase-timing recommendations. History is sparse and daily coverage is prospective; gaps are disclosed without backfill. No remote quota or live catalog count is promised by repository documentation.
 
 See [eligibility vocabulary](docs/eligibility.md), [normalization](docs/catalog-normalization.md), [matching](docs/catalog-matching.md), [public search](docs/public-search.md), [quantity quality](docs/quantity-quality.md), [availability](docs/availability.md), [conditional pricing](docs/conditional-pricing.md), [price history](docs/price-history.md), [shopping lists](docs/shopping-list.md), [basket optimization](docs/basket-optimization.md), [catalog budget](docs/catalog-budget.md), [roadmap](docs/roadmap.md) and [dated engineering history](docs/history/README.md).

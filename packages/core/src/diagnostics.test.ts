@@ -44,3 +44,18 @@ it("retains safe timeout and validation distinctions at the failing stage", () =
     ).reason,
   ).toBe("validation_failed");
 });
+
+it("sync diagnostics do not copy documents or session material", () => {
+  const diagnostic = safeDiagnostic(
+    new Error("session_token=secret label=personal", {
+      cause: { name: "ZodError", issues: ["private list"], token: "secret" },
+    }),
+    { stage: "persistence", operation: "list_sync", reason: "db_write_failed" },
+  );
+  expect(diagnostic).toEqual({
+    stage: "persistence",
+    operation: "list_sync",
+    reason: "validation_failed",
+    message: "Boundary validation failed.",
+  });
+});

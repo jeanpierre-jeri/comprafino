@@ -1,5 +1,7 @@
 # Local PostgreSQL and browser testing
 
+Milestone 19B adds `packages/core/src/shopping-list-sync.test.ts`, `packages/db/src/user-shopping-lists.integration.test.ts` and `apps/web/testing/shopping-list-sync*.spec.ts`. The existing explicit local integration command includes DB CAS/no-op/corruption tests and real Better Auth sync HTTP tests; each suite owns a separate disposable schema. Test-only transport barriers force races without sleeps or production hooks. The combined Chromium fixture run also checks the production sync route while verifying browser list storage stays unchanged. See [persistence verification](shopping-list-persistence.md#verification-and-next-phase).
+
 ## Disposable database and required checks
 
 Docker Compose provides PostgreSQL 17 with `pg_trgm`, loopback port 55432 and temporary storage:

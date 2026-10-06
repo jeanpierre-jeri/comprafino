@@ -6,6 +6,7 @@ export default defineConfig({
     "**/stream-cancellation.spec.ts",
     "testing/shopping-api.spec.ts",
     "testing/auth.spec.ts",
+    "testing/shopping-list-sync.spec.ts",
   ],
   workers: 1,
   reporter: "list",

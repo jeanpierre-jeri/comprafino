@@ -1,6 +1,8 @@
 # Auth foundation (Milestone 19A)
 
-Google sign-in/sign-out is available in the public shell through Better Auth **1.7.7** and `@better-auth/drizzle-adapter` **1.7.7**. Browsing, `/list` and `/api/list/evaluate` remain public. Shopping lists remain localStorage-only with the existing in-memory fallback; sign-in/out does not transfer, claim, clear or synchronize them. No remote list persistence or account dashboard is implemented.
+[Milestone 19B backend persistence](shopping-list-persistence.md) requires real session validation only on GET/POST `/api/list/sync`, plus a same-origin JSON boundary on POST. It does not connect the current browser list to remote storage or change auth configuration.
+
+Google sign-in/sign-out is available in the public shell through Better Auth **1.7.7** and `@better-auth/drizzle-adapter` **1.7.7**. Browsing, `/list` and `/api/list/evaluate` remain public. Shopping lists remain localStorage-only with the existing in-memory fallback; sign-in/out does not transfer, claim, clear or synchronize them. The browser list does not use remote persistence; no account dashboard is implemented.
 
 ## Auth UX (Milestone 19A.1)
 

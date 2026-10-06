@@ -378,3 +378,54 @@ test("logout failure retains the real session, shows themed Base UI toast feedba
     await session.dispose();
   }
 });
+
+test("backend sync route persists only the signed owner's list and leaves browser storage untouched", async ({
+  page,
+  context,
+}) => {
+  const session = await signedIn(context, "Sync Fixture");
+  try {
+    await page.goto("/");
+    const local = JSON.stringify({ version: 2, items: [] });
+    await page.evaluate((value) => localStorage.setItem("comprafino-shopping-list", value), local);
+    const initial = await context.request.get("/api/list/sync");
+    expect(initial.status()).toBe(200);
+    expect(await initial.json()).toEqual({ revision: 0, list: { version: 2, items: [] } });
+    const item = {
+      id: randomUUID(),
+      intent: "generic",
+      label: "Huevos",
+      query: "huevos",
+      canonicalId: null,
+      quantity: { amount: 30, unit: "unit" },
+      frequency: "weekly",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    const response = await context.request.post("/api/list/sync", {
+      headers: { origin: authTestEnv.BETTER_AUTH_URL },
+      data: { expectedRevision: 0, operation: { type: "save", item } },
+    });
+    expect(response.status()).toBe(200);
+    expect(await response.json()).toMatchObject({
+      revision: 1,
+      list: { version: 2, items: [{ id: item.id }] },
+    });
+    const conflict = await context.request.post("/api/list/sync", {
+      headers: { origin: authTestEnv.BETTER_AUTH_URL },
+      data: { expectedRevision: 0, operation: { type: "remove", id: item.id } },
+    });
+    expect(conflict.status()).toBe(409);
+    expect(await conflict.json()).toMatchObject({
+      error: "revision_conflict",
+      current: { revision: 1 },
+    });
+    expect(await page.evaluate(() => localStorage.getItem("comprafino-shopping-list"))).toBe(local);
+    const publicResponse = await context.request.post("/api/list/evaluate", {
+      data: { version: 2, items: [] },
+    });
+    expect(publicResponse.status()).toBe(200);
+  } finally {
+    await session.dispose();
+  }
+});
