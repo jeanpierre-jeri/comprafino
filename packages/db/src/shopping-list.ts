@@ -102,7 +102,7 @@ function shoppingCandidate(
     ordinaryPriceCents: o.currentPriceCents,
     conditionalOffers: o.conditionalOffers,
     observedAt: o.observedAt,
-    available: true,
+    available: o.available,
     packageQuantity:
       q && o.pricingBasis === "unit"
         ? {

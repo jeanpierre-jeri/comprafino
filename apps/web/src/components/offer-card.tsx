@@ -1,3 +1,4 @@
+import { AvailabilityNotice } from "./availability-notice";
 import { AddShoppingItem } from "./shopping-list/shopping-item-editor";
 import { shoppingQueryForTitle, shoppingSeedForRetailerOffer } from "@comprafino/core";
 import { ArrowRight, ArrowUpRight } from "@comprafino/ui";
@@ -71,6 +72,7 @@ export function GenericOfferCard({
         <div className="card-provenance">
           <RetailerBadge id={offer.retailerId} name={offer.retailerName} />
           <ObservedAt date={offer.observedAt} relativeTo={observedNow} />
+          <AvailabilityNotice available={offer.available} />
         </div>
         <a href={offer.url} target="_blank" rel="noopener noreferrer" className="source-link">
           Ver producto en {offer.retailerName}
@@ -112,16 +114,21 @@ export function ExactProductCard({
 }) {
   const conditionalRanking = product.lowestBenefit;
   // One conservative freshness label for ordinary-price ties; detail keeps every timestamp.
-  const observedAt = product.offers
-    .filter(
+  const winningOffers = product.offers.filter(
+    (offer) =>
+      offer.freshness === "fresh" &&
+      offer.available !== false &&
+      offer.currentPriceCents === product.lowestPriceCents,
+  );
+  const observedAt = winningOffers.reduce<Date | null>(
+    (oldest, offer) => (!oldest || offer.observedAt < oldest ? offer.observedAt : oldest),
+    null,
+  );
+  const hasUnknownStock =
+    winningOffers.some((offer) => offer.available == null) ||
+    product.offers.some(
       (offer) =>
-        offer.freshness === "fresh" &&
-        offer.available !== false &&
-        offer.currentPriceCents === product.lowestPriceCents,
-    )
-    .reduce<Date | null>(
-      (oldest, offer) => (!oldest || offer.observedAt < oldest ? offer.observedAt : oldest),
-      null,
+        offer.available == null && conditionalRanking?.retailers.includes(offer.retailerName),
     );
 
   return (
@@ -175,6 +182,7 @@ export function ExactProductCard({
       </NavigationLink>
       <div className="mt-auto">
         {observedAt && <ObservedAt date={observedAt} relativeTo={observedNow} />}
+        {hasUnknownStock && <AvailabilityNotice available={null} />}
         <AddShoppingItem
           seed={{
             label: product.displayName,

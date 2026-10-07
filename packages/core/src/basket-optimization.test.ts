@@ -29,6 +29,7 @@ function option(
     ordinaryTotalCents: price,
     effectiveUnitCents: price / 30,
     condition: null,
+    available: true,
   });
 }
 
@@ -364,4 +365,15 @@ it("a zero ordinary option cannot win even when passed directly to the basket op
   const plans = optimizeBasket([need(1, [option("metro", 0), option("tottus", 100)])]);
   expect(plans.every((p) => p.totalCostCents === 100)).toBe(true);
   expect(plans.every((p) => p.retailerIds.join(",") === "tottus")).toBe(true);
+});
+
+it("retains unknown stock in basket assignments without penalizing its price", () => {
+  const unknown = { ...option("metro", 1000), available: null };
+  const confirmed = option("tottus", 1200);
+  const plans = optimizeBasket([need(1, [confirmed, unknown])]);
+  expect(plans[0]).toMatchObject({
+    status: "complete",
+    totalCostCents: 1000,
+    assignments: [{ option: { retailerId: "metro", available: null } }],
+  });
 });

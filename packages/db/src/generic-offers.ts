@@ -118,6 +118,7 @@ export function genericProductOffer(raw: unknown, now = new Date(), mode: PriceM
     conditionalOffers,
     ranking,
     observedAt: row.observedAt,
+    available: row.available,
     url,
     imageUrl: productImageUrl(row.imageUrl),
     canonicalId: row.canonicalId,

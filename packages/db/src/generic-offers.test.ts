@@ -217,3 +217,12 @@ function displayUnitForBasis(basis: string): "kg" | "l" | "roll" {
 
   return "roll";
 }
+
+it("preserves unknown stock without changing current offer eligibility", () => {
+  expect(genericProductOffer({ ...raw, available: null }, now)).toMatchObject({
+    available: null,
+    currentPriceCents: raw.currentPriceCents,
+  });
+  expect(genericProductOffer(raw, now)?.available).toBe(true);
+  expect(genericProductOffer({ ...raw, available: false }, now)).toBeNull();
+});

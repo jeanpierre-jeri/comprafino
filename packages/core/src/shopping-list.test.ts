@@ -534,3 +534,14 @@ it("zero ordinary prices cannot fulfill generic or exact shopping needs", () => 
     expect(result.options.map((o) => o.id)).toEqual(["paid"]);
   }
 });
+
+it("preserves unknown stock in winning options while excluding explicit unavailability", () => {
+  const result = evaluate(item(), [
+    candidate({ id: "unknown", available: null, ordinaryPriceCents: 1500 }),
+    candidate({ id: "confirmed", available: true, ordinaryPriceCents: 1790 }),
+    candidate({ id: "unavailable", available: false, ordinaryPriceCents: 100 }),
+  ]);
+  expect(result.best).toMatchObject({ id: "unknown", available: null, totalCostCents: 1500 });
+  expect(result.options.map((option) => option.id)).toEqual(["unknown", "confirmed"]);
+  expect(result.options[1]?.available).toBe(true);
+});

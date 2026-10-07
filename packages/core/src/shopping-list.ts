@@ -258,6 +258,7 @@ export const shoppingCandidateSchema = z.object({
 export type ShoppingCandidate = z.infer<typeof shoppingCandidateSchema>;
 
 export const shoppingOptionSchema = z.object({
+  available: z.boolean().nullable(),
   id: z.string(),
   canonicalId: z.uuid().nullable(),
   title: z.string(),
@@ -390,6 +391,7 @@ export function evaluateShoppingFulfillment(
     }
 
     evaluated.push({
+      available: c.available,
       id: c.id,
       canonicalId: c.canonicalId,
       title: c.title,

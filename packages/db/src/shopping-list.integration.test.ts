@@ -78,6 +78,14 @@ describe.skipIf(!url)("batched current shopping snapshot", () => {
       );
     }
 
+    expect(result.evaluations.every((evaluation) => evaluation.best?.available === null)).toBe(
+      true,
+    );
+    expect(
+      result.baskets.every((plan) =>
+        plan.assignments.every(({ option }) => option.available === null),
+      ),
+    ).toBe(true);
     expect(result.baskets[0]).toMatchObject({
       status: "complete",
       totalCostCents: 4970,

@@ -838,6 +838,9 @@ test.describe("current basket optimization fixtures", () => {
     page,
   }) => {
     await storeBasket(page, 3);
+    await expect(page.getByRole("region", { name: "Compras del plan seleccionado" })).toContainText(
+      "Disponibilidad no confirmada.",
+    );
     const first = page.getByRole("article", { name: "Límite 1", exact: true });
     const second = page.getByRole("article", { name: "Límite 2", exact: true });
     const third = page.getByRole("article", { name: "Límite 3", exact: true });

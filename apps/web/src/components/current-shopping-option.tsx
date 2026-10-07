@@ -1,3 +1,4 @@
+import { AvailabilityNotice } from "./availability-notice";
 import Link from "next/link";
 import { formatPen } from "@comprafino/core";
 import type { ShoppingOption } from "@comprafino/core";
@@ -28,6 +29,7 @@ export function CurrentOption({ option }: { option: ShoppingOption }) {
         {formatPen(Math.round(option.effectiveUnitCents))} / {measure} ·{" "}
         {option.condition ?? "Precio para todos"}
       </p>
+      <AvailabilityNotice available={option.available} />
       {option.condition && (
         <p className="text-sm">
           Para todos: {formatPen(option.ordinaryTotalCents)} por esta compra.

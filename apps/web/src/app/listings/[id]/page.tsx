@@ -1,3 +1,4 @@
+import { AvailabilityNotice } from "../../../components/availability-notice";
 import { logDiagnostic } from "../../../server/diagnostics.ts";
 import type { Metadata } from "next";
 import { cache } from "react";
@@ -117,18 +118,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
                 {listing.unitPrice.quality === "approximate" ? " · orientativo" : ""}
               </p>
             )}
-            {listing.available === false && (
-              <p className="mt-2 text-sm text-muted-foreground">
-                No disponible en la última consulta.
-              </p>
-            )}
-            {listing.available !== false && (
-              <p className="mt-2 text-sm text-muted-foreground">
-                {listing.available === true
-                  ? "Disponible en la última consulta."
-                  : "Disponibilidad no confirmada."}
-              </p>
-            )}
+            <AvailabilityNotice available={listing.available} />
             {!listing.current && (
               <p className="mt-2 text-sm text-muted-foreground">
                 Este registro no confirma el precio de compra de hoy.

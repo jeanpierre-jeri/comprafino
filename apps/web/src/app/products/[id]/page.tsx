@@ -1,3 +1,4 @@
+import { AvailabilityNotice } from "../../../components/availability-notice";
 import { catalogQuantityToShoppingUnit } from "@comprafino/core";
 import { logDiagnostic } from "../../../server/diagnostics.ts";
 import { AddShoppingItem } from "../../../components/shopping-list/shopping-item-editor";
@@ -168,12 +169,8 @@ export default async function ProductPage({ params, searchParams }: Props) {
                       </p>
                     )}
                     <ObservedAt date={offer.observedAt} />
-                    {
-                      <OfferAvailabilityNotice
-                        available={offer.available}
-                        freshness={offer.freshness}
-                      />
-                    }
+                    <AvailabilityNotice available={offer.available ?? null} />
+                    <PriceFreshnessNotice freshness={offer.freshness} />
                   </div>
                   <div className="sm:text-right">
                     <p
@@ -216,19 +213,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
   );
 }
 
-function OfferAvailabilityNotice({
-  available,
-  freshness,
-}: {
-  available?: boolean | null;
-  freshness: string;
-}) {
-  if (available === false) {
-    return (
-      <p className="mt-1 text-sm text-muted-foreground">No disponible en la última consulta.</p>
-    );
-  }
-
+function PriceFreshnessNotice({ freshness }: { freshness: string }) {
   if (freshness === "stale") {
     return <p className="mt-1 text-sm text-muted-foreground">Precio pendiente de actualización.</p>;
   }

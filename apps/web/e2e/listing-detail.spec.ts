@@ -46,6 +46,7 @@ test.describe("isolated listing details", () => {
     await expect(
       card.getByRole("link").filter({ hasText: "Huevos Pardos Tottus Bandeja 30un" }),
     ).toHaveAttribute("href", `/listings/${fixture("independent")}`);
+    await expect(card.getByText("Disponibilidad no confirmada.", { exact: true })).toBeVisible();
     await expect(card.getByRole("link", { name: "Ver producto en Tottus" })).toHaveAttribute(
       "target",
       "_blank",
@@ -109,6 +110,7 @@ test.describe("isolated listing details", () => {
     page,
   }) => {
     await page.goto(`/listings/${fixture("listing-rich-tottus")}`);
+    await expect(page.locator(".detail-best-price")).toContainText("Disponibilidad no confirmada.");
     await expect(
       page.getByRole("link", { name: "Comparar este producto entre supermercados", exact: true }),
     ).toHaveAttribute("href", `/products/${fixture("rich")}`);
@@ -119,6 +121,25 @@ test.describe("isolated listing details", () => {
     await page.getByRole("button", { name: "Agregar a mi lista", exact: true }).click();
     await expect(page.getByRole("dialog")).toBeVisible();
     await expect(page.getByRole("dialog")).toContainText("Prefiero este producto");
+  });
+  test("canonical comparisons disclose unknown stock beside ordinary prices", async ({ page }) => {
+    await page.goto("/search?q=gloria");
+    await expect(page.locator(".exact-card").first()).toContainText(
+      "Disponibilidad no confirmada.",
+    );
+    await page.goto(`/products/${fixture("rich")}`);
+    const offers = page.getByRole("region", { name: /^Compara en/ }).getByRole("article");
+    await expect(offers.first()).toContainText("Disponibilidad no confirmada.");
+    await expect(offers.first()).toContainText("Precio online para todos");
+    await page.goto(`/products/${fixture("old")}`);
+    const historicalOffer = page
+      .getByRole("region", { name: /^Compara en/ })
+      .getByRole("article")
+      .first();
+    await expect(historicalOffer).toContainText("Disponibilidad no confirmada.");
+    await expect(historicalOffer).toContainText(
+      "Último precio registrado · pendiente de actualización.",
+    );
   });
   test("URL ranges clip multi-state history and retain browser navigation", async ({ page }) => {
     await page.goto(`/listings/${fixture("listing-rich-metro")}`);
@@ -185,6 +206,9 @@ test("explicit unavailable offer retains its listing history and recovery restor
   await page.goto("/search?q=huevos+availability");
   await expect(page.locator(`[data-offer-id="${fixture("listing-unavailable")}"]`)).toHaveCount(0);
   await expect(page.locator(`[data-offer-id="${fixture("listing-recovered")}"]`)).toBeVisible();
+  await expect(page.locator(`[data-offer-id="${fixture("listing-recovered")}"]`)).toContainText(
+    "Disponible en la última consulta.",
+  );
   await page.goto(`/listings/${fixture("listing-unavailable")}`);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "Huevos Availability unavailable Bandeja 30un",

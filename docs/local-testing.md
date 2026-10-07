@@ -41,7 +41,7 @@ Fixtures seed known ordinary transitions/gaps, exact and unmatched listings, sep
 
 ## Required deterministic CI (Cleanup A)
 
-The `CI` workflow's `check` job runs frozen installation, format, Oxlint, authoritative TypeScript, unit/stream regressions, disposable PostgreSQL integration, one production build and one combined Chromium invocation. Fork PRs receive the same secret-free fixture coverage. It installs Chromium headless shell/system requirements, stops the container with `always()` and uploads `apps/web/test-results/` as `playwright-failure-results` on failure with seven-day retention.
+The `CI` workflow's `check` job runs frozen installation, format, documentation references, Oxlint, authoritative TypeScript, unit/stream regressions, disposable PostgreSQL integration, one production build and one combined Chromium invocation. Fork PRs receive the same secret-free fixture coverage. It installs Chromium headless shell/system requirements, stops the container with `always()` and uploads `apps/web/test-results/` as `playwright-failure-results` on failure with seven-day retention.
 
 There is one job/install/container/build/fixture seed/server startup. Actual test counts and runtimes belong in dated validation evidence, not this setup guide. See [history](history/README.md) and [audit remediation](engineering-audit.md#cleanup-a-remediation-status--october-5-2026).
 
