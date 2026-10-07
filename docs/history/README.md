@@ -47,4 +47,4 @@ Routine basket benchmarks now write new ignored `.artifacts/` files; explicit de
 
 Run `pnpm docs:check` to validate Markdown paths/anchors, root README commands and literal runtime JSON/workflow references. This dependency-free checker does not fetch external URLs or infer deployment state.
 
-- [Account rollout observations, October 6](account-rollout-2026-10-06.md): anonymous production boundaries and scoped migration evidence; real-account acceptance remains unverified.
+- [Account rollout observations, October 6](account-rollout-2026-10-06.md): anonymous production boundaries, scoped migration evidence, publication checks and user-confirmed production sync; detailed acceptance limits are recorded.

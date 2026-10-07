@@ -16,7 +16,7 @@ Read-only metadata inspection found `user`, `session`, `account`, `verification`
 
 The first read-only health report observed 1,000 retained listings; fresh searchable offers were Tottus 271, Plaza Vea 286 and Metro 294. Tottus/Plaza Vea retailer health was healthy; Metro was delayed and its latest recorded attempt failed. Capacity skips were not measured by that standalone check. These numbers are a dated observation and must not become current operational constants.
 
-## Remaining acceptance
+## Initial acceptance checklist
 
 Production OAuth client/callback settings, the hosting database connection, authenticated reads/writes and cross-device behavior require a real account acceptance test. Anonymous endpoints cannot prove these. Existing deterministic integration/Chromium tests use owned schemas and real persisted test sessions, never production identities or Google requests.
 
@@ -27,4 +27,12 @@ Production OAuth client/callback settings, the hosting database connection, auth
 5. Log out; verify account items are withheld and only the remaining anonymous list appears. Remove the disposable item while signed in.
 6. Enable Actions failure notifications and verify a manually dispatched health run's summary and notification delivery after publication.
 
-No real Google login, application write, repository push or deployment was performed during this review. Local changes and publication should be reviewed separately.
+The initial read-only inspection performed no real Google login, application write, repository push or deployment. Subsequent publication and acceptance evidence follows.
+
+## Publication and user acceptance
+
+Commit `0d9ca8ae0364f02ac68fffa9addf42dadc0bcba0` is published on GitHub main. Its [CI run](https://github.com/jeanpierre-jeri/comprafino/actions/runs/37564851676) passed, and Vercel reported a successful Production deployment for that revision. An anonymous mobile browser verified the live homepage, enabled sign-in control, Google login dialog with import explanation and browser-local empty-list page. No OAuth request was initiated by that browser check.
+
+The [manually dispatched Catalog health run](https://github.com/jeanpierre-jeri/comprafino/actions/runs/37565061020) passed at October 6, approximately 22:05 Peru. Its report marked all three retailers healthy, with 1,000 retained listings under the configured 2,000 guard and 950 fresh searchable offers (Tottus 293, Plaza Vea 315, Metro 342). Metro's latest attempt was successful, superseding the earlier failed-attempt observation. Capacity skips were unmeasured, not zero.
+
+The user subsequently confirmed production synchronization: “yes, it works the sync”. This records user-confirmed sync behavior; it does not establish separate results for anonymous import, logout isolation, each cross-device scenario or provider/hosting configuration inspection. Those detailed checks were not individually reported. Notification delivery remains unverified; a successful health run establishes execution and report generation, not failure-notification receipt. No migrations or account settings were changed during verification.

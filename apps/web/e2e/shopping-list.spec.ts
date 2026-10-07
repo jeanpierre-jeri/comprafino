@@ -610,7 +610,7 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
   });
   test("preferred product exposes a cheaper compatible option and preserves its identity", async ({
     page,
-  }) => {
+  }, testInfo) => {
     await addSpecific(page, "preferred");
     const card = page
       .getByRole("region", { name: /Cada semana|Cada 2 semanas|Cada mes/ })
@@ -618,6 +618,22 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       .first();
     await expect(card).toContainText("Tu producto preferido");
     await expect(card).toContainText("Ahorra S/ 3.00");
+    const notice = page.getByRole("region", { name: "Hay una oportunidad de ahorro hoy" });
+    await expect(notice).toContainText("S/ 3.00 menos en Tottus");
+    await notice.getByRole("link").click();
+    await expect(card).toBeFocused();
+    await expect(card.getByRole("note", { name: "Una alternativa más barata hoy" })).toBeVisible();
+    await page.setViewportSize({ width: 390, height: 844 });
+    for (const theme of ["light", "dark"] as const) {
+      await page.emulateMedia({ colorScheme: theme });
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+        true,
+      );
+      await page.screenshot({
+        path: testInfo.outputPath(`savings-390-${theme}.png`),
+        fullPage: true,
+      });
+    }
     await expect(card).toContainText("Huevos Tottus");
     const saved = shoppingListSchema.parse(
       JSON.parse(
@@ -639,6 +655,9 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       .getByRole("article")
       .first();
     await expect(card).toContainText("S/ 17.90");
+    await expect(
+      card.getByRole("note", { name: "El mismo producto, más barato en otra tienda" }),
+    ).toContainText("Ahorra S/ 1.00");
     await expect(card).not.toContainText("Huevos Tottus");
     await expect(card.getByRole("link", { name: "Comparar e historial" }).first()).toHaveAttribute(
       "href",
@@ -661,7 +680,33 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
     await expect(card).toContainText("Huevos Bell's");
     await expect(card).toContainText("S/ 12.90");
     await expect(card).toContainText("Requiere tarjeta CMR");
+    await expect(
+      page.getByRole("region", { name: "Hay una oportunidad de ahorro hoy" }),
+    ).toContainText("Requiere tarjeta CMR");
     await expect(card).toContainText("Para todos: S/ 19.90");
+  });
+  test("savings notices disappear on refresh failure and return after a successful retry", async ({
+    page,
+  }) => {
+    await addSpecific(page, "preferred");
+    const summary = page.getByRole("region", { name: "Hay una oportunidad de ahorro hoy" });
+    await expect(summary).toBeVisible();
+    await page.route("**/api/list/evaluate*", (route) =>
+      route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "Unavailable" }),
+      }),
+    );
+    await page.reload();
+    await expect(
+      page.getByText("No pudimos cargar los precios. Intenta nuevamente.", { exact: true }),
+    ).toBeVisible();
+    await expect(summary).toHaveCount(0);
+    await expect(page.getByRole("note", { name: /más barata/ })).toHaveCount(0);
+    await page.unroute("**/api/list/evaluate*");
+    await page.getByRole("button", { name: "Reintentar", exact: true }).click();
+    await expect(summary).toBeVisible();
   });
   test("generic winner changes after fresh fixture price observations", async ({ page }) => {
     await addGeneric(page);

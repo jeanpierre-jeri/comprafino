@@ -16,7 +16,7 @@ See the [component audit and migration decisions](ui-component-audit.md) for the
 
 ## Production acceptance
 
-[October 6 rollout observations](history/account-rollout-2026-10-06.md) record successful anonymous production boundaries and auth/list migration hashes in the configured database. Real Google sign-in, hosting connection correspondence and cross-device behavior remain explicit acceptance checks; local implementation and migration metadata alone do not prove them.
+[October 6 rollout observations](history/account-rollout-2026-10-06.md) record successful anonymous production boundaries, auth/list migration hashes in the configured database, publication checks and user-confirmed production sync. Individual import/logout scenarios and provider/hosting configuration inspection were not separately confirmed; see the recorded acceptance status.
 
 ## Configuration and boundaries
 

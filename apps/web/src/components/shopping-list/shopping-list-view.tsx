@@ -6,6 +6,7 @@ import { removeShoppingItem, shoppingFrequencyLabels } from "@comprafino/core";
 import type { PriceMode, ShoppingListItem } from "@comprafino/core";
 import { useShoppingList } from "./use-shopping-list";
 import { MarketComparison } from "./market-comparison";
+import { ShoppingSavingsSummary } from "./shopping-savings-notices";
 import { ShoppingItemCard } from "./shopping-item-card";
 import { useShoppingEvaluation } from "./use-shopping-evaluation";
 import { ShoppingItemEditor } from "./shopping-item-editor";
@@ -60,6 +61,12 @@ export function ShoppingListView() {
             <option value="benefits">Incluir beneficios</option>
           </select>
         </div>
+        <ShoppingSavingsSummary
+          items={list.items}
+          evaluations={evaluations}
+          pending={pending}
+          error={error}
+        />
         <div className="empty-surface mt-5" aria-live="polite">
           <MarketComparison
             pending={pending}

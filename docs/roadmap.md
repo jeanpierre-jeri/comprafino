@@ -12,7 +12,7 @@ The repository hardening/cleanup program is complete: Cleanups A/B/C and the fin
 
 ## Operations and account acceptance
 
-Read-only [catalog health monitoring](catalog-health.md) is implemented with scheduled and post-acquisition Actions checks, using existing refresh/offer policies and explicit capacity-skip evidence. Publication and notification delivery remain separate. [Dated account rollout observations](history/account-rollout-2026-10-06.md) verify anonymous production endpoints and scoped migration metadata; real Google login and cross-device acceptance remain unverified.
+Read-only [catalog health monitoring](catalog-health.md) is implemented with scheduled and post-acquisition Actions checks, using existing refresh/offer policies and explicit capacity-skip evidence. Publication, CI, production deployment status and a manual health run are verified. [Dated account rollout observations](history/account-rollout-2026-10-06.md) also record user-confirmed production sync. Individual import/logout checks, hosting configuration inspection and notification delivery remain unverified.
 
 ## Next measured work
 

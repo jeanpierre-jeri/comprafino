@@ -1,8 +1,9 @@
 "use client";
 
 import type { Ref } from "react";
-import { formatPen, shoppingFrequencyLabels } from "@comprafino/core";
+import { shoppingSavingsNotice, shoppingFrequencyLabels } from "@comprafino/core";
 import type { ShoppingListItem, ShoppingEvaluation } from "@comprafino/core";
+import { ShoppingSavingsMessage } from "./shopping-savings-notices";
 import { CurrentOption } from "../current-shopping-option";
 
 const intentLabels: Record<ShoppingListItem["intent"], string> = {
@@ -38,6 +39,10 @@ function CurrentItemOptions({
 
   if (error) return <p className="mt-4">Precios no disponibles.</p>;
 
+  if (item.intent === "preferred" && result?.alternative && !result.preferred) {
+    return <p className="mt-4">Tu producto preferido no tiene un precio válido actual.</p>;
+  }
+
   if (!result?.best || (item.intent === "preferred" && !result.preferred)) {
     return (
       <p className="mt-4">No encontramos alternativas suficientemente comparables por ahora.</p>
@@ -66,23 +71,25 @@ export function ShoppingItemCard({
   onRemove,
   editButtonRef,
 }: CardProps) {
+  const notice = !pending && !error && result ? shoppingSavingsNotice(item, result) : null;
+
   return (
-    <article className="empty-surface h-full" aria-label={item.label}>
+    <article
+      id={`shopping-item-${item.id}`}
+      tabIndex={-1}
+      className="empty-surface h-full scroll-mt-6"
+      aria-label={item.label}
+    >
       <h3 className="text-xl font-semibold wrap-break-word">{item.label}</h3>
       <p className="mt-2 text-sm">
         {item.quantity.amount} {quantityLabel(item)} · {shoppingFrequencyLabels[item.frequency]}
       </p>
       <p className="mt-1 text-sm text-muted-foreground">{intentLabels[item.intent]}</p>
+      {notice && <ShoppingSavingsMessage notice={notice} />}
       <CurrentItemOptions item={item} result={result} pending={pending} error={error} />
       {!pending && !error && result?.alternative && (
         <aside className="benefit-surface mt-4">
           <p className="font-medium">Alternativa compatible hoy</p>
-          {result.savingsCents > 0 && (
-            <p>Ahorra {formatPen(result.savingsCents)} en esta compra.</p>
-          )}
-          {!result.preferred && (
-            <p className="text-sm">Tu producto preferido no tiene un precio válido actual.</p>
-          )}
           <CurrentOption option={result.alternative} />
         </aside>
       )}

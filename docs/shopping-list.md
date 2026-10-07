@@ -18,6 +18,16 @@ Generic edits keep desired quantity, measure and frequency. New exact edits keep
 
 `/list` groups cards by weekly/biweekly/monthly recurrence. Public intent copy is “Cualquier opción equivalente”, “Producto preferido”, and “Producto exacto”. New exact items display `1 paquete` or `6 paquetes`; generic items display their desired units/kg/L. Explicitly withheld compatibility stays withheld on save/edit and is kept distinct from a supported family need during duplicate detection. Creating a new supported need from search can establish that separate intent. Unknown or unsupported generic compatibility displays “No encontramos alternativas suficientemente comparables por ahora.” Pricing failures have their own retry message.
 
+## Current savings notices
+
+The list shows an inline summary of current savings opportunities, with links that scroll and focus the corresponding item. Item callouts distinguish an approved preferred alternative, the exact same canonical product in another retailer, and compatible generic fulfillment. The amount compares evaluated **purchase totals for the saved need**, with package counts and overbuy disclosed in the existing options. It is not a historic price drop, a sum of basket savings, a guarantee of stock or a future checkout price.
+
+Notices require both at least S/ 1 and 5% savings against the stated baseline, reusing the existing preferred savings gate for display without changing eligibility, ranking or basket optimization. Generic notices compare the next evaluated option; tied cheapest offers suppress a claim rather than selecting a more expensive baseline. Strict/preferred same-product notices require the saved canonical identity and a different retailer. An unavailable preferred item may still show the existing safe alternative, but cannot support a savings claim without a valid baseline. CMR conditions on either side remain explicit.
+
+Notices are derived from the existing validated evaluation response and refresh with prices. Pending/failed requests withhold them; they return after successful retry. There are no repeated toasts, browser-notification permissions, background delivery, new cache or persistence fields. The summary is a named region and item notices use a non-interrupting note role. Current source availability disclosures remain alongside each option.
+
+Weekday purchase recommendations remain unimplemented. A read-only October 6 inspection found usable daily observation coverage only for October 4–6, with at most three covered dates per listing. These dated observations cannot establish repeated weekday patterns; earlier recorded price states do not backfill missing daily coverage. See [history coverage semantics](price-history.md#observation-coverage-and-chart-choice).
+
 ## Desired quantity and sale-package counts
 
 Generic `quantityMode: normalized` means the amount needed: 30 eggs, 5 kg rice or 3 L cooking oil. Strong catalog quantity evidence determines how many whole packages fulfill it. Mass/volume use integer thousandth-unit arithmetic; units are whole counts. Packages = ceiling(desired quantity / package quantity). Offers exceeding twice the desired amount are excluded.
