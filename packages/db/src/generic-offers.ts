@@ -210,7 +210,7 @@ export async function searchGenericProductOffers(
     public.similarity(title_text,${query}) desc, title_text collate "C", listing->>'id' limit ${catalogPolicy.overflowSentinel}`),
   ]);
 
-  // Current catalog already has a 1000-row operational guard. Refuse truncation:
+  // Current catalog already has a bounded operational guard. Refuse truncation:
   // lowest-price modes must consider every admitted candidate before limiting.
   if (result.rows.length > catalogPolicy.retainedListingCap) {
     throw new Error("Generic search candidate bound exceeded");

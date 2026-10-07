@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import {
+  catalogPolicy,
   shoppingListItemSchema,
   shoppingListSchema,
   shoppingListEvaluationSchema,
@@ -226,17 +227,23 @@ describe.skipIf(!url)("batched current shopping snapshot", () => {
     }
   });
   it("retains options beyond the presentation cutoff and rejects snapshot overflow", async () => {
-    const listings = Array.from({ length: 992 }, (_, i) => ({
-      retailer: "metro" as const,
-      externalId: `basket-guard-${i}`,
-      productId: `basket-guard-${i}`,
-      title: "Arroz Blanco Guard 1kg",
-      url: "https://www.metro.pe/rice/p",
-      currentPriceCents: 500,
-      currency: "PEN" as const,
-      priceUnit: "UN" as const,
-      observedAt: new Date(),
-    }));
+    const existing = z
+      .object({ count: z.number().int() })
+      .parse((await scoped.query("select count(*)::int as count from retailer_listings"))[0]).count;
+    const listings = Array.from(
+      { length: catalogPolicy.retainedListingCap - existing },
+      (_, i) => ({
+        retailer: "metro" as const,
+        externalId: `basket-guard-${i}`,
+        productId: `basket-guard-${i}`,
+        title: "Arroz Blanco Guard 1kg",
+        url: "https://www.metro.pe/rice/p",
+        currentPriceCents: 500,
+        currency: "PEN" as const,
+        priceUnit: "UN" as const,
+        observedAt: new Date(),
+      }),
+    );
     await persistListings(db, "metro", listings);
     const rows = z
       .array(z.object({ id: z.uuid(), external_id: z.string() }))
@@ -250,7 +257,7 @@ describe.skipIf(!url)("batched current shopping snapshot", () => {
       db,
       listings.map((l) => ({ ...l, id: ids.get(l.externalId)!, retailerId: "metro" })),
     );
-    // The writer now rejects new identities above 1000. Deliberately inject one
+    // The writer now rejects new identities above the configured cap. Deliberately inject one
     // extra isolated row to retain the independent reader overflow regression.
     await scoped.query(`insert into retailer_listings select (jsonb_populate_record(null::retailer_listings,
       to_jsonb(l)||jsonb_build_object('id',gen_random_uuid(),'external_id','basket-guard-overflow'))).*

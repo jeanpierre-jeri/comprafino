@@ -6,7 +6,7 @@ Current domain guidance. Dated audits, measurements and acceptance narratives ar
 
 `packages/core/src/product-family.ts` owns ten small shopping-option families: eggs, rice, sugar, cooking_oil, pasta, flour, oats, canned_tuna, detergent and toilet_paper. Source categories and original titles remain unchanged. Families do not define exact identity and never enter matcher candidates, scores, thresholds or canonical persistence.
 
-There is **no schema change or migration**. Family/origin/evidence is recomputed from each current listing snapshot during search and developer inspection. This avoids attaching mutable category classification to the exact normalization fingerprint. Repeated reads are deterministic; category changes take effect without re-normalizing unchanged title/content. Title/content changes still require the existing current-version/current-fingerprint normalization gate. `pnpm normalize:catalog -- --limit=1000` remains the repair path; no historical price is rewritten.
+There is **no schema change or migration**. Family/origin/evidence is recomputed from each current listing snapshot during search and developer inspection. This avoids attaching mutable category classification to the exact normalization fingerprint. Repeated reads are deterministic; category changes take effect without re-normalizing unchanged title/content. Title/content changes still require the existing current-version/current-fingerprint normalization gate. `pnpm normalize:catalog -- --limit=2000` remains the repair path; no historical price is rewritten.
 
 After obvious unsafe property/accessory/mixed-bundle exclusions, precedence is:
 

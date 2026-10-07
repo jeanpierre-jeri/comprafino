@@ -2,6 +2,7 @@ import {
   safeDiagnostic,
   DiagnosticError,
   discoveryRetailerLimit,
+  matchesDiscoveryQuery,
   listingSchema,
   retailerIdSchema,
 } from "@comprafino/core";
@@ -49,11 +50,13 @@ export async function processDiscoveryQuery(claim: DiscoveryClaim, tasks: Discov
 
     try {
       const sample = await adapter.searchProducts(claim.query, discoveryRetailerLimit);
-      const rows = boundedSearchListings(sample.listings, discoveryRetailerLimit).map((r) =>
-        listingSchema.parse(r),
+      const validated = sample.listings.map((row) => listingSchema.parse(row));
+      const rows = boundedSearchListings(
+        validated.filter((row) => matchesDiscoveryQuery(claim.query, row)),
+        discoveryRetailerLimit,
       );
 
-      if (rows.some((row) => row.retailer !== adapter.retailer)) {
+      if (validated.some((row) => row.retailer !== adapter.retailer)) {
         throw new Error("Mixed retailers");
       }
 

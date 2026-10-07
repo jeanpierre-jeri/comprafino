@@ -18,7 +18,7 @@ Generic normalized quantities, explicit exact sale-package counts and legacy nor
 
 Current prices must be verified within 36 hours, including the boundary, and cannot be future observations. Only supported current concrete CMR prices participate in benefits mode; structured start/end windows remain authoritative, with exclusive expiration. Catalog evaluation is read-only and never ingests, refreshes, searches retailer websites or creates discovery demand.
 
-Fetching the **bounded eligible catalog snapshot is an intentional current-scale tradeoff**: predictable one-query work, complete candidate coverage and simple safety reuse. The existing 1,000-listing operational bound remains; requesting 1,001 rows detects overflow and returns an API error rather than a truncated optimum. No search-page or three-option display limit affects optimization.
+Fetching the **bounded eligible catalog snapshot is an intentional current-scale tradeoff**: predictable one-query work, complete candidate coverage and simple safety reuse. The existing 2,000-listing operational bound remains; requesting 2,001 rows detects overflow and returns an API error rather than a truncated optimum. No search-page or three-option display limit affects optimization.
 
 If the catalog guard grows substantially, move candidate filtering earlier into SQL by requested canonical IDs and safe substitution families, preserving the same domain safety gate and complete candidate accounting. That future optimization is not implemented now. There is no new schema, migration, dependency, infrastructure or cache.
 

@@ -1,5 +1,5 @@
 /** Retained catalog capacity shared by admission and complete-catalog readers. */
-const retainedListingCap = 1000;
+const retainedListingCap = 2000;
 
 export const catalogPolicy = {
   retainedListingCap,

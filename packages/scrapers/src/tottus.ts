@@ -50,7 +50,7 @@ export function createTottusAdapter(
       }
 
       return {
-        listings: boundedSearchListings(parsed.listings, limit),
+        listings: boundedSearchListings(parsed.listings, limit, query),
         discovered: parsed.discovered,
       };
     },

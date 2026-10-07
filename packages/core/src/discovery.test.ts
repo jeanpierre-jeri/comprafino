@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   discoveryQueryForSearch,
+  matchesDiscoveryQuery,
   normalizeDiscoveryQuery,
   parseDiscoveryOptions,
   validDiscoveryQuery,
@@ -70,4 +71,30 @@ it("bounds the retained original spelling before normalized admission", () => {
   // NFKC composes two code points into one: normalized length alone is insufficient.
   expect(validDiscoveryQuery("a\u0301".repeat(80))).toBe(false);
   expect(validDiscoveryQuery("a\u0301".repeat(60))).toBe(true);
+});
+
+describe("discovery acquisition relevance", () => {
+  it("requires the requested brand, including structured brands absent from titles", () => {
+    expect(
+      matchesDiscoveryQuery("queso edam tottus", {
+        title: "Queso Edam 400 g",
+        sourceBrand: "TOTTUS",
+      }),
+    ).toBe(true);
+    expect(
+      matchesDiscoveryQuery("queso edam aro", {
+        title: "Queso Edam Tottus 400 g",
+        sourceBrand: "TOTTUS",
+      }),
+    ).toBe(false);
+    expect(matchesDiscoveryQuery("queso edam", { title: "Queso Edam Vonk x Kg" })).toBe(true);
+  });
+
+  it("preserves quantities, accents and variant terms using public search semantics", () => {
+    expect(matchesDiscoveryQuery("LECHE GLORIA 1L", { title: "Leche Gloria 1 L" })).toBe(true);
+    expect(matchesDiscoveryQuery("leche gloria 1l", { title: "Leche Gloria 11 L" })).toBe(false);
+    expect(matchesDiscoveryQuery("atún light", { title: "Atún en aceite" })).toBe(false);
+    expect(matchesDiscoveryQuery("atún", { title: "Atun" })).toBe(false);
+    expect(matchesDiscoveryQuery("???", { title: "Queso" })).toBe(false);
+  });
 });

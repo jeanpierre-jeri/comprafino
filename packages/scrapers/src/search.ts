@@ -1,4 +1,8 @@
-import { discoveryRetailerLimit, validDiscoveryQuery } from "@comprafino/core";
+import {
+  discoveryRetailerLimit,
+  matchesDiscoveryQuery,
+  validDiscoveryQuery,
+} from "@comprafino/core";
 import type { NormalizedRetailerListing } from "@comprafino/core";
 
 export function assertRetailerSearch(query: string, limit: number) {
@@ -14,8 +18,19 @@ export function assertRetailerSearch(query: string, limit: number) {
 export function boundedSearchListings(
   listings: readonly NormalizedRetailerListing[],
   limit: number,
+  query?: string,
 ) {
-  return [...new Map(listings.map((row) => [row.externalId, row])).values()].slice(0, limit);
+  const unique = [...new Map(listings.map((row) => [row.externalId, row])).values()];
+
+  // Stable ordering preserves retailer ranking within each relevance tier.
+  if (query) {
+    unique.sort(
+      (left, right) =>
+        Number(matchesDiscoveryQuery(query, right)) - Number(matchesDiscoveryQuery(query, left)),
+    );
+  }
+
+  return unique.slice(0, limit);
 }
 
 /** One VTEX page, no retries; empty arrays are successful searches. */
@@ -24,6 +39,7 @@ export async function fetchVtexSearch(
   url: URL,
   parse: (raw: unknown, at: Date) => { listings: NormalizedRetailerListing[]; discovered: number },
   limit: number,
+  query: string,
 ) {
   const response = await fetchPage(url, {
     headers: {
@@ -63,5 +79,8 @@ export async function fetchVtexSearch(
 
   const parsed = parse(raw, new Date());
 
-  return { listings: boundedSearchListings(parsed.listings, limit), discovered: parsed.discovered };
+  return {
+    listings: boundedSearchListings(parsed.listings, limit, query),
+    discovered: parsed.discovered,
+  };
 }

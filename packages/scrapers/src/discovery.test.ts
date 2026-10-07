@@ -222,3 +222,31 @@ it("derives accepted listings when part of a discovery batch is skipped at capac
   expect(tasks.normalize).toHaveBeenCalledOnce();
   expect(tasks.match).toHaveBeenCalledOnce();
 });
+
+it("spends the last available slot on the requested brand rather than retailer suggestions", async () => {
+  const tasks = setup([], true);
+  const requested = { ...listing("tottus", 12), title: "Queso Edam 400 g", sourceBrand: "TOTTUS" };
+  tasks.adapters[0]!.searchProducts.mockResolvedValue({
+    listings: [
+      ...Array.from({ length: 11 }, (_, index) => ({
+        ...listing("tottus", index),
+        title: "Queso Edam Vonk x Kg",
+        sourceBrand: "VONK",
+      })),
+      requested,
+    ],
+    discovered: 12,
+  });
+  const result = await processDiscoveryQuery({ ...claim, query: "queso edam tottus" }, tasks);
+  expect(tasks.persist).toHaveBeenCalledExactlyOnceWith("tottus", [requested], expect.anything());
+  expect(result).toMatchObject({ status: "completed", newListings: 1, resultCount: 1 });
+});
+
+it("does not persist unrelated brands or claim coverage when the source only returns suggestions", async () => {
+  const tasks = setup();
+  const result = await processDiscoveryQuery({ ...claim, query: "queso edam aro" }, tasks);
+  expect(result).toMatchObject({ status: "no_results", resultCount: 0, newListings: 0 });
+  expect(tasks.persist).not.toHaveBeenCalled();
+  expect(tasks.normalize).not.toHaveBeenCalled();
+  expect(tasks.match).not.toHaveBeenCalled();
+});

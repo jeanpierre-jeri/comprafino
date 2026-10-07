@@ -1,3 +1,5 @@
+import { normalizeSearchQuery } from "./public-products.ts";
+
 // A month covers recurring weekly demand; 3,000 rows equals 100 daily budgets.
 export const discoveryDemandPolicy = {
   inactiveDays: 30,
@@ -69,4 +71,22 @@ export function parseDiscoveryOptions(args: readonly string[]) {
   }
 
   return { limit, dryRun };
+}
+
+/** Acquisition relevance only: query text never establishes product identity. */
+export function matchesDiscoveryQuery(
+  query: string,
+  listing: { title: string; sourceBrand?: string | null },
+): boolean {
+  const tokens = normalizeSearchQuery(query).split(" ").filter(Boolean);
+  const words = normalizeSearchQuery(`${listing.title} ${listing.sourceBrand ?? ""}`)
+    .split(" ")
+    .filter(Boolean);
+
+  return (
+    tokens.length > 0 &&
+    tokens.every((token) =>
+      words.some((word) => (/^\d+$/u.test(token) ? word === token : word.startsWith(token))),
+    )
+  );
 }

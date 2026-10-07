@@ -16,7 +16,7 @@ Counts use complete family buckets, separate from the UI result limit. Milk is a
 
 ## Source scope, refresh and capacity
 
-`refreshCoverage` is the scheduled source/limit owner. Metro eggs is an existing validated narrow ten-listing scope; this cleanup adds no source. Targeted priority favors exact associations, strong safe shopping candidates, discovery acquisitions, useful staples, then other listings. Category rotation and discovery can add retained identities; all admission writers share the capacity lock and 1,000-listing guard.
+`refreshCoverage` is the scheduled source/limit owner. Metro eggs is an existing validated narrow ten-listing scope; this cleanup adds no source. Targeted priority favors exact associations, strong safe shopping candidates, discovery acquisitions, useful staples, then other listings. Category rotation and discovery can add retained identities; all admission writers share the capacity lock and 2,000-listing guard.
 
 Deploy all current availability/identity/admission writers together after applying the full reviewed journal. Price age, explicit stock, exact absence and request failure are separate evidence; see [availability](availability.md), [refresh](listing-refresh.md) and [eligibility](eligibility.md).
 

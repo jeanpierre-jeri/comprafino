@@ -1,9 +1,14 @@
-import { retailerIdSchema } from "@comprafino/core";
+import { catalogPolicy, retailerIdSchema } from "@comprafino/core";
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 
 import { closeLocalTestConnections } from "./testing/test-query-client.ts";
+
+import { assertRefreshScope } from "./operations.ts";
+import { normalizeCatalog } from "./catalog.ts";
+import { matchCatalog } from "./matching.ts";
+import { searchPublicProducts } from "./generic-offers.ts";
 
 import { persistListings, persistListingsDetailed } from "./ingestion.ts";
 
@@ -38,15 +43,40 @@ describe.skipIf(!testUrl)("PostgreSQL capacity (explicit TEST_DATABASE_URL)", ()
       .parse((await query("select count(*)::int as count from retailer_listings"))[0]).count;
     await query(
       `insert into retailer_listings(retailer_id,external_id,product_id,title,url,current_price_cents,currency,price_unit,first_seen_at,last_seen_at)
-      select 'metro','capacity-fill-'||i,'capacity-fill-'||i,'Capacity fixture','https://www.metro.pe/fixture/p',500,'PEN','UN',$1::timestamptz,$1::timestamptz from generate_series(1,$2::int) i`,
-      [publicNow.toISOString(), String(total - count)],
+      select 'metro','capacity-fill-'||$3||'-'||i,'capacity-fill-'||$3||'-'||i,'Capacity fixture','https://www.metro.pe/fixture/p',500,'PEN','UN',$1::timestamptz,$1::timestamptz from generate_series(1,$2::int) i`,
+      [publicNow.toISOString(), String(total - count), String(total)],
     );
   }
 
-  it("admits only two new identities at 998 and refreshes known listings at full capacity", async () => {
+  it("admits demanded listings beyond the former cap and derives searchable offers at the expanded cap", async () => {
+    await fillTo(catalogPolicy.retainedListingCap - 2);
+    const demanded = [400, 180].map((grams) => ({
+      ...observation(`demanded-${grams}`, 1),
+      title: `Queso Edam Tottus Empaque ${grams} g`,
+      sourceBrand: "TOTTUS",
+      available: undefined,
+    }));
+    expect(await persistListingsDetailed(db, "tottus", demanded)).toMatchObject({
+      created: 2,
+      skippedByCapacity: 0,
+    });
+    await expect(assertRefreshScope(db)).resolves.toBeUndefined();
+    const normalization = await normalizeCatalog(db, catalogPolicy.retainedListingCap);
+    expect(normalization.persisted).toMatchObject({ stale: 0 });
+    const matching = await matchCatalog(db, catalogPolicy.retainedListingCap);
+    expect(matching.persisted).toMatchObject({ stale: false });
+    const results = await searchPublicProducts(db, "queso edam tottus", "relevance", publicNow);
+    expect(results.offers.map((offer) => offer.title).sort()).toEqual(
+      demanded.map((row) => row.title).sort(),
+    );
+    await fillTo(catalogPolicy.retainedListingCap + 1);
+    await expect(assertRefreshScope(db)).rejects.toThrow("downstream bound");
+  }, 30000);
+
+  it("admits only two new identities with two remaining slots and refreshes known listings at full capacity", async () => {
     const initial = { ...observation("known", 0), available: true };
     await persistListings(db, "tottus", [initial]);
-    await fillTo(998);
+    await fillTo(catalogPolicy.retainedListingCap - 2);
     const batch = [
       observation("new-first", 1),
       observation("new-second", 1),
@@ -65,7 +95,7 @@ describe.skipIf(!testUrl)("PostgreSQL capacity (explicit TEST_DATABASE_URL)", ()
       skippedByCapacity: 1,
     });
     expect((await query("select count(*)::int as count from retailer_listings"))[0]).toEqual({
-      count: 1000,
+      count: catalogPolicy.retainedListingCap,
     });
     expect(
       await query(
@@ -118,7 +148,7 @@ describe.skipIf(!testUrl)("PostgreSQL capacity (explicit TEST_DATABASE_URL)", ()
       await query(
         `insert into retailer_listings(retailer_id,external_id,product_id,title,url,current_price_cents,currency,price_unit,first_seen_at,last_seen_at)
         select 'metro','guard-fixture-'||i,'guard-fixture-'||i,'Catalog guard fixture','https://www.metro.pe/fixture/p',500,'PEN','UN',$1::timestamptz,$1::timestamptz from generate_series(1,$2::int) i`,
-        [publicNow.toISOString(), String(999 - count)],
+        [publicNow.toISOString(), String(catalogPolicy.retainedListingCap - 1 - count)],
       );
       const values = ["metro", "plaza-vea"].map((retailer) => ({
         ...observation(`guard-fixture-${retailer}`, 0),
@@ -133,7 +163,7 @@ describe.skipIf(!testUrl)("PostgreSQL capacity (explicit TEST_DATABASE_URL)", ()
       expect(results.map((r) => r.skippedByCapacity).sort((a, b) => a - b)).toEqual([0, 1]);
       expect(
         (await query("select count(*)::int as count from retailer_listings"))[0],
-      ).toMatchObject({ count: 1000 });
+      ).toMatchObject({ count: catalogPolicy.retainedListingCap });
       const winner = values[results.findIndex((r) => r.persisted === 1)]!;
       expect(
         await persistListings(db, winner.retailer, [

@@ -12,7 +12,7 @@ The repository hardening/cleanup program is complete: Cleanups A/B/C and the fin
 
 ## Next measured work
 
-F05 remains consciously deferred: review catalog capacity/performance before deliberate growth beyond the current 1,000-listing guard. F18 remains consciously deferred: optional query/read optimization requires measurement before implementation. Measure actual successful workflow duration and a stable multi-day price-change rate before quota or monthly storage decisions. These are future technical work, not unfinished cleanup; preserve the guard until a deliberate review supports a change.
+The catalog capacity review raises the admission/read guard to 2,000 listings; see [capacity evidence and limits](catalog-budget.md#reviewed-expansion-to-2000-listings). Further growth requires another performance review. F18 remains consciously deferred: optional query/read optimization requires measurement before implementation. Measure actual successful workflow duration and a stable multi-day price-change rate before quota or monthly storage decisions. These are future technical work, not unfinished cleanup; preserve the guard until a deliberate review supports a change.
 
 ## Deferred product work
 

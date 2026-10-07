@@ -143,7 +143,7 @@ export function createPlazaVeaAdapter(
       // VTEX expects URI-encoded whitespace, rather than form-style plus separators.
       url.search = url.search.replaceAll("+", "%20");
 
-      return fetchVtexSearch(fetchPage, url, parsePlazaVeaPage, limit);
+      return fetchVtexSearch(fetchPage, url, parsePlazaVeaPage, limit, query);
     },
     async fetchListings(limit) {
       if (!Number.isInteger(limit) || limit < 1 || limit > 500) {

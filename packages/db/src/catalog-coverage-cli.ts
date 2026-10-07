@@ -17,7 +17,7 @@ try {
   );
 } catch {
   console.error(
-    "Read-only catalog/availability audit failed; check database access, schema and 1000-row guard. No credentials logged.",
+    "Read-only catalog/availability audit failed; check database access, schema and configured catalog guard. No credentials logged.",
   );
   process.exitCode = 1;
 }

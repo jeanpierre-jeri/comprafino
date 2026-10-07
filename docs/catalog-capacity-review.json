@@ -1,0 +1,57 @@
+{
+  "observedAt": "2026-10-07T00:16:03.088Z",
+  "method": "Read-only current catalog searches; matching evaluation uses PostgreSQL similarity SELECT only. The 1500 scenario clones a uniformly sampled 500 listings in memory with fresh UUIDs; no synthetic rows persisted.",
+  "searches": [
+    {
+      "query": "queso edam tottus",
+      "elapsedMs": 502,
+      "products": 0,
+      "offers": 0
+    },
+    {
+      "query": "queso edam",
+      "elapsedMs": 230,
+      "products": 0,
+      "offers": 11
+    },
+    {
+      "query": "leche",
+      "elapsedMs": 516,
+      "products": 15,
+      "offers": 30
+    }
+  ],
+  "matching": [
+    {
+      "listings": 1000,
+      "synthetic": false,
+      "candidates": 10153,
+      "candidateMs": 75,
+      "evaluationMs": 6578,
+      "groupingMs": 3,
+      "groups": 69
+    },
+    {
+      "listings": 1500,
+      "synthetic": true,
+      "candidates": 22635,
+      "candidateMs": 13,
+      "evaluationMs": 11689,
+      "groupingMs": 5,
+      "groups": 90
+    }
+  ],
+  "limits": "Single sequential run from local environment including Neon HTTP latency; not production p95. Synthetic matching is not a future composition guarantee. No future-size SQL search or write latency measured here.",
+  "expansionTo2000": {
+    "observedAt": "2026-10-07T00:18:22.648Z",
+    "baselineListings": 1000,
+    "listings": 2000,
+    "synthetic": true,
+    "candidates": 40612,
+    "candidateMs": 79,
+    "evaluationMs": 16214,
+    "groupingMs": 11,
+    "groups": 138,
+    "method": "Uniformly sample the current catalog to clone additional listings in memory with fresh UUIDs, then evaluate PostgreSQL similarity using SELECT only. No synthetic rows persisted. This separate run includes HTTP latency and is not production p95 or future-composition evidence."
+  }
+}

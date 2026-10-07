@@ -108,3 +108,49 @@ describe("public retailer search adapters", () => {
     expect(fake).not.toHaveBeenCalled();
   });
 });
+
+it("prioritizes a requested brand before the adapter truncates the source page", async () => {
+  const data = structuredClone(tottus);
+  const template = data.props.pageProps.results[0]!;
+  data.props.pageProps.results = Array.from({ length: 12 }, (_, index) => ({
+    ...template,
+    productId: String(1000 + index),
+    url: `https://www.tottus.com.pe/tottus-pe/articulo/${1000 + index}/queso-edam`,
+    skuId: String(2000 + index),
+    displayName: index === 11 ? "Queso Edam Tottus 400 g" : "Queso Edam Vonk x Kg",
+  }));
+  data.props.pageProps.pagination.count = 12;
+  const fake = vi.fn<typeof fetch>(
+    async () => new Response(`<script id="__NEXT_DATA__">${JSON.stringify(data)}</script>`),
+  );
+  const result = await createTottusAdapter(fake).searchProducts("queso edam tottus", 10);
+  expect(result.listings).toHaveLength(10);
+  expect(result.listings[0]?.title).toBe("Queso Edam Tottus 400 g");
+  expect(fake).toHaveBeenCalledOnce();
+});
+
+for (const [name, create, fixture, host] of [
+  ["metro", createMetroAdapter, metro, "www.metro.pe"],
+  ["plaza-vea", createPlazaVeaAdapter, plaza, "www.plazavea.com.pe"],
+] as const) {
+  it(`${name} prioritizes structured brand matches beyond the first ten source products`, async () => {
+    const rows = Array.from({ length: 12 }, (_, index) => {
+      const template = fixture[0]!;
+      return {
+        ...template,
+        productId: String(1000 + index),
+        productName: "Queso Edam 400 g",
+        brand: index === 11 ? "ARO" : "VONK",
+        link: `https://${host}/queso-edam-${index}/p`,
+        items: [{ ...template.items[0]!, itemId: String(2000 + index), name: "Queso Edam 400 g" }],
+      };
+    });
+    const fake = vi.fn<typeof fetch>(
+      async () => new Response(JSON.stringify(rows), { headers: { resources: "0-19/12" } }),
+    );
+    const result = await create(fake).searchProducts("queso edam aro", 10);
+    expect(result.listings[0]?.sourceBrand).toBe("ARO");
+    expect(result.listings).toHaveLength(10);
+    expect(fake).toHaveBeenCalledOnce();
+  });
+}
