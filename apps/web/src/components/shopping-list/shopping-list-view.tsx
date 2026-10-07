@@ -111,6 +111,9 @@ export function ShoppingListView() {
                       <ShoppingItemCard
                         item={item}
                         result={result}
+                        weekday={market.weekdayRecommendations.find(
+                          (recommendation) => recommendation.itemId === item.id,
+                        )}
                         pending={pending}
                         error={error}
                         busy={busy}

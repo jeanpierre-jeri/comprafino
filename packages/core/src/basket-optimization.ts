@@ -7,6 +7,8 @@ import {
   shoppingOptionSchema,
 } from "./shopping-list.ts";
 
+import { shoppingWeekdaySchema } from "./weekday-recommendation.ts";
+
 export const basketOptionSchema = shoppingOptionSchema.extend({ retailerId: retailerIdSchema });
 
 export type BasketOption = z.infer<typeof basketOptionSchema>;
@@ -74,6 +76,10 @@ export type BasketPlan = z.infer<typeof basketPlanSchema>;
 export const shoppingListEvaluationSchema = z
   .object({
     evaluations: z.array(shoppingEvaluationSchema).max(shoppingListPolicy.maximumItems),
+    weekdayRecommendations: z
+      .array(shoppingWeekdaySchema)
+      .max(shoppingListPolicy.maximumItems)
+      .default([]),
     baskets: z.tuple([basketPlanSchema, basketPlanSchema, basketPlanSchema]),
     evaluatedAt: z.iso.datetime(),
     timings: z.object({ queryMs: z.number().nonnegative(), totalMs: z.number().nonnegative() }),

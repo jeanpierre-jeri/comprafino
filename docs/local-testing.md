@@ -88,3 +88,9 @@ The transport integration case spawns a production-client subprocess with the ex
 ```sh
 docker compose -f compose.test.yaml exec -T postgres psql -U comprafino_test -d comprafino_test -c "select nspname from pg_namespace where nspname ~ '^comprafino_(test|e2e)_[0-9a-f]{32}$';"
 ```
+
+## Weekday recommendation checks
+
+`packages/core/src/weekday-recommendation.test.ts` covers Lima week boundaries, sparse coverage, gaps, unsupported days, constant prices, ties, repeated minima, inconsistent patterns and material difference thresholds. The existing shopping DB suite adds real SQL coverage for ordinary/reference intraday transitions, missing dates, retailer isolation, generic withholding, association-date safety and benefits-mode independence in its owned random schema. Chromium shopping fixtures assert the insufficient-history copy for generic and exact rows. A separate browser case injects a validated evaluation response to exercise the suggestion/disclosure and no-pattern presentation; SQL pattern correctness is checked by the isolated DB case. Run the same integration/build/combined Chromium commands above; no application database is used for test writes.
+
+The read-only audit can be repeated with `pnpm --filter @comprafino/db exec node --env-file-if-exists=../../.env --experimental-strip-types src/weekday-audit-cli.ts`, alongside `pnpm audit:observation-coverage`. These explicitly read the configured application catalog and write no records; they are inspections, not test commands.

@@ -43,3 +43,5 @@ export * from "./shopping-list-merge.ts";
 export * from "./catalog-health.ts";
 
 export * from "./shopping-savings.ts";
+
+export * from "./weekday-recommendation.ts";

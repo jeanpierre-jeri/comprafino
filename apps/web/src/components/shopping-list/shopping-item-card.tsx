@@ -2,8 +2,13 @@
 
 import type { Ref } from "react";
 import { Button } from "@comprafino/ui/components/button";
-import { shoppingSavingsNotice, shoppingFrequencyLabels } from "@comprafino/core";
-import type { ShoppingListItem, ShoppingEvaluation, ShoppingSavingsNotice } from "@comprafino/core";
+import { shoppingSavingsNotice, shoppingFrequencyLabels, weekdayLabels } from "@comprafino/core";
+import type {
+  ShoppingListItem,
+  ShoppingEvaluation,
+  ShoppingSavingsNotice,
+  ShoppingWeekday,
+} from "@comprafino/core";
 import { ShoppingSavingsMessage } from "./shopping-savings-notices";
 import { CurrentOption } from "../current-shopping-option";
 
@@ -22,6 +27,7 @@ function quantityLabel(item: ShoppingListItem): string {
 type CardProps = {
   item: ShoppingListItem;
   result?: ShoppingEvaluation;
+  weekday?: ShoppingWeekday;
   pending: boolean;
   error: string;
   busy: boolean;
@@ -69,6 +75,7 @@ function CurrentItemOptions({
 
 export function ShoppingItemCard({
   item,
+  weekday,
   result,
   pending,
   error,
@@ -118,6 +125,7 @@ export function ShoppingItemCard({
         error={error}
         notice={notice}
       />
+      {!pending && !error && result && <WeekdayAdvice recommendation={weekday} />}
       {!pending && !error && result?.alternative && (
         <aside className="benefit-surface mt-4">
           <p className="font-medium">Alternativa compatible hoy</p>
@@ -137,5 +145,47 @@ export function ShoppingItemCard({
         </details>
       )}
     </article>
+  );
+}
+
+function WeekdayAdvice({ recommendation }: { recommendation?: ShoppingWeekday }) {
+  const supported =
+    recommendation?.series.filter((series) => series.pattern.status === "recommended") ?? [];
+  const first = supported[0];
+  const hasComplete = recommendation?.series.some(
+    (series) => series.pattern.status === "no_pattern",
+  );
+
+  if (!first || first.pattern.weekday === null) {
+    return (
+      <p className="mt-3 text-sm text-muted-foreground">
+        {hasComplete
+          ? "No observamos un patrón claro para recomendar un día."
+          : "Aún no hay suficiente historial para recomendar un día"}
+      </p>
+    );
+  }
+
+  return (
+    <div className="mt-3 text-sm">
+      <p>
+        {weekdayLabels[first.pattern.weekday]} en {first.retailerName}: el menor precio para todos
+        observado en las cuatro semanas completas.
+      </p>
+      <details className="shopping-disclosure mt-2">
+        <summary>Fundamento del día sugerido</summary>
+        {supported.map((series) => (
+          <p className="mt-2" key={series.listingId}>
+            {series.retailerName}: {weekdayLabels[series.pattern.weekday ?? 0]}, con 28 fechas
+            comparables del {series.pattern.start} al {series.pattern.end} (America/Lima).
+          </p>
+        ))}
+        <p className="mt-2">
+          Comparamos el mismo producto y supermercado, sin beneficios condicionados. El día fue el
+          único mínimo en cada semana, al menos S/ 1 y 5 % por debajo de cada otro día. Las
+          observaciones no garantizan el precio entre consultas ni precios o stock futuros.
+        </p>
+      </details>
+    </div>
   );
 }

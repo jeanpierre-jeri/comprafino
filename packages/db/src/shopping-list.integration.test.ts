@@ -4,6 +4,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import { z } from "zod";
 import {
   catalogPolicy,
+  weekdayEvidenceWindow,
+  shiftObservationDay,
   shoppingListItemSchema,
   shoppingListSchema,
   shoppingListEvaluationSchema,
@@ -284,4 +286,126 @@ describe.skipIf(!url)("batched current shopping snapshot", () => {
       "update retailer_listings set active=false where external_id like 'basket-guard-%'",
     );
   }, 30000);
+  it("weekday SQL uses real days, separates retailers/intent and ignores CMR and reference changes", async () => {
+    const evaluationTime = new Date();
+    const { start } = weekdayEvidenceWindow(evaluationTime);
+    const listing = z
+      .object({ id: z.uuid() })
+      .parse(
+        (
+          await scoped.query(
+            "select id from retailer_listings where external_id='shopping-preferred-tottus'",
+          )
+        )[0],
+      );
+    await scoped.query(
+      "update canonical_product_listings set linked_at=$1::timestamptz where listing_id=$2::uuid",
+      [`${start}T05:00:00Z`, listing.id],
+    );
+    await scoped.query("delete from listing_observation_days where listing_id=$1::uuid", [
+      listing.id,
+    ]);
+    await scoped.query(
+      "delete from price_history where listing_id=$1::uuid and valid_until is not null",
+      [listing.id],
+    );
+    for (let index = 0; index < 28; index++) {
+      const date = shiftObservationDay(start, index);
+      const price = index % 7 === 2 ? 1000 : 1500;
+      await scoped.query(
+        `insert into price_history(listing_id,current_price_cents,currency,price_unit,valid_from,valid_until)
+        values($1::uuid,$2,'PEN','UN',$3::timestamptz,$4::timestamptz)`,
+        [listing.id, price, `${date}T05:00:00Z`, `${shiftObservationDay(date, 1)}T05:00:00Z`],
+      );
+      await scoped.query(
+        `insert into listing_observation_days(listing_id,observation_date,first_observed_at,last_observed_at,observation_count)
+        values($1::uuid,$2::date,$3::timestamptz,$4::timestamptz,2)`,
+        [listing.id, date, `${date}T12:00:00Z`, `${date}T20:00:00Z`],
+      );
+    }
+    const exact = make("strict");
+    const generic = make("generic");
+    const list = shoppingListSchema.parse({ version: 2, items: [exact, generic] });
+    const result = await evaluateCurrentShoppingList(db, list, "standard", evaluationTime);
+    const series = result.weekdayRecommendations[0]!.series;
+    expect(series.find((row) => row.listingId === listing.id)?.pattern).toMatchObject({
+      status: "recommended",
+      weekday: 2,
+      coveredDays: 28,
+    });
+    expect(
+      series
+        .filter((row) => row.listingId !== listing.id)
+        .every((row) => row.pattern.status === "insufficient"),
+    ).toBe(true);
+    expect(result.weekdayRecommendations[1]!.series).toEqual([]);
+    expect(
+      (await evaluateCurrentShoppingList(db, list, "benefits", evaluationTime))
+        .weekdayRecommendations,
+    ).toEqual(result.weekdayRecommendations);
+
+    // A reference-only transition preserves comparable ordinary observations.
+    const referenceDay = shiftObservationDay(start, 1);
+    await scoped.query(
+      "update price_history set valid_until=$1::timestamptz where listing_id=$2::uuid and valid_from=$3::timestamptz",
+      [`${referenceDay}T16:00:00Z`, listing.id, `${referenceDay}T05:00:00Z`],
+    );
+    await scoped.query(
+      `insert into price_history(listing_id,current_price_cents,regular_price_cents,currency,price_unit,valid_from,valid_until)
+      values($1::uuid,1500,2000,'PEN','UN',$2::timestamptz,$3::timestamptz)`,
+      [
+        listing.id,
+        `${referenceDay}T16:00:00Z`,
+        `${shiftObservationDay(referenceDay, 1)}T05:00:00Z`,
+      ],
+    );
+    expect(
+      (await evaluateCurrentShoppingList(db, list, "standard", evaluationTime))
+        .weekdayRecommendations,
+    ).toEqual(result.weekdayRecommendations);
+    // Missing recorded states between actual observations are not bridged.
+    await scoped.query(
+      "update price_history set valid_until=$1::timestamptz where listing_id=$2::uuid and valid_from=$3::timestamptz",
+      [`${referenceDay}T15:00:00Z`, listing.id, `${referenceDay}T05:00:00Z`],
+    );
+    expect(
+      (
+        await evaluateCurrentShoppingList(db, list, "standard", evaluationTime)
+      ).weekdayRecommendations[0]!.series.find((row) => row.listingId === listing.id)?.pattern
+        .coveredDays,
+    ).toBe(27);
+    await scoped.query(
+      "update price_history set valid_until=$1::timestamptz where listing_id=$2::uuid and valid_from=$3::timestamptz",
+      [`${referenceDay}T16:00:00Z`, listing.id, `${referenceDay}T05:00:00Z`],
+    );
+    // An ordinary intraday change makes this date unusable; it is never a daily average.
+    await scoped.query(
+      "update price_history set current_price_cents=1400 where listing_id=$1::uuid and valid_from=$2::timestamptz",
+      [listing.id, `${referenceDay}T16:00:00Z`],
+    );
+    const mixed = await evaluateCurrentShoppingList(db, list, "standard", evaluationTime);
+    expect(
+      mixed.weekdayRecommendations[0]!.series.find((row) => row.listingId === listing.id)?.pattern,
+    ).toMatchObject({ status: "insufficient", coveredDays: 27 });
+    await scoped.query(
+      "delete from listing_observation_days where listing_id=$1::uuid and observation_date=$2::date",
+      [listing.id, start],
+    );
+    expect(
+      (
+        await evaluateCurrentShoppingList(db, list, "standard", evaluationTime)
+      ).weekdayRecommendations[0]!.series.find((row) => row.listingId === listing.id)?.pattern
+        .coveredDays,
+    ).toBe(26);
+    await scoped.query(
+      "update canonical_product_listings set linked_at=$1::timestamptz where listing_id=$2::uuid",
+      [evaluationTime.toISOString(), listing.id],
+    );
+    expect(
+      (
+        await evaluateCurrentShoppingList(db, list, "standard", evaluationTime)
+      ).weekdayRecommendations[0]!.series.find((row) => row.listingId === listing.id)?.pattern
+        .coveredDays,
+    ).toBe(0);
+  });
 });

@@ -11,6 +11,7 @@ import {
   searchFilters,
   shoppingQueryForTitle,
   shoppingMarketQuery,
+  shoppingWeekdays,
 } from "@comprafino/core";
 import type {
   PriceMode,
@@ -26,6 +27,8 @@ import {
   genericProductOffer,
 } from "./generic-offers.ts";
 import { getCanonicalProductComparison, eligibleProducts } from "./public-products.ts";
+
+import { shoppingWeekdayRows, weekdayRowsSchema } from "./weekday-recommendation.ts";
 
 /** Read-only current market boundary. Exact eligibility and generic quantity
  * evidence come from existing public queries; no list data is persisted. */
@@ -128,6 +131,7 @@ export async function evaluateCurrentShoppingList(
   let queryMs = 0;
   let candidates: ShoppingCandidate[] = [];
   const titles = new Map<string, string>();
+  let weekdayRows: unknown = [];
 
   if (list.items.length) {
     const ids = [
@@ -138,6 +142,7 @@ export async function evaluateCurrentShoppingList(
       db.execute(sql`${eligibleProducts}, current_listings as (
       ${currentGenericOfferRows(now)}
     ) select jsonb_build_object(
+      'weekdayRows', (${shoppingWeekdayRows(ids, now)}),
       'products', coalesce((select jsonb_agg(jsonb_build_object('id',id,'title',"displayName"))
         from products where ${
           ids.length
@@ -154,6 +159,7 @@ export async function evaluateCurrentShoppingList(
     queryMs = performance.now() - queryStarted;
     const snapshot = z
       .object({
+        weekdayRows: z.unknown(),
         products: z.array(z.object({ id: z.uuid(), title: z.string().min(1) })),
         listings: z.array(z.unknown()),
       })
@@ -162,6 +168,8 @@ export async function evaluateCurrentShoppingList(
     if (snapshot.listings.length > catalogPolicy.retainedListingCap) {
       throw new Error("Shopping catalog snapshot bound exceeded");
     }
+
+    weekdayRows = snapshot.weekdayRows;
 
     for (const product of snapshot.products) {
       titles.set(product.id, product.title);
@@ -188,6 +196,12 @@ export async function evaluateCurrentShoppingList(
 
   return {
     evaluations: fulfillments.map((f) => f.evaluation),
+    weekdayRecommendations: shoppingWeekdays(
+      list,
+      candidates,
+      weekdayRowsSchema.parse(weekdayRows),
+      now,
+    ),
     baskets: optimizeBasket(
       fulfillments.map((f) => ({
         itemId: f.evaluation.itemId,

@@ -1,7 +1,7 @@
 import { fixtureDatabase } from "../../../packages/db/src/testing/fixture-client.ts";
 import { closeLocalTestConnections } from "../../../packages/db/src/testing/test-query-client.ts";
 import { expect, test, type Page } from "@playwright/test";
-import { shoppingListSchema } from "@comprafino/core";
+import { shoppingListSchema, shoppingListEvaluationSchema } from "@comprafino/core";
 import { restrictBasketFixtureRetailers } from "@comprafino/db/basket-fixtures";
 import { persistListings } from "@comprafino/db";
 
@@ -34,6 +34,7 @@ test("local generic need persists, edits, deduplicates and removes", async ({ pa
   await addGeneric(page);
   const card = page.getByRole("article", { name: "Huevos", exact: true });
   await expect(card).toContainText("30 unidades");
+  await expect(card).toContainText("Aún no hay suficiente historial para recomendar un día");
   await page.reload();
   await expect(card).toBeVisible();
   await card.getByRole("button", { name: "Editar Huevos" }).click();
@@ -434,6 +435,42 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
     "Run pnpm test:e2e:list:local after a production build",
   );
   test.describe.configure({ mode: "serial" });
+  test("weekday advice discloses its ordinary evidence and distinguishes an unclear pattern", async ({
+    page,
+  }) => {
+    let clear = true;
+    await page.route("**/api/list/evaluate?*", async (route) => {
+      const response = await route.fetch();
+      const data = shoppingListEvaluationSchema.parse(await response.json());
+      const recommendation = data.weekdayRecommendations[0];
+      expect(recommendation?.series.length).toBeGreaterThan(0);
+      for (const series of recommendation?.series ?? []) {
+        series.pattern = {
+          status: clear ? "recommended" : "no_pattern",
+          weekday: clear ? 2 : null,
+          coveredDays: 28,
+          start: "2026-09-07",
+          end: "2026-10-04",
+        };
+      }
+      await route.fulfill({ response, json: shoppingListEvaluationSchema.parse(data) });
+    });
+    await addSpecific(page, "strict");
+    const card = page
+      .getByRole("region", { name: /Cada semana|Cada 2 semanas|Cada mes/ })
+      .getByRole("article")
+      .first();
+    await expect(card).toContainText("miércoles en");
+    await expect(card.getByText(/Las observaciones no garantizan/)).toBeHidden();
+    await card.getByText("Fundamento del día sugerido", { exact: true }).click();
+    await expect(card).toContainText("28 fechas comparables del 2026-09-07 al 2026-10-04");
+    await expect(card.getByText(/Las observaciones no garantizan/)).toBeVisible();
+    await expect(card).toContainText("sin beneficios condicionados");
+    clear = false;
+    await page.reload();
+    await expect(card).toContainText("No observamos un patrón claro para recomendar un día.");
+    await expect(card.getByText("Fundamento del día sugerido", { exact: true })).toHaveCount(0);
+  });
   test("card links preserve their destinations while add buttons never navigate", async ({
     page,
     context,
@@ -655,6 +692,7 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       .getByRole("article")
       .first();
     await expect(card).toContainText("S/ 17.90");
+    await expect(card).toContainText("Aún no hay suficiente historial para recomendar un día");
     await card.getByText("Ver producto y precio", { exact: true }).click();
     await expect(
       card.getByRole("note", { name: "El mismo producto, más barato en otra tienda" }),
@@ -1104,6 +1142,9 @@ test.describe("current basket optimization fixtures", () => {
     await page.getByRole("option", { name: "Incluir beneficios", exact: true }).click();
     await expect(comparison).toContainText("Requiere tarjeta CMR");
     await expect(comparison).toContainText("Para todos, esta selección");
+    // Base UI can retain a hidden portal after the closing animation. Wait for
+    // visual dismissal before resizing to measure the settled mobile layout.
+    await expect(page.getByRole("listbox", { includeHidden: true })).toBeHidden();
 
     for (const width of [390, 1280]) {
       await page.setViewportSize({ width, height: 900 });
