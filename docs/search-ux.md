@@ -31,3 +31,9 @@ The URL/state behavior above is unchanged. The heading is borderless, with compa
 No history chart, new facet, aggregation, filter preference persistence, client caching or filter modal is included.
 
 Public appearance supports System/Light/Dark independently of filter URLs. An explicit light/dark preference is stored locally; System removes that override. See [UI polish](ui-polish.md) for initialization and token details.
+
+## Compact exact comparisons
+
+“Compara el mismo producto” initially shows up to three cards in the existing result order. A centered downward arrow reveals additional results and then disappears. It has a 44px touch target and an accessible name including the remaining count, without visible text or border. Expansion stays open until search/filter navigation; focus moves to the first revealed product link when the control disappears. Up to three results need no disclosure control. The total result count, query/filter URLs, matching, prices and generic retailer options remain unchanged.
+
+Cards and both grids remain Server Components. A small client disclosure uses the shared Base UI Collapsible, local open state and the existing measured-height/opacity transition (220/180 ms). Reduced-motion preference removes the panel transition. Collapsed contents are hidden from focus and accessibility navigation; keyboard Enter/Space and expanded state follow the native button/Collapsible behavior. There are no animation dependencies, extra queries, client result cache or timers. Search/filter navigation resets expansion through the existing keyed server result boundary.

@@ -546,3 +546,25 @@
   background: var(--background);
   color: var(--foreground);
 }
+
+/* Base UI measures intrinsic panel height and retains content through exit transitions. */
+.collapsible-content {
+  height: var(--collapsible-panel-height);
+  overflow: hidden;
+  opacity: 1;
+  transition:
+    height 220ms ease,
+    opacity 180ms ease;
+}
+
+.collapsible-content[data-starting-style],
+.collapsible-content[data-ending-style] {
+  height: 0;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collapsible-content {
+    transition: none;
+  }
+}

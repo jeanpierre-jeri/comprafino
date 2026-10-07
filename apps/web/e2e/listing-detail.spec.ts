@@ -122,6 +122,94 @@ test.describe("isolated listing details", () => {
     await expect(page.getByRole("dialog")).toBeVisible();
     await expect(page.getByRole("dialog")).toContainText("Prefiero este producto");
   });
+  test("exact comparisons show a centered arrow that disappears after revealing results", async ({
+    page,
+  }, testInfo) => {
+    const section = page.getByRole("region", { name: "Comparaciones del mismo producto" });
+    const cards = section.locator(".exact-card");
+    const trigger = section.getByRole("button", { name: /^Ver más comparaciones/ });
+    for (const width of [390, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const theme of ["light", "dark"] as const) {
+        await page.emulateMedia({ colorScheme: theme });
+        await page.goto("/search?q=gloria");
+        await expect(section.locator(".exact-card:visible")).toHaveCount(3);
+        await expect.poll(() => cards.count()).toBeGreaterThan(3);
+        const total = await cards.count();
+        await expect(trigger).toHaveAttribute("aria-expanded", "false");
+        await expect(trigger).toHaveText("");
+        const panelId = await trigger.getAttribute("aria-controls");
+        expect(panelId).toBeTruthy();
+        const panel = page.locator(`[id="${panelId}"]`);
+        await expect(panel).toBeHidden();
+        await expect(panel.getByRole("link")).toHaveCount(0);
+        const productLinks = await cards
+          .locator("a.navigation-link")
+          .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
+        const triggerBox = await trigger.boundingBox();
+        const sectionBox = await section.boundingBox();
+        expect(triggerBox).not.toBeNull();
+        expect(sectionBox).not.toBeNull();
+        expect(
+          Math.abs(triggerBox!.x + triggerBox!.width / 2 - sectionBox!.x - sectionBox!.width / 2),
+        ).toBeLessThan(3);
+        await section.screenshot({
+          path: testInfo.outputPath(`comparisons-closed-${width}-${theme}.png`),
+        });
+        await trigger.focus();
+        await page.keyboard.press(width === 390 ? "Enter" : "Space");
+        await expect(trigger).toHaveCount(0);
+        await expect(section.locator(".exact-card:visible")).toHaveCount(total);
+        await expect(panel.locator("a.navigation-link").first()).toBeFocused();
+        await expect(panel).toHaveCSS("transition-duration", "0.22s, 0.18s");
+        await expect
+          .poll(() =>
+            panel.evaluate((element) =>
+              Math.abs(element.getBoundingClientRect().height - element.scrollHeight),
+            ),
+          )
+          .toBeLessThan(2);
+        expect(
+          await cards
+            .locator("a.navigation-link")
+            .evaluateAll((links) => links.map((link) => link.getAttribute("href"))),
+        ).toEqual(productLinks);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+          true,
+        );
+        await section.screenshot({
+          path: testInfo.outputPath(`comparisons-open-${width}-${theme}.png`),
+        });
+      }
+    }
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/search?q=gloria");
+    const panelId = await trigger.getAttribute("aria-controls");
+    await trigger.click();
+    const panel = page.locator(`[id="${panelId}"]`);
+    await expect(panel).toBeVisible();
+    await expect(panel).toHaveCSS("transition-duration", "0s");
+    await expect(trigger).toHaveCount(0);
+    await page.getByRole("combobox", { name: "Precios", exact: true }).click();
+    await page.getByRole("option", { name: "Incluir beneficios", exact: true }).click();
+    await expect(page).toHaveURL(/priceMode=benefits/);
+    await expect(trigger).toBeVisible();
+    await expect(section.locator(".exact-card:visible")).toHaveCount(3);
+  });
+  test("small exact result sets and empty searches need no disclosure control", async ({
+    page,
+  }) => {
+    await page.goto("/search?q=gloria+rich");
+    const section = page.getByRole("region", { name: "Comparaciones del mismo producto" });
+    await expect(section.locator(".exact-card:visible")).toHaveCount(1);
+    await expect(
+      section.getByRole("button", { name: /Ver (más|menos) comparaciones/ }),
+    ).toHaveCount(0);
+    await page.goto("/search");
+    await expect(
+      page.getByRole("region", { name: "Comparaciones del mismo producto" }),
+    ).toHaveCount(0);
+  });
   test("canonical comparisons disclose unknown stock beside ordinary prices", async ({ page }) => {
     await page.goto("/search?q=gloria");
     await expect(page.locator(".exact-card").first()).toContainText(
@@ -150,6 +238,10 @@ test.describe("isolated listing details", () => {
       await expect(card.getByText("S/ 6.77 / L", { exact: true })).toBeVisible();
       await expect(card.locator(".benefit-surface")).toContainText("S/ 5.71 / L · con CMR");
       await expect(card.locator(".benefit-surface")).toContainText("Requiere tarjeta CMR");
+      const moreComparisons = page.getByRole("button", { name: /^Ver más comparaciones/ });
+      if (await moreComparisons.count()) {
+        await moreComparisons.click();
+      }
       const exactCard = page
         .locator(".exact-card")
         .filter({ has: page.locator(`a[href^="/products/${fixture("rich")}"]`) });

@@ -1,3 +1,4 @@
+import { ExactComparisonDisclosure } from "./exact-comparison-disclosure";
 import Link from "next/link";
 import { ArrowRight } from "@comprafino/ui";
 import { unitPriceBases, unitPriceBasisLabel } from "@comprafino/core";
@@ -76,18 +77,32 @@ export function SearchResultsContent({
           <p className="mt-2 mb-4 text-xs text-muted-foreground">
             {products.length === 20 ? "Hasta 20" : products.length} productos para «{query}»
           </p>
-          <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((product, index) => (
-              <li key={product.id}>
-                <ExactProductCard
-                  product={product}
+          {products.length > 3 ? (
+            <ExactComparisonDisclosure
+              remainingCount={products.length - 3}
+              preview={
+                <ExactProductGrid
+                  products={products.slice(0, 3)}
                   benefits={filters.priceMode === "benefits"}
-                  eager={index === 0}
                   observedNow={observedNow}
+                  eagerFirst
                 />
-              </li>
-            ))}
-          </ul>
+              }
+            >
+              <ExactProductGrid
+                products={products.slice(3)}
+                benefits={filters.priceMode === "benefits"}
+                observedNow={observedNow}
+              />
+            </ExactComparisonDisclosure>
+          ) : (
+            <ExactProductGrid
+              products={products}
+              benefits={filters.priceMode === "benefits"}
+              observedNow={observedNow}
+              eagerFirst
+            />
+          )}
         </section>
       )}
       {offers.length > 0 && (
@@ -139,6 +154,33 @@ export function SearchResultsContent({
         </section>
       )}
     </>
+  );
+}
+
+function ExactProductGrid({
+  products,
+  benefits,
+  observedNow,
+  eagerFirst = false,
+}: {
+  products: readonly ProductComparison[];
+  benefits: boolean;
+  observedNow: Date;
+  eagerFirst?: boolean;
+}) {
+  return (
+    <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {products.map((product, index) => (
+        <li key={product.id}>
+          <ExactProductCard
+            product={product}
+            benefits={benefits}
+            eager={eagerFirst && index === 0}
+            observedNow={observedNow}
+          />
+        </li>
+      ))}
+    </ul>
   );
 }
 
