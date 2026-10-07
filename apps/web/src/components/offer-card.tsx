@@ -1,9 +1,11 @@
+import { UnitPriceReference } from "./unit-price-reference";
+import { repriceUnitPrice, canonicalUnitPrice } from "@comprafino/core";
 import { AvailabilityNotice } from "./availability-notice";
 import { AddShoppingItem } from "./shopping-list/shopping-item-editor";
 import { shoppingQueryForTitle, shoppingSeedForRetailerOffer } from "@comprafino/core";
 import { ArrowRight, ArrowUpRight } from "@comprafino/ui";
 import { NavigationLink } from "./navigation-link";
-import { formatPen, formatUnitPrice } from "@comprafino/db";
+import { formatPen } from "@comprafino/db";
 import type { GenericProductOffer, ProductComparison } from "@comprafino/db";
 import { ProductImage } from "./product-image";
 import { ObservedAt, packageSummary, RetailerBadge } from "./product-info";
@@ -17,6 +19,12 @@ export function GenericOfferCard({
   offer: GenericProductOffer;
   benefits: boolean;
 }) {
+  const ordinaryUnitPrice = repriceUnitPrice(
+    offer.unitPrice,
+    offer.ranking.priceCents,
+    offer.currentPriceCents,
+  );
+
   return (
     <article data-offer-id={offer.id} className="product-card">
       <div className="product-summary">
@@ -51,19 +59,23 @@ export function GenericOfferCard({
             </p>
           )}
         </div>
-        {offer.unitPrice && offer.pricingBasis !== "kg" && (
-          <p className="unit-price">
-            {formatUnitPrice(offer.unitPrice)}
-            {offer.ranking.condition ? " · con CMR" : ""}
-            {offer.unitPrice.quality === "approximate" ? " · orientativo" : ""}
-          </p>
-        )}
+        {offer.pricingBasis !== "kg" && <UnitPriceReference price={ordinaryUnitPrice} />}
         {offer.conditionalOffers.map((benefit) => (
           <div key={benefit.programKey} className="benefit-surface">
             <p className="text-sm font-semibold">
               Con CMR: {formatPen(benefit.priceCents)}
               {offer.pricingBasis === "kg" ? " / kg" : ""}
             </p>
+            {offer.pricingBasis !== "kg" && (
+              <UnitPriceReference
+                conditional
+                price={repriceUnitPrice(
+                  offer.unitPrice,
+                  offer.ranking.priceCents,
+                  benefit.priceCents,
+                )}
+              />
+            )}
             <p className="mt-1 text-xs text-muted-foreground">{benefit.conditionLabel}</p>
           </div>
         ))}
@@ -113,6 +125,26 @@ export function ExactProductCard({
   observedNow: Date;
 }) {
   const conditionalRanking = product.lowestBenefit;
+  const benefitSource = product.offers.find((offer) =>
+    offer.conditionalOffers.some(
+      (benefit) => benefit.priceCents === conditionalRanking?.priceCents,
+    ),
+  );
+  const benefitUnitPrice =
+    conditionalRanking && benefitSource
+      ? canonicalUnitPrice(
+          {
+            title: benefitSource.title,
+            quantityValue: product.quantityValue,
+            quantityUnit: product.quantityUnit,
+            packageCount: product.packageCount,
+            priceCents: conditionalRanking.priceCents,
+            observedAt: benefitSource.observedAt,
+            available: benefitSource.available,
+          },
+          observedNow,
+        )
+      : null;
   // One conservative freshness label for ordinary-price ties; detail keeps every timestamp.
   const winningOffers = product.offers.filter(
     (offer) =>
@@ -162,6 +194,7 @@ export function ExactProductCard({
                   <p className="text-sm font-semibold">
                     Con CMR: {formatPen(conditionalRanking.priceCents)}
                   </p>
+                  <UnitPriceReference conditional price={benefitUnitPrice} />
                   <p className="mt-1 text-xs">
                     {conditionalRanking.retailers.join(" y ")} ·{" "}
                     {conditionalRanking.conditions.join(" · ")}

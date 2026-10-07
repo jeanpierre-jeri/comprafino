@@ -1,3 +1,6 @@
+import { UnitPriceReference } from "../../../components/unit-price-reference";
+import type { RetailerOffer } from "@comprafino/db";
+import { canonicalUnitPrice } from "@comprafino/core";
 import { AvailabilityNotice } from "../../../components/availability-notice";
 import { catalogQuantityToShoppingUnit } from "@comprafino/core";
 import { logDiagnostic } from "../../../server/diagnostics.ts";
@@ -30,8 +33,11 @@ const loadProduct = cache(async (id: string, mode: "standard" | "benefits" = "st
   await connection();
 
   try {
+    const observedNow = new Date();
+
     return {
-      product: await getCanonicalProductComparison(createDatabase(), id, new Date(), mode),
+      observedNow,
+      product: await getCanonicalProductComparison(createDatabase(), id, observedNow, mode),
       failed: false,
     };
   } catch (error) {
@@ -60,7 +66,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
   const query = await searchParams;
   const filters = searchFilters(query);
   const range = parseHistoryRange(query.range);
-  const { product, failed } = await loadProduct((await params).id, filters.priceMode);
+  const { product, failed, observedNow } = await loadProduct((await params).id, filters.priceMode);
 
   if (failed) {
     return (
@@ -74,6 +80,31 @@ export default async function ProductPage({ params, searchParams }: Props) {
   if (!product) {
     notFound();
   }
+
+  const packageContents = {
+    quantityValue: product.quantityValue,
+    quantityUnit: product.quantityUnit,
+    packageCount: product.packageCount,
+  };
+
+  function pricePerUnit(priceCents: number, source: RetailerOffer) {
+    return canonicalUnitPrice(
+      {
+        title: source.title,
+        ...packageContents,
+        priceCents,
+        observedAt: source.observedAt,
+        available: source.available,
+      },
+      observedNow,
+    );
+  }
+
+  const benefitSource = product.offers.find((offer) =>
+    offer.conditionalOffers.some(
+      (benefit) => benefit.priceCents === product.lowestBenefit?.priceCents,
+    ),
+  );
 
   return (
     <PublicShell>
@@ -120,6 +151,14 @@ export default async function ProductPage({ params, searchParams }: Props) {
                 <p className="mt-1 text-lg font-semibold">
                   {formatPen(product.lowestBenefit.priceCents)} con CMR
                 </p>
+                <UnitPriceReference
+                  conditional
+                  price={
+                    benefitSource
+                      ? pricePerUnit(product.lowestBenefit.priceCents, benefitSource)
+                      : null
+                  }
+                />
                 <p className="text-xs text-muted-foreground">
                   {product.lowestBenefit.retailers.join(" y ")} ·{" "}
                   {product.lowestBenefit.conditions.join(" · ")}
@@ -187,6 +226,10 @@ export default async function ProductPage({ params, searchParams }: Props) {
                     {offer.conditionalOffers.map((benefit) => (
                       <div key={benefit.programKey} className="benefit-surface">
                         <p className="font-semibold">{formatPen(benefit.priceCents)} con CMR</p>
+                        <UnitPriceReference
+                          conditional
+                          price={pricePerUnit(benefit.priceCents, offer)}
+                        />
                         <p className="text-xs">{benefit.conditionLabel}</p>
                       </div>
                     ))}

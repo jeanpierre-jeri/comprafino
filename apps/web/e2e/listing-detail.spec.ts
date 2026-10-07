@@ -141,6 +141,34 @@ test.describe("isolated listing details", () => {
       "Último precio registrado · pendiente de actualización.",
     );
   });
+  test("ordinary and CMR unit references stay separate in both search modes and details", async ({
+    page,
+  }) => {
+    for (const mode of ["standard", "benefits"]) {
+      await page.goto(`/search?q=leche+gloria&priceMode=${mode}`);
+      const card = page.locator(`[data-offer-id="${fixture("listing-rich-tottus")}"]`);
+      await expect(card.getByText("S/ 6.77 / L", { exact: true })).toBeVisible();
+      await expect(card.locator(".benefit-surface")).toContainText("S/ 5.71 / L · con CMR");
+      await expect(card.locator(".benefit-surface")).toContainText("Requiere tarjeta CMR");
+      const exactCard = page
+        .locator(".exact-card")
+        .filter({ has: page.locator(`a[href^="/products/${fixture("rich")}"]`) });
+      await expect(exactCard.locator(".benefit-surface")).toContainText("S/ 5.71 / L · con CMR");
+    }
+    await page.goto(`/listings/${fixture("listing-rich-tottus")}`);
+    await expect(page.locator(".detail-hero .benefit-surface")).toContainText(
+      "S/ 5.71 / L · con CMR",
+    );
+    await page.goto(`/products/${fixture("rich")}`);
+    await expect(page.locator(".detail-hero .benefit-surface")).toContainText(
+      "S/ 5.71 / L · con CMR",
+    );
+    const tottus = page
+      .getByRole("region", { name: /^Compara en/ })
+      .getByRole("article")
+      .filter({ has: page.getByRole("heading", { name: "Tottus", exact: true }) });
+    await expect(tottus.locator(".benefit-surface")).toContainText("S/ 5.71 / L · con CMR");
+  });
   test("URL ranges clip multi-state history and retain browser navigation", async ({ page }) => {
     await page.goto(`/listings/${fixture("listing-rich-metro")}`);
     const history = page.getByRole("region", { name: "Historial del precio para todos" });

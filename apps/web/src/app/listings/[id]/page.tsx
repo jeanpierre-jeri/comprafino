@@ -1,3 +1,5 @@
+import { UnitPriceReference } from "../../../components/unit-price-reference";
+import { repriceUnitPrice } from "@comprafino/core";
 import { AvailabilityNotice } from "../../../components/availability-notice";
 import { logDiagnostic } from "../../../server/diagnostics.ts";
 import type { Metadata } from "next";
@@ -132,6 +134,16 @@ export default async function ListingPage({ params, searchParams }: Props) {
                 {formatPen(benefit.priceCents)} con CMR
                 {listing.pricingBasis === "kg" ? " / kg" : ""}
               </p>
+              {listing.pricingBasis !== "kg" && (
+                <UnitPriceReference
+                  conditional
+                  price={repriceUnitPrice(
+                    listing.unitPrice,
+                    listing.currentPriceCents,
+                    benefit.priceCents,
+                  )}
+                />
+              )}
               <p className="text-xs text-muted-foreground">{benefit.conditionLabel}</p>
             </aside>
           ))}
