@@ -1,6 +1,8 @@
 import { expect, it } from "vitest";
 import {
   calculateUnitPrice,
+  repriceUnitPrice,
+  canonicalUnitPrice,
   compareUnitPrices,
   formatUnitPrice,
   genericOfferSort,
@@ -224,4 +226,64 @@ it("distinguishes conflicting dimensions from missing or ambiguous content", () 
   expect(
     calculateUnitPrice({ ...input, title: "Papel Higiénico 65m", totalQuantity: null }, now).reason,
   ).toBe("missing-quantity");
+});
+
+it.each([
+  [400, "g", 1890, 1790, "S/ 47.25 / kg", "S/ 44.75 / kg"],
+  [180, "g", 990, 890, "S/ 55.00 / kg", "S/ 49.44 / kg"],
+  [946, "ml", 640, 540, "S/ 6.77 / L", "S/ 5.71 / L"],
+  [30, "unit", 1790, 1290, "S/ 0.60 / unidad", "S/ 0.43 / unidad"],
+] as const)(
+  "separates ordinary and CMR unit references for %i %s",
+  (value, unit, ordinary, benefit, ordinaryLabel, benefitLabel) => {
+    const basis = price({ currentPriceCents: ordinary, totalQuantity: { value, unit } });
+    const conditional = repriceUnitPrice(basis, ordinary, benefit)!;
+    expect(formatUnitPrice(basis)).toBe(ordinaryLabel);
+    expect(formatUnitPrice(conditional)).toBe(benefitLabel);
+    expect(formatUnitPrice(repriceUnitPrice(conditional, benefit, ordinary)!)).toBe(ordinaryLabel);
+  },
+);
+
+it("keeps approximate roll metadata and direct KG quote semantics when repricing", () => {
+  const paper = price({
+    title: "Papel higiénico 12 rollos",
+    productFamily: "toilet_paper",
+    totalQuantity: { value: 12, unit: "unit" },
+    currentPriceCents: 2400,
+  });
+  expect(repriceUnitPrice(paper, 2400, 1800)).toMatchObject({
+    quality: "approximate",
+    basis: "roll",
+    displayUnit: "roll",
+  });
+  expect(formatUnitPrice(repriceUnitPrice(paper, 2400, 1800)!)).toBe("S/ 1.50 / rollo");
+  const kg = price({ pricingBasis: "kg", totalQuantity: null, currentPriceCents: 5500 });
+  expect(formatUnitPrice(repriceUnitPrice(kg, 5500, 5000)!)).toBe("S/ 50.00 / kg");
+});
+
+it("withholds conditional references when quantity semantics or payable amounts are invalid", () => {
+  expect(repriceUnitPrice(null, 1890, 1790)).toBeNull();
+  for (const invalid of [0, -1, 1.5, Infinity, Number.MAX_SAFE_INTEGER + 1]) {
+    expect(repriceUnitPrice(price(), 390, invalid)).toBeNull();
+    expect(repriceUnitPrice(price(), invalid, 290)).toBeNull();
+  }
+  expect(repriceUnitPrice({ ...price(), numerator: 0n }, 390, 290)).toBeNull();
+});
+
+it("uses full trusted canonical multipack contents without bypassing freshness or semantic gates", () => {
+  const canonical = {
+    title: "Leche 3 × 946 ml",
+    quantityValue: 946,
+    quantityUnit: "ml" as const,
+    packageCount: 3,
+    priceCents: 1390,
+    observedAt: now,
+  };
+  expect(formatUnitPrice(canonicalUnitPrice(canonical, now)!)).toBe("S/ 4.90 / L");
+  expect(
+    canonicalUnitPrice({ ...canonical, title: "Atún escurrido 3 × 946 g", quantityUnit: "g" }, now),
+  ).toBeNull();
+  expect(canonicalUnitPrice({ ...canonical, available: false }, now)).toBeNull();
+  expect(canonicalUnitPrice({ ...canonical, observedAt: new Date("2026-09-01") }, now)).toBeNull();
+  expect(canonicalUnitPrice({ ...canonical, quantityValue: 0.5, packageCount: 2 }, now)).toBeNull();
 });

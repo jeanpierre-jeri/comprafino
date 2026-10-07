@@ -207,3 +207,65 @@ function unitPriceMetadata(
     displayUnit: paper ? "roll" : "unit",
   };
 }
+
+/** Reprice an already validated unit basis without inferring new quantity semantics. */
+export function repriceUnitPrice(
+  price: UnitPrice | null,
+  quotedPriceCents: number,
+  payablePriceCents: number,
+): UnitPrice | null {
+  if (
+    !price ||
+    price.numerator <= 0n ||
+    price.denominator <= 0n ||
+    !Number.isSafeInteger(quotedPriceCents) ||
+    quotedPriceCents <= 0 ||
+    !Number.isSafeInteger(payablePriceCents) ||
+    payablePriceCents <= 0
+  ) {
+    return null;
+  }
+
+  return {
+    ...price,
+    numerator: price.numerator * BigInt(payablePriceCents),
+    denominator: price.denominator * BigInt(quotedPriceCents),
+  };
+}
+
+/** Trusted canonical sale-package contents, subject to the same freshness and semantic gates. */
+export function canonicalUnitPrice(
+  input: {
+    title: string;
+    quantityValue: number;
+    quantityUnit: Quantity["unit"];
+    packageCount: number;
+    priceCents: number;
+    observedAt: Date;
+    available?: boolean | null;
+  },
+  now = new Date(),
+): UnitPrice | null {
+  if (
+    !Number.isSafeInteger(input.packageCount) ||
+    input.packageCount <= 0 ||
+    !Number.isSafeInteger(input.quantityValue) ||
+    input.quantityValue <= 0 ||
+    input.priceCents <= 0
+  ) {
+    return null;
+  }
+
+  return calculateUnitPrice(
+    {
+      title: input.title,
+      pricingBasis: "unit",
+      totalQuantity: { value: input.quantityValue * input.packageCount, unit: input.quantityUnit },
+      issues: [],
+      currentPriceCents: input.priceCents,
+      observedAt: input.observedAt,
+      available: input.available,
+    },
+    now,
+  ).price;
+}
