@@ -1,3 +1,4 @@
+import type { BasketPanel } from "../basket-comparison";
 import { BasketComparison } from "../basket-comparison";
 import type { ShoppingListItem, BasketPlan } from "@comprafino/core";
 
@@ -9,6 +10,8 @@ type Props = {
   items: readonly ShoppingListItem[];
   selectedLimit: number | null;
   selectLimit: (limit: number) => void;
+  panel: BasketPanel;
+  onPanelChange: (panel: BasketPanel) => void;
 };
 
 export function MarketComparison({ pending, error, retry, ...basket }: Props) {

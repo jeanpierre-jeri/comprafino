@@ -547,6 +547,28 @@
   color: var(--foreground);
 }
 
+/* Native disclosures keep secondary shopping information keyboard accessible. */
+.shopping-disclosure > summary {
+  display: list-item;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 2.75rem;
+  align-content: center;
+  cursor: pointer;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  border-radius: var(--radius-md);
+}
+
+.shopping-disclosure > summary:hover {
+  color: var(--foreground);
+}
+
+.shopping-disclosure > summary:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+}
+
 /* Base UI measures intrinsic panel height and retains content through exit transitions. */
 .collapsible-content {
   height: var(--collapsible-panel-height);
@@ -567,4 +589,16 @@
   .collapsible-content {
     transition: none;
   }
+}
+
+/* Controls have their own row; panel contents cannot resize or reposition them. */
+.basket-controls {
+  display: flex;
+  align-items: stretch;
+  gap: 0.75rem;
+}
+
+.basket-controls > button {
+  /* Never animate flex sizing when the viewport or open state changes. */
+  transition-property: background-color, color, border-color, box-shadow, opacity, transform;
 }

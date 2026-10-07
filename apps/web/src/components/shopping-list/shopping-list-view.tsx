@@ -1,10 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useId, useLayoutEffect, useRef, useState } from "react";
+import { buttonVariants } from "@comprafino/ui/components/button";
+import { ChoiceSelect } from "@comprafino/ui/components/select";
+import { useLayoutEffect, useRef, useState } from "react";
 import { removeShoppingItem, shoppingFrequencyLabels } from "@comprafino/core";
 import type { PriceMode, ShoppingListItem } from "@comprafino/core";
 import { useShoppingList } from "./use-shopping-list";
+import type { BasketPanel } from "../basket-comparison";
 import { MarketComparison } from "./market-comparison";
 import { ShoppingSavingsSummary } from "./shopping-savings-notices";
 import { ShoppingItemCard } from "./shopping-item-card";
@@ -12,12 +15,13 @@ import { useShoppingEvaluation } from "./use-shopping-evaluation";
 import { ShoppingItemEditor } from "./shopping-item-editor";
 
 export function ShoppingListView() {
-  const pricingId = useId();
   const { list, ready, warning, change, busy, authenticated, retry, session } = useShoppingList();
   const [mode, setMode] = useState<PriceMode>("standard");
   const market = useShoppingEvaluation(list, mode, ready, session);
   const { evaluations, baskets, pending, error } = market;
   const [selectedBasketLimit, setSelectedBasketLimit] = useState<number | null>(null);
+
+  const [basketPanel, setBasketPanel] = useState<BasketPanel>({ view: "comparison", open: false });
 
   const [editing, setEditing] = useState<ShoppingListItem | null>(null);
   const editButtons = useRef(new Map<string, HTMLButtonElement>());
@@ -50,16 +54,24 @@ export function ShoppingListView() {
 
     return (
       <>
-        <div className="shopping-field max-w-sm">
-          <label htmlFor={pricingId}>Precios</label>
-          <select
-            id={pricingId}
+        <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
+          <Link className={buttonVariants({ variant: "outline", size: "lg" })} href="/search">
+            + Agregar productos
+          </Link>
+          <ChoiceSelect
+            className="w-full sm:w-52"
+            label="Precios"
             value={mode}
-            onChange={(e) => setMode(e.target.value === "benefits" ? "benefits" : "standard")}
-          >
-            <option value="standard">Para todos</option>
-            <option value="benefits">Incluir beneficios</option>
-          </select>
+            options={[
+              { value: "standard", label: "Para todos" },
+              { value: "benefits", label: "Incluir beneficios" },
+            ]}
+            onValueChange={(value) => {
+              if (value === "standard" || value === "benefits") {
+                setMode(value);
+              }
+            }}
+          />
         </div>
         <ShoppingSavingsSummary
           items={list.items}
@@ -67,7 +79,7 @@ export function ShoppingListView() {
           pending={pending}
           error={error}
         />
-        <div className="empty-surface mt-5" aria-live="polite">
+        <div className="mt-5 rounded-2xl border bg-surface p-5 sm:p-6" aria-live="polite">
           <MarketComparison
             pending={pending}
             error={error}
@@ -76,6 +88,8 @@ export function ShoppingListView() {
             items={list.items}
             selectedLimit={selectedBasketLimit}
             selectLimit={setSelectedBasketLimit}
+            panel={basketPanel}
+            onPanelChange={setBasketPanel}
           />
         </div>
         {Object.entries(shoppingFrequencyLabels).map(([frequency, label]) => {
@@ -85,8 +99,10 @@ export function ShoppingListView() {
 
           return (
             <section className="mt-8" key={frequency} aria-label={label}>
-              <h2 className="text-2xl font-semibold">{label}</h2>
-              <ul className="mt-4 grid gap-4 md:grid-cols-2">
+              <h2 className="text-sm font-semibold text-muted-foreground">
+                {label} · {items.length} {items.length === 1 ? "producto" : "productos"}
+              </h2>
+              <ul className="mt-3 flex flex-col gap-3">
                 {items.map((item) => {
                   const result = evaluations.find((e) => e.itemId === item.id);
 
@@ -125,13 +141,10 @@ export function ShoppingListView() {
 
   return (
     <>
-      <p className="eyebrow">Tus compras habituales</p>
-      <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Mi lista de compras</h1>
+      <h1 className="text-3xl font-semibold sm:text-4xl">Mi lista de compras</h1>
       <p className="mt-3 text-muted-foreground">
-        Guarda lo que necesitas y compara cuánto cuesta hoy.{" "}
-        {authenticated
-          ? "Tu lista se sincroniza con tu cuenta."
-          : "Sin cuenta; se guarda en este navegador."}
+        Lo que necesitas, al mejor precio disponible.{" "}
+        {authenticated ? "Sincronizada con tu cuenta." : "Sin cuenta; se guarda en este navegador."}
       </p>
       {warning && <output className="empty-surface mt-4 block">{warning}</output>}
       {authenticated && warning && (

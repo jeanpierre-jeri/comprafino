@@ -655,6 +655,7 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       .getByRole("article")
       .first();
     await expect(card).toContainText("S/ 17.90");
+    await card.getByText("Ver producto y precio", { exact: true }).click();
     await expect(
       card.getByRole("note", { name: "El mismo producto, más barato en otra tienda" }),
     ).toContainText("Ahorra S/ 1.00");
@@ -676,7 +677,12 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       .first();
     await expect(card).toContainText("Huevos Tottus");
     await expect(card).toContainText("S/ 14.90");
-    await page.getByLabel("Precios", { exact: true }).selectOption("benefits");
+    const prices = page.getByRole("combobox", { name: "Precios", exact: true });
+    await prices.focus();
+    await page.keyboard.press("Enter");
+    await page.getByRole("option", { name: "Incluir beneficios", exact: true }).click();
+    await expect(prices).toContainText("Incluir beneficios");
+    await expect(prices).toBeFocused();
     await expect(card).toContainText("Huevos Bell's");
     await expect(card).toContainText("S/ 12.90");
     await expect(card).toContainText("Requiere tarjeta CMR");
@@ -684,6 +690,10 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       page.getByRole("region", { name: "Hay una oportunidad de ahorro hoy" }),
     ).toContainText("Requiere tarjeta CMR");
     await expect(card).toContainText("Para todos: S/ 19.90");
+    await prices.click();
+    await page.getByRole("option", { name: "Para todos", exact: true }).click();
+    await expect(card).toContainText("Huevos Tottus");
+    await expect(card).toContainText("S/ 14.90");
   });
   test("savings notices disappear on refresh failure and return after a successful retry", async ({
     page,
@@ -871,6 +881,7 @@ async function storeBasket(page: Page, count: number, unsupported = false) {
   );
   await page.reload();
   await expect(page.getByRole("region", { name: "Comparación de canastas" })).toBeVisible();
+  await page.getByRole("button", { name: "Comparar supermercados", exact: true }).click();
 }
 
 test.describe("current basket optimization fixtures", () => {
@@ -879,13 +890,114 @@ test.describe("current basket optimization fixtures", () => {
     "Run pnpm test:e2e:list:local for isolated catalog fixtures",
   );
   test.describe.configure({ mode: "serial" });
+  test("one product starts compact and reveals details by keyboard on mobile and desktop", async ({
+    page,
+  }, testInfo) => {
+    await addGeneric(page);
+    const comparison = page.getByRole("region", { name: "Comparación de canastas" });
+    const card = page.getByRole("article", { name: "Huevos", exact: true });
+    await expect(comparison).toBeVisible();
+    await expect(card).toContainText("S/ 14.90");
+    await expect(
+      comparison.getByRole("button", { name: "Comparar supermercados", exact: true }),
+    ).toHaveAttribute("aria-haspopup", "dialog");
+    await expect(
+      comparison.getByRole("button", { name: "Ver compras por supermercado", exact: true }),
+    ).toHaveAttribute("aria-haspopup", "dialog");
+    await expect(card.locator("details[open]")).toHaveCount(0);
+    await expect(page.getByRole("article", { name: "Límite 1", exact: true })).toHaveCount(0);
+    await expect(card.getByRole("link", { name: /Ver en Tottus/ })).toHaveCount(0);
+
+    for (const width of [390, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const theme of ["light", "dark"] as const) {
+        await page.emulateMedia({ colorScheme: theme });
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+          true,
+        );
+        await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+        const bounds = await card.boundingBox();
+        expect(bounds?.height).toBeLessThan(360);
+        await page.screenshot({
+          path: testInfo.outputPath(`compact-list-${width}-${theme}.png`),
+          fullPage: true,
+          animations: "disabled",
+        });
+      }
+    }
+
+    const productDetails = card.getByText("Ver producto y precio", { exact: true });
+    await productDetails.focus();
+    await page.keyboard.press("Enter");
+    await expect(card.getByRole("link", { name: /Ver en Tottus/ })).toBeVisible();
+    await expect(card).toContainText("30 unidades en total");
+    await page.getByText("Comparar supermercados", { exact: true }).click();
+    await expect(page.getByRole("article", { name: "Límite 1", exact: true })).toBeVisible();
+    await page.getByRole("article", { name: "Límite 2", exact: true }).getByRole("button").click();
+    await expect(page.getByRole("region", { name: "Compras del plan seleccionado" })).toBeVisible();
+  });
+  test("basket dialogs animate without moving the list and restore keyboard focus", async ({
+    page,
+  }, testInfo) => {
+    await addGeneric(page);
+    const card = page.locator('article[id^="shopping-item-"]').first();
+    for (const width of [390, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const theme of ["light", "dark"] as const) {
+        await page.emulateMedia({ colorScheme: theme, reducedMotion: "no-preference" });
+        await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+        for (const view of [
+          {
+            trigger: "Comparar supermercados",
+            title: "Comparar supermercados",
+            name: "comparison",
+          },
+          {
+            trigger: "Ver compras por supermercado",
+            title: "Compras por supermercado",
+            name: "purchases",
+          },
+        ]) {
+          const trigger = page.getByRole("button", { name: view.trigger, exact: true });
+          await trigger.scrollIntoViewIfNeeded();
+          const before = await card.evaluate((element) => {
+            const bounds = element.getBoundingClientRect();
+            return { x: bounds.x + scrollX, y: bounds.y + scrollY, width: bounds.width };
+          });
+          await trigger.focus();
+          await page.keyboard.press("Enter");
+          const dialog = page.getByRole("dialog", { name: view.title, exact: true });
+          await expect(dialog).toBeVisible();
+          await expect(dialog).not.toHaveCSS("animation-name", "none");
+          const after = await card.evaluate((element) => {
+            const bounds = element.getBoundingClientRect();
+            return { x: bounds.x + scrollX, y: bounds.y + scrollY, width: bounds.width };
+          });
+          expect(after).toEqual(before);
+          expect(
+            await dialog.evaluate((element) => element.scrollWidth <= element.clientWidth),
+          ).toBe(true);
+          await page.screenshot({
+            path: testInfo.outputPath(`basket-dialog-${view.name}-${width}-${theme}.png`),
+            animations: "disabled",
+          });
+          await page.keyboard.press("Escape");
+          await expect(dialog).toBeHidden();
+          await expect(trigger).toBeFocused();
+        }
+      }
+    }
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.getByRole("button", { name: "Comparar supermercados", exact: true }).click();
+    const dialog = page.getByRole("dialog", { name: "Comparar supermercados", exact: true });
+    await expect(dialog).toHaveCSS("animation-duration", "0s");
+    await dialog.getByRole("button", { name: "Cerrar diálogo", exact: true }).click();
+    await expect(dialog).toBeHidden();
+  });
   test("shows every limit, defaults to one store, groups purchases and refreshes after editing", async ({
     page,
   }) => {
     await storeBasket(page, 3);
-    await expect(page.getByRole("region", { name: "Compras del plan seleccionado" })).toContainText(
-      "Disponibilidad no confirmada.",
-    );
     const first = page.getByRole("article", { name: "Límite 1", exact: true });
     const second = page.getByRole("article", { name: "Límite 2", exact: true });
     const third = page.getByRole("article", { name: "Límite 3", exact: true });
@@ -898,10 +1010,13 @@ test.describe("current basket optimization fixtures", () => {
     const details = page.getByRole("region", { name: "Compras del plan seleccionado" });
     await expect(details.getByRole("heading", { level: 4 })).toHaveCount(3);
     await expect(details).toContainText("1 paquete");
+    await expect(details).toContainText("Disponibilidad no confirmada.");
+    await page.keyboard.press("Escape");
     const card = page.getByRole("article", { name: "Leche para canasta 1", exact: true });
     await card.getByRole("button", { name: "Editar Leche para canasta 1" }).click();
     await page.getByLabel("Paquetes", { exact: true }).fill("2");
     await page.getByRole("button", { name: "Guardar cambios" }).click();
+    await page.getByRole("button", { name: "Comparar supermercados", exact: true }).click();
     await expect(first).toContainText("S/ 70.00");
     await expect(third.getByRole("button")).toHaveAttribute("aria-pressed", "true");
   });
@@ -964,6 +1079,10 @@ test.describe("current basket optimization fixtures", () => {
       await expect(
         page.getByRole("article", { name: "Límite 3", exact: true }).getByRole("button"),
       ).toHaveAttribute("aria-pressed", "true");
+      await page
+        .getByRole("article", { name: "Límite 3", exact: true })
+        .getByRole("button")
+        .click();
       await expect(
         page.getByRole("region", { name: "Compras del plan seleccionado" }),
       ).toContainText("3 de 4 productos");
@@ -976,10 +1095,13 @@ test.describe("current basket optimization fixtures", () => {
   }) => {
     await addSpecific(page, "preferred");
     const comparison = page.getByRole("region", { name: "Comparación de canastas" });
+    await page.getByText("Ver compras por supermercado", { exact: true }).click();
     await expect(page.getByRole("region", { name: "Compras del plan seleccionado" })).toContainText(
       "Alternativa compatible a tu producto preferido",
     );
-    await page.getByLabel("Precios", { exact: true }).selectOption("benefits");
+    await page.keyboard.press("Escape");
+    await page.getByRole("combobox", { name: "Precios", exact: true }).click();
+    await page.getByRole("option", { name: "Incluir beneficios", exact: true }).click();
     await expect(comparison).toContainText("Requiere tarjeta CMR");
     await expect(comparison).toContainText("Para todos, esta selección");
 

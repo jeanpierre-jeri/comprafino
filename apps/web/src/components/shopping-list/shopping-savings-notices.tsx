@@ -33,15 +33,18 @@ export function ShoppingSavingsSummary({
             : `Hay ${opportunities.length} oportunidades de ahorro hoy`}
         </AlertTitle>
         <AlertDescription>
-          <p>
-            Precios observados para la cantidad que necesitas. Revisa las condiciones de cada
-            opción.
-          </p>
-          <ul className="mt-3 flex flex-col gap-2">
+          <ul className="flex flex-col gap-2">
             {opportunities.map(({ item, notice }) => (
               <li key={item.id}>
                 <a
                   href={`#shopping-item-${item.id}`}
+                  onClick={() => {
+                    const card = document.getElementById(`shopping-item-${item.id}`);
+                    const details = card?.querySelector("details");
+                    if (details) {
+                      details.open = true;
+                    }
+                  }}
                   className="inline-flex min-h-11 items-center gap-2 underline underline-offset-4"
                 >
                   <span className="min-w-0 wrap-anywhere">
@@ -57,9 +60,6 @@ export function ShoppingSavingsSummary({
               </li>
             ))}
           </ul>
-          <p className="mt-2">
-            Son ahorros por producto; la comparación de canastas muestra el total por tiendas.
-          </p>
         </AlertDescription>
       </Alert>
     </section>
@@ -88,10 +88,7 @@ export function ShoppingSavingsMessage({ notice }: { notice: ShoppingSavingsNoti
         <p>
           Ahorra {formatPen(notice.savingsCents)} en esta compra {comparison}.
         </p>
-        <p className="mt-2">
-          Opción más barata: {notice.option.retailerName} ·{" "}
-          {formatPen(notice.option.totalCostCents)}.
-        </p>
+
         {notice.option.condition && <p className="mt-2">{notice.option.condition}.</p>}
         {notice.baseline.condition && (
           <p className="mt-2">La opción comparada requiere: {notice.baseline.condition}.</p>

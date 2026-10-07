@@ -34,7 +34,7 @@ Results distinguish `empty`, `complete` and `incomplete`. Complete plans have `t
 
 ## `/list` behavior
 
-All three maximum-retailer tiers are always shown for a nonempty successfully evaluated list. Cards show the actual retailer count and names, so a two/three-store limit may display **1 supermercado · Metro**. Equal complete totals say “No ahorras más al añadir otra tienda.” Adding a store to an incomplete plan may explain improved coverage or completion, without a saving claim.
+A nonempty successfully evaluated list initially shows one selected basket summary. “Comparar supermercados” opens an animated modal with all three maximum-retailer tiers; “Ver compras por supermercado” opens the selected assignments in the same modal. The buttons use action icons and do not expand the page or move the list. Selecting a tier shows its purchases; “Cambiar plan” returns to comparison. The dialog supports internal scrolling, close/Escape/backdrop dismissal, focus return and reduced motion. The current modal view survives price refreshes. Cards show the actual retailer count and names, so a two/three-store limit may display **1 supermercado · Metro**. Equal complete totals say “No ahorras más al añadir otra tienda.” Adding a store to an incomplete plan may explain improved coverage or completion, without a saving claim.
 
 The initially selected plan is the complete one-store result when available; otherwise the first higher complete limit; otherwise the best partial result. This is presentation only. Selecting another limit persists through evaluation refreshes and edits within the current page session.
 

@@ -1,8 +1,9 @@
 "use client";
 
 import type { Ref } from "react";
+import { Button } from "@comprafino/ui/components/button";
 import { shoppingSavingsNotice, shoppingFrequencyLabels } from "@comprafino/core";
-import type { ShoppingListItem, ShoppingEvaluation } from "@comprafino/core";
+import type { ShoppingListItem, ShoppingEvaluation, ShoppingSavingsNotice } from "@comprafino/core";
 import { ShoppingSavingsMessage } from "./shopping-savings-notices";
 import { CurrentOption } from "../current-shopping-option";
 
@@ -34,7 +35,10 @@ function CurrentItemOptions({
   result,
   pending,
   error,
-}: Pick<CardProps, "item" | "result" | "pending" | "error">) {
+  notice,
+}: Pick<CardProps, "item" | "result" | "pending" | "error"> & {
+  notice: ShoppingSavingsNotice | null;
+}) {
   if (pending) return <p className="mt-4">Buscando opciones actuales…</p>;
 
   if (error) return <p className="mt-4">Precios no disponibles.</p>;
@@ -51,12 +55,14 @@ function CurrentItemOptions({
 
   return (
     <>
-      <p className="mt-4 text-sm font-medium">
+      <p className="sr-only">
         {item.intent === "preferred" && result.preferred
           ? "Tu producto preferido"
           : "Mejor opción actual"}
       </p>
-      <CurrentOption option={result.best} />
+      <CurrentOption option={result.best} compact>
+        {notice && <ShoppingSavingsMessage notice={notice} />}
+      </CurrentOption>
     </>
   );
 }
@@ -77,25 +83,50 @@ export function ShoppingItemCard({
     <article
       id={`shopping-item-${item.id}`}
       tabIndex={-1}
-      className="empty-surface h-full scroll-mt-6"
+      className="scroll-mt-6 rounded-2xl border bg-surface p-4 sm:p-5"
       aria-label={item.label}
     >
-      <h3 className="text-xl font-semibold wrap-break-word">{item.label}</h3>
-      <p className="mt-2 text-sm">
-        {item.quantity.amount} {quantityLabel(item)} · {shoppingFrequencyLabels[item.frequency]}
-      </p>
-      <p className="mt-1 text-sm text-muted-foreground">{intentLabels[item.intent]}</p>
-      {notice && <ShoppingSavingsMessage notice={notice} />}
-      <CurrentItemOptions item={item} result={result} pending={pending} error={error} />
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <h3 className="text-lg font-semibold wrap-anywhere">{item.label}</h3>
+          <p className="mt-2 text-sm">
+            {item.quantity.amount} {quantityLabel(item)} · {shoppingFrequencyLabels[item.frequency]}
+          </p>
+          {item.intent !== "generic" && (
+            <p className="mt-1 text-sm text-muted-foreground">{intentLabels[item.intent]}</p>
+          )}
+        </div>
+        <div className="flex shrink-0 gap-1">
+          <Button
+            variant="ghost"
+            className="min-h-11"
+            ref={editButtonRef}
+            disabled={busy}
+            onClick={onEdit}
+          >
+            Editar<span className="sr-only"> {item.label}</span>
+          </Button>
+          <Button variant="ghost" className="min-h-11" disabled={busy} onClick={onRemove}>
+            Quitar<span className="sr-only"> {item.label}</span>
+          </Button>
+        </div>
+      </div>
+      <CurrentItemOptions
+        item={item}
+        result={result}
+        pending={pending}
+        error={error}
+        notice={notice}
+      />
       {!pending && !error && result?.alternative && (
         <aside className="benefit-surface mt-4">
           <p className="font-medium">Alternativa compatible hoy</p>
-          <CurrentOption option={result.alternative} />
+          <CurrentOption option={result.alternative} compact />
         </aside>
       )}
       {!pending && !error && item.intent !== "preferred" && result && result.options.length > 1 && (
-        <details className="mt-4">
-          <summary className="cursor-pointer">
+        <details className="shopping-disclosure mt-3">
+          <summary>
             {item.intent === "strict"
               ? "Otras tiendas del mismo producto"
               : "Otras opciones compatibles"}
@@ -105,19 +136,6 @@ export function ShoppingItemCard({
           ))}
         </details>
       )}
-      <div className="mt-5 flex flex-wrap gap-3">
-        <button
-          className="shopping-button secondary"
-          ref={editButtonRef}
-          disabled={busy}
-          onClick={onEdit}
-        >
-          Editar<span className="sr-only"> {item.label}</span>
-        </button>
-        <button className="shopping-button secondary" disabled={busy} onClick={onRemove}>
-          Quitar<span className="sr-only"> {item.label}</span>
-        </button>
-      </div>
     </article>
   );
 }
