@@ -14,6 +14,10 @@ Deterministic Chromium cases cover dialog/menu focus, loading/retries, real pers
 
 See the [component audit and migration decisions](ui-component-audit.md) for the Base UI correction.
 
+## Production acceptance
+
+[October 6 rollout observations](history/account-rollout-2026-10-06.md) record successful anonymous production boundaries and auth/list migration hashes in the configured database. Real Google sign-in, hosting connection correspondence and cross-device behavior remain explicit acceptance checks; local implementation and migration metadata alone do not prove them.
+
 ## Configuration and boundaries
 
 Set these **server-only** variables in `apps/web/.env.local` for development, or the intended hosting environment after review:

@@ -121,6 +121,13 @@ try {
       ),
     );
 
+    console.log(
+      JSON.stringify({
+        operation: "catalog_capacity",
+        skippedByCapacity: metric("skippedByCapacity"),
+      }),
+    );
+
     if (results.some((r) => r.status === "failed" || r.status === "partial")) {
       process.exitCode = 1;
     }

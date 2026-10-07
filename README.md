@@ -88,6 +88,8 @@ Commands below use root `DATABASE_URL` unless marked database-free. Apply migrat
 
 Full refresh runs twice daily; discovery runs every six hours with shared noncanceling workflow concurrency. GitHub schedules may run late. Retailer-specific ingestion workflows are manual. Workflow `DATABASE_URL` secrets are operational inputs, not required CI test inputs. See [operations](docs/operations.md), [discovery](docs/discovery.md) and [listing refresh](docs/listing-refresh.md).
 
+Read-only `pnpm health:catalog` and the scheduled/post-acquisition health checks report overdue refreshes, failed attempts, lost current search coverage and measured capacity skips. See [catalog health and notification setup](docs/catalog-health.md).
+
 ## Deployment
 
 Vercel hosts the Next.js app, Neon supplies PostgreSQL, and GitHub Actions schedules acquisition. Local repository state does not establish which revision is currently deployed.

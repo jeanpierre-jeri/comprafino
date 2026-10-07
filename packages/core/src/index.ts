@@ -39,3 +39,5 @@ export * from "./catalog-policy.ts";
 export * from "./diagnostics.ts";
 
 export * from "./shopping-list-merge.ts";
+
+export * from "./catalog-health.ts";

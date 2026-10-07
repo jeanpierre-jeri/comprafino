@@ -46,3 +46,5 @@ These reports and the full [original roadmap](engineering-notes-2026-10-05.md#or
 Routine basket benchmarks now write new ignored `.artifacts/` files; explicit destinations are supported and existing files are refused. Read-only audits emit stdout without writing permanent documentation. Reviewed historical baselines are never automatic output targets. See [local testing](../local-testing.md#basket-benchmark-outputs).
 
 Run `pnpm docs:check` to validate Markdown paths/anchors, root README commands and literal runtime JSON/workflow references. This dependency-free checker does not fetch external URLs or infer deployment state.
+
+- [Account rollout observations, October 6](account-rollout-2026-10-06.md): anonymous production boundaries and scoped migration evidence; real-account acceptance remains unverified.

@@ -102,6 +102,18 @@ try {
     JSON.stringify({ ...summary, observedAt: new Date().toISOString(), categoryRequests }, null, 2),
   );
 
+  console.log(
+    JSON.stringify({
+      operation: "catalog_capacity",
+      skippedByCapacity: summary.retailers.reduce(
+        (total, entry) =>
+          total +
+          (entry.outcome.status === "success" ? (entry.outcome.result.skippedByCapacity ?? 0) : 0),
+        0,
+      ),
+    }),
+  );
+
   if (summary.status === "failed") {
     process.exitCode = 1;
   }

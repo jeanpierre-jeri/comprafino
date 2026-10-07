@@ -43,7 +43,8 @@
     "benchmark:basket:local": "node --experimental-strip-types packages/db/src/local-test-cli.ts basket",
     "audit:shopping-list": "pnpm --filter @comprafino/db audit:shopping-list",
     "audit:catalog-coverage": "pnpm --filter @comprafino/db audit:catalog-coverage",
-    "audit:availability": "pnpm --filter @comprafino/db audit:availability"
+    "audit:availability": "pnpm --filter @comprafino/db audit:availability",
+    "health:catalog": "pnpm --filter @comprafino/db health:catalog"
   },
   "devDependencies": {
     "oxfmt": "0.71.0",

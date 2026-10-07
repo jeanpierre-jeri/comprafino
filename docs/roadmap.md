@@ -10,6 +10,10 @@ Bounded Tottus, Plaza Vea and Metro acquisition; scheduled refresh and demand di
 
 The repository hardening/cleanup program is complete: Cleanups A/B/C and the final unused-route/core-surface review resolve F01–F04, F06–F17 and F19. The [October 5 audit](engineering-audit.md#final-remediation-status--october-5-2026) preserves original evidence and final remediation status. Feature work may resume under separately agreed scope.
 
+## Operations and account acceptance
+
+Read-only [catalog health monitoring](catalog-health.md) is implemented with scheduled and post-acquisition Actions checks, using existing refresh/offer policies and explicit capacity-skip evidence. Publication and notification delivery remain separate. [Dated account rollout observations](history/account-rollout-2026-10-06.md) verify anonymous production endpoints and scoped migration metadata; real Google login and cross-device acceptance remain unverified.
+
 ## Next measured work
 
 The catalog capacity review raises the admission/read guard to 2,000 listings; see [capacity evidence and limits](catalog-budget.md#reviewed-expansion-to-2000-listings). Further growth requires another performance review. F18 remains consciously deferred: optional query/read optimization requires measurement before implementation. Measure actual successful workflow duration and a stable multi-day price-change rate before quota or monthly storage decisions. These are future technical work, not unfinished cleanup; preserve the guard until a deliberate review supports a change.

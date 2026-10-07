@@ -24,6 +24,10 @@ Run creation/finish is separate from listing commits; interruption may leave `ru
 
 `listingRefreshPolicy` independently defines purchase freshness (36h), historical visibility (72h), targeted age (24h), cooldown (12h) and request maximum (100). These are separate policies. Public stale prices cannot win current purchase comparisons; historical pages retain disclosed evidence. `/dev/ingestion` displays read-only attempts/successes and returns 404 in production.
 
+## Catalog health monitoring
+
+`pnpm health:catalog` reports per-retailer successful refresh age, latest failures, fresh searchable offer counts and retained capacity without writes or retailer requests. A new six-hour scheduled workflow and post-acquisition refresh/discovery steps expose failures through Actions annotations and summaries. Capacity skips come only from explicit acquisition markers; standalone runs report them as unmeasured. See [monitoring policy and notification setup](catalog-health.md) and [dated account rollout observations](history/account-rollout-2026-10-06.md). Publication and account notification delivery are not implied by local implementation.
+
 ## Commands and repair
 
 ```sh
@@ -33,6 +37,7 @@ pnpm refresh:catalog -- --dry-run
 pnpm refresh:listings -- --dry-run --limit=50
 pnpm discover:catalog -- --dry-run --limit=3
 pnpm coverage:report
+pnpm health:catalog
 pnpm audit:catalog-coverage
 pnpm audit:availability
 pnpm audit:quantity-quality

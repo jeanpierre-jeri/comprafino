@@ -20,6 +20,14 @@ jobs:
           node-version: "24"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm refresh:catalog
+      - name: Acquire catalog data
+        id: acquisition
+        shell: bash
+        run: pnpm refresh:catalog | tee "$RUNNER_TEMP/catalog-acquisition.log"
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - name: Inspect catalog health and capacity skips
+        if: ${{ !cancelled() && steps.acquisition.outcome != 'skipped' }}
+        run: pnpm health:catalog -- --acquisition-log="$RUNNER_TEMP/catalog-acquisition.log"
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
