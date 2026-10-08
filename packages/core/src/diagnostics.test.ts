@@ -1,4 +1,5 @@
 import { expect, it } from "vitest";
+import { z } from "zod";
 import { DiagnosticError, safeDiagnostic } from "./diagnostics.ts";
 
 it("allowlists reasons and SQLSTATE without copying arbitrary errors or sensitive causes", () => {
@@ -59,5 +60,46 @@ it("sync diagnostics do not copy documents or session material", () => {
     operation: "list_sync",
     reason: "validation_failed",
     message: "Boundary validation failed.",
+  });
+});
+
+it("reports bounded schema-owned source paths without values, messages or dynamic keys", () => {
+  const error = new z.ZodError([
+    {
+      code: "invalid_type",
+      expected: "boolean",
+      path: ["props", "pageProps", "productData", "variants", 0, "isPurchaseable"],
+      message: "private payload",
+    },
+    { code: "custom", path: ["secret_customer_key"], message: "private payload" },
+    { code: "custom", path: ["variants", 1000, "id"], message: "private payload" },
+    ...Array.from({ length: 10 }, () => ({
+      code: "custom" as const,
+      path: ["prices"],
+      message: "private payload",
+    })),
+  ]);
+  const context = {
+    stage: "source",
+    operation: "targeted",
+    reason: "source_request_failed",
+  } as const;
+  const diagnostic = safeDiagnostic(error, context);
+  expect(diagnostic.validationType).toBe("schema");
+  expect(diagnostic.validationIssues).toHaveLength(5);
+  expect(diagnostic.validationIssues?.[0]).toEqual({
+    code: "invalid_type",
+    path: "props.pageProps.productData.variants.0.isPurchaseable",
+  });
+  expect(JSON.stringify(diagnostic)).not.toMatch(/private|secret|1000/u);
+  expect(
+    safeDiagnostic({ name: "ZodError", issues: error.issues }, context).validationIssues,
+  ).toBeUndefined();
+  expect(
+    safeDiagnostic(error, { ...context, stage: "persistence" }).validationIssues,
+  ).toBeUndefined();
+  expect(safeDiagnostic(new SyntaxError("private payload"), context)).toMatchObject({
+    reason: "invalid_source_response",
+    validationType: "json_syntax",
   });
 });

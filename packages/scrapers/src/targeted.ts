@@ -114,8 +114,8 @@ const productPage = z.object({
           z.object({
             id: z.string(),
             name: z.string(),
-            isPurchaseable: z.boolean(),
-            isOnlineSellable: z.boolean(),
+            isPurchaseable: z.boolean().optional(),
+            isOnlineSellable: z.boolean().optional(),
             offerings: z.array(z.object({ sellerId: z.string(), isActive: z.boolean() })),
             prices: z.array(z.unknown()),
             medias: z.array(z.object({ url: z.url() })),
@@ -163,8 +163,8 @@ export function parseTottusProduct(html: string, known: KnownListing, at: Date):
 
   if (
     !product.isPublished ||
-    !variant.isPurchaseable ||
-    !variant.isOnlineSellable ||
+    variant.isPurchaseable === false ||
+    variant.isOnlineSellable === false ||
     sellers[0]?.isActive === false
   ) {
     return { status: "unavailable" };
@@ -190,7 +190,10 @@ export function parseTottusProduct(html: string, known: KnownListing, at: Date):
     merchantCategoryId: product.merchantCategoryId,
     prices: variant.prices,
   };
-  const listing = { ...normalizeTottusProduct(mapped, at), available: true };
+  // Omitted purchase flags are unknown stock, never positive or negative evidence.
+  const available =
+    variant.isPurchaseable === true && variant.isOnlineSellable === true ? true : undefined;
+  const listing = { ...normalizeTottusProduct(mapped, at), available };
 
   return { status: "observed", listing };
 }

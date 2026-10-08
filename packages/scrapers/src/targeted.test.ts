@@ -193,3 +193,60 @@ it("Tottus exact positive flags verify availability; missing seller is unknown",
     "Missing availability",
   );
 });
+
+it.each(["isPurchaseable", "isOnlineSellable", "both"] as const)(
+  "Tottus omitted %s flags preserve a valid ordinary quote with unknown availability",
+  (missing) => {
+    const fixture = structuredClone(tottus);
+    const variant = fixture.props.pageProps.productData.variants[0]!;
+    const { isPurchaseable, isOnlineSellable, ...withoutFlags } = variant;
+    const optionalFlags = {
+      ...withoutFlags,
+      ...(missing === "isOnlineSellable" ? { isPurchaseable } : {}),
+      ...(missing === "isPurchaseable" ? { isOnlineSellable } : {}),
+    };
+    const page = {
+      props: {
+        pageProps: {
+          productData: { ...fixture.props.pageProps.productData, variants: [optionalFlags] },
+        },
+      },
+    };
+    expect(parseTottusProduct(html(page), tottusKnown, new Date())).toMatchObject({
+      status: "observed",
+      listing: { available: undefined, currentPriceCents: 970, priceUnit: "UN" },
+    });
+    expect(
+      parseTottusProduct(
+        html({
+          props: {
+            pageProps: {
+              productData: {
+                ...page.props.pageProps.productData,
+                variants: [{ ...optionalFlags, isPurchaseable: false }],
+              },
+            },
+          },
+        }),
+        tottusKnown,
+        new Date(),
+      ),
+    ).toEqual({ status: "unavailable" });
+    expect(() =>
+      parseTottusProduct(
+        html({
+          props: {
+            pageProps: {
+              productData: {
+                ...page.props.pageProps.productData,
+                variants: [{ ...optionalFlags, isOnlineSellable: "true" }],
+              },
+            },
+          },
+        }),
+        tottusKnown,
+        new Date(),
+      ),
+    ).toThrow(/isOnlineSellable/u);
+  },
+);

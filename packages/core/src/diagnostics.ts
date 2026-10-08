@@ -1,4 +1,59 @@
+import { z } from "zod";
 import type { RetailerId } from "./listing.ts";
+
+// Schema-owned source fields only: dynamic keys, messages and input values stay private.
+const sourceFields = new Set([
+  "props",
+  "pageProps",
+  "productData",
+  "id",
+  "brandName",
+  "merchantCategoryId",
+  "isPublished",
+  "variants",
+  "name",
+  "isPurchaseable",
+  "isOnlineSellable",
+  "offerings",
+  "sellerId",
+  "isActive",
+  "prices",
+  "medias",
+  "url",
+  "attributes",
+  "measurement",
+  "formato",
+  "unidad-de-medida",
+  "productId",
+  "skuId",
+  "displayName",
+  "brand",
+  "mediaUrls",
+  "measurements",
+  "format",
+  "unit",
+  "type",
+  "symbol",
+  "icons",
+  "crossed",
+  "price",
+]);
+
+function sourceValidationIssues(error: z.ZodError) {
+  return error.issues
+    .filter(
+      (issue) =>
+        issue.path.length > 0 &&
+        issue.path.length <= 12 &&
+        issue.path.every(
+          (part) =>
+            (typeof part === "string" && sourceFields.has(part)) ||
+            (typeof part === "number" && Number.isSafeInteger(part) && part >= 0 && part < 1000),
+        ),
+    )
+    .slice(0, 5)
+    .map((issue) => ({ code: issue.code, path: issue.path.map(String).join(".") }));
+}
 
 const messages = {
   source_timeout: "Retailer request timed out.",
@@ -40,14 +95,18 @@ export interface DiagnosticContext {
 export interface SafeDiagnostic extends DiagnosticContext {
   message: string;
   databaseCode?: string;
+  validationType?: "schema" | "json_syntax";
+  validationIssues?: { code: string; path: string }[];
 }
 
-/** Allowlisted context and SQLSTATE only. Never copy message, stack, URL or payload. */
+/** Allowlisted context, SQLSTATE and schema paths only. Never copy messages or payloads. */
 export function safeDiagnostic(error: unknown, context: DiagnosticContext): SafeDiagnostic {
   if (error instanceof DiagnosticError) return error.diagnostic;
 
   let reason = context.reason;
   let databaseCode: string | undefined;
+  let validationType: SafeDiagnostic["validationType"];
+  let validationIssues: SafeDiagnostic["validationIssues"];
   let current = error;
 
   for (let depth = 0; depth < 3 && typeof current === "object" && current !== null; depth++) {
@@ -61,6 +120,14 @@ export function safeDiagnostic(error: unknown, context: DiagnosticContext): Safe
 
       if (current.name === "ZodError" || current.name === "SyntaxError") {
         reason = context.stage === "source" ? "invalid_source_response" : "validation_failed";
+        if (context.stage === "source") {
+          validationType = current.name === "SyntaxError" ? "json_syntax" : "schema";
+          validationIssues = undefined;
+          if (current instanceof z.ZodError) {
+            const issues = sourceValidationIssues(current);
+            validationIssues = issues.length > 0 ? issues : undefined;
+          }
+        }
       }
     }
 
@@ -91,6 +158,8 @@ export function safeDiagnostic(error: unknown, context: DiagnosticContext): Safe
     reason,
     message: messages[reason],
     ...(databaseCode ? { databaseCode } : {}),
+    ...(validationType ? { validationType } : {}),
+    ...(validationIssues ? { validationIssues } : {}),
   };
 }
 
