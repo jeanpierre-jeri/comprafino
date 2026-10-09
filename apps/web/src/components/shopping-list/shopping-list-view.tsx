@@ -54,12 +54,20 @@ export function ShoppingListView() {
 
     return (
       <>
-        <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
-          <Link className={buttonVariants({ variant: "outline", size: "lg" })} href="/search">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+          <Link
+            className={buttonVariants({
+              variant: "outline",
+              size: "default",
+              className: "min-h-11",
+            })}
+            href="/search"
+          >
             + Agregar productos
           </Link>
           <ChoiceSelect
-            className="w-full sm:w-52"
+            compact
+            className="shrink-0"
             label="Precios"
             value={mode}
             options={[
@@ -79,7 +87,7 @@ export function ShoppingListView() {
           pending={pending}
           error={error}
         />
-        <div className="mt-5 rounded-2xl border bg-surface p-5 sm:p-6" aria-live="polite">
+        <div className="mt-4 rounded-xl border bg-surface px-4 py-3 sm:px-5" aria-live="polite">
           <MarketComparison
             pending={pending}
             error={error}
@@ -98,11 +106,11 @@ export function ShoppingListView() {
           if (!items.length) return null;
 
           return (
-            <section className="mt-8" key={frequency} aria-label={label}>
+            <section className="mt-6" key={frequency} aria-label={label}>
               <h2 className="text-sm font-semibold text-muted-foreground">
                 {label} · {items.length} {items.length === 1 ? "producto" : "productos"}
               </h2>
-              <ul className="mt-3 flex flex-col gap-3">
+              <ul className="mt-2 divide-y overflow-hidden rounded-xl border bg-surface">
                 {items.map((item) => {
                   const result = evaluations.find((e) => e.itemId === item.id);
 
@@ -144,10 +152,9 @@ export function ShoppingListView() {
 
   return (
     <>
-      <h1 className="text-3xl font-semibold sm:text-4xl">Mi lista de compras</h1>
-      <p className="mt-3 text-muted-foreground">
-        Lo que necesitas, al mejor precio disponible.{" "}
-        {authenticated ? "Sincronizada con tu cuenta." : "Sin cuenta; se guarda en este navegador."}
+      <h1 className="text-2xl font-semibold sm:text-3xl">Mi lista de compras</h1>
+      <p className="mt-2 text-sm text-muted-foreground">
+        {authenticated ? "Sincronizada con tu cuenta." : "Se guarda en este navegador."}
       </p>
       {warning && <output className="empty-surface mt-4 block">{warning}</output>}
       {authenticated && warning && (

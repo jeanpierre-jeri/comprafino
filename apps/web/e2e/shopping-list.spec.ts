@@ -1,12 +1,38 @@
 import { fixtureDatabase } from "../../../packages/db/src/testing/fixture-client.ts";
 import { closeLocalTestConnections } from "../../../packages/db/src/testing/test-query-client.ts";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page, type Locator } from "@playwright/test";
 import { shoppingListSchema, shoppingListEvaluationSchema } from "@comprafino/core";
 import { restrictBasketFixtureRetailers } from "@comprafino/db/basket-fixtures";
 import { persistListings } from "@comprafino/db";
 
 // Catalog-mutation scenarios share the same isolated PostgreSQL fixture schema.
 test.describe.configure({ mode: "serial" });
+
+async function openItemDetails(card: Locator) {
+  const trigger = card.getByRole("button", { name: /^Ver detalles de / });
+  if ((await trigger.getAttribute("aria-expanded")) === "false") {
+    await trigger.click();
+  }
+}
+
+async function removeItem(page: Page, label = "Huevos") {
+  const card = page.getByRole("article", { name: label, exact: true });
+  await openItemDetails(card);
+  await card.getByRole("button", { name: `Quitar ${label}`, exact: true }).click();
+}
+
+async function openBasketComparison(page: Page) {
+  const comparison = page.getByRole("dialog", { name: "Comparar supermercados", exact: true });
+  if (await comparison.isVisible()) return;
+
+  const purchases = page.getByRole("dialog", { name: "Compras por supermercado", exact: true });
+  if (!(await purchases.isVisible())) {
+    // The editor can retain its closing portal. The stable plan trigger waits
+    // for that animation without confusing the editor with the plan dialog.
+    await page.getByRole("button", { name: "Ver plan", exact: true }).click();
+  }
+  await purchases.getByRole("button", { name: "Comparar supermercados", exact: true }).click();
+}
 
 async function openGeneric(page: Page, query = "huevos") {
   await page.goto(`/search?q=${query}`);
@@ -42,7 +68,7 @@ test("local generic need persists, edits, deduplicates and removes", async ({ pa
   await page.getByLabel("Frecuencia", { exact: true }).selectOption("biweekly");
   await page.getByRole("button", { name: "Guardar cambios" }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
-  await expect(card).toContainText("60 unidades · Cada 2 semanas");
+  await expect(card).toContainText("60 unidades");
   await expect(
     page.getByRole("region", { name: "Cada 2 semanas", exact: true }).getByRole("article", {
       name: "Huevos",
@@ -62,7 +88,7 @@ test("local generic need persists, edits, deduplicates and removes", async ({ pa
   await page.getByRole("link", { name: "Mi lista", exact: true }).click();
   await expect(card).toHaveCount(1);
   await expect(card).toContainText("30 unidades");
-  await card.getByRole("button", { name: "Quitar Huevos" }).click();
+  await removeItem(page);
   await expect(page.getByText("Todavía no tienes productos en tu lista.")).toBeVisible();
   await page.reload();
   await expect(page.getByText("Todavía no tienes productos en tu lista.")).toBeVisible();
@@ -190,7 +216,7 @@ for (const operation of ["add", "edit", "remove"] as const) {
       await page.getByRole("button", { name: "Guardar cambios" }).click();
       await expect(eggs).toContainText("60 unidades");
     } else {
-      await eggs.getByRole("button", { name: "Quitar Huevos" }).click();
+      await removeItem(page);
       await expect(eggs).toHaveCount(0);
     }
 
@@ -228,7 +254,7 @@ test("working cross-tab storage synchronizes additions, edits and removal", asyn
   await other.getByRole("button", { name: "Agregar", exact: true }).click();
   await expect(other.getByRole("dialog")).toHaveCount(0);
   await expect(page.getByRole("article", { name: "Arroz blanco", exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Quitar Huevos" }).click();
+  await removeItem(page);
   await other.getByRole("link", { name: "Mi lista", exact: true }).click();
   await expect(eggs).toHaveCount(0);
   await expect(other.getByRole("article", { name: "Arroz blanco", exact: true })).toBeVisible();
@@ -341,7 +367,7 @@ test("list updates across tabs and clears when storage is cleared", async ({ pag
   const other = await context.newPage();
   await other.goto("/list");
   await expect(other.getByRole("article", { name: "Huevos", exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Quitar Huevos" }).click();
+  await removeItem(page);
   await expect(other.getByText("Todavía no tienes productos en tu lista.")).toBeVisible();
   await addGeneric(page);
   await expect(other.getByRole("article", { name: "Huevos", exact: true })).toBeVisible();
@@ -462,7 +488,7 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       .first();
     await expect(card).toContainText("miércoles en");
     await expect(card.getByText(/Las observaciones no garantizan/)).toBeHidden();
-    await card.getByText("Fundamento del día sugerido", { exact: true }).click();
+    await openItemDetails(card);
     await expect(card).toContainText("28 fechas comparables del 2026-09-07 al 2026-10-04");
     await expect(card.getByText(/Las observaciones no garantizan/)).toBeVisible();
     await expect(card).toContainText("sin beneficios condicionados");
@@ -657,6 +683,7 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
     await expect(card).toContainText("Ahorra S/ 3.00");
     const notice = page.getByRole("region", { name: "Hay una oportunidad de ahorro hoy" });
     await expect(notice).toContainText("S/ 3.00 menos en Tottus");
+    await notice.getByRole("button", { name: "Ver ahorros", exact: true }).click();
     await notice.getByRole("link").click();
     await expect(card).toBeFocused();
     await expect(card.getByRole("note", { name: "Una alternativa más barata hoy" })).toBeVisible();
@@ -693,7 +720,7 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       .first();
     await expect(card).toContainText("S/ 17.90");
     await expect(card).toContainText("Aún no hay suficiente historial para recomendar un día");
-    await card.getByText("Ver producto y precio", { exact: true }).click();
+    await openItemDetails(card);
     await expect(
       card.getByRole("note", { name: "El mismo producto, más barato en otra tienda" }),
     ).toContainText("Ahorra S/ 1.00");
@@ -702,7 +729,9 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       "href",
       `/products/${fixture("preferred")}`,
     );
-    await card.getByText("Otras tiendas del mismo producto").click();
+    await expect(
+      card.getByRole("heading", { name: "Otras tiendas del mismo producto" }),
+    ).toBeVisible();
     await expect(card).toContainText("Plaza Vea");
   });
   test("generic need selects a supported CMR benefit only after changing price mode", async ({
@@ -856,12 +885,12 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       .getByRole("region", { name: /Cada semana|Cada 2 semanas|Cada mes/ })
       .getByRole("article")
       .first();
-    await expect(card).toContainText("1 paquete · Cada semana");
+    await expect(card).toContainText("1 paquete");
     await card.getByRole("button", { name: /^Editar/ }).click();
     await page.getByLabel("Paquetes", { exact: true }).fill("2");
     await page.getByRole("radio", { name: "Solo quiero este producto", exact: true }).check();
     await page.getByRole("button", { name: "Guardar cambios" }).click();
-    await expect(card).toContainText("2 paquetes · Cada semana");
+    await expect(card).toContainText("2 paquetes");
     await expect(card).toContainText("Producto exacto");
     await expect(card).toContainText("S/ 35.80");
     const saved = shoppingListSchema.parse(
@@ -919,7 +948,7 @@ async function storeBasket(page: Page, count: number, unsupported = false) {
   );
   await page.reload();
   await expect(page.getByRole("region", { name: "Comparación de canastas" })).toBeVisible();
-  await page.getByRole("button", { name: "Comparar supermercados", exact: true }).click();
+  await openBasketComparison(page);
 }
 
 test.describe("current basket optimization fixtures", () => {
@@ -935,14 +964,20 @@ test.describe("current basket optimization fixtures", () => {
     const comparison = page.getByRole("region", { name: "Comparación de canastas" });
     const card = page.getByRole("article", { name: "Huevos", exact: true });
     await expect(comparison).toBeVisible();
+    await expect(comparison).toContainText("Tu canasta hoy · 1 supermercado");
     await expect(card).toContainText("S/ 14.90");
+    await expect(comparison.getByRole("button", { name: "Ver plan", exact: true })).toHaveAttribute(
+      "aria-haspopup",
+      "dialog",
+    );
+    await expect(comparison.getByRole("button")).toHaveCount(1);
+    await expect(card.getByRole("button", { name: "Quitar Huevos" })).toHaveCount(0);
     await expect(
-      comparison.getByRole("button", { name: "Comparar supermercados", exact: true }),
-    ).toHaveAttribute("aria-haspopup", "dialog");
+      card.getByText("Aún no hay suficiente historial para recomendar un día", { exact: true }),
+    ).toBeHidden();
     await expect(
-      comparison.getByRole("button", { name: "Ver compras por supermercado", exact: true }),
-    ).toHaveAttribute("aria-haspopup", "dialog");
-    await expect(card.locator("details[open]")).toHaveCount(0);
+      card.getByRole("button", { name: "Ver detalles de Huevos", exact: true }),
+    ).toHaveAttribute("aria-expanded", "false");
     await expect(page.getByRole("article", { name: "Límite 1", exact: true })).toHaveCount(0);
     await expect(card.getByRole("link", { name: /Ver en Tottus/ })).toHaveCount(0);
 
@@ -955,7 +990,7 @@ test.describe("current basket optimization fixtures", () => {
         );
         await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
         const bounds = await card.boundingBox();
-        expect(bounds?.height).toBeLessThan(360);
+        expect(bounds?.height).toBeLessThan(180);
         await page.screenshot({
           path: testInfo.outputPath(`compact-list-${width}-${theme}.png`),
           fullPage: true,
@@ -964,12 +999,42 @@ test.describe("current basket optimization fixtures", () => {
       }
     }
 
-    const productDetails = card.getByText("Ver producto y precio", { exact: true });
+    const productDetails = card.getByRole("button", {
+      name: "Ver detalles de Huevos",
+      exact: true,
+    });
     await productDetails.focus();
     await page.keyboard.press("Enter");
-    await expect(card.getByRole("link", { name: /Ver en Tottus/ })).toBeVisible();
+    await expect(card.getByRole("link", { name: /Ver en Tottus/ }).first()).toBeVisible();
+    await expect(productDetails).toHaveAttribute("aria-expanded", "true");
+    await expect(card.locator("details")).toHaveCount(0);
+    await expect(card.getByRole("button", { name: "Quitar Huevos" })).toBeVisible();
     await expect(card).toContainText("30 unidades en total");
-    await page.getByText("Comparar supermercados", { exact: true }).click();
+    for (const width of [390, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const theme of ["light", "dark"] as const) {
+        await page.emulateMedia({ colorScheme: theme, reducedMotion: "reduce" });
+        await expect
+          .poll(() =>
+            productDetails.evaluate((button) => {
+              const panel = document.getElementById(button.getAttribute("aria-controls") ?? "");
+              const divider = panel?.querySelector(".border-t");
+              if (!divider) throw new Error("Expanded detail separator is missing");
+              return divider.getBoundingClientRect().top - button.getBoundingClientRect().bottom;
+            }),
+          )
+          .toBeGreaterThanOrEqual(8);
+        expect(await card.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(
+          true,
+        );
+        await page.screenshot({
+          path: testInfo.outputPath(`expanded-list-${width}-${theme}.png`),
+          fullPage: true,
+          animations: "disabled",
+        });
+      }
+    }
+    await openBasketComparison(page);
     await expect(page.getByRole("article", { name: "Límite 1", exact: true })).toBeVisible();
     await page.getByRole("article", { name: "Límite 2", exact: true }).getByRole("button").click();
     await expect(page.getByRole("region", { name: "Compras del plan seleccionado" })).toBeVisible();
@@ -986,12 +1051,12 @@ test.describe("current basket optimization fixtures", () => {
         await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
         for (const view of [
           {
-            trigger: "Comparar supermercados",
+            trigger: "Ver plan",
             title: "Comparar supermercados",
             name: "comparison",
           },
           {
-            trigger: "Ver compras por supermercado",
+            trigger: "Ver plan",
             title: "Compras por supermercado",
             name: "purchases",
           },
@@ -1004,6 +1069,12 @@ test.describe("current basket optimization fixtures", () => {
           });
           await trigger.focus();
           await page.keyboard.press("Enter");
+          if (view.name === "comparison") {
+            await page
+              .getByRole("dialog")
+              .getByRole("button", { name: "Comparar supermercados", exact: true })
+              .click();
+          }
           const dialog = page.getByRole("dialog", { name: view.title, exact: true });
           await expect(dialog).toBeVisible();
           await expect(dialog).not.toHaveCSS("animation-name", "none");
@@ -1026,7 +1097,7 @@ test.describe("current basket optimization fixtures", () => {
       }
     }
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.getByRole("button", { name: "Comparar supermercados", exact: true }).click();
+    await openBasketComparison(page);
     const dialog = page.getByRole("dialog", { name: "Comparar supermercados", exact: true });
     await expect(dialog).toHaveCSS("animation-duration", "0s");
     await dialog.getByRole("button", { name: "Cerrar diálogo", exact: true }).click();
@@ -1034,8 +1105,36 @@ test.describe("current basket optimization fixtures", () => {
   });
   test("shows every limit, defaults to one store, groups purchases and refreshes after editing", async ({
     page,
-  }) => {
+  }, testInfo) => {
     await storeBasket(page, 3);
+    await page.keyboard.press("Escape");
+    const comparison = page.getByRole("region", { name: "Comparación de canastas", exact: true });
+    await expect(comparison.getByRole("button")).toHaveCount(1);
+    for (const width of [390, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const theme of ["light", "dark"] as const) {
+        await page.emulateMedia({ colorScheme: theme });
+        await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+          true,
+        );
+        for (const row of await page.locator('article[id^="shopping-item-"]').all()) {
+          await expect(row.getByRole("button", { name: /^Ver detalles de / })).toHaveAttribute(
+            "aria-expanded",
+            "false",
+          );
+          await expect(
+            row.getByText("Disponibilidad no confirmada.", { exact: true }).first(),
+          ).toBeVisible();
+        }
+        await page.screenshot({
+          path: testInfo.outputPath(`compact-three-items-${width}-${theme}.png`),
+          fullPage: true,
+          animations: "disabled",
+        });
+      }
+    }
+    await openBasketComparison(page);
     const first = page.getByRole("article", { name: "Límite 1", exact: true });
     const second = page.getByRole("article", { name: "Límite 2", exact: true });
     const third = page.getByRole("article", { name: "Límite 3", exact: true });
@@ -1054,7 +1153,7 @@ test.describe("current basket optimization fixtures", () => {
     await card.getByRole("button", { name: "Editar Leche para canasta 1" }).click();
     await page.getByLabel("Paquetes", { exact: true }).fill("2");
     await page.getByRole("button", { name: "Guardar cambios" }).click();
-    await page.getByRole("button", { name: "Comparar supermercados", exact: true }).click();
+    await openBasketComparison(page);
     await expect(first).toContainText("S/ 70.00");
     await expect(third.getByRole("button")).toHaveAttribute("aria-pressed", "true");
   });
@@ -1133,7 +1232,7 @@ test.describe("current basket optimization fixtures", () => {
   }) => {
     await addSpecific(page, "preferred");
     const comparison = page.getByRole("region", { name: "Comparación de canastas" });
-    await page.getByText("Ver compras por supermercado", { exact: true }).click();
+    await page.getByRole("button", { name: "Ver plan", exact: true }).click();
     await expect(page.getByRole("region", { name: "Compras del plan seleccionado" })).toContainText(
       "Alternativa compatible a tu producto preferido",
     );

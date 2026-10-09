@@ -18,7 +18,8 @@ function Coverage({ plan, items }: { plan: BasketPlan; items: readonly ShoppingL
   return (
     <div className="mt-3 flex flex-col gap-2">
       <p className="font-semibold">
-        Canasta incompleta · {plan.assignments.length} de {items.length} productos
+        Canasta incompleta · {plan.assignments.length} de {items.length}{" "}
+        {items.length === 1 ? "producto" : "productos"}
       </p>
       <p>
         Subtotal de productos disponibles:{" "}
@@ -63,79 +64,51 @@ export function BasketComparison({
     >
       <section aria-label="Comparación de canastas">
         {plan && (
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <h2 className="text-sm font-medium text-muted-foreground">Tu canasta hoy</h2>
-              {plan.status === "complete" ? (
-                <p className="mt-1 text-3xl font-semibold tracking-tight">
-                  {formatPen(plan.totalCostCents)}
-                </p>
-              ) : (
-                <Coverage plan={plan} items={items} />
-              )}
-              <p className="mt-2 text-sm text-muted-foreground">
-                {plan.retailerIds
-                  .map(
-                    (id) =>
-                      plan.assignments.find((assignment) => assignment.option.retailerId === id)!
-                        .option.retailerName,
-                  )
-                  .join(" + ")}
-                {plan.status === "complete" &&
-                  ` · ${items.length} ${items.length === 1 ? "producto" : "productos"}`}
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <div className="min-w-0">
+              <h2 className="text-sm text-muted-foreground">
+                Tu canasta hoy
+                {plan.retailerIds.length > 0 &&
+                  ` · ${plan.retailerIds.length} ${plan.retailerIds.length === 1 ? "supermercado" : "supermercados"}`}
+              </h2>
+              <p className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                <strong className="text-2xl font-semibold tabular-nums">
+                  {formatPen(plan.totalCostCents ?? plan.partialSubtotalCents ?? 0)}
+                </strong>
+                <span className="text-sm text-muted-foreground">
+                  {plan.status === "complete" ? "Total" : "Subtotal · Canasta incompleta"}
+                  {" · "}
+                  {plan.assignments.length} de {items.length}{" "}
+                  {items.length === 1 ? "producto" : "productos"}
+                </span>
               </p>
             </div>
-            {plan.assignments.some((assignment) => assignment.option.condition) && (
-              <div className="benefit-surface text-sm">
-                <p>
-                  Precio potencial ·{" "}
-                  {[
-                    ...new Set(
-                      plan.assignments.flatMap((assignment) =>
-                        assignment.option.condition ? [assignment.option.condition] : [],
-                      ),
-                    ),
-                  ].join(" · ")}
-                </p>
-                <p>
-                  {plan.status === "complete"
-                    ? "Para todos, esta selección"
-                    : "Subtotal para todos, productos disponibles"}
-                  : {formatPen(plan.ordinarySubtotalCents)}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="basket-controls mt-4">
-          <DialogTrigger
-            render={
-              <Button
-                variant="secondary"
-                className="h-auto min-h-11 min-w-0 flex-1 whitespace-normal sm:flex-none"
-              />
-            }
-            onClick={() => onPanelChange({ view: "comparison", open: true })}
-          >
-            <ArrowLeftRight data-icon="inline-start" />
-            Comparar supermercados
-          </DialogTrigger>
-          {plan && (
             <DialogTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  className="h-auto min-h-11 min-w-0 flex-1 whitespace-normal sm:flex-none"
-                />
-              }
+              render={<Button variant="secondary" className="min-h-11" />}
               onClick={() => onPanelChange({ view: "purchases", open: true })}
             >
               <ShoppingBag data-icon="inline-start" />
-              Ver compras por supermercado
+              Ver plan
             </DialogTrigger>
-          )}
-        </div>
+            {plan.assignments.some((assignment) => assignment.option.condition) && (
+              <p className="w-full text-sm text-primary">
+                Precio potencial ·{" "}
+                {[
+                  ...new Set(
+                    plan.assignments.flatMap((assignment) =>
+                      assignment.option.condition ? [assignment.option.condition] : [],
+                    ),
+                  ),
+                ].join(" · ")}
+                {" · "}
+                {plan.status === "complete"
+                  ? "Para todos, esta selección"
+                  : "Subtotal para todos, productos disponibles"}
+                : {formatPen(plan.ordinarySubtotalCents)}
+              </p>
+            )}
+          </div>
+        )}
       </section>
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-4xl">
         <DialogHeader className="pr-12">
@@ -148,6 +121,23 @@ export function BasketComparison({
               : "Productos y cantidades del plan seleccionado."}
           </DialogDescription>
         </DialogHeader>
+        <div>
+          <Button
+            variant="ghost"
+            className="min-h-11"
+            onClick={() =>
+              onPanelChange({
+                view: panel.view === "comparison" ? "purchases" : "comparison",
+                open: true,
+              })
+            }
+          >
+            <ArrowLeftRight data-icon="inline-start" />
+            {panel.view === "comparison"
+              ? "Ver compras por supermercado"
+              : "Comparar supermercados"}
+          </Button>
+        </div>
         {panel.view === "comparison" && (
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             {plans.map((p, index) => {
@@ -236,14 +226,6 @@ export function BasketComparison({
         )}
         {panel.view === "purchases" && plan && (
           <div className="min-w-0">
-            <Button
-              variant="ghost"
-              className="min-h-11"
-              onClick={() => onPanelChange({ view: "comparison", open: true })}
-            >
-              <ArrowLeftRight data-icon="inline-start" />
-              Cambiar plan
-            </Button>
             <section className="min-w-0" aria-label="Compras del plan seleccionado">
               <h3 className="sr-only">Compras por supermercado</h3>
               {plan.status === "incomplete" && <Coverage plan={plan} items={items} />}

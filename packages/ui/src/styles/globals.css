@@ -598,15 +598,3 @@
     transition: none;
   }
 }
-
-/* Controls have their own row; panel contents cannot resize or reposition them. */
-.basket-controls {
-  display: flex;
-  align-items: stretch;
-  gap: 0.75rem;
-}
-
-.basket-controls > button {
-  /* Never animate flex sizing when the viewport or open state changes. */
-  transition-property: background-color, color, border-color, box-shadow, opacity, transform;
-}

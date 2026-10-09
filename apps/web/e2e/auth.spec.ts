@@ -91,6 +91,10 @@ test("real persisted session imports anonymous items and logout does not expose 
     );
     await page
       .getByRole("article", { name: "Huevos", exact: true })
+      .getByRole("button", { name: "Ver detalles de Huevos", exact: true })
+      .click();
+    await page
+      .getByRole("article", { name: "Huevos", exact: true })
       .getByRole("button", { name: "Quitar Huevos" })
       .click();
     await expect(other.getByRole("article", { name: "Huevos", exact: true })).toHaveCount(0);
