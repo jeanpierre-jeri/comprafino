@@ -1,0 +1,2 @@
+ALTER TABLE "discovery_queries" DROP CONSTRAINT "discovery_counts";--> statement-breakpoint
+ALTER TABLE "discovery_queries" ADD CONSTRAINT "discovery_counts" CHECK ("discovery_queries"."request_count" > 0 and "discovery_queries"."latest_result_count" between 0 and 40);

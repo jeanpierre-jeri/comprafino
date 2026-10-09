@@ -2,6 +2,7 @@ import { desc, asc, eq, and, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   discoveryDailyLimit,
+  discoveryResultLimit,
   discoveryDemandPolicy,
   discoveryQueryForSearch,
   parseDiscoveryOptions,
@@ -15,7 +16,7 @@ export { discoveryQueryForSearch, parseDiscoveryOptions } from "@comprafino/core
 
 export const discoveryOutcomeSchema = z.object({
   status: z.enum(["completed", "no_results", "partial", "failed"]),
-  resultCount: z.number().int().min(0).max(30),
+  resultCount: z.number().int().min(0).max(discoveryResultLimit),
   error: z.enum(["Retailer discovery failed.", "Catalog derivation failed."]).nullable(),
 });
 

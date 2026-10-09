@@ -19,8 +19,20 @@ describe("public discovery boundary", () => {
       }).success,
     ).toBe(false);
     expect(
-      discoveryOutcomeSchema.safeParse({ status: "completed", resultCount: 31, error: null })
+      discoveryOutcomeSchema.safeParse({ status: "completed", resultCount: 41, error: null })
         .success,
+    ).toBe(false);
+  });
+
+  it.each([0, 30, 31, 40])("accepts %i results within the four-retailer bound", (resultCount) => {
+    expect(
+      discoveryOutcomeSchema.safeParse({ status: "completed", resultCount, error: null }).success,
+    ).toBe(true);
+  });
+
+  it.each([-1, 1.5, 41])("rejects invalid result count %i", (resultCount) => {
+    expect(
+      discoveryOutcomeSchema.safeParse({ status: "completed", resultCount, error: null }).success,
     ).toBe(false);
   });
 });

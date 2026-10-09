@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { NormalizedRetailerListing, RetailerId } from "@comprafino/core";
+import { discoveryOutcomeSchema } from "@comprafino/db";
 import { processDiscoveryQuery } from "./discovery.ts";
 import type { SearchRetailerAdapter } from "./adapter.ts";
 import type { DiscoveryTasks } from "./discovery.ts";
@@ -54,6 +55,38 @@ function setup(failures: RetailerId[] = [], empty = false) {
 }
 
 describe("bounded discovery processing", () => {
+  it("completes forty results through the real outcome boundary", async () => {
+    const tasks = setup();
+
+    for (const adapter of tasks.adapters) {
+      adapter.searchProducts.mockResolvedValue({
+        listings: Array.from({ length: 10 }, (_, index) => listing(adapter.retailer, index)),
+        discovered: 10,
+      });
+    }
+
+    tasks.persist.mockImplementation(async (_retailer, rows) => ({
+      created: rows.length,
+      changed: rows.length,
+      skippedByCapacity: 0,
+    }));
+    tasks.finish.mockImplementation(async (_claim, outcome) => {
+      discoveryOutcomeSchema.parse(outcome);
+    });
+
+    expect(await processDiscoveryQuery(claim, tasks)).toMatchObject({
+      status: "completed",
+      resultCount: 40,
+      newListings: 40,
+      retailerSearchCalls: 4,
+    });
+    expect(tasks.finish).toHaveBeenCalledWith(claim, {
+      status: "completed",
+      resultCount: 40,
+      error: null,
+    });
+  });
+
   it("persists through ingestion, then normalizes and matches", async () => {
     const tasks = setup();
     const r = await processDiscoveryQuery(claim, tasks);

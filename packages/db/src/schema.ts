@@ -1,4 +1,5 @@
 import { sql } from "drizzle-orm";
+import { discoveryResultLimit } from "@comprafino/core";
 import {
   pgTable,
   numeric,
@@ -146,7 +147,7 @@ export const discoveryQueries = pgTable(
     ),
     check(
       "discovery_counts",
-      sql`${t.requestCount} > 0 and ${t.latestResultCount} between 0 and 30`,
+      sql`${t.requestCount} > 0 and ${t.latestResultCount} between 0 and ${sql.raw(String(discoveryResultLimit))}`,
     ),
     check(
       "discovery_status",

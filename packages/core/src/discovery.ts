@@ -1,4 +1,5 @@
 import { normalizeSearchQuery } from "./public-products.ts";
+import { retailerIdSchema } from "./listing.ts";
 
 // A month covers recurring weekly demand; 3,000 rows equals 100 daily budgets.
 export const discoveryDemandPolicy = {
@@ -13,6 +14,8 @@ export const discoveryDailyLimit = 30;
 export const discoveryDefaultQueryLimit = 10;
 
 export const discoveryRetailerLimit = 10;
+
+export const discoveryResultLimit = discoveryRetailerLimit * retailerIdSchema.options.length;
 
 export const discoveryCooldownHours = 24;
 

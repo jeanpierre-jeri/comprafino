@@ -52,6 +52,31 @@ describe.skipIf(!testUrl)("PostgreSQL discovery (explicit TEST_DATABASE_URL)", (
     expect(await recordDiscoveryForSearch(db, "??", 0)).toBe(false);
     expect((await inspectDiscovery(db)).queries).toHaveLength(1);
   }, 30_000);
+  it.each([31, 40])(
+    "persists completion with %i results from four retailers",
+    async (resultCount) => {
+      await recordDiscoveryForSearch(db, "aceite primor", 0);
+      const [claim] = await claimDiscoveryQueries(db, 1);
+
+      if (!claim) {
+        throw new Error("Expected claim");
+      }
+
+      await finishDiscoveryQuery(db, claim, { status: "completed", resultCount, error: null });
+      expect((await inspectDiscovery(db)).queries[0]).toMatchObject({
+        status: "completed",
+        latestResultCount: resultCount,
+        error: null,
+      });
+      await expect(
+        query("update discovery_queries set latest_result_count=41 where id=$1", [claim.id]),
+      ).rejects.toThrow(/discovery_counts/u);
+      await expect(
+        query("update discovery_queries set request_count=0 where id=$1", [claim.id]),
+      ).rejects.toThrow(/discovery_counts/u);
+    },
+  );
+
   it("discovery preserves 24h cooldown despite demand, expires at the boundary and rejects stale completion", async () => {
     await resetDiscovery();
     await recordDiscoveryForSearch(db, "aceite primor", 0);
