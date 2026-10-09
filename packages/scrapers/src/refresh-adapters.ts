@@ -5,11 +5,21 @@ import type { RetailerAdapter } from "./adapter.ts";
 import { createTottusAdapter } from "./tottus.ts";
 import { createPlazaVeaAdapter } from "./plaza-vea.ts";
 import { createMetroAdapter } from "./metro.ts";
+import { createMakroAdapter } from "./makro.ts";
 
 // Fixed, validated scheduled coverage; never use operator CLI defaults.
 export const refreshCoverage = {
   tottus: { meat: 50, dairy: 100 },
   "plaza-vea": {
+    dairy: 100,
+    "sugar-brown": 20,
+    "sugar-white": 20,
+    pasta: 20,
+    flour: 20,
+    oats: 20,
+    "toilet-paper": 20,
+  },
+  makro: {
     dairy: 100,
     "sugar-brown": 20,
     "sugar-white": 20,
@@ -53,11 +63,13 @@ export function combineTottusCoverage(
 
 /** All category fetches complete before the single atomic retailer write. */
 export function combineVtexCoverage(
-  retailer: "plaza-vea" | "metro",
-  createAdapter: (category: VtexCategory) => RetailerAdapter = (category) =>
-    retailer === "metro"
-      ? createMetroAdapter(undefined, category)
-      : createPlazaVeaAdapter(undefined, category),
+  retailer: "plaza-vea" | "metro" | "makro",
+  createAdapter: (category: VtexCategory) => RetailerAdapter = (category) => {
+    if (retailer === "metro") return createMetroAdapter(undefined, category);
+    if (retailer === "makro") return createMakroAdapter(undefined, category);
+
+    return createPlazaVeaAdapter(undefined, category);
+  },
   pause: () => Promise<void> = () => new Promise((resolve) => setTimeout(resolve, 1000)),
 ): RetailerAdapter {
   return {
@@ -114,6 +126,10 @@ export function createRefreshAdapters(fetchPage: typeof fetch = fetch) {
         createPlazaVeaAdapter(fetchPage, category),
       ),
       limit: scheduledObservationLimit("plaza-vea"),
+    },
+    makro: {
+      adapter: combineVtexCoverage("makro", (category) => createMakroAdapter(fetchPage, category)),
+      limit: scheduledObservationLimit("makro"),
     },
     metro: {
       adapter: combineVtexCoverage("metro", (category) => createMetroAdapter(fetchPage, category)),

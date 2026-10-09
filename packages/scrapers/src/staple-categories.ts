@@ -10,6 +10,15 @@ export const vtexCategories = {
     oats: "478/479/1639",
     "toilet-paper": "399/1627/402",
   },
+  makro: {
+    dairy: "845",
+    "sugar-brown": "431/434/444",
+    "sugar-white": "431/434/1625",
+    pasta: "431/436/454",
+    flour: "493/346/349",
+    oats: "478/479/1639",
+    "toilet-paper": "399/1627/402",
+  },
   metro: {
     eggs: "1001327/1001347/1001348", // Milestone 18: validated narrow eggs source
     dairy: "1001436", // existing verified dairy root

@@ -14,6 +14,7 @@ test("homepage offers an accessible product search", async ({ page }) => {
   await expect(page).toHaveTitle(/CompraFino/);
   await expect(page.locator("html")).toHaveAttribute("lang", "es-PE");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Compra mejor.Paga menos.");
+  await expect(page.locator('.retailer-badge[data-retailer="makro"]')).toHaveText("Makro");
   await expect(page.getByLabel("¿Qué necesitas comprar?")).toBeEnabled();
   await expect(page.getByRole("button", { name: "Buscar" })).toBeEnabled();
   await expect(

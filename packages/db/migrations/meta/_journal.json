@@ -78,6 +78,13 @@
       "when": 1791310176581,
       "tag": "0010_natural_switch",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791502007171,
+      "tag": "0011_real_quasar",
+      "breakpoints": true
     }
   ]
 }

@@ -21,6 +21,11 @@ function row(index: number, retailer: KnownListing["retailer"] = "metro"): Known
 function tasks(): ListingRefreshTasks {
   return {
     adapters: {
+      makro: {
+        lookupListing: vi
+          .fn<ListingRefreshTasks["adapters"]["makro"]["lookupListing"]>()
+          .mockResolvedValue({ status: "not-found" }),
+      },
       metro: {
         lookupListing: vi
           .fn<ListingRefreshTasks["adapters"]["metro"]["lookupListing"]>()

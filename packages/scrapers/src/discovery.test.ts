@@ -26,7 +26,7 @@ const listing = (retailer: RetailerId, i = 0): NormalizedRetailerListing => ({
 });
 
 function setup(failures: RetailerId[] = [], empty = false) {
-  const adapters = (["tottus", "plaza-vea", "metro"] as const).map((retailer) => ({
+  const adapters = (["tottus", "plaza-vea", "metro", "makro"] as const).map((retailer) => ({
     retailer,
     lookupListing: async () => ({ status: "not-found" as const }),
     fetchListings: vi.fn<SearchRetailerAdapter["fetchListings"]>(),
@@ -59,23 +59,23 @@ describe("bounded discovery processing", () => {
     const r = await processDiscoveryQuery(claim, tasks);
     expect(r).toMatchObject({
       status: "completed",
-      resultCount: 3,
-      retailerSearchCalls: 3,
-      newListings: 3,
+      resultCount: 4,
+      retailerSearchCalls: 4,
+      newListings: 4,
       normalizationWrites: 3,
       matchingWrites: 3,
       canonicalGroupsCreated: 1,
     });
-    expect(tasks.persist).toHaveBeenCalledTimes(3);
+    expect(tasks.persist).toHaveBeenCalledTimes(4);
     expect(tasks.normalize.mock.invocationCallOrder[0]).toBeGreaterThan(
-      tasks.persist.mock.invocationCallOrder[2]!,
+      tasks.persist.mock.invocationCallOrder[3]!,
     );
     expect(tasks.match.mock.invocationCallOrder[0]).toBeGreaterThan(
       tasks.normalize.mock.invocationCallOrder[0]!,
     );
     expect(tasks.finish).toHaveBeenCalledWith(claim, {
       status: "completed",
-      resultCount: 3,
+      resultCount: 4,
       error: null,
     });
 
@@ -88,15 +88,15 @@ describe("bounded discovery processing", () => {
     const r = await processDiscoveryQuery(claim, tasks);
     expect(r).toMatchObject({
       status: "partial",
-      resultCount: 2,
+      resultCount: 3,
       error: "Retailer discovery failed.",
     });
-    expect(tasks.persist).toHaveBeenCalledTimes(2);
+    expect(tasks.persist).toHaveBeenCalledTimes(3);
     expect(tasks.match).toHaveBeenCalledOnce();
     expect(JSON.stringify(r)).not.toContain("secret");
   });
   it("records all-retailer failure without downstream writes", async () => {
-    const tasks = setup(["tottus", "plaza-vea", "metro"]);
+    const tasks = setup(["tottus", "plaza-vea", "metro", "makro"]);
     const r = await processDiscoveryQuery(claim, tasks);
     expect(r.status).toBe("failed");
     expect(tasks.persist).not.toHaveBeenCalled();
@@ -121,7 +121,7 @@ describe("bounded discovery processing", () => {
     });
     const r = await processDiscoveryQuery(claim, tasks);
     expect(tasks.persist.mock.calls[0]?.[1]).toHaveLength(10);
-    expect(r.resultCount).toBe(12);
+    expect(r.resultCount).toBe(13);
   });
   it("retains persisted results and records derivation failure safely", async () => {
     const tasks = setup();
@@ -129,7 +129,7 @@ describe("bounded discovery processing", () => {
     const r = await processDiscoveryQuery(claim, tasks);
     expect(r).toMatchObject({
       status: "failed",
-      resultCount: 3,
+      resultCount: 4,
       error: "Catalog derivation failed.",
     });
     expect(tasks.match).not.toHaveBeenCalled();
@@ -150,7 +150,7 @@ describe("bounded discovery processing", () => {
     const tasks = setup();
     tasks.adapters.pop();
     await expect(processDiscoveryQuery(claim, tasks)).rejects.toThrow(
-      "Discovery requires the three existing retailers",
+      "Discovery requires all registered retailers",
     );
   });
 });
@@ -192,7 +192,7 @@ it("reports capacity-limited discovery without treating it as a retailer failure
     status: "completed",
     resultCount: 0,
     error: null,
-    skippedByCapacity: 3,
+    skippedByCapacity: 4,
   });
   expect(result.retailers.every((r) => r.status === "success" && r.skippedByCapacity === 1)).toBe(
     true,

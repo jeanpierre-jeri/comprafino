@@ -44,7 +44,8 @@
     "audit:shopping-list": "pnpm --filter @comprafino/db audit:shopping-list",
     "audit:catalog-coverage": "pnpm --filter @comprafino/db audit:catalog-coverage",
     "audit:availability": "pnpm --filter @comprafino/db audit:availability",
-    "health:catalog": "pnpm --filter @comprafino/db health:catalog"
+    "health:catalog": "pnpm --filter @comprafino/db health:catalog",
+    "scrape:makro": "pnpm --filter @comprafino/scrapers scrape:makro"
   },
   "devDependencies": {
     "oxfmt": "0.71.0",

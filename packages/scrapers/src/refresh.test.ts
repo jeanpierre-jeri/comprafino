@@ -25,7 +25,7 @@ it("completes a full refresh in ingestion → normalization → matching order",
   const events: string[] = [];
   const result = await refreshCatalog(t, false, (e) => events.push(`${e.stage}:${e.status}`));
   expect(result.status).toBe("success");
-  expect(t.ingest.mock.calls).toEqual([["tottus"], ["plaza-vea"], ["metro"]]);
+  expect(t.ingest.mock.calls).toEqual([["tottus"], ["plaza-vea"], ["metro"], ["makro"]]);
   expect(events).toEqual([
     "tottus:started",
     "tottus:success",
@@ -33,6 +33,8 @@ it("completes a full refresh in ingestion → normalization → matching order",
     "plaza-vea:success",
     "metro:started",
     "metro:success",
+    "makro:started",
+    "makro:success",
     "normalization:started",
     "normalization:success",
     "matching:started",
@@ -52,7 +54,12 @@ it("isolates partial failure, continues downstream, returns failure, and never l
   });
   const result = await refreshCatalog(t);
   expect(result.status).toBe("failed");
-  expect(result.retailers.map((r) => r.outcome.status)).toEqual(["success", "failed", "success"]);
+  expect(result.retailers.map((r) => r.outcome.status)).toEqual([
+    "success",
+    "failed",
+    "success",
+    "success",
+  ]);
   expect(t.normalize).toHaveBeenCalledOnce();
   expect(t.match).toHaveBeenCalledOnce();
   expect(JSON.stringify(result)).not.toContain("password");
@@ -66,7 +73,7 @@ it("skips downstream writes when all retailers fail", async () => {
     normalization: { status: "skipped" },
     matching: { status: "skipped" },
   });
-  expect(t.ingest).toHaveBeenCalledTimes(3);
+  expect(t.ingest).toHaveBeenCalledTimes(4);
   expect(t.normalize).not.toHaveBeenCalled();
   expect(t.match).not.toHaveBeenCalled();
 });
@@ -97,7 +104,7 @@ it("matching failure is visible without retrying derived writes", async () => {
 it("dry run fetches all retailers and never calls downstream persistence", async () => {
   const t = tasks();
   expect((await refreshCatalog(t, true)).status).toBe("success");
-  expect(t.ingest).toHaveBeenCalledTimes(3);
+  expect(t.ingest).toHaveBeenCalledTimes(4);
   expect(t.normalize).not.toHaveBeenCalled();
   expect(t.match).not.toHaveBeenCalled();
 });
@@ -139,6 +146,15 @@ it("freezes validated category limits and persists neither Tottus category on a 
   expect(refreshCoverage).toEqual({
     tottus: { meat: 50, dairy: 100 },
     "plaza-vea": {
+      dairy: 100,
+      "sugar-brown": 20,
+      "sugar-white": 20,
+      pasta: 20,
+      flour: 20,
+      oats: 20,
+      "toilet-paper": 20,
+    },
+    makro: {
       dairy: 100,
       "sugar-brown": 20,
       "sugar-white": 20,
@@ -208,7 +224,15 @@ it("runs targeted refresh after categories and derives exactly once even when ca
       stages.push(event.stage);
     }
   });
-  expect(stages).toEqual(["tottus", "plaza-vea", "metro", "targeted", "normalization", "matching"]);
+  expect(stages).toEqual([
+    "tottus",
+    "plaza-vea",
+    "metro",
+    "makro",
+    "targeted",
+    "normalization",
+    "matching",
+  ]);
   expect(result.status).toBe("failed");
   expect(t.normalize).toHaveBeenCalledOnce();
   expect(t.match).toHaveBeenCalledOnce();

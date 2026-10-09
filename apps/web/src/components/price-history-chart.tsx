@@ -18,6 +18,7 @@ const treatment = {
   tottus: { color: "var(--tottus-text)", shape: "circle", symbol: "●" },
   "plaza-vea": { color: "var(--plaza-text)", shape: "diamond", symbol: "◆" },
   metro: { color: "var(--metro-text)", shape: "square", symbol: "■" },
+  makro: { color: "var(--makro-text)", shape: "triangle", symbol: "▲" },
 } as const;
 
 const date = (at: number, detailed = false) =>

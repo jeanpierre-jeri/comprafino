@@ -5,7 +5,7 @@ export function parseArguments(args: readonly string[]) {
   let category: VtexCategory | undefined;
   let dryRun = false;
   let limit = 20;
-  let retailer: "tottus" | "plaza-vea" | "metro" = "tottus";
+  let retailer: "tottus" | "plaza-vea" | "metro" | "makro" = "tottus";
 
   for (const arg of args) {
     if (arg === "--") {
@@ -14,6 +14,11 @@ export function parseArguments(args: readonly string[]) {
 
     if (arg === "--retailer=plaza-vea") {
       retailer = "plaza-vea";
+      continue;
+    }
+
+    if (arg === "--retailer=makro") {
+      retailer = "makro";
       continue;
     }
 
@@ -45,7 +50,7 @@ export function parseArguments(args: readonly string[]) {
     throw new Error("Limit must be from 1 to 500");
   }
 
-  if (retailer === "plaza-vea" && category === "eggs") {
+  if ((retailer === "plaza-vea" || retailer === "makro") && category === "eggs") {
     throw new Error("Usage: eggs source is Metro only");
   }
 

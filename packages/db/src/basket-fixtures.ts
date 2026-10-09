@@ -37,6 +37,7 @@ export async function seedBasketFixtures(
         url: {
           tottus: "https://www.tottus.com.pe/tottus-pe/articulo/1/test",
           metro: "https://www.metro.pe/basket/p",
+          makro: "https://www.makro.plazavea.com.pe/basket/p",
           "plaza-vea": "https://www.plazavea.com.pe/basket/p",
         }[retailer],
         currentPriceCents: index === i % 3 ? 1000 : 2500,

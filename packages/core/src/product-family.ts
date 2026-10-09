@@ -39,6 +39,11 @@ const categories: Record<RetailerId, Partial<Record<ProductFamily, readonly stri
     detergent: ["413", "1371"],
     toilet_paper: ["402"],
   },
+  makro: {
+    sugar: ["444", "1625"],
+    pasta: ["454"],
+    toilet_paper: ["402"],
+  },
   metro: {
     eggs: ["1001348"],
     rice: ["1001283", "1001284", "1001285"],
@@ -55,6 +60,7 @@ const categories: Record<RetailerId, Partial<Record<ProductFamily, readonly stri
 const mismatches: Record<RetailerId, readonly string[]> = {
   tottus: ["J0102010302", "J0102010307", "J0101070507", "J0502050201", "J0502050203"],
   "plaza-vea": ["859", "1652", "785", "1498", "38", "1389", "34", "319"],
+  makro: ["859", "1652", "785", "1498", "38", "1389", "34", "319"],
   metro: ["1001440", "1001624", "1000923", "1001690", "1001200", "2406"],
 };
 

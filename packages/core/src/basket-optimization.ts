@@ -148,6 +148,8 @@ export function optimizeBasket(
 
   for (let mask = 1; mask < 1 << retailers.length; mask++) {
     const subset = retailers.filter((_, i) => mask & (1 << i));
+    if (subset.length > 3) continue;
+
     const assignments: BasketPlan["assignments"] = [];
     const missingItemIds: string[] = [];
 

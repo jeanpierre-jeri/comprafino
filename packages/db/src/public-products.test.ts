@@ -188,3 +188,16 @@ it("withholds zero ordinary offers from public exact ranking in both modes", () 
     expect(product.offers.every((o) => o.currentPriceCents > 0)).toBe(true);
   }
 });
+
+it("allows Makro product links only on its own storefront", () => {
+  expect(
+    retailerProductUrl({ retailerId: "makro", url: "https://www.makro.plazavea.com.pe/leche/p" }),
+  ).toBe("https://www.makro.plazavea.com.pe/leche/p");
+  for (const url of [
+    "https://www.plazavea.com.pe/leche/p",
+    "https://www.makro.plazavea.com.pe.evil.test/leche/p",
+    "http://www.makro.plazavea.com.pe/leche/p",
+  ]) {
+    expect(retailerProductUrl({ retailerId: "makro", url })).toBeNull();
+  }
+});

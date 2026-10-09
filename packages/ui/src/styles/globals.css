@@ -60,6 +60,8 @@
   --plaza-text: #993717;
   --metro-bg: #fff6d9;
   --metro-text: #665014;
+  --makro-bg: #eaf0ff;
+  --makro-text: #253c8b;
   color-scheme: light;
 }
 
@@ -92,6 +94,8 @@
   --plaza-text: #efb69b;
   --metro-bg: #423d28;
   --metro-text: #e0ce8e;
+  --makro-bg: #2c3650;
+  --makro-text: #bdccff;
   color-scheme: dark;
 }
 
@@ -153,6 +157,10 @@
   .retailer-badge[data-retailer="plaza-vea"] {
     background: var(--plaza-bg);
     color: var(--plaza-text);
+  }
+  .retailer-badge[data-retailer="makro"] {
+    background: var(--makro-bg);
+    color: var(--makro-text);
   }
   .retailer-badge[data-retailer="metro"] {
     background: var(--metro-bg);

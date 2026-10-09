@@ -6,7 +6,8 @@ import "@comprafino/ui/globals.css";
 
 export const metadata: Metadata = {
   title: "CompraFino · Compra mejor. Paga menos.",
-  description: "Compara precios observados de productos de Tottus, Plaza Vea y Metro en Perú.",
+  description:
+    "Compara precios observados de productos de Tottus, Plaza Vea, Metro y Makro en Perú.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

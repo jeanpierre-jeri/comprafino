@@ -27,11 +27,11 @@ export async function processDiscoveryQuery(claim: DiscoveryClaim, tasks: Discov
   // Explicitly require all existing retailers; accidental missing coverage must
   // never be reported as complete success.
   if (
-    tasks.adapters.length !== 3 ||
-    new Set(tasks.adapters.map((a) => a.retailer)).size !== 3 ||
+    tasks.adapters.length !== retailerIdSchema.options.length ||
+    new Set(tasks.adapters.map((a) => a.retailer)).size !== retailerIdSchema.options.length ||
     tasks.adapters.some((a) => !retailerIdSchema.safeParse(a.retailer).success)
   ) {
-    throw new Error("Discovery requires the three existing retailers");
+    throw new Error("Discovery requires all registered retailers");
   }
 
   const retailers: {
@@ -158,7 +158,7 @@ function discoveryStatus(
 ): DiscoveryOutcome["status"] {
   if (derivationFailed || successes === 0) return "failed";
 
-  if (successes < 3) return "partial";
+  if (successes < retailerIdSchema.options.length) return "partial";
 
   if (resultCount === 0 && skippedByCapacity === 0) return "no_results";
 
@@ -171,7 +171,7 @@ function discoveryFailureMessage(
 ): DiscoveryOutcome["error"] {
   if (derivationFailed) return "Catalog derivation failed.";
 
-  if (successes < 3) return "Retailer discovery failed.";
+  if (successes < retailerIdSchema.options.length) return "Retailer discovery failed.";
 
   return null;
 }

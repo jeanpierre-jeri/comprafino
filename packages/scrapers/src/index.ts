@@ -8,6 +8,8 @@ export * from "./plaza-vea.ts";
 
 export * from "./metro.ts";
 
+export * from "./makro.ts";
+
 export * from "./targeted.ts";
 
 export * from "./listing-refresh.ts";

@@ -1,5 +1,6 @@
 import type { ShoppingList, ShoppingCandidate } from "./shopping-list.ts";
 import { z } from "zod";
+import { retailerIdSchema } from "./listing.ts";
 import { observationDay, shiftObservationDay } from "./observation-coverage.ts";
 
 export const weekdayLabels = [
@@ -41,7 +42,7 @@ export const shoppingWeekdaySchema = z.object({
         pattern: weekdayPatternSchema,
       }),
     )
-    .max(3),
+    .max(retailerIdSchema.options.length),
 });
 
 export type ShoppingWeekday = z.infer<typeof shoppingWeekdaySchema>;

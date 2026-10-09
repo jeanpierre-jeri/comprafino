@@ -89,7 +89,7 @@ describe("exact current basket optimization", () => {
     expect(defaultBasketLimit(plans)).toBe(1);
   });
   it("matches independent exhaustive assignment costs across varied baskets", () => {
-    const retailers = ["metro", "plaza-vea", "tottus"] as const;
+    const retailers = ["metro", "plaza-vea", "tottus", "makro"] as const;
 
     for (let seed = 0; seed < 30; seed++) {
       const needs = Array.from({ length: 3 }, (_, i) =>
@@ -376,4 +376,19 @@ it("retains unknown stock in basket assignments without penalizing its price", (
     totalCostCents: 1000,
     assignments: [{ option: { retailerId: "metro", available: null } }],
   });
+});
+
+it("considers Makro among four retailers while retaining one/two/three-store tiers", () => {
+  const plans = optimizeBasket([
+    { itemId: uuid(1), options: [option("metro", 20), option("makro", 10)] },
+    { itemId: uuid(2), options: [option("plaza-vea", 10)] },
+    { itemId: uuid(3), options: [option("tottus", 10)] },
+    { itemId: uuid(4), options: [option("metro", 10), option("makro", 20)] },
+  ]);
+  expect(plans.map((plan) => plan.maxRetailers)).toEqual([1, 2, 3]);
+  expect(plans[2]).toMatchObject({ status: "complete", totalCostCents: 50 });
+  expect(plans.every((plan) => plan.retailerIds.length <= plan.maxRetailers)).toBe(true);
+  expect(
+    optimizeBasket([{ itemId: uuid(1), options: [option("metro", 20), option("makro", 10)] }])[0],
+  ).toMatchObject({ retailerIds: ["makro"], totalCostCents: 10 });
 });

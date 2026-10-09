@@ -3,6 +3,7 @@ import type { createDatabase } from "@comprafino/db";
 import { createTottusAdapter } from "./tottus.ts";
 import { createPlazaVeaAdapter } from "./plaza-vea.ts";
 import { createMetroAdapter } from "./metro.ts";
+import { createMakroAdapter } from "./makro.ts";
 import type { ListingRefreshTasks } from "./listing-refresh.ts";
 
 export function listingRefreshTasks(db: ReturnType<typeof createDatabase>): ListingRefreshTasks {
@@ -11,6 +12,7 @@ export function listingRefreshTasks(db: ReturnType<typeof createDatabase>): List
       tottus: createTottusAdapter(),
       "plaza-vea": createPlazaVeaAdapter(),
       metro: createMetroAdapter(),
+      makro: createMakroAdapter(),
     },
     claim: (row, at) => claimListingRefresh(db, row, at),
     persist: (retailer, rows) =>

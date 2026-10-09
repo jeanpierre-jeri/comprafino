@@ -1,4 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { persistListings } from "./ingestion.ts";
+import { normalizeCatalog } from "./catalog.ts";
 import { inspectCatalogHealth } from "./catalog-health.ts";
 import { ownedTestDatabase } from "./testing/database.ts";
 import { closeLocalTestConnections } from "./testing/test-query-client.ts";
@@ -18,6 +20,23 @@ describe.skipIf(!testUrl)("catalog health with an explicit owned test database",
   beforeEach(async () => {
     await harness.reset();
     await seedShoppingListFixtures(harness.db, harness.scoped);
+    await persistListings(harness.db, "makro", [
+      {
+        retailer: "makro",
+        externalId: "health-makro",
+        productId: "health-makro",
+        title: "Azúcar Rubia ARO Bolsa 5Kg",
+        sourceBrand: "ARO",
+        category: "444",
+        url: "https://www.makro.plazavea.com.pe/azucar/p",
+        currentPriceCents: 1779,
+        currency: "PEN",
+        priceUnit: "UN",
+        available: true,
+        observedAt: new Date(),
+      },
+    ]);
+    await normalizeCatalog(harness.db, 2000);
     await harness.scoped.query(
       "insert into ingestion_runs(retailer_id,status,started_at,ended_at) select id,'success',now()-interval '12 hours',now()-interval '11 hours' from retailers",
     );

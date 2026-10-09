@@ -110,3 +110,27 @@ it.each(["pasta dental colgate", "aceite corporal", "arroz con pollo", "avena be
 it("an oat beverage product noun is insufficient evidence for dry oats", () => {
   expect(classifyProductFamily({ title: "Avena bebida 1L" }).family).toBeNull();
 });
+
+it("uses verified Makro leaves but leaves mixed flour/oats sources conservative", () => {
+  expect(
+    classifyProductFamily({
+      retailerId: "makro",
+      sourceCategory: "444",
+      title: "Azúcar Rubia ARO Bolsa 5Kg",
+    }),
+  ).toMatchObject({ family: "sugar", origin: "source-category" });
+  expect(
+    classifyProductFamily({
+      retailerId: "makro",
+      sourceCategory: "349",
+      title: "Polvo para hornear 100g",
+    }).family,
+  ).toBeNull();
+  expect(
+    classifyProductFamily({
+      retailerId: "makro",
+      sourceCategory: "1639",
+      title: "Quinua Avena 3 OSITOS Bolsa 900g",
+    }).family,
+  ).toBeNull();
+});

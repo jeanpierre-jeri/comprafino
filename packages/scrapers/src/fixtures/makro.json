@@ -1,0 +1,429 @@
+[
+  {
+    "productId": "101021448",
+    "productName": "Leche Light GLORIA Lata 390g Paquete 6un",
+    "brand": "GLORIA",
+    "link": "https://www.makro.plazavea.com.pe/leche-light-gloria-lata-390g-paquete-6un-20402667/p",
+    "categoryId": "853",
+    "CantidadBiPrecioMK": ["3"],
+    "CantidadTriPrecioMK": ["6"],
+    "Presentación unitarios vitrina": ["Paquete 6un"],
+    "items": [
+      {
+        "itemId": "11390020",
+        "name": "Leche Light GLORIA Lata 390g Paquete 6un",
+        "measurementUnit": "un",
+        "unitMultiplier": 1.0,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/36336932/20402667.jpg?v=639268160108670000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "sellerName": "Makro Plazavea",
+            "commertialOffer": {
+              "Price": 23.3,
+              "ListPrice": 23.3,
+              "IsAvailable": true,
+              "AvailableQuantity": 393,
+              "Tax": 0.0,
+              "PromotionTeasers": [
+                {
+                  "Name": "MAKRO-Bi-Precio|Vigente Oculto",
+                  "GeneralValues": {},
+                  "Conditions": {
+                    "MinimumQuantity": 0,
+                    "Parameters": [
+                      {
+                        "Name": "PaymentMethodId",
+                        "Value": "4"
+                      }
+                    ]
+                  },
+                  "Effects": {
+                    "Parameters": [
+                      {
+                        "Name": "PromotionalPriceTableItemsIds",
+                        "Value": "11390020"
+                      },
+                      {
+                        "Name": "PromotionalPriceTableItemsDiscount",
+                        "Value": "0.480"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "productId": "100990618",
+    "productName": "Leche Reconstituida Entera GLORIA Lata 390g Paquete 6un",
+    "brand": "GLORIA",
+    "link": "https://www.makro.plazavea.com.pe/leche-reconstituida-entera-gloria-lata-390g-paquete-6un-20402655/p",
+    "categoryId": "853",
+    "CantidadBiPrecioMK": ["3"],
+    "CantidadTriPrecioMK": ["6"],
+    "Presentación unitarios vitrina": ["Paquete 6un"],
+    "items": [
+      {
+        "itemId": "11359692",
+        "name": "Leche Reconstituida Entera GLORIA Lata 390g Paquete 6un",
+        "measurementUnit": "un",
+        "unitMultiplier": 1.0,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/36336931/20402655.jpg?v=639268160104170000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "sellerName": "Makro Plazavea",
+            "commertialOffer": {
+              "Price": 23.2,
+              "ListPrice": 23.2,
+              "IsAvailable": true,
+              "AvailableQuantity": 1204,
+              "Tax": 0.0,
+              "PromotionTeasers": [
+                {
+                  "Name": "MAKRO-Bi-Precio|Vigente Oculto",
+                  "GeneralValues": {},
+                  "Conditions": {
+                    "MinimumQuantity": 0,
+                    "Parameters": [
+                      {
+                        "Name": "PaymentMethodId",
+                        "Value": "4"
+                      }
+                    ]
+                  },
+                  "Effects": {
+                    "Parameters": [
+                      {
+                        "Name": "PromotionalPriceTableItemsIds",
+                        "Value": "11359692"
+                      },
+                      {
+                        "Name": "PromotionalPriceTableItemsDiscount",
+                        "Value": "0.10"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "productId": "101166251",
+    "productName": "Azúcar Rubia ARO Bolsa 5Kg",
+    "brand": "ARO",
+    "link": "https://www.makro.plazavea.com.pe/azucar-rubia-aro-bolsa-5kg/p",
+    "categoryId": "444",
+    "CantidadBiPrecioMK": ["2"],
+    "Presentación unitarios vitrina": ["Bolsa 5Kg"],
+    "items": [
+      {
+        "itemId": "11542550",
+        "name": "Azúcar Rubia ARO Bolsa 5Kg",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/30212937/20283175.jpg?v=638678724266700000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "sellerName": "Makro Plazavea",
+            "commertialOffer": {
+              "Price": 17.79,
+              "ListPrice": 17.79,
+              "IsAvailable": true,
+              "AvailableQuantity": 846,
+              "Tax": 0,
+              "PromotionTeasers": [
+                {
+                  "Name": "MAKRO-Bi-Precio|Vigente Oculto",
+                  "GeneralValues": {},
+                  "Conditions": {
+                    "MinimumQuantity": 0,
+                    "Parameters": [
+                      {
+                        "Name": "PaymentMethodId",
+                        "Value": "4"
+                      }
+                    ]
+                  },
+                  "Effects": {
+                    "Parameters": [
+                      {
+                        "Name": "PromotionalPriceTableItemsIds",
+                        "Value": "11542550"
+                      },
+                      {
+                        "Name": "PromotionalPriceTableItemsDiscount",
+                        "Value": "0.890"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "productId": "101190183",
+    "productName": "Azúcar Blanca ARO Bolsa 5Kg",
+    "brand": "ARO",
+    "link": "https://www.makro.plazavea.com.pe/azucar-blanca-aro-bolsa-5kg/p",
+    "categoryId": "1625",
+    "CantidadTriPrecioMK": ["4"],
+    "Presentación unitarios vitrina": ["Bolsa 5Kg"],
+    "items": [
+      {
+        "itemId": "11566738",
+        "name": "Azúcar Blanca ARO Bolsa 5Kg",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/30575579/20283178.jpg?v=638748341872000000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "sellerName": "Makro Plazavea",
+            "commertialOffer": {
+              "Price": 23.3,
+              "ListPrice": 23.3,
+              "IsAvailable": true,
+              "AvailableQuantity": 153,
+              "Tax": 0,
+              "PromotionTeasers": []
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "productId": "100383606",
+    "productName": "Fideos DON VITTORIO Spaghetti Bolsa 950g",
+    "brand": "DON VITTORIO",
+    "link": "https://www.makro.plazavea.com.pe/fideos-don-vittorio-spaghetti-bolsa-950g-20277768/p",
+    "categoryId": "454",
+    "CantidadBiPrecioMK": ["3"],
+    "CantidadTriPrecioMK": ["12"],
+    "items": [
+      {
+        "itemId": "10536673",
+        "name": "Fideos DON VITTORIO Spaghetti Bolsa 950g",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/35462680/20277768.jpg?v=639207697520670000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "sellerName": "Makro Plazavea",
+            "commertialOffer": {
+              "Price": 5.1,
+              "ListPrice": 5.1,
+              "IsAvailable": true,
+              "AvailableQuantity": 7664,
+              "Tax": 0,
+              "PromotionTeasers": [
+                {
+                  "Name": "MAKRO-Bi-Precio|Vigente Oculto",
+                  "GeneralValues": {},
+                  "Conditions": {
+                    "MinimumQuantity": 0,
+                    "Parameters": [
+                      {
+                        "Name": "PaymentMethodId",
+                        "Value": "4"
+                      }
+                    ]
+                  },
+                  "Effects": {
+                    "Parameters": [
+                      {
+                        "Name": "PromotionalPriceTableItemsIds",
+                        "Value": "10536673"
+                      },
+                      {
+                        "Name": "PromotionalPriceTableItemsDiscount",
+                        "Value": "0.10"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "productId": "104",
+    "productName": "Harina Sin Preparar FAVORITA Paquete 1kg",
+    "brand": "FAVORITA",
+    "link": "https://www.makro.plazavea.com.pe/favorita-harina-s-prep-un1kg/p",
+    "categoryId": "349",
+    "CantidadBiPrecioMK": ["3"],
+    "CantidadTriPrecioMK": ["12"],
+    "Presentación unitarios vitrina": ["Paquete 1kg"],
+    "items": [
+      {
+        "itemId": "155",
+        "name": "Harina Sin Preparar FAVORITA Paquete 1kg",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/16380961/10443.jpg?v=637970148005130000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "sellerName": "Makro Plazavea",
+            "commertialOffer": {
+              "Price": 5.2,
+              "ListPrice": 5.2,
+              "IsAvailable": true,
+              "AvailableQuantity": 1152,
+              "Tax": 0,
+              "PromotionTeasers": []
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "productId": "100140036",
+    "productName": "Avena QUAKER Tradicional Bolsa 900g",
+    "brand": "QUAKER",
+    "link": "https://www.makro.plazavea.com.pe/avena-quaker-tradicional-bolsa-900g/p",
+    "categoryId": "1639",
+    "Presentación unitarios vitrina": ["Bolsa 900g"],
+    "items": [
+      {
+        "itemId": "10237660",
+        "name": "Avena QUAKER Tradicional Bolsa 900g",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/34359769/20251263.jpg?v=639125043115100000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "sellerName": "Makro Plazavea",
+            "commertialOffer": {
+              "Price": 11,
+              "ListPrice": 11,
+              "IsAvailable": true,
+              "AvailableQuantity": 826,
+              "Tax": 0,
+              "PromotionTeasers": []
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "productId": "101190157",
+    "productName": "Papel Higiénico SUAVE Resistemax Doble Hoja Paquete 48un",
+    "brand": "SUAVE",
+    "link": "https://www.makro.plazavea.com.pe/papel-higienico-suave-resistemax-doble-hoja-paquete-48un/p",
+    "categoryId": "402",
+    "Presentación unitarios vitrina": ["Paquete 48un"],
+    "items": [
+      {
+        "itemId": "11566712",
+        "name": "Papel Higiénico SUAVE Resistemax Doble Hoja Paquete 48un",
+        "measurementUnit": "un",
+        "unitMultiplier": 1,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/34359174/20212799.jpg?v=639125038569070000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "sellerName": "Makro Plazavea",
+            "commertialOffer": {
+              "Price": 27.9,
+              "ListPrice": 27.9,
+              "IsAvailable": true,
+              "AvailableQuantity": 934,
+              "Tax": 0,
+              "PromotionTeasers": []
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "productId": "101189563",
+    "productName": "Pollo Sin Menudencia SAN FERNANDO x kg",
+    "brand": "SAN FERNANDO",
+    "link": "https://www.makro.plazavea.com.pe/pollo-sin-menudencia-san-fernando-x-kg-20216175/p",
+    "categoryId": "841",
+    "items": [
+      {
+        "itemId": "11566118",
+        "name": "Pollo Sin Menudencia SAN FERNANDO x kg",
+        "measurementUnit": "kg",
+        "unitMultiplier": 1.9,
+        "images": [
+          {
+            "imageUrl": "https://plazavea.vteximg.com.br/arquivos/ids/30215302/20216175.jpg?v=638833515826070000"
+          }
+        ],
+        "sellers": [
+          {
+            "sellerId": "1",
+            "sellerName": "Makro Plazavea",
+            "commertialOffer": {
+              "Price": 11.5,
+              "ListPrice": 11.5,
+              "IsAvailable": true,
+              "AvailableQuantity": 33,
+              "Tax": 0,
+              "PromotionTeasers": []
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

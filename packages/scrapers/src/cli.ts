@@ -3,6 +3,7 @@ import { createIngestionStore } from "@comprafino/db";
 import { createTottusAdapter } from "./tottus.ts";
 import { createPlazaVeaAdapter } from "./plaza-vea.ts";
 import { createMetroAdapter } from "./metro.ts";
+import { createMakroAdapter } from "./makro.ts";
 import { ingest } from "./ingestion.ts";
 
 import { parseArguments } from "./cli-options.ts";
@@ -13,6 +14,7 @@ async function main() {
     tottus: createTottusAdapter,
     "plaza-vea": createPlazaVeaAdapter,
     metro: createMetroAdapter,
+    makro: createMakroAdapter,
   };
   const adapter =
     retailer === "tottus"

@@ -6,12 +6,12 @@ import { categoryRequestBudget, workflowCadence, catalogProjection } from "./cat
 it("accounts for sparse page caps independently of usable observation limits", () => {
   const budget = categoryRequestBudget();
   expect(budget).toMatchObject({
-    categorySources: 17,
-    observationCap: 600,
-    typicalRequests: 28,
-    maximumRequests: 100,
+    categorySources: 24,
+    observationCap: 820,
+    typicalRequests: 39,
+    maximumRequests: 137,
   });
-  expect(budget.sources.filter((s) => s.maximumRequests === 2)).toHaveLength(13);
+  expect(budget.sources.filter((s) => s.maximumRequests === 2)).toHaveLength(19);
 });
 
 it("reads actual cron cadence and refuses unsupported or invalid assumptions", () => {
@@ -47,7 +47,7 @@ it("qualifies recorded evidence by date, full source identity and catalog size",
     provenance: {
       baselineCommit: "c3e5eb7",
       sourceConfigurationIdentity: sourceConfigurationIdentity(),
-      categorySources: 17,
+      categorySources: 24,
       catalogListings: 952,
       note: "Worktree measurement, exact revision unknown",
     },
@@ -90,7 +90,7 @@ it("preserves the recorded runtime evidence and checks its source attribution", 
     ),
   );
   expect(refreshMeasurementEvidence(value, 952)).toMatchObject({
-    sourceScopeMatches: true,
-    comparable: true,
+    sourceScopeMatches: false,
+    comparable: false,
   });
 });

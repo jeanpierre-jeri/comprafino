@@ -2,7 +2,7 @@
 
 ## Refresh coverage and ownership
 
-`pnpm refresh:catalog` runs configured category adapters sequentially, then eligible targeted known-listing lookups, then complete normalization and matching. `refreshCoverage` in `packages/scrapers/src/refresh-adapters.ts` defines each retailer/category limit. Scheduled retailer totals derive from this configuration; `pnpm catalog:budget` derives source counts, observation caps and page/request bounds. Tottus uses validated meat/dairy scopes; Plaza Vea/Metro use dairy and six staples, with a narrow Metro eggs scope. No arbitrary URL/category input or broad crawl exists.
+`pnpm refresh:catalog` runs configured category adapters sequentially, then eligible targeted known-listing lookups, then complete normalization and matching. `refreshCoverage` in `packages/scrapers/src/refresh-adapters.ts` defines each retailer/category limit. Scheduled retailer totals derive from this configuration; `pnpm catalog:budget` derives source counts, observation caps and page/request bounds. Tottus uses validated meat/dairy scopes; Plaza Vea/Metro/Makro use dairy and six staples, with a narrow Metro eggs scope. No arbitrary URL/category input or broad crawl exists.
 
 All categories for one retailer fetch before its atomic write. Bounded rotation can add new identities while absent sample rows remain retained. The 2,000-listing admission/read guard fails rather than silently truncating downstream derivation. Review capacity before any expansion.
 
@@ -52,6 +52,8 @@ pnpm match:catalog -- --limit=2000
 Retailer commands support bounded allowlisted `--category`, `--limit` and database-free `--dry-run`; see [retailer guides](../packages/scrapers/README.md). Discovery/targeted dry-runs read the database but make no retailer requests or writes. A failed source/schema response requires inspection, not retries or access-control bypass.
 
 ## Migration and rollout
+
+Makro requires `0011_real_quasar.sql` before updated refresh/discovery code runs; it expands the retailer constraint and seeds the fourth store. No application database is migrated by this implementation. Makro adds seven sources and up to 220 observations; current budgets derive from configuration, and prior timing evidence is no longer comparable. See [Makro](retailers/makro.md).
 
 Fresh environments apply the full existing journal using `pnpm db:migrate`. Generate migrations only for reviewed schema changes. Deploy category/discovery/targeted ingestion and every raw/derived identity writer together with corresponding readers. Older writers do not gain evidence preservation, capacity locking, current-benefit verification or automatic identity invalidation merely from additive columns. Reconcile normalization and matching after raw identity changes; normalization alone cannot reauthorize an exact association.
 

@@ -109,6 +109,9 @@ export default function Home() {
           <li className="retailer-badge" data-retailer="metro">
             Metro
           </li>
+          <li className="retailer-badge" data-retailer="makro">
+            Makro
+          </li>
         </ul>
       </section>
     </PublicShell>

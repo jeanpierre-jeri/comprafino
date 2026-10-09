@@ -36,7 +36,7 @@ try {
       [productId, `Leche Gloria Entera 946ml · fixture ${kind}`],
     );
 
-    for (const retailer of ["metro", "plaza-vea", "tottus"] as const) {
+    for (const retailer of ["metro", "plaza-vea", "tottus", "makro"] as const) {
       let ages;
 
       if (kind === "continuous" || kind === "decrease") {
@@ -66,6 +66,7 @@ try {
           url: {
             tottus: "https://www.tottus.com.pe/tottus-pe/articulo/1/test",
             metro: "https://www.metro.pe/test/p",
+            makro: "https://www.makro.plazavea.com.pe/test/p",
             "plaza-vea": "https://www.plazavea.com.pe/test/p",
           }[retailer],
           currentPriceCents: observedFixturePrice(kind, index, prices),
@@ -224,7 +225,7 @@ try {
   )) {
     const history = await getCanonicalProductPriceHistory(db, id);
 
-    if (history?.retailers.length !== 3) {
+    if (history?.retailers.length !== 4) {
       throw new Error("Fixture history eligibility failed");
     }
 

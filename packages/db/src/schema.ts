@@ -118,7 +118,7 @@ export const retailers = pgTable(
     id: text("id").primaryKey(),
     name: text("name").notNull(),
   },
-  (t) => [check("retailer_identity", sql`${t.id} in ('tottus', 'plaza-vea', 'metro')`)],
+  (t) => [check("retailer_identity", sql`${t.id} in ('tottus', 'plaza-vea', 'metro', 'makro')`)],
 );
 
 export const discoveryQueries = pgTable(

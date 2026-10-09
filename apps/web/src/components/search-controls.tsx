@@ -87,6 +87,7 @@ export function SearchControls({
                 { value: "tottus", label: "Tottus" },
                 { value: "plaza-vea", label: "Plaza Vea" },
                 { value: "metro", label: "Metro" },
+                { value: "makro", label: "Makro" },
               ]}
             />
             {(units.length > 1 || filters.unit) && (

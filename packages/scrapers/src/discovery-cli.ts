@@ -17,6 +17,7 @@ import { processDiscoveryQuery } from "./discovery.ts";
 import { createTottusAdapter } from "./tottus.ts";
 import { createPlazaVeaAdapter } from "./plaza-vea.ts";
 import { createMetroAdapter } from "./metro.ts";
+import { createMakroAdapter } from "./makro.ts";
 
 try {
   const { limit, dryRun } = parseDiscoveryOptions(process.argv.slice(2));
@@ -45,7 +46,12 @@ try {
     const claims = await claimDiscoveryQueries(db, limit);
     const results: Awaited<ReturnType<typeof processDiscoveryQuery>>[] = [];
     const tasks = {
-      adapters: [createTottusAdapter(), createPlazaVeaAdapter(), createMetroAdapter()],
+      adapters: [
+        createTottusAdapter(),
+        createPlazaVeaAdapter(),
+        createMetroAdapter(),
+        createMakroAdapter(),
+      ],
       persist: (
         retailer: Parameters<typeof persistListingsDetailed>[1],
         rows: Parameters<typeof persistListingsDetailed>[2],

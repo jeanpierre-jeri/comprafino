@@ -38,6 +38,7 @@ export async function lookupVtex(
   endpoint: string,
   known: KnownListing,
   parse: (raw: unknown, at: Date) => { listings: NormalizedRetailerListing[] },
+  salesChannel: "1" | "9" = "1",
 ): Promise<TargetedResult> {
   if (!/^\d+$/u.test(known.externalId)) {
     throw new Error("Invalid SKU");
@@ -45,7 +46,7 @@ export async function lookupVtex(
 
   const url = new URL(endpoint);
   url.searchParams.set("fq", `skuId:${known.externalId}`);
-  url.searchParams.set("sc", "1");
+  url.searchParams.set("sc", salesChannel);
   url.searchParams.set("_from", "0");
   url.searchParams.set("_to", "0");
   const response = await fetchPage(url, requestOptions("application/json"));

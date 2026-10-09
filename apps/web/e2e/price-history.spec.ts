@@ -44,7 +44,7 @@ test.describe("isolated ordinary-history fixtures", () => {
         ),
     ).toBeTruthy();
 
-    for (const name of ["Metro", "Plaza Vea", "Tottus"]) {
+    for (const name of ["Metro", "Plaza Vea", "Tottus", "Makro"]) {
       await expect(section.getByRole("button", { name, exact: true })).toHaveAttribute(
         "aria-pressed",
         "true",
@@ -56,6 +56,15 @@ test.describe("isolated ordinary-history fixtures", () => {
       "aria-pressed",
       "false",
     );
+  });
+  test("Makro can be selected in the public supermarket filter", async ({ page }) => {
+    await page.goto("/search?q=gloria");
+    const supermarket = page.getByRole("combobox", { name: "Supermercado", exact: true });
+    await supermarket.click();
+    await page.getByRole("option", { name: "Makro", exact: true }).click();
+    await expect(page).toHaveURL(/retailer=makro/u);
+    await expect(supermarket).toContainText("Makro");
+    await expect(page.locator('.retailer-badge[data-retailer="makro"]').first()).toBeVisible();
   });
   test("URL range changes metrics and preserves benefits in both directions", async ({ page }) => {
     await page.goto(`/products/${fixture("rich")}?range=7d&priceMode=benefits`);
@@ -86,7 +95,7 @@ test.describe("isolated ordinary-history fixtures", () => {
       }),
     ).toBeVisible();
     await expect(page.locator("[data-slot=chart]")).toHaveCount(0);
-    await expect(page.getByRole("heading", { name: "Compara en 3 supermercados" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Compara en 4 supermercados" })).toBeVisible();
     await page.goto(`/products/${fixture("old")}`);
     await expect(
       page.getByText("No tenemos registros de precio en este rango.", { exact: true }),

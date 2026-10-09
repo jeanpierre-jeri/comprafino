@@ -1,7 +1,7 @@
 import { conditionalOfferSchema } from "./conditional-offer.ts";
 import { z } from "zod";
 
-export const retailerIdSchema = z.enum(["tottus", "plaza-vea", "metro"]);
+export const retailerIdSchema = z.enum(["tottus", "plaza-vea", "metro", "makro"]);
 
 export type RetailerId = z.infer<typeof retailerIdSchema>;
 

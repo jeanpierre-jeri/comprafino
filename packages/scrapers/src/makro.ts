@@ -2,20 +2,21 @@ import { createPlazaStorefrontAdapter, parsePlazaStorefrontPage } from "./plaza-
 import type { PlazaStorefront } from "./plaza-storefront.ts";
 import type { VtexCategory } from "./staple-categories.ts";
 
+// Public Makro homepage declares jssalesChannel=9; channel 1 is unavailable.
 const storefront = {
-  retailer: "plaza-vea",
-  name: "Plaza Vea",
-  origin: "https://www.plazavea.com.pe",
-  salesChannel: "1",
+  retailer: "makro",
+  name: "Makro",
+  origin: "https://www.makro.plazavea.com.pe",
+  salesChannel: "9",
 } as const satisfies PlazaStorefront;
 
-export const plazaVeaCatalogUrl = `${storefront.origin}/api/catalog_system/pub/products/search`;
+export const makroCatalogUrl = `${storefront.origin}/api/catalog_system/pub/products/search`;
 
-export function parsePlazaVeaPage(raw: unknown, observedAt: Date) {
+export function parseMakroPage(raw: unknown, observedAt: Date) {
   return parsePlazaStorefrontPage(raw, observedAt, storefront);
 }
 
-export function createPlazaVeaAdapter(
+export function createMakroAdapter(
   fetchPage: typeof fetch = fetch,
   category: VtexCategory = "dairy",
 ) {

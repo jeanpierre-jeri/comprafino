@@ -68,6 +68,7 @@ const retailerHosts: Record<RetailerId, string> = {
   tottus: "www.tottus.com.pe",
   "plaza-vea": "www.plazavea.com.pe",
   metro: "www.metro.pe",
+  makro: "www.makro.plazavea.com.pe",
 };
 
 const productImageHosts = [

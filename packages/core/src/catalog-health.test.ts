@@ -8,7 +8,7 @@ const now = new Date("2026-10-07T01:00:00Z");
 
 function snapshot(): CatalogHealthSnapshot {
   return {
-    retainedListings: 30,
+    retainedListings: retailerIdSchema.options.length * 10,
     skippedByCapacity: null,
     retailers: retailerIdSchema.options.map((retailer, index) => {
       const success = {
@@ -89,7 +89,8 @@ describe("catalog health monitoring", () => {
   it("warns at full capacity while separately alerting on observed skips and overflow", () => {
     const input = snapshot();
     input.retainedListings = catalogPolicy.retainedListingCap;
-    input.retailers[0]!.known = catalogPolicy.retainedListingCap - 20;
+    input.retailers[0]!.known =
+      catalogPolicy.retainedListingCap - (retailerIdSchema.options.length - 1) * 10;
     expect(evaluateCatalogHealth(input, now)).toMatchObject({
       status: "healthy",
       issues: [{ severity: "warning", reason: "catalog_full" }],
@@ -100,7 +101,8 @@ describe("catalog health monitoring", () => {
       skippedByCapacity: 3,
     });
     input.retainedListings = catalogPolicy.overflowSentinel;
-    input.retailers[0]!.known = catalogPolicy.overflowSentinel - 20;
+    input.retailers[0]!.known =
+      catalogPolicy.overflowSentinel - (retailerIdSchema.options.length - 1) * 10;
     expect(evaluateCatalogHealth(input, now).issues).toContainEqual({
       severity: "error",
       reason: "catalog_overflow",
