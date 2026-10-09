@@ -216,12 +216,14 @@ test.describe("isolated listing details", () => {
       "Disponibilidad no confirmada.",
     );
     await page.goto(`/products/${fixture("rich")}`);
-    const offers = page.getByRole("region", { name: /^Compara en/ }).getByRole("article");
+    const offers = page
+      .getByRole("region", { name: /^Precios y registros en/ })
+      .getByRole("article");
     await expect(offers.first()).toContainText("Disponibilidad no confirmada.");
     await expect(offers.first()).toContainText("Precio online para todos");
     await page.goto(`/products/${fixture("old")}`);
     const historicalOffer = page
-      .getByRole("region", { name: /^Compara en/ })
+      .getByRole("region", { name: /^Precios y registros en/ })
       .getByRole("article")
       .first();
     await expect(historicalOffer).toContainText("Disponibilidad no confirmada.");
@@ -256,7 +258,7 @@ test.describe("isolated listing details", () => {
       "S/ 5.71 / L · con CMR",
     );
     const tottus = page
-      .getByRole("region", { name: /^Compara en/ })
+      .getByRole("region", { name: /^Precios y registros en/ })
       .getByRole("article")
       .filter({ has: page.getByRole("heading", { name: "Tottus", exact: true }) });
     await expect(tottus.locator(".benefit-surface")).toContainText("S/ 5.71 / L · con CMR");

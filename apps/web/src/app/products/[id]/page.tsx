@@ -1,6 +1,7 @@
 import { UnitPriceReference } from "../../../components/unit-price-reference";
+import { ComparisonCoverage } from "../../../components/comparison-coverage";
 import type { RetailerOffer } from "@comprafino/db";
-import { canonicalUnitPrice } from "@comprafino/core";
+import { canonicalUnitPrice, classifyProductFamily } from "@comprafino/core";
 import { AvailabilityNotice } from "../../../components/availability-notice";
 import { catalogQuantityToShoppingUnit } from "@comprafino/core";
 import { logDiagnostic } from "../../../server/diagnostics.ts";
@@ -153,6 +154,11 @@ export default async function ProductPage({ params, searchParams }: Props) {
                 </p>
                 <UnitPriceReference
                   conditional
+                  family={
+                    benefitSource
+                      ? classifyProductFamily({ title: benefitSource.title }).family
+                      : null
+                  }
                   price={
                     benefitSource
                       ? pricePerUnit(product.lowestBenefit.priceCents, benefitSource)
@@ -183,14 +189,13 @@ export default async function ProductPage({ params, searchParams }: Props) {
       <SearchControls query="" filters={filters} comparisonPath={`/products/${product.id}`} />
       <section className="mt-8" aria-labelledby="offers-title">
         <h2 id="offers-title" className="text-2xl font-semibold tracking-tight">
-          Compara en {product.retailerCount} supermercados
+          Precios y registros en {product.retailerCount} supermercados
         </h2>
-        <ul className="mt-5 space-y-4">
+        <ComparisonCoverage product={product} />
+        <ul className="mt-5 flex flex-col gap-4">
           {product.offers.map((offer) => {
-            const best =
-              offer.freshness === "fresh" &&
-              offer.available !== false &&
-              offer.currentPriceCents === product.lowestPriceCents;
+            const current = offer.freshness === "fresh" && offer.available !== false;
+            const best = current && offer.currentPriceCents === product.lowestPriceCents;
             const url = retailerProductUrl(offer);
 
             return (
@@ -217,7 +222,9 @@ export default async function ProductPage({ params, searchParams }: Props) {
                     >
                       {formatPen(offer.currentPriceCents)}
                     </p>
-                    <p className="text-xs text-muted-foreground">Precio online para todos</p>
+                    <p className="text-xs text-muted-foreground">
+                      {current ? "Precio online para todos" : "Último precio registrado para todos"}
+                    </p>
                     {offer.regularPriceCents !== null && (
                       <p className="mt-1 text-sm text-muted-foreground">
                         Antes <s>{formatPen(offer.regularPriceCents)}</s>
@@ -228,6 +235,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
                         <p className="font-semibold">{formatPen(benefit.priceCents)} con CMR</p>
                         <UnitPriceReference
                           conditional
+                          family={classifyProductFamily({ title: offer.title }).family}
                           price={pricePerUnit(benefit.priceCents, offer)}
                         />
                         <p className="text-xs">{benefit.conditionLabel}</p>

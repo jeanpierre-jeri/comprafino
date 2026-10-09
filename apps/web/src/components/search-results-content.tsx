@@ -74,6 +74,10 @@ export function SearchResultsContent({
         <section className="exact-section" aria-label="Comparaciones del mismo producto">
           <p className="eyebrow">Entre supermercados</p>
           <h2 className="mt-2 text-2xl font-semibold tracking-tight">Compara el mismo producto</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Comparaciones por relevancia entre todas las tiendas con registros. El precio «Desde»
+            considera sus ofertas vigentes, aunque selecciones un supermercado.
+          </p>
           <p className="mt-2 mb-4 text-xs text-muted-foreground">
             {products.length === 20 ? "Hasta 20" : products.length} productos para «{query}»
           </p>

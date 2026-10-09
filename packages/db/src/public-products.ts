@@ -58,6 +58,7 @@ export type ProductComparison = Omit<z.infer<typeof productSchema>, "offers"> & 
   offers: RetailerOffer[];
   imageUrl: string | null;
   retailerCount: number;
+  currentOfferCount: number;
   lowestPriceCents: number | null;
   cheapestRetailers: string[];
   bestRanking: { priceCents: number; retailers: string[]; conditions: string[] } | null;
@@ -185,6 +186,9 @@ export function publicProduct(
     offers,
     imageUrl,
     retailerCount: offers.length,
+    // Unknown stock remains admitted under the existing tri-state policy.
+    // This count describes usable price observations, not confirmed stock.
+    currentOfferCount: ranked.length,
     lowestPriceCents: cheapest[0]?.currentPriceCents ?? null,
     cheapestRetailers: cheapest.map((offer) => offer.retailerName),
   };

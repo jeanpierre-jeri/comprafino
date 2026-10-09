@@ -12,7 +12,6 @@ import type { HistoryRange } from "@comprafino/core";
 import {
   createDatabase,
   formatPen,
-  formatUnitPrice,
   getPublicRetailerListingDetail,
   isPublicProductId,
 } from "@comprafino/db";
@@ -114,11 +113,12 @@ export default async function ListingPage({ params, searchParams }: Props) {
                 Referencia registrada <s>{formatPen(listing.regularPriceCents)}</s>
               </p>
             )}
-            {listing.unitPrice && (
-              <p className="unit-price">
-                {formatUnitPrice(listing.unitPrice)}
-                {listing.unitPrice.quality === "approximate" ? " · orientativo" : ""}
-              </p>
+            {listing.pricingBasis !== "kg" && (
+              <UnitPriceReference
+                price={listing.unitPrice}
+                family={listing.family.family}
+                unavailableReason={listing.unitPriceUnavailableReason}
+              />
             )}
             <AvailabilityNotice available={listing.available} />
             {!listing.current && (
@@ -137,6 +137,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
               {listing.pricingBasis !== "kg" && (
                 <UnitPriceReference
                   conditional
+                  family={listing.family.family}
                   price={repriceUnitPrice(
                     listing.unitPrice,
                     listing.currentPriceCents,

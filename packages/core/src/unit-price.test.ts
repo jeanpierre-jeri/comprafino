@@ -135,6 +135,22 @@ it.each([15, 30])("a %i egg tray contains one package", (count) => {
   expect(attrs.quantity).toEqual({ value: count, unit: "unit" });
 });
 
+it("labels validated egg counts without changing rational ranking or other bases", () => {
+  const eggs = price({ currentPriceCents: 1790, totalQuantity: { value: 30, unit: "unit" } });
+  const roundedTie = price({ currentPriceCents: 1800, totalQuantity: { value: 30, unit: "unit" } });
+  expect(formatUnitPrice(eggs, "eggs")).toBe("S/ 0.60 / huevo");
+  expect(formatUnitPrice(roundedTie, "eggs")).toBe("S/ 0.60 / huevo");
+  expect(compareUnitPrices(eggs, roundedTie)).toBe(-1);
+  expect(formatUnitPrice(eggs)).toBe("S/ 0.60 / unidad");
+  expect(formatUnitPrice(price(), "eggs")).toBe("S/ 7.80 / kg");
+  expect(
+    formatUnitPrice(
+      { ...eggs, basis: "roll", displayUnit: "roll", quality: "approximate" },
+      "eggs",
+    ),
+  ).toBe("S/ 0.60 / rollo");
+});
+
 it("withholds canned tuna mass comparison without confusing net and drained weight", () => {
   const tunaNow = new Date("2026-10-04T16:00:00Z");
   const result = calculateUnitPrice(

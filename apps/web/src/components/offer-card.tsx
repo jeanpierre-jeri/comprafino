@@ -1,5 +1,6 @@
 import { UnitPriceReference } from "./unit-price-reference";
-import { repriceUnitPrice, canonicalUnitPrice } from "@comprafino/core";
+import { ComparisonCoverage } from "./comparison-coverage";
+import { repriceUnitPrice, canonicalUnitPrice, classifyProductFamily } from "@comprafino/core";
 import { AvailabilityNotice } from "./availability-notice";
 import { AddShoppingItem } from "./shopping-list/shopping-item-editor";
 import { shoppingQueryForTitle, shoppingSeedForRetailerOffer } from "@comprafino/core";
@@ -59,7 +60,13 @@ export function GenericOfferCard({
             </p>
           )}
         </div>
-        {offer.pricingBasis !== "kg" && <UnitPriceReference price={ordinaryUnitPrice} />}
+        {offer.pricingBasis !== "kg" && (
+          <UnitPriceReference
+            price={ordinaryUnitPrice}
+            family={offer.family.family}
+            unavailableReason={offer.unitPriceUnavailableReason}
+          />
+        )}
         {offer.conditionalOffers.map((benefit) => (
           <div key={benefit.programKey} className="benefit-surface">
             <p className="text-sm font-semibold">
@@ -69,6 +76,7 @@ export function GenericOfferCard({
             {offer.pricingBasis !== "kg" && (
               <UnitPriceReference
                 conditional
+                family={offer.family.family}
                 price={repriceUnitPrice(
                   offer.unitPrice,
                   offer.ranking.priceCents,
@@ -100,7 +108,7 @@ export function GenericOfferCard({
             href={`/products/${offer.canonicalId}${benefits ? "?priceMode=benefits" : ""}`}
             className="comparison-link"
           >
-            Comparar este producto en {offer.retailerCount} supermercados
+            Ver comparación entre supermercados
           </NavigationLink>
         )}
         <AddShoppingItem
@@ -194,7 +202,15 @@ export function ExactProductCard({
                   <p className="text-sm font-semibold">
                     Con CMR: {formatPen(conditionalRanking.priceCents)}
                   </p>
-                  <UnitPriceReference conditional price={benefitUnitPrice} />
+                  <UnitPriceReference
+                    conditional
+                    price={benefitUnitPrice}
+                    family={
+                      benefitSource
+                        ? classifyProductFamily({ title: benefitSource.title }).family
+                        : null
+                    }
+                  />
                   <p className="mt-1 text-xs">
                     {conditionalRanking.retailers.join(" y ")} ·{" "}
                     {conditionalRanking.conditions.join(" · ")}
@@ -205,13 +221,14 @@ export function ExactProductCard({
           )}
         </div>
         <p className="comparison-link">
-          Comparar en {product.retailerCount} supermercados
+          Ver registros en {product.retailerCount} supermercados
           <ArrowRight
             aria-hidden="true"
             size={14}
             className="ml-1 inline-block shrink-0 align-middle"
           />
         </p>
+        <ComparisonCoverage product={product} />
       </NavigationLink>
       <div className="mt-auto">
         {observedAt && <ObservedAt date={observedAt} relativeTo={observedNow} />}

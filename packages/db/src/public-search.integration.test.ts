@@ -503,6 +503,7 @@ describe.skipIf(!testUrl)("PostgreSQL public-search (explicit TEST_DATABASE_URL)
     const product = await getCanonicalProductComparison(db, id);
     expect(product).toMatchObject({
       retailerCount: 2,
+      currentOfferCount: 2,
       lowestPriceCents: 590,
       cheapestRetailers: ["Metro"],
     });
@@ -552,6 +553,7 @@ describe.skipIf(!testUrl)("PostgreSQL public-search (explicit TEST_DATABASE_URL)
       await query(`update retailer_listings set ${update} where id=$1::uuid`, [listingId]);
       const filtered = await getCanonicalProductComparison(db, id);
       expect(filtered?.cheapestRetailers.length ?? null).toBe(update === "active=false" ? null : 1);
+      expect(filtered?.currentOfferCount ?? null).toBe(update === "active=false" ? null : 1);
       await query("update retailer_listings set active=true,available=true where id=$1::uuid", [
         listingId,
       ]);
@@ -615,6 +617,7 @@ describe.skipIf(!testUrl)("PostgreSQL public-search (explicit TEST_DATABASE_URL)
     const product = await getCanonicalProductComparison(db, id);
     expect(product).not.toBeNull();
     expect(product!.lowestPriceCents).toBeNull();
+    expect(product!.currentOfferCount).toBe(0);
     expect(product!.cheapestRetailers).toEqual([]);
     const options = { limit: 1, dryRun: true, retailer: undefined, externalId: undefined };
     const before = await query("select * from retailer_listings order by id");

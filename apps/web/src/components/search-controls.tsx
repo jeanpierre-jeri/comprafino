@@ -117,6 +117,13 @@ export function SearchControls({
           ]}
         />
       </fieldset>
+      {!comparisonPath && (
+        <p className="mt-2.5 text-xs text-muted-foreground">
+          El orden elegido se aplica a «Opciones en supermercados». El supermercado filtra esas
+          ofertas y las comparaciones que incluyen esa tienda; cada comparación conserva los precios
+          de todas sus tiendas.
+        </p>
+      )}
       <output className="mt-2.5 block text-xs leading-relaxed text-muted-foreground">
         {filterStatusMessage(pending, filters.priceMode)}
       </output>

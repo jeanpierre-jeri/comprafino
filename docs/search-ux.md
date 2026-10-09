@@ -2,13 +2,13 @@
 
 Search remains server-rendered and shareable. The query form submits a GET search. A small client toolbar immediately navigates with App Router `router.push(..., {scroll:false})` when a select changes. There is no Apply button, browser-side results cache, state-management dependency or persistent filter preference. Labelled Base UI custom Select triggers/popups support keyboards; navigation disables the fieldset while pending and announces “Actualizando resultados…” using an output/status element. Back/forward restores controls from server URL props.
 
-| Parameter   | Default (omitted) | Supported values               |
-| ----------- | ----------------- | ------------------------------ |
-| `q`         | empty             | existing validated query       |
-| `sort`      | `relevance`       | `total-price`, `unit-price`    |
-| `retailer`  | all               | `tottus`, `plaza-vea`, `metro` |
-| `unit`      | all bases         | `kg`, `L`, `unit`, `roll`      |
-| `priceMode` | `standard`        | `benefits`                     |
+| Parameter   | Default (omitted) | Supported values                        |
+| ----------- | ----------------- | --------------------------------------- |
+| `q`         | empty             | existing validated query                |
+| `sort`      | `relevance`       | `total-price`, `unit-price`             |
+| `retailer`  | all               | `tottus`, `plaza-vea`, `metro`, `makro` |
+| `unit`      | all bases         | `kg`, `L`, `unit`, `roll`               |
+| `priceMode` | `standard`        | `benefits`                              |
 
 Invalid, duplicate/repeated or unsupported filter values fall back independently to defaults. Query text is encoded. Example: `/search?q=huevos&sort=unit-price&unit=unit&retailer=metro&priceMode=benefits`. Exact detail supports `priceMode=benefits` too; comparison links preserve that preference.
 
@@ -23,6 +23,14 @@ Retailer selection filters independent offers and retains exact cards containing
 Default prices rank ordinary quotes. “Incluir beneficios” uses lower fresh CMR potential prices with adjacent required-card text; it does not assert user eligibility. Generic cards keep ordinary totals visible even when benefit unit prices determine sorting. See [conditional pricing](conditional-pricing.md).
 
 Discovery uses the successful **unfiltered** useful-query count. A retailer/unit filter returning zero existing candidates displays “No hay opciones con estos filtros” and suggests clearing filters; it creates no new missing-catalog demand. True underlying empty searches retain existing discovery handling. Public navigation never calls retailers.
+
+## Explicit comparison scope
+
+The toolbar says that sorting applies to “Opciones en supermercados” and explains the retailer filter's two scopes. The exact section states that comparisons retain relevance ordering and that “Desde” considers current offers across all stores in the group. Exact cards link to records in the counted stores; cards and detail separately show the number of current ordinary offers (positive, observed within 36 hours, not future, availability not false). Unknown stock remains allowed and disclosed; a current offer count is not a confirmed-stock count. Stale/unavailable exact records remain visible and cannot win. Detail labels their amounts “Último precio registrado para todos”.
+
+Validated strong egg counts use “/ huevo” for ordinary and CMR unit prices on independent cards/listing detail and CMR references in exact comparisons. Fractions, rounding, sorting and identity are unchanged. Independent cards and listing detail explain absent unit prices using existing calculation reasons. Direct KG quotes retain their source “/ kg” label.
+
+Controlled `apps/web/e2e/search-experience.spec.ts` cases run with `pnpm test:e2e:fixtures:local` after a production build, in the existing owned random schema. Fixtures exercise 15/30 eggs, differing variants, unknown stock, ordinary ties, CMR, missing/ambiguous quantities, stale/unavailable exclusions and exact comparisons retaining all stores under a retailer filter. DB tests cover one/zero current offers separately from retained store counts. No application catalog, retailer requests, schema changes or additional infrastructure are required.
 
 ## Milestone 12 visual refinement
 

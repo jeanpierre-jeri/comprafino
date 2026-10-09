@@ -170,14 +170,19 @@ export function compareUnitPrices(a: UnitPrice, b: UnitPrice): number {
   }
 }
 
-export function formatUnitPrice(price: UnitPrice): string {
+export function formatUnitPrice(price: UnitPrice, family: ProductFamily | null = null): string {
   const cents = (price.numerator * 2n + price.denominator) / (price.denominator * 2n);
 
   if (cents > BigInt(Number.MAX_SAFE_INTEGER)) {
     throw new Error("Unit price exceeds display range");
   }
 
-  return `${formatPen(Number(cents))} / ${unitDisplayLabels[price.displayUnit]}`;
+  const label =
+    family === "eggs" && price.basis === "item-count" && price.quality === "strong"
+      ? "huevo"
+      : unitDisplayLabels[price.displayUnit];
+
+  return `${formatPen(Number(cents))} / ${label}`;
 }
 
 export type GenericOfferSort = "relevance" | "total-price" | "unit-price";

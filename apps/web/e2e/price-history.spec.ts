@@ -95,7 +95,9 @@ test.describe("isolated ordinary-history fixtures", () => {
       }),
     ).toBeVisible();
     await expect(page.locator("[data-slot=chart]")).toHaveCount(0);
-    await expect(page.getByRole("heading", { name: "Compara en 4 supermercados" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Precios y registros en 4 supermercados" }),
+    ).toBeVisible();
     await page.goto(`/products/${fixture("old")}`);
     await expect(
       page.getByText("No tenemos registros de precio en este rango.", { exact: true }),

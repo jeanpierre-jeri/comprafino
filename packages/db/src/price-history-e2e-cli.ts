@@ -1,5 +1,6 @@
 import { fixtureDatabaseUrl } from "./testing/fixture-url.ts";
 import { ownedTestDatabase } from "./testing/database.ts";
+import { seedSearchExperienceFixtures } from "./testing/search-experience-fixtures.ts";
 import { getPublicRetailerListingDetail } from "./listing-detail.ts";
 import { seedBasketFixtures } from "./basket-fixtures.ts";
 import { seedShoppingListFixtures } from "./shopping-list-e2e-fixtures.ts";
@@ -314,6 +315,9 @@ try {
   }
 
   const shopping = all || process.argv.includes("--shopping-list");
+  if (listings) {
+    Object.assign(fixtures, await seedSearchExperienceFixtures(db, scopedClient));
+  }
   const shoppingFixtures = shopping
     ? {
         ...(await seedShoppingListFixtures(db, scopedClient)),

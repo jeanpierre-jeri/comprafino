@@ -8,9 +8,9 @@ Current domain guidance. Dated audits, measurements and acceptance narratives ar
 - `/search?q=gloria`: request-rendered, bounded product search.
 - `/products/[id]`: request-rendered comparison of an existing verified group. Invalid/unknown/ineligible IDs use Next.js `notFound()` and a public Spanish empty page. Next.js may stream a not-found response with HTTP 200; the not-found UI and framework noindex behavior remain authoritative for streamed responses.
 
-Only existing canonical associations are read. Each displayed group requires at least two distinct retailers with usable ordinary offers. Associations must be automatic, from the current matcher version (1), with confidence at least 0.90. A group containing any manual, obsolete-version or lower-confidence link is excluded entirely. Review decisions are not persisted as public associations; unmatched listings never appear as cross-store equivalents. Search neither runs matching nor writes to PostgreSQL. The matcher is unchanged.
+Only existing canonical associations are read. Each displayed group requires at least two distinct retailers with active listings, normalizations and positive open ordinary PEN/UN states. Associations must be automatic, from the current matcher version (1), with confidence at least 0.90. A group containing any manual, obsolete-version or lower-confidence link is excluded entirely. Review decisions are not persisted as public associations; unmatched listings never appear as cross-store equivalents. Search never runs matching; a true empty search can record discovery demand after the response. The matcher is unchanged.
 
-Eligible offers require an active listing, availability other than explicitly false, and an open PEN/UN price-history state. Unknown source availability is allowed; explicit unavailability, inactive listings and missing open prices are excluded. At least two eligible retailers must remain. Thus some saved groups can cease to be publicly comparable without altering their identity associations. There is no arbitrary age-based expiration.
+Exact comparisons retain stale and explicitly unavailable records for context. `retailerCount` counts those retained stores; `currentOfferCount` separately counts positive ordinary offers observed within the inclusive 36-hour freshness window, not in the future, with availability other than false. Only those current offers contribute to “Desde” and cheapest-store ranking. Unknown availability is disclosed and never interpreted as confirmed stock. Zero current offers leave the group/detail accessible with an updating message. Inactive listings and missing open price states are excluded; at least two retained retailers are required. Independent generic offers enforce freshness and availability before presentation. See [generic comparison](generic-comparison.md).
 
 ## Search and ranking
 
@@ -26,7 +26,7 @@ Every distinct query token must match a word prefix in the combined identity tex
 4. Highest `public.similarity()` against canonical or associated normalized retailer titles.
 5. Display name using PostgreSQL C collation, then product UUID.
 
-SQL is parameterized through Drizzle; query text cannot introduce wildcard or SQL behavior. At 28 saved groups, bounded aggregate queries require no extra index, schema migration or search service. Broader fuzzy recall, autocomplete, taxonomy and synonyms are deferred.
+SQL is parameterized through Drizzle; query text cannot introduce wildcard or SQL behavior. The current bounded aggregate search uses the existing schema and requires no additional search service. Broader fuzzy recall, autocomplete, taxonomy and synonyms are deferred.
 
 ## Database and price boundaries
 
@@ -34,7 +34,7 @@ SQL is parameterized through Drizzle; query text cannot introduce wildcard or SQ
 
 The authoritative price source is `price_history` where `valid_until IS NULL`, using the existing unique-open-state constraint. Listing price mirrors are not substituted. Ordinary ingestion already excludes card/member/quantity teaser discounts. Reference prices survive only when strictly greater than the open current price. Money remains integer PEN cents, formatted by the shared `formatPen` utility as `S/ 6.20`.
 
-Offers sort by current cents ascending, then retailer ID. All offers equal to the minimum are cheapest; the detail UI marks a tie and credits all stores. No invented unique winner, savings percentages or generalized unit-price calculation is presented. Exact structured package size/count provides context while preserving existing canonical names.
+Offers sort by current cents ascending, then retailer ID. All fresh, not-explicitly-unavailable offers equal to the minimum are cheapest; the detail UI marks a tie and credits all stores. No invented unique winner or savings percentages are presented. Supported unit references use the existing conservative quantity and freshness calculation. Exact structured package size/count provides context while preserving existing canonical names.
 
 Freshness uses `retailer_listings.last_seen_at`, the actual last observation (including unchanged prices), rather than history `valid_from`, which is when the price state began. `<time>` carries the ISO instant; visible dates/times use `es-PE` and `America/Lima`. The UI explains possible location, channel, availability and retailer-update differences. Prices are observed, never called live, guaranteed or real-time. There is no schedule, strict TTL or background refresh job.
 
@@ -50,7 +50,7 @@ No results: **“No encontramos ese producto todavía.”** The UI says zero-res
 
 ## Limits
 
-Coverage is a bounded grocery/household subset, not the whole supermarket catalog. Source descriptions and stable IDs inherit conservative matcher limitations. Rerun normalization and matching after source identity changes; stale automatic claims remain withheld. Generic relevance, exact identity and safe substitution are separate. Accounts, alerts and purchase-timing recommendations remain deferred. Scheduled acquisition and ordinary history are implemented by separate owners.
+Coverage is a bounded grocery/household subset, not the whole supermarket catalog. Source descriptions and stable IDs inherit conservative matcher limitations. Rerun normalization and matching after source identity changes; stale automatic claims remain withheld. Generic relevance, exact identity and safe substitution are separate. Accounts and shopping-list recommendations have separate owners; see [authentication](auth.md) and [shopping lists](shopping-list.md). Alerts remain deferred. Scheduled acquisition and ordinary history are implemented by separate owners.
 
 ## Positive ordinary purchasing prices (Cleanup A)
 

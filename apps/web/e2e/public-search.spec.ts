@@ -56,12 +56,16 @@ test.describe("persisted public catalog (explicit DATABASE_URL)", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(product!.displayName);
     await expect(page).toHaveTitle(`${product!.displayName} – precios | CompraFino`);
     await expect(
-      page.getByRole("heading", { name: `Compara en ${product!.retailerCount} supermercados` }),
+      page.getByRole("heading", {
+        name: `Precios y registros en ${product!.retailerCount} supermercados`,
+      }),
     ).toBeVisible();
 
     for (const offer of product!.offers) {
       const row = page
-        .getByRole("region", { name: `Compara en ${product!.retailerCount} supermercados` })
+        .getByRole("region", {
+          name: `Precios y registros en ${product!.retailerCount} supermercados`,
+        })
         .getByRole("article")
         .filter({ has: page.getByRole("heading", { name: offer.retailerName, exact: true }) });
       await expect(
@@ -113,15 +117,17 @@ test.describe("generic persisted offers (explicit DATABASE_URL)", () => {
     const first = section.locator("article[data-offer-id]").first();
     await expect(first).toHaveAttribute("data-offer-id", countOffers[0]!.id);
     await expect(
-      first.getByText(formatUnitPrice(countOffers[0]!.unitPrice!), { exact: true }),
+      first.getByText(formatUnitPrice(countOffers[0]!.unitPrice!, countOffers[0]!.family.family), {
+        exact: true,
+      }),
     ).toBeVisible();
     const independent = offers.find((o) => !o.canonicalId);
     expect(independent).toBeDefined();
     const independentCard = section.locator(`article[data-offer-id="${independent!.id}"]`);
     await expect(independentCard).toBeVisible();
-    await expect(independentCard.getByRole("link", { name: /Comparar este producto/ })).toHaveCount(
-      0,
-    );
+    await expect(
+      independentCard.getByRole("link", { name: /Ver comparación entre supermercados/ }),
+    ).toHaveCount(0);
     await expect(first.locator("time")).toHaveAttribute(
       "datetime",
       countOffers[0]!.observedAt.toISOString(),
@@ -222,7 +228,7 @@ test.describe("immediate filters and CMR (explicit DATABASE_URL)", () => {
     expect(product, "At least one freshly ingested exact CMR product is required").toBeDefined();
     await page.goto(`/products/${product!.id}`);
     const row = page
-      .getByRole("region", { name: /^Compara en \d+ supermercados$/u })
+      .getByRole("region", { name: /^Precios y registros en \d+ supermercados$/u })
       .getByRole("article")
       .filter({ has: page.getByRole("heading", { name: "Tottus", exact: true }) });
     const offer = product!.offers.find((o) => o.retailerId === "tottus")!;

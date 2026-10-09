@@ -48,6 +48,7 @@ it("validates the public database boundary, orders prices and preserves retailer
   expect(product.lowestPriceCents).toBe(590);
   expect(product.cheapestRetailers).toEqual(["Metro"]);
   expect(product.retailerCount).toBe(2);
+  expect(product.currentOfferCount).toBe(2);
   expect(product.offers[0]).toMatchObject({
     retailerId: "metro",
     retailerName: "Metro",
@@ -59,6 +60,32 @@ it("validates the public database boundary, orders prices and preserves retailer
   expect(() => publicProduct({ ...raw, quantityUnit: "unknown" })).toThrow(
     /Too small|Invalid option/u,
   );
+});
+
+it("distinguishes retained stores from current ordinary offers without claiming unknown stock", () => {
+  const product = publicProduct({
+    ...raw,
+    offers: [
+      { ...offer, available: null },
+      { ...raw.offers[1], available: false, currentPriceCents: 100 },
+      {
+        ...offer,
+        retailerId: "tottus",
+        retailerName: "Tottus",
+        observedAt: "2026-10-01T21:00:00Z",
+        currentPriceCents: 50,
+      },
+    ],
+  });
+  expect(product.retailerCount).toBe(3);
+  expect(product.currentOfferCount).toBe(1);
+  expect(product.lowestPriceCents).toBe(590);
+  expect(product.cheapestRetailers).toEqual(["Metro"]);
+  expect(product.offers).toHaveLength(3);
+  const historical = mapPublicProduct(raw, new Date("2026-10-05T10:00:00Z"));
+  expect(historical.currentOfferCount).toBe(0);
+  expect(historical.lowestPriceCents).toBeNull();
+  expect(historical.retailerCount).toBe(2);
 });
 
 it("retains tied retailers, drops lower references, chooses images independently of prices", () => {
