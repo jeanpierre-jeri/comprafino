@@ -16,6 +16,8 @@ VTEX returns HTTP 206 with one parent product; only the requested SKU is retaine
 
 `SearchRetailerAdapter` gains `lookupListing(known)` through the small targeted adapter interface. Results distinguish `observed` with the existing `NormalizedRetailerListing`, `unavailable`, and `not-found`. System/parse failures throw. Tottus category, search and PDP variants share `normalizeTottusProduct`; its parser moved to `tottus-parser.ts` to avoid a dependency cycle. VTEX uses its existing parsers. There is no third price/listing persistence path. Tottus PDP source images can use a different CDN; source URLs are preserved, while public image allowlisting continues to decide whether they are shown.
 
+Tottus empty or whitespace-only brand strings are treated as absent source-brand evidence across category, search and PDP parsing. Non-string brands still fail validation. Missing brand evidence never establishes an exact match; ordinary price, unit, SKU identity and tri-state availability validation remain required.
+
 ## Selection and request budget
 
 Default admission requires both:

@@ -118,6 +118,32 @@ it("preserves validated structured brand metadata for catalog normalization", ()
   expect(parseTottusPage(html(data), observed).listings[0]?.sourceBrand).toBe("TOTTUS");
 });
 
+it.each([undefined, "", " \n\t ", " TOTTUS "])(
+  "normalizes optional Tottus source brand %j without discarding an ordinary quote",
+  (brand) => {
+    const product = { ...fixture.props.pageProps.results[0]!, brand };
+    const data = {
+      props: { pageProps: { ...fixture.props.pageProps, results: [product] } },
+    };
+    const listing = parseTottusPage(html(data), observed).listings[0]!;
+    expect(listing.sourceBrand).toBe(brand?.trim() || undefined);
+    expect(listing.currentPriceCents).toBeGreaterThan(0);
+    expect(listing.available).toBeUndefined();
+  },
+);
+
+it.each([null, 42, {}, []])("rejects malformed Tottus source brand %j", (brand) => {
+  const data = {
+    props: {
+      pageProps: {
+        ...fixture.props.pageProps,
+        results: [{ ...fixture.props.pageProps.results[0]!, brand }],
+      },
+    },
+  };
+  expect(() => parseTottusPage(html(data), observed)).toThrow(/brand/u);
+});
+
 it("selects the observed dairy category while retaining the existing parser and request bounds", async () => {
   const request = vi.fn<typeof fetch>().mockResolvedValue(new Response(html(fixture)));
   await createTottusAdapter(request, "dairy").fetchListings(2);

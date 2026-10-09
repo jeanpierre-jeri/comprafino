@@ -122,6 +122,24 @@ it("maps Tottus exact variant using ordinary internet/reference price and quote 
   expect(fetcher).toHaveBeenCalledOnce();
 });
 
+it.each(["", " \n\t "])("Tottus blank brand %j preserves the exact ordinary quote", (brandName) => {
+  const fixture = structuredClone(tottus);
+  fixture.props.pageProps.productData.brandName = brandName;
+  const result = parseTottusProduct(html(fixture), tottusKnown, new Date());
+  expect(result).toMatchObject({
+    status: "observed",
+    listing: {
+      externalId: tottusKnown.externalId,
+      productId: tottusKnown.productId,
+      sourceBrand: undefined,
+      currentPriceCents: 970,
+      regularPriceCents: 1100,
+      priceUnit: "UN",
+      available: true,
+    },
+  });
+});
+
 it("Tottus unavailable does not fabricate prices and missing exact variants are not found", () => {
   const unavailable = structuredClone(tottus);
   unavailable.props.pageProps.productData.variants[0]!.isPurchaseable = false;

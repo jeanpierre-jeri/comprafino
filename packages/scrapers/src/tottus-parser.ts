@@ -10,7 +10,12 @@ const sourcePrice = z.object({
 });
 
 const sourceProduct = z.object({
-  brand: z.string().trim().min(1).optional(),
+  // Blank source metadata is absent brand evidence, never an inferred identity.
+  brand: z
+    .string()
+    .trim()
+    .transform((brand) => brand || undefined)
+    .optional(),
   productId: z.string().regex(/^\d+$/u),
   skuId: z.string().regex(/^\d+$/u),
   displayName: z.string().min(1),
