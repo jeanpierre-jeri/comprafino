@@ -28,6 +28,6 @@ it.each([
   expect(result.status).toBe(1);
   expect(result.stdout).toBe("");
   expect(result.stderr).toContain("invalid_discovery_options");
-  expect(result.stderr).toContain("--limit=1..30");
+  expect(result.stderr).toContain("--limit=1..60");
   expect(result.stderr).not.toMatch(/db_read_failed|private-input|invalid-private-database-url/u);
 });

@@ -1,7 +1,8 @@
 import { normalizeSearchQuery } from "./public-products.ts";
 import { retailerIdSchema } from "./listing.ts";
+import type { RetailerId } from "./listing.ts";
 
-// A month covers recurring weekly demand; 3,000 rows equals 100 daily budgets.
+// A month covers recurring weekly demand; retained demand stays independently bounded.
 export const discoveryDemandPolicy = {
   inactiveDays: 30,
   maximumRows: 3000,
@@ -9,11 +10,12 @@ export const discoveryDemandPolicy = {
   maximumOriginalLength: 120,
 } as const;
 
-export const discoveryDailyLimit = 30;
+export const discoveryDailyLimit = 240;
+export const discoveryRunLimit = 60;
 
-export const discoveryDefaultQueryLimit = 10;
+export const discoveryDefaultQueryLimit = 20;
 
-export const discoveryRetailerLimit = 10;
+export const discoveryRetailerLimit = 20;
 
 export const discoveryResultLimit = discoveryRetailerLimit * retailerIdSchema.options.length;
 
@@ -46,6 +48,11 @@ export function discoveryQueryForSearch(value: string, resultCount: number): str
   return resultCount === 0 && validDiscoveryQuery(value) ? normalizeDiscoveryQuery(value) : null;
 }
 
+/** Counts cover all eligible candidates, before filters and pagination. */
+export function missingDiscoveryRetailers(counts: Partial<Record<RetailerId, number>>) {
+  return retailerIdSchema.options.filter((retailer) => (counts[retailer] ?? 0) < 3);
+}
+
 export function parseDiscoveryOptions(args: readonly string[]) {
   let limit: number = discoveryDefaultQueryLimit;
   let dryRun = false;
@@ -68,12 +75,12 @@ export function parseDiscoveryOptions(args: readonly string[]) {
     } else if (/^--limit=\d+$/u.test(arg)) {
       limit = Number(arg.slice(8));
     } else {
-      throw new Error("Use --dry-run, --manual and --limit=1..30");
+      throw new Error("Use --dry-run, --manual and --limit=1..60");
     }
   }
 
-  if (!Number.isInteger(limit) || limit < 1 || limit > discoveryDailyLimit) {
-    throw new Error("Discovery limit must be 1..30");
+  if (!Number.isInteger(limit) || limit < 1 || limit > discoveryRunLimit) {
+    throw new Error("Discovery limit must be 1..60");
   }
 
   return { limit, dryRun, manual };
@@ -84,8 +91,10 @@ export function matchesDiscoveryQuery(
   query: string,
   listing: { title: string; sourceBrand?: string | null },
 ): boolean {
-  const tokens = normalizeSearchQuery(query).split(" ").filter(Boolean);
-  const words = normalizeSearchQuery(`${listing.title} ${listing.sourceBrand ?? ""}`)
+  // Acquisition spelling tolerance never changes exact product identity.
+  const fold = (text: string) => normalizeSearchQuery(text).normalize("NFD").replace(/\p{M}/gu, "");
+  const tokens = fold(query).split(" ").filter(Boolean);
+  const words = fold(`${listing.title} ${listing.sourceBrand ?? ""}`)
     .split(" ")
     .filter(Boolean);
 

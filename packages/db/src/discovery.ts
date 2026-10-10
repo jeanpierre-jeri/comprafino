@@ -6,9 +6,11 @@ import {
   discoveryDemandPolicy,
   discoveryQueryForSearch,
   parseDiscoveryOptions,
+  retailerIdSchema,
 } from "@comprafino/core";
 import { createDatabase } from "./client.ts";
 import { discoveryQueries } from "./schema.ts";
+import type { RetailerId } from "@comprafino/core";
 
 type Database = ReturnType<typeof createDatabase>;
 
@@ -26,6 +28,7 @@ const claimSchema = z.object({
   id: z.uuid(),
   query: z.string().min(3).max(80),
   attemptedAt: z.coerce.date(),
+  requestedRetailers: z.array(retailerIdSchema).optional(),
 });
 
 export type DiscoveryClaim = z.infer<typeof claimSchema>;
@@ -53,9 +56,15 @@ export async function cleanupDiscoveryDemand(db: Database) {
   return z.object({ removed: z.number().int() }).parse(results[1].rows[0]);
 }
 
-/** Only call after a successful local public search; failures are never zero results. */
-export async function recordDiscoveryForSearch(db: Database, query: string, resultCount: number) {
-  const normalizedQuery = discoveryQueryForSearch(query, resultCount);
+/** Successful search coverage, before filters/pagination; failures never become demand. */
+export async function recordDiscoveryForSearch(
+  db: Database,
+  query: string,
+  resultCount: number,
+  requestedRetailers: readonly RetailerId[] = [],
+) {
+  const requested = [...new Set(z.array(retailerIdSchema).parse(requestedRetailers))];
+  const normalizedQuery = discoveryQueryForSearch(query, requested.length ? 0 : resultCount);
 
   if (!normalizedQuery) return false;
 
@@ -63,13 +72,14 @@ export async function recordDiscoveryForSearch(db: Database, query: string, resu
   const results = await db.batch([
     db.execute(demandLock),
     // Separate statement after the lock: concurrent admissions see committed rows.
-    db.execute(sql`insert into discovery_queries(normalized_query,original_query)
-      select ${normalizedQuery},${original}
+    db.execute(sql`insert into discovery_queries(normalized_query,original_query,requested_retailers)
+      select ${normalizedQuery},${original},array(select jsonb_array_elements_text(${JSON.stringify(requested)}::jsonb))
       where (select count(*) from discovery_queries)<${discoveryDemandPolicy.maximumRows}
         or exists(select 1 from discovery_queries where normalized_query=${normalizedQuery})
       on conflict(normalized_query) do update set
         request_count=least(discovery_queries.request_count::bigint+1,2147483647)::integer,
-        last_requested_at=greatest(discovery_queries.last_requested_at,clock_timestamp())
+        last_requested_at=greatest(discovery_queries.last_requested_at,clock_timestamp()),
+        requested_retailers=array(select distinct unnest(discovery_queries.requested_retailers||excluded.requested_retailers))
       returning id`),
   ]);
 
@@ -106,7 +116,7 @@ export function discoveryClaimStatements(limit: number, manual = false) {
       update discovery_queries q set status='processing', last_attempted_at=date_trunc('milliseconds',statement_timestamp()),
         next_eligible_at=statement_timestamp()+interval '24 hours', error=null
       from candidates c where q.id=c.id
-      returning q.id, q.normalized_query as query, q.last_attempted_at as "attemptedAt"
+      returning q.id, q.normalized_query as query, q.last_attempted_at as "attemptedAt",q.requested_retailers as "requestedRetailers"
     ) ${completion}`;
 
   if (manual) return [claim] as const;

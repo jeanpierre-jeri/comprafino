@@ -6,6 +6,7 @@ import {
   selectListingRefresh,
   hasTargetedRefreshPath,
   listingNeedsRefresh,
+  listingRefreshPolicy,
 } from "@comprafino/core";
 import { createDatabase } from "./client.ts";
 import { knownListings } from "./listing-refresh.ts";
@@ -35,7 +36,7 @@ export async function coverageReport(db = createDatabase(), now = new Date()) {
     .parse(states.rows);
   const stateMap = new Map(stateRows.map((row) => [row.id, row]));
   const publicRows = rows.filter((row) => row.public);
-  const selected = selectListingRefresh(rows, now, 100);
+  const selected = selectListingRefresh(rows, now, listingRefreshPolicy.limit);
   const retailers = retailerIdSchema.options.map((retailer) => {
     const known = rows.filter((row) => row.retailer === retailer);
     const linked = known.filter((row) => row.public);

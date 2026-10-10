@@ -6,6 +6,7 @@ import {
   canonicalGroups,
   comparisonTitle,
   generateCandidates,
+  generateAutomaticCandidates,
   hardConflicts,
   scoreMatch,
 } from "./matching.ts";
@@ -23,6 +24,32 @@ const listing = (
   title,
   retailer,
   attributes: normalizeCatalogListing({ title, priceUnit: "UN", sourceBrand: "Gloria" }),
+});
+
+it("incremental candidates retain every possible automatic fixture match without broad incompatible pairs", () => {
+  const sample = Object.values(rows);
+  const expected = generateCandidates(sample)
+    .filter(([left, right]) => scoreMatch(left, right, 1).decision === "auto_match")
+    .map(([left, right]) => [left.id, right.id].sort().join("|"))
+    .sort();
+  const incremental = generateAutomaticCandidates(sample)
+    .filter(([left, right]) => scoreMatch(left, right, 1).decision === "auto_match")
+    .map(([left, right]) => [left.id, right.id].sort().join("|"))
+    .sort();
+  expect(incremental).toEqual(expected);
+});
+
+it("keeps different sizes and identity variants out of automatic candidate blocks", () => {
+  const a = listing("a");
+  const b = listing("b", undefined, "plaza-vea");
+  const otherSize = listing("c", "Leche Gloria Entera 1 L", "tottus");
+  const otherVariant = listing("d", "Leche Gloria Descremada 946ml", "tottus");
+  expect(
+    generateAutomaticCandidates([a, b, otherSize, otherVariant]).map(([left, right]) => [
+      left.id,
+      right.id,
+    ]),
+  ).toEqual([["a", "b"]]);
 });
 
 describe("deterministic matching", () => {

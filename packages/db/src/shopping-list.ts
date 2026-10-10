@@ -12,6 +12,8 @@ import {
   shoppingQueryForTitle,
   shoppingMarketQuery,
   shoppingWeekdays,
+  genericSubstitutionContexts,
+  resolveProductFamilyQuery,
 } from "@comprafino/core";
 import type {
   PriceMode,
@@ -25,6 +27,7 @@ import {
   getCanonicalCurrentProductOffers,
   currentGenericOfferRows,
   genericProductOffer,
+  genericFamilyCandidatePredicate,
 } from "./generic-offers.ts";
 import { getCanonicalProductComparison, eligibleProducts } from "./public-products.ts";
 
@@ -138,10 +141,28 @@ export async function evaluateCurrentShoppingList(
       ...new Set(list.items.flatMap((i) => (i.intent === "generic" ? [] : [i.canonicalId]))),
     ];
     const queryStarted = performance.now();
+    const families = [
+      ...new Set(
+        Object.values(genericSubstitutionContexts).flatMap((context) => {
+          const interpretation = resolveProductFamilyQuery(context.query);
+          return interpretation ? [interpretation.family] : [];
+        }),
+      ),
+    ];
+    const alternativePredicate = list.items.some((item) => item.intent !== "strict")
+      ? sql`(${sql.join(families.map(genericFamilyCandidatePredicate), sql` or `)})`
+      : sql`false`;
+    const exactPredicate = ids.length
+      ? sql`"canonicalId" in (${sql.join(
+          ids.map((id) => sql`${id}::uuid`),
+          sql`,`,
+        )})`
+      : sql`false`;
     const [result] = await db.batch([
       db.execute(sql`${eligibleProducts}, current_listings as (
       ${currentGenericOfferRows(now)}
     ) select jsonb_build_object(
+      'currentCount',(select count(*)::int from current_listings),
       'weekdayRows', (${shoppingWeekdayRows(ids, now)}),
       'products', coalesce((select jsonb_agg(jsonb_build_object('id',id,'title',"displayName"))
         from products where ${
@@ -153,19 +174,24 @@ export async function evaluateCurrentShoppingList(
             : sql`false`
         }), '[]'::jsonb),
       'listings', coalesce((select jsonb_agg(row_to_json(bounded)) from
-        (select * from current_listings order by listing->>'id' limit ${catalogPolicy.overflowSentinel}) bounded), '[]'::jsonb)
+        (select * from current_listings where ${exactPredicate} or ${alternativePredicate}
+          order by listing->>'id' limit ${catalogPolicy.overflowSentinel}) bounded), '[]'::jsonb)
     ) as snapshot`),
     ]);
     queryMs = performance.now() - queryStarted;
     const snapshot = z
       .object({
         weekdayRows: z.unknown(),
+        currentCount: z.number().int().nonnegative(),
         products: z.array(z.object({ id: z.uuid(), title: z.string().min(1) })),
         listings: z.array(z.unknown()),
       })
       .parse(result.rows[0]?.snapshot);
 
-    if (snapshot.listings.length > catalogPolicy.retainedListingCap) {
+    if (
+      snapshot.currentCount > catalogPolicy.retainedListingCap ||
+      snapshot.listings.length > catalogPolicy.retainedListingCap
+    ) {
       throw new Error("Shopping catalog snapshot bound exceeded");
     }
 

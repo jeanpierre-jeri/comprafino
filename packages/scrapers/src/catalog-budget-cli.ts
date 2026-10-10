@@ -1,11 +1,18 @@
 import { readFileSync, existsSync } from "node:fs";
 import {
+  catalogPolicy,
+  discoveryRunLimit,
   listingRefreshPolicy,
   discoveryDailyLimit,
   discoveryDefaultQueryLimit,
   retailerIdSchema,
 } from "@comprafino/core";
-import { catalogBudget } from "@comprafino/db";
+import {
+  catalogBudget,
+  createDatabase,
+  inspectCatalogAcquisition,
+  inspectCatalogWork,
+} from "@comprafino/db";
 import { refreshCoverage } from "./refresh-adapters.ts";
 import {
   categoryRequestBudget,
@@ -19,7 +26,10 @@ try {
     throw new Error("No options supported");
   }
 
-  const metrics = await catalogBudget();
+  const db = createDatabase();
+  const metrics = await catalogBudget(db);
+  const sources = await inspectCatalogAcquisition(db);
+  const pending = await inspectCatalogWork(db);
   const refreshWorkflow = readFileSync(
     new URL("../../../.github/workflows/refresh-catalog.yml", import.meta.url),
     "utf8",
@@ -36,13 +46,20 @@ try {
   const evidence = existsSync(evidencePath)
     ? refreshMeasurementEvidence(JSON.parse(readFileSync(evidencePath, "utf8")) as unknown, n)
     : null;
-  const comparableDurationMs = evidence?.comparable ? evidence.measurement.durationMs : null;
   const retailerCount = retailerIdSchema.options.length;
   console.log(
     JSON.stringify(
       {
         ...metrics,
+        acquisition: {
+          pagesPerRetailer: catalogPolicy.acquisitionPagesPerRetailer,
+          totalPageBudget: catalogPolicy.acquisitionPagesPerRetailer * retailerCount,
+          categoryRegistryRequests: retailerCount,
+          categories: sources,
+          pending,
+        },
         refresh: {
+          mode: "legacy-manual-sample-budget",
           categorySources: budget.categorySources,
           usableCategoryObservationCap: budget.observationCap,
           targetedRequestCap: listingRefreshPolicy.limit,
@@ -55,29 +72,25 @@ try {
           discoveryRunsPerDay: discoveryCadence.runsPerDay,
         },
         requests: {
-          categoryTypicalEstimate: budget.typicalRequests,
-          categoryHardCap: budget.maximumRequests,
+          legacySampleTypicalEstimate: budget.typicalRequests,
+          legacySampleHardCap: budget.maximumRequests,
           targetedSelectedNow: metrics.coverage.selectedTargeted,
           targetedPerRunCap: listingRefreshPolicy.limit,
-          discoveryPerRunCap: discoveryDailyLimit * retailerCount,
+          discoveryPerRunCap: discoveryRunLimit * retailerCount,
           discoveryDefaultRunRequests: discoveryDefaultQueryLimit * retailerCount,
           discoveryPerDayCap: discoveryDailyLimit * retailerCount,
           totalScheduledDailyCap:
-            refreshCadence.runsPerDay * (budget.maximumRequests + listingRefreshPolicy.limit) +
+            refreshCadence.runsPerDay *
+              (retailerCount * (catalogPolicy.acquisitionPagesPerRetailer + 1) +
+                listingRefreshPolicy.limit) +
             discoveryDailyLimit * retailerCount,
-          note: "Category estimates derive from configured scopes and bounded pages. Discovery hard per-run/day bounds use the shared daily query cap; default-run requests use the CLI query default. Audit/manual calls excluded.",
+          note: "Scheduled category requests use the resumable page budget plus registry calls; fixed sample estimates are legacy manual scope. Discovery run/day bounds are independent. Audit/manual calls excluded.",
         },
         actions: {
-          refreshCommandMinutesPerDay:
-            comparableDurationMs !== null
-              ? (refreshCadence.runsPerDay * comparableDurationMs) / 60000
-              : null,
-          refreshCommandMinutesPer30Days:
-            comparableDurationMs !== null
-              ? (30 * refreshCadence.runsPerDay * comparableDurationMs) / 60000
-              : null,
+          refreshCommandMinutesPerDay: null,
+          refreshCommandMinutesPer30Days: null,
           discoveryCommandMinutes: null,
-          note: "Workflow runtime also includes checkout/setup/install/queue overhead. No GitHub APIs queried; billing and plan quotas are not inferred.",
+          note: "No comparable resumable-acquisition timing is recorded. Workflow runtime also includes checkout/setup/install/queue overhead. No GitHub APIs queried; billing and plan quotas are not inferred.",
         },
         growth: {
           monthlyHistoryChanges: null,

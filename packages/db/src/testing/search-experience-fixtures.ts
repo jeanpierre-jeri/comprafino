@@ -114,5 +114,37 @@ export async function seedSearchExperienceFixtures(
     throw new Error("Search experience fixture eligibility mismatch");
   }
   fixtures["search-product"] = product.id;
+  const paginationRows: NormalizedRetailerListing[] = Array.from({ length: 37 }, (_, index) => ({
+    retailer: "metro",
+    externalId: `search-pagination-${index}`,
+    productId: `search-pagination-${index}`,
+    title: `Producto Auditpaginacion Tipo ${index} Paquete 12un`,
+    sourceBrand: "Auditpaginacion",
+    url: "https://www.metro.pe/eggs/p",
+    currency: "PEN",
+    priceUnit: "UN",
+    available: true,
+    currentPriceCents: 1000 + index,
+    observedAt: new Date(now.getTime() - 60_000),
+  }));
+  await persistListings(db, "metro", paginationRows);
+  const paginationIds = z
+    .array(z.object({ id: z.uuid(), external_id: z.string() }))
+    .parse(
+      await client.query(
+        "select id,external_id from retailer_listings where retailer_id='metro' and external_id like 'search-pagination-%'",
+      ),
+    );
+  const byExternalId = new Map(paginationIds.map((row) => [row.external_id, row.id]));
+  await persistCatalogNormalizations(
+    db,
+    paginationRows.map((row) => {
+      const id = byExternalId.get(row.externalId);
+      if (!id) {
+        throw new Error("Missing pagination fixture");
+      }
+      return { ...row, id, retailerId: row.retailer };
+    }),
+  );
   return fixtures;
 }

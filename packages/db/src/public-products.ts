@@ -238,6 +238,7 @@ export async function searchCanonicalProducts(
   db: Database,
   rawQuery: string,
   now = new Date(),
+  page = 1,
 ): Promise<ProductComparison[]> {
   if (!usefulSearchQuery(rawQuery)) return [];
 
@@ -258,7 +259,7 @@ export async function searchCanonicalProducts(
       (brand_text=${query}) desc,
       greatest(public.similarity(title_text,${query}),
         (select max(public.similarity(t,${query})) from unnest(retailer_titles) t)) desc,
-      "displayName" collate "C", id limit 20`),
+      "displayName" collate "C", id limit 20 offset ${(page - 1) * 20}`),
   ]);
 
   return z

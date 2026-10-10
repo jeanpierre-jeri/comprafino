@@ -1,7 +1,7 @@
 name: Catalog refresh
 on:
   schedule:
-    - cron: "17 11,23 * * *"
+    - cron: "17 1,3,5,7,9,11,13,15,17,19,21,23 * * *"
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,7 +23,7 @@ jobs:
       - name: Acquire catalog data
         id: acquisition
         shell: bash
-        run: pnpm refresh:catalog | tee "$RUNNER_TEMP/catalog-acquisition.log"
+        run: pnpm acquire:catalog -- --pages=100 | tee "$RUNNER_TEMP/catalog-acquisition.log"
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
       - name: Inspect catalog health and capacity skips

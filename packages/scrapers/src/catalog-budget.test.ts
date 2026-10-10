@@ -34,7 +34,7 @@ it("labels quadratic candidate projections and the existing guard", () => {
   });
   expect(catalogProjection(735, 8845, 1000).currentGuardExceeded).toBe(false);
   expect(catalogProjection(735, 8845, 2000).currentGuardExceeded).toBe(false);
-  expect(catalogProjection(735, 8845, 2001).currentGuardExceeded).toBe(true);
+  expect(catalogProjection(735, 8845, 50001).currentGuardExceeded).toBe(true);
   expect(() => catalogProjection(0, 10, 1500)).toThrow("Invalid projection inputs");
 });
 

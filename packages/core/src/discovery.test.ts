@@ -5,6 +5,7 @@ import {
   normalizeDiscoveryQuery,
   parseDiscoveryOptions,
   validDiscoveryQuery,
+  missingDiscoveryRetailers,
 } from "./discovery.ts";
 
 describe("discovery query boundary", () => {
@@ -62,7 +63,7 @@ describe("discovery query boundary", () => {
 
     for (const args of [
       ["--limit=0"],
-      ["--limit=31"],
+      ["--limit=61"],
       ["--limit=3.5"],
       ["--limit=3", "--limit=4"],
       ["--dry-run", "--dry-run"],
@@ -83,6 +84,21 @@ it("bounds the retained original spelling before normalized admission", () => {
 });
 
 describe("discovery acquisition relevance", () => {
+  it("requests missing and sparse retailers independently of total results", () => {
+    expect(missingDiscoveryRetailers({ "plaza-vea": 40, metro: 20, makro: 2 })).toEqual([
+      "tottus",
+      "makro",
+    ]);
+    expect(missingDiscoveryRetailers({ tottus: 3, "plaza-vea": 3, metro: 3, makro: 3 })).toEqual(
+      [],
+    );
+    expect(
+      matchesDiscoveryQuery("papel higienico", { title: "Papel Higiénico Elite 12 rollos" }),
+    ).toBe(true);
+    expect(
+      matchesDiscoveryQuery("papel higienico 12", { title: "Papel Higiénico Elite 120 rollos" }),
+    ).toBe(false);
+  });
   it("requires the requested brand, including structured brands absent from titles", () => {
     expect(
       matchesDiscoveryQuery("queso edam tottus", {
@@ -99,11 +115,11 @@ describe("discovery acquisition relevance", () => {
     expect(matchesDiscoveryQuery("queso edam", { title: "Queso Edam Vonk x Kg" })).toBe(true);
   });
 
-  it("preserves quantities, accents and variant terms using public search semantics", () => {
+  it("preserves quantities and variants while tolerating acquisition spelling", () => {
     expect(matchesDiscoveryQuery("LECHE GLORIA 1L", { title: "Leche Gloria 1 L" })).toBe(true);
     expect(matchesDiscoveryQuery("leche gloria 1l", { title: "Leche Gloria 11 L" })).toBe(false);
     expect(matchesDiscoveryQuery("atún light", { title: "Atún en aceite" })).toBe(false);
-    expect(matchesDiscoveryQuery("atún", { title: "Atun" })).toBe(false);
+    expect(matchesDiscoveryQuery("atún", { title: "Atun" })).toBe(true);
     expect(matchesDiscoveryQuery("???", { title: "Queso" })).toBe(false);
   });
 });

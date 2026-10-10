@@ -1,11 +1,13 @@
 import { createHash } from "node:crypto";
 import { and, asc, eq, isNull, sql } from "drizzle-orm";
+import { catalogPolicy } from "@comprafino/core";
 import {
   calculateUnitPrice,
   classifyProductFamily,
   catalogInputSchema,
   normalizeCatalogListing,
   normalizationVersion,
+  normalizeSearchQuery,
   retailerIdSchema,
 } from "@comprafino/core";
 import type { CatalogInput, RetailerId } from "@comprafino/core";
@@ -74,6 +76,7 @@ export function catalogPersistenceStatements(raw: readonly CatalogRecord[]) {
         input_fingerprint: catalogFingerprint(row),
         normalization_version: a.normalizationVersion,
         normalized_title: a.normalizedTitle,
+        search_identity: normalizeSearchQuery(`${a.normalizedTitle} ${a.brand ?? ""}`),
         brand: a.brand,
         brand_key: a.brandKey,
         brand_source: a.brandSource,
@@ -90,7 +93,7 @@ export function catalogPersistenceStatements(raw: readonly CatalogRecord[]) {
   );
   const eligible = sql`select x.* from jsonb_to_recordset(${payload}::jsonb) as x(
     id uuid, retailer_id text, title text, price_unit text, package_text text, source_brand text, source_unit_multiplier numeric,
-    input_fingerprint text, normalization_version integer, normalized_title text, brand text, brand_key text,
+    input_fingerprint text, normalization_version integer, normalized_title text, search_identity text, brand text, brand_key text,
     brand_source text, quantity_value integer, quantity_unit text, package_count integer,
     total_quantity_value integer, total_quantity_unit text, pricing_basis text, sold_by_weight boolean, issues text[])
     join retailer_listings l on l.id = x.id
@@ -103,24 +106,26 @@ export function catalogPersistenceStatements(raw: readonly CatalogRecord[]) {
     sql`select id from retailers where id in (select jsonb_array_elements_text(${retailers}::jsonb)) order by id for update`,
     sql`select count(*)::integer as eligible from (${eligible}) e`,
     sql`with normalized as (insert into listing_normalizations (listing_id, input_fingerprint, normalization_version,
-      normalized_title, brand, brand_key, brand_source, quantity_value, quantity_unit, package_count,
+      normalized_title, search_identity, brand, brand_key, brand_source, quantity_value, quantity_unit, package_count,
       total_quantity_value, total_quantity_unit, pricing_basis, sold_by_weight, issues)
-      select id, input_fingerprint, normalization_version, normalized_title, brand, brand_key, brand_source,
+      select id, input_fingerprint, normalization_version, normalized_title, search_identity, brand, brand_key, brand_source,
         quantity_value, quantity_unit, package_count, total_quantity_value, total_quantity_unit,
         pricing_basis, sold_by_weight, issues from (${eligible}) e
       on conflict (listing_id) do update set
         input_fingerprint = excluded.input_fingerprint, normalization_version = excluded.normalization_version,
         normalized_title = excluded.normalized_title, brand = excluded.brand, brand_key = excluded.brand_key,
+        search_identity = excluded.search_identity,
         brand_source = excluded.brand_source, quantity_value = excluded.quantity_value, quantity_unit = excluded.quantity_unit,
         package_count = excluded.package_count, total_quantity_value = excluded.total_quantity_value,
         total_quantity_unit = excluded.total_quantity_unit, pricing_basis = excluded.pricing_basis,
-        sold_by_weight = excluded.sold_by_weight, issues = excluded.issues, normalized_at = now()
+        sold_by_weight = excluded.sold_by_weight, issues = excluded.issues, normalized_at = now(),
+        matched_fingerprint=null,matched_version=null
       where (listing_normalizations.input_fingerprint, listing_normalizations.normalization_version,
-        listing_normalizations.normalized_title, listing_normalizations.brand, listing_normalizations.brand_key,
+        listing_normalizations.normalized_title, listing_normalizations.search_identity, listing_normalizations.brand, listing_normalizations.brand_key,
         listing_normalizations.brand_source, listing_normalizations.quantity_value, listing_normalizations.quantity_unit,
         listing_normalizations.package_count, listing_normalizations.total_quantity_value, listing_normalizations.total_quantity_unit,
         listing_normalizations.pricing_basis, listing_normalizations.sold_by_weight, listing_normalizations.issues)
-        is distinct from (excluded.input_fingerprint, excluded.normalization_version, excluded.normalized_title,
+        is distinct from (excluded.input_fingerprint, excluded.normalization_version, excluded.normalized_title, excluded.search_identity,
         excluded.brand, excluded.brand_key, excluded.brand_source, excluded.quantity_value, excluded.quantity_unit,
         excluded.package_count, excluded.total_quantity_value, excluded.total_quantity_unit, excluded.pricing_basis,
         excluded.sold_by_weight, excluded.issues) returning listing_id),
@@ -151,8 +156,8 @@ export async function persistCatalogNormalizations(db: Database, rows: readonly 
 }
 
 export async function readCatalogSample(db: Database, limit: number, retailer?: RetailerId) {
-  if (!Number.isInteger(limit) || limit < 1 || limit > 5000) {
-    throw new Error("Limit must be an integer from 1 to 5000");
+  if (!Number.isInteger(limit) || limit < 1 || limit > catalogPolicy.retainedListingCap) {
+    throw new Error("Invalid catalog limit");
   }
 
   const rows = await db
@@ -173,7 +178,19 @@ export async function normalizeCatalog(
 ) {
   const rows = await readCatalogSample(db, limit, retailer);
   const samples = rows.map((input) => ({ input, attributes: normalizeCatalogListing(input) }));
-  const persisted = dryRun ? null : await persistCatalogNormalizations(db, rows);
+  let persisted: Awaited<ReturnType<typeof persistCatalogNormalizations>> | null = null;
+  if (!dryRun) {
+    persisted = { changed: 0, unchanged: 0, stale: 0 };
+    for (let offset = 0; offset < rows.length; offset += catalogPolicy.batchSize) {
+      const batch = await persistCatalogNormalizations(
+        db,
+        rows.slice(offset, offset + catalogPolicy.batchSize),
+      );
+      persisted.changed += batch.changed;
+      persisted.unchanged += batch.unchanged;
+      persisted.stale += batch.stale;
+    }
+  }
   const coverage = {
     processed: samples.length,
     brand: samples.filter((s) => s.attributes.brand !== null).length,
@@ -193,6 +210,39 @@ export async function normalizeCatalog(
   };
 
   return { persisted, coverage, samples };
+}
+
+/** Accepted raw identity changes invalidate their fingerprint in the shared writer. */
+export async function normalizeChangedCatalog(db: Database, limit = 5000) {
+  if (!Number.isSafeInteger(limit) || limit < 1 || limit > catalogPolicy.retainedListingCap) {
+    throw new Error("Invalid normalization work limit");
+  }
+  let processed = 0,
+    changed = 0;
+  while (processed < limit) {
+    const records = await db
+      .select({ listing: retailerListings })
+      .from(retailerListings)
+      .leftJoin(listingNormalizations, eq(retailerListings.id, listingNormalizations.listingId))
+      .where(
+        sql`${listingNormalizations.listingId} is null or ${listingNormalizations.inputFingerprint}='' or ${listingNormalizations.normalizationVersion}<>${normalizationVersion}`,
+      )
+      .orderBy(asc(retailerListings.id))
+      .limit(Math.min(catalogPolicy.batchSize, limit - processed));
+    if (!records.length) {
+      break;
+    }
+    const result = await persistCatalogNormalizations(
+      db,
+      records.map((record) => catalogRecord(record.listing)),
+    );
+    if (result.stale) {
+      throw new Error("Normalization snapshot changed; pending work retained");
+    }
+    processed += records.length;
+    changed += result.changed;
+  }
+  return { processed, changed };
 }
 
 export async function inspectCatalog(db = createDatabase()) {

@@ -1,10 +1,12 @@
 import { createHash } from "node:crypto";
-import { asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, sql } from "drizzle-orm";
+import { catalogPolicy } from "@comprafino/core";
 import { z } from "zod";
 import {
   canonicalGroups,
   comparisonTitle,
   generateCandidates,
+  generateAutomaticCandidates,
   hardConflicts,
   matchingVersion,
   normalizationVersion,
@@ -29,8 +31,12 @@ export type MatchingSnapshot = MatchingListing & {
   priorGroupId?: string | null;
 };
 
-export async function readMatchingSample(db: Database, limit: number): Promise<MatchingSnapshot[]> {
-  if (!Number.isInteger(limit) || limit < 1 || limit > 5000) {
+export async function readMatchingSample(
+  db: Database,
+  limit: number,
+  ids?: readonly string[],
+): Promise<MatchingSnapshot[]> {
+  if (!Number.isInteger(limit) || limit < 1 || limit > catalogPolicy.retainedListingCap) {
     throw new Error("Invalid limit");
   }
 
@@ -45,7 +51,7 @@ export async function readMatchingSample(db: Database, limit: number): Promise<M
     .from(retailerListings)
     .innerJoin(listingNormalizations, eq(retailerListings.id, listingNormalizations.listingId))
     .leftJoin(canonicalProductListings, eq(retailerListings.id, canonicalProductListings.listingId))
-    .where(eq(retailerListings.active, true))
+    .where(ids ? inArray(retailerListings.id, [...ids]) : eq(retailerListings.active, true))
     .orderBy(asc(retailerListings.retailerId), asc(retailerListings.externalId))
     .limit(limit);
 
@@ -103,6 +109,16 @@ export async function evaluatePairs(
 ): Promise<MatchPair[]> {
   if (!pairs.length) return [];
 
+  if (pairs.length > catalogPolicy.batchSize) {
+    const results: MatchPair[] = [];
+    for (let offset = 0; offset < pairs.length; offset += catalogPolicy.batchSize) {
+      results.push(
+        ...(await evaluatePairs(db, pairs.slice(offset, offset + catalogPolicy.batchSize))),
+      );
+    }
+    return results;
+  }
+
   const compatibility = pairs.map(([a, b]) => hardConflicts(a, b));
   const payload = JSON.stringify(
     pairs.map(([a, b]) => ({ a: a.id, b: b.id, ta: comparisonTitle(a), tb: comparisonTitle(b) })),
@@ -127,6 +143,131 @@ export async function evaluatePairs(
         }
       : scoreMatch(a, b, indexed.get(`${a.id}|${b.id}`)!),
   }));
+}
+
+/** Expand exact dimension blocks and every existing group before any mutation.
+ * Missing brand/content cannot auto-match. Reviews remain available in the full audit.
+ * Prior groups connect changed keys, so an identity change cannot split their scope. */
+async function changedMatchingScope(db: Database, seed: string) {
+  let ids = [seed];
+  while (true) {
+    const result = await db.execute(sql`with selected as (
+      select jsonb_array_elements_text(${JSON.stringify(ids)}::jsonb)::uuid as id
+    ), neighbors as (
+      select peer.listing_id as id from listing_normalizations current
+      join selected s on s.id=current.listing_id join listing_normalizations peer
+        on peer.brand_key=current.brand_key and peer.quantity_value=current.quantity_value
+          and peer.quantity_unit=current.quantity_unit and peer.package_count=current.package_count
+      union select peer.listing_id from canonical_product_listings current
+        join selected s on s.id=current.listing_id join canonical_product_listings peer
+          on peer.canonical_product_id=current.canonical_product_id
+      union select id from selected
+    ) select id from neighbors order by id limit 5001`);
+    const expanded = z
+      .array(z.object({ id: z.uuid() }))
+      .parse(result.rows)
+      .map((row) => row.id);
+    if (expanded.length > 5000) {
+      throw new Error("Matching block exceeds 5000; scope retained for review without truncation");
+    }
+    if (expanded.length === ids.length) return expanded;
+    ids = expanded;
+  }
+}
+
+export async function matchChangedCatalog(db: Database, blocks = 100) {
+  if (!Number.isSafeInteger(blocks) || blocks < 1 || blocks > 1000) {
+    throw new Error("Invalid matching block budget");
+  }
+  // Unassociated rows lacking required identity evidence cannot form automatic
+  // groups. Checkpoint them in one bounded transaction instead of one DB roundtrip
+  // per product; previously associated rows must still expand their old groups.
+  const unsupported = await db.batch([
+    db.execute(sql`select id from retailers order by id for update`),
+    db.execute(sql`with pending as (
+      select n.listing_id from listing_normalizations n where n.input_fingerprint<>'' and n.normalization_version=${normalizationVersion}
+        and (n.matched_fingerprint is distinct from n.input_fingerprint or n.matched_version is distinct from ${matchingVersion})
+        and (n.brand_key is null or n.quantity_value is null or n.package_count is null or n.total_quantity_value is null or n.sold_by_weight or cardinality(n.issues)>0)
+        and not exists(select 1 from canonical_product_listings a where a.listing_id=n.listing_id)
+      order by n.listing_id limit ${Math.min(catalogPolicy.retainedListingCap, blocks * catalogPolicy.batchSize)}
+    ) update listing_normalizations n set matched_fingerprint=n.input_fingerprint,matched_version=${matchingVersion}
+      from pending p where n.listing_id=p.listing_id returning n.listing_id`),
+  ]);
+  let processed = unsupported[1].rows.length,
+    candidates = 0,
+    associationsChanged = 0,
+    productsChanged = 0,
+    productsCreated = 0,
+    deferred = 0;
+  const attempted = new Set<string>();
+  for (let block = 0; block < blocks; block++) {
+    const pending = await db
+      .select({ id: listingNormalizations.listingId })
+      .from(listingNormalizations)
+      .where(
+        and(
+          sql`${listingNormalizations.inputFingerprint}<>''`,
+          eq(listingNormalizations.normalizationVersion, normalizationVersion),
+          sql`${listingNormalizations.listingId} not in(select jsonb_array_elements_text(${JSON.stringify([...attempted])}::jsonb)::uuid)`,
+          sql`(${listingNormalizations.matchedFingerprint} is distinct from ${listingNormalizations.inputFingerprint} or ${listingNormalizations.matchedVersion} is distinct from ${matchingVersion})`,
+          sql`not exists(select 1 from canonical_product_listings manual where manual.listing_id=${listingNormalizations.listingId} and manual.method='manual')`,
+        ),
+      )
+      .orderBy(asc(listingNormalizations.listingId))
+      .limit(1);
+    const seed = pending[0]?.id;
+    if (!seed) {
+      break;
+    }
+    if (attempted.has(seed)) {
+      throw new Error("Matching snapshot changed; pending work retained");
+    }
+    attempted.add(seed);
+    const ids = await changedMatchingScope(db, seed);
+    for (const id of ids) {
+      attempted.add(id);
+    }
+    const readiness = await db.execute(sql`select count(*)::int as waiting from retailer_listings l
+      left join listing_normalizations n on n.listing_id=l.id
+      where l.id in(select jsonb_array_elements_text(${JSON.stringify(ids)}::jsonb)::uuid)
+        and (n.listing_id is null or n.input_fingerprint='' or n.normalization_version<>${normalizationVersion})`);
+    if (z.object({ waiting: z.number().int() }).parse(readiness.rows[0]).waiting) {
+      deferred += ids.length;
+      continue;
+    }
+    const rows = await readMatchingSample(db, ids.length, ids);
+    if (rows.length !== ids.length) {
+      throw new Error("Matching block contains unnormalized peers; normalize before retrying");
+    }
+    const pairs = await evaluatePairs(db, generateAutomaticCandidates(rows));
+    const writes = await persistMatching(db, rows, pairs);
+    if (writes.stale) {
+      deferred += rows.length;
+      continue;
+    }
+    const snapshots = JSON.stringify(
+      rows.map((row) => ({
+        id: row.id,
+        raw: JSON.parse(row.rawSnapshot) as unknown,
+        normalized: JSON.parse(row.normalizedSnapshot) as unknown,
+      })),
+    );
+    const marks = await db.batch([
+      db.execute(sql`select id from retailers order by id for update`),
+      db.execute(sql`update listing_normalizations n set matched_fingerprint=n.input_fingerprint,matched_version=${matchingVersion}
+        from jsonb_to_recordset(${snapshots}::jsonb) x(id uuid,raw jsonb,normalized jsonb),retailer_listings l
+        where n.listing_id=x.id and l.id=x.id and to_jsonb(l)=x.raw and to_jsonb(n)=x.normalized returning n.listing_id`),
+    ]);
+    if (marks[1].rows.length !== rows.length) {
+      throw new Error("Matching checkpoint changed; pending work retained");
+    }
+    processed += rows.length;
+    candidates += pairs.length;
+    associationsChanged += writes.linksCreated + writes.linksRemoved;
+    productsChanged += writes.productsCreated + writes.productsUpdated + writes.productsRemoved;
+    productsCreated += writes.productsCreated;
+  }
+  return { processed, candidates, associationsChanged, productsChanged, productsCreated, deferred };
 }
 
 export function canonicalGroupId(ids: readonly string[]): string {
@@ -266,6 +407,9 @@ export async function persistMatching(
 }
 
 export async function matchCatalog(db: Database, limit = 100, dryRun = false) {
+  if (limit > 5000) {
+    throw new Error("Use incremental derive:catalog above 5000; full review scopes stay bounded");
+  }
   const rows = await readMatchingSample(db, limit);
   const pairs = await evaluatePairs(db, generateCandidates(rows));
   const groups = canonicalGroups(rows, pairs);

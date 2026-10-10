@@ -52,6 +52,8 @@ pnpm normalize:catalog -- --retailer=metro --limit=50
 pnpm normalize:catalog -- --retailer=metro --limit=50 --dry-run
 ```
 
-Root `.env`/`DATABASE_URL` is required even in dry-run: this command reads persisted listings, not retailer websites. Default limit 100, maximum 5000; stable retailer/external-ID ordering, with a global limit unless retailer-filtered. Repeats intentionally inspect the same bounded sample. Duplicate/unknown options and invalid bounds fail before database access. Dry-run performs no writes. Output includes actual coverage, persistence counts and five samples; driver details/credentials are never printed on failure.
+Root `.env`/`DATABASE_URL` is required even in dry-run: this command reads persisted listings, not retailer websites. Default limit 100, maximum 50000; stable retailer/external-ID ordering, with a global limit unless retailer-filtered. Repeats intentionally inspect the same bounded sample. Duplicate/unknown options and invalid bounds fail before database access. Dry-run performs no writes. Output includes actual coverage, persistence counts and five samples; driver details/credentials are never printed on failure.
 
 `/dev/catalog` is a request-time Server Component, showing up to 20 listings per retailer, both titles, brand/origin, quantity, count, total, pricing basis, weight status, raw package description and issues/staleness/version. Missing configuration and connection errors produce safe guidance. It returns 404 in production and has no editing interface.
+
+Scheduled processors use changed-only normalization with 500-row transactions. Accepted raw identity changes mark the normalization fingerprint dirty in the shared identity writer; price-only refreshes do not enqueue derivation. Matching checkpoints are cleared when derived attributes change. See [catalog expansion](catalog-expansion.md) for incremental processing and full reconciliation.

@@ -35,6 +35,23 @@ const raw = {
   retailerCount: 0,
 };
 
+it("paginates every admitted offer exactly once while retaining first-page dimension diversity", () => {
+  const prototype = genericProductOffer(raw, now)!;
+  const offers = Array.from({ length: 77 }, (_, index) => ({
+    ...prototype,
+    id: String(index),
+    currentPriceCents: index + 1,
+    unitPrice: index < 70 ? prototype.unitPrice : null,
+  }));
+  const pages = [1, 2, 3].flatMap((page) => limitGenericOffers(offers, "unit-price", page));
+  expect(pages).toHaveLength(77);
+  expect(new Set(pages.map((offer) => offer.id)).size).toBe(77);
+  expect(limitGenericOffers(offers, "unit-price").some((offer) => offer.unitPrice === null)).toBe(
+    true,
+  );
+  expect(limitGenericOffers(offers, "unit-price", 4)).toEqual([]);
+});
+
 it("includes single-store offers with explicit independent identity", () => {
   const offer = genericProductOffer(raw, now)!;
   expect(offer.canonicalId).toBeNull();

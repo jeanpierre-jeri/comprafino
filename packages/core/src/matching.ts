@@ -125,6 +125,41 @@ export function generateCandidates(
   return pairs;
 }
 
+/** Incremental persistence needs only potential automatic equivalences. Exact
+ * token identity and complete dimensions are necessary under the existing scorer.
+ * The broader candidate generator remains available for human-review audits. */
+export function generateAutomaticCandidates(rows: readonly MatchingListing[]) {
+  const blocks = new Map<string, MatchingListing[]>();
+  for (const row of rows) {
+    const attributes = row.attributes;
+    if (
+      !attributes.brandKey ||
+      !attributes.quantity ||
+      !attributes.totalQuantity ||
+      attributes.packageCount === null ||
+      attributes.soldByWeight ||
+      attributes.issues.length
+    ) {
+      continue;
+    }
+    const key = JSON.stringify([
+      attributes.brandKey,
+      attributes.quantity.value,
+      attributes.quantity.unit,
+      attributes.packageCount,
+      attributes.totalQuantity.value,
+      attributes.totalQuantity.unit,
+      [...tokens(row)].sort(),
+    ]);
+    const block = blocks.get(key) ?? [];
+    block.push(row);
+    blocks.set(key, block);
+  }
+  return [...blocks.values()].flatMap((block) =>
+    generateCandidates(block).filter(([left, right]) => !hardConflicts(left, right).length),
+  );
+}
+
 export function hardConflicts(a: MatchingListing, b: MatchingListing): string[] {
   const x = a.attributes,
     y = b.attributes;

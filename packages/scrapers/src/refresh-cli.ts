@@ -1,13 +1,12 @@
 import { logDiagnostic } from "./diagnostics.ts";
 import { listingRefreshPolicy } from "@comprafino/core";
-import { catalogPolicy } from "@comprafino/core";
 import { refreshKnownListings } from "./listing-refresh.ts";
 import { listingRefreshTasks } from "./listing-refresh-tasks.ts";
 import {
   createDatabase,
   createIngestionStore,
-  normalizeCatalog,
-  matchCatalog,
+  normalizeChangedCatalog,
+  matchChangedCatalog,
   assertRefreshScope,
   previewListingRefresh,
 } from "@comprafino/db";
@@ -69,13 +68,9 @@ try {
         }
 
         await assertRefreshScope(db);
-        const r = await normalizeCatalog(db, catalogPolicy.retainedListingCap);
+        const r = await normalizeChangedCatalog(db, 10_000);
 
-        if (!r.persisted || r.persisted.stale) {
-          throw new Error("Stale normalization");
-        }
-
-        return { processed: r.coverage.processed, changed: r.persisted.changed };
+        return r;
       },
       async match() {
         if (!db) {
@@ -83,18 +78,9 @@ try {
         }
 
         await assertRefreshScope(db);
-        const r = await matchCatalog(db, catalogPolicy.retainedListingCap);
+        const r = await matchChangedCatalog(db, 250);
 
-        if (!r.persisted || r.persisted.stale) {
-          throw new Error("Stale matching");
-        }
-
-        return {
-          candidates: r.metrics.candidatePairs,
-          associationsChanged: r.persisted.linksCreated + r.persisted.linksRemoved,
-          productsChanged:
-            r.persisted.productsCreated + r.persisted.productsUpdated + r.persisted.productsRemoved,
-        };
+        return r;
       },
     },
     dryRun,

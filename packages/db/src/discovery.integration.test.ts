@@ -69,7 +69,7 @@ describe.skipIf(!testUrl)("PostgreSQL discovery (explicit TEST_DATABASE_URL)", (
         error: null,
       });
       await expect(
-        query("update discovery_queries set latest_result_count=41 where id=$1", [claim.id]),
+        query("update discovery_queries set latest_result_count=81 where id=$1", [claim.id]),
       ).rejects.toThrow(/discovery_counts/u);
       await expect(
         query("update discovery_queries set request_count=0 where id=$1", [claim.id]),
@@ -117,14 +117,14 @@ describe.skipIf(!testUrl)("PostgreSQL discovery (explicit TEST_DATABASE_URL)", (
       Array.from({ length: 4 }, (_, i) => recordDiscoveryForSearch(db, `arroz ${i}`, 0)),
     );
     await query(
-      "insert into discovery_daily_budget(day,processed) values ((statement_timestamp() at time zone 'UTC')::date,29),((statement_timestamp() at time zone 'UTC')::date-1,30)",
+      "insert into discovery_daily_budget(day,processed) values ((statement_timestamp() at time zone 'UTC')::date,239),((statement_timestamp() at time zone 'UTC')::date-1,240)",
     );
     const claims = await Promise.all([claimDiscoveryQueries(db, 3), claimDiscoveryQueries(db, 3)]);
     expect(claims.flat()).toHaveLength(1);
-    expect((await inspectDiscovery(db)).stats.processedToday).toBe(30);
+    expect((await inspectDiscovery(db)).stats.processedToday).toBe(240);
     expect(await claimDiscoveryQueries(db, 30)).toEqual([]);
     expect(await previewDiscoveryQueries(db, 30)).toEqual([]);
-    await expect(query("update discovery_daily_budget set processed=31")).rejects.toThrow(
+    await expect(query("update discovery_daily_budget set processed=241")).rejects.toThrow(
       /discovery_daily_cap/u,
     );
   }, 30_000);
@@ -178,7 +178,7 @@ describe.skipIf(!testUrl)("PostgreSQL discovery (explicit TEST_DATABASE_URL)", (
     }
 
     await query(
-      "insert into discovery_daily_budget(day,processed) values ((statement_timestamp() at time zone 'UTC')::date,30)",
+      "insert into discovery_daily_budget(day,processed) values ((statement_timestamp() at time zone 'UTC')::date,240)",
     );
     const beforeQueries = await query("select * from discovery_queries order by id");
     const beforeBudget = await query("select * from discovery_daily_budget");

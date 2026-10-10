@@ -1,3 +1,4 @@
+import { assertPublicAccess } from "./public-access.ts";
 import { vtexCategories } from "./staple-categories.ts";
 import type { VtexCategory } from "./staple-categories.ts";
 import { lookupVtex } from "./targeted.ts";
@@ -186,6 +187,8 @@ export function createMetroAdapter(
           signal: AbortSignal.timeout(30_000),
           redirect: "error",
         });
+
+        assertPublicAccess(response);
 
         if (!response.ok) {
           throw new Error(`Metro HTTP ${response.status}; ingestion stopped without retries`);

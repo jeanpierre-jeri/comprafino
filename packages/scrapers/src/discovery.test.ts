@@ -4,12 +4,24 @@ import { discoveryOutcomeSchema } from "@comprafino/db";
 import { processDiscoveryQuery } from "./discovery.ts";
 import type { SearchRetailerAdapter } from "./adapter.ts";
 import type { DiscoveryTasks } from "./discovery.ts";
+import { CatalogAccessRestriction } from "./public-access.ts";
 
 const claim = {
   id: "00000000-0000-4000-8000-000000000001",
   query: "aceite primor",
   attemptedAt: new Date("2026-10-03T00:00:00Z"),
 };
+
+it("does not make further retailer calls in an invocation after an access restriction", async () => {
+  const tasks = setup();
+  tasks.adapters[0]!.searchProducts.mockRejectedValue(new CatalogAccessRestriction("HTTP 403"));
+  const first = await processDiscoveryQuery(claim, tasks);
+  expect(first.retailers[0]?.restricted).toBe(true);
+  const blocked = { ...tasks, isRestricted: (retailer: RetailerId) => retailer === "tottus" };
+  const second = await processDiscoveryQuery(claim, blocked);
+  expect(second.retailerSearchCalls).toBe(3);
+  expect(tasks.adapters[0]!.searchProducts).toHaveBeenCalledOnce();
+});
 
 const listing = (retailer: RetailerId, i = 0): NormalizedRetailerListing => ({
   retailer,
@@ -113,7 +125,7 @@ describe("bounded discovery processing", () => {
     });
 
     for (const a of tasks.adapters) {
-      expect(a.searchProducts).toHaveBeenCalledWith(claim.query, 10);
+      expect(a.searchProducts).toHaveBeenCalledWith(claim.query, 20);
     }
   });
   it("preserves successful retailers on a partial failure and reports a safe error", async () => {
@@ -153,8 +165,8 @@ describe("bounded discovery processing", () => {
       discovered: 26,
     });
     const r = await processDiscoveryQuery(claim, tasks);
-    expect(tasks.persist.mock.calls[0]?.[1]).toHaveLength(10);
-    expect(r.resultCount).toBe(13);
+    expect(tasks.persist.mock.calls[0]?.[1]).toHaveLength(20);
+    expect(r.resultCount).toBe(23);
   });
   it("retains persisted results and records derivation failure safely", async () => {
     const tasks = setup();

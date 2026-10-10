@@ -1,3 +1,4 @@
+import { assertPublicAccess } from "./public-access.ts";
 import {
   discoveryRetailerLimit,
   matchesDiscoveryQuery,
@@ -11,7 +12,7 @@ export function assertRetailerSearch(query: string, limit: number) {
   }
 
   if (!Number.isInteger(limit) || limit < 1 || limit > discoveryRetailerLimit) {
-    throw new Error("Retailer search limit must be 1..10");
+    throw new Error("Retailer search limit must be 1..20");
   }
 }
 
@@ -49,6 +50,8 @@ export async function fetchVtexSearch(
     signal: AbortSignal.timeout(30_000),
     redirect: "error",
   });
+
+  assertPublicAccess(response);
 
   if (!response.ok) {
     throw new Error("Retailer search request failed");

@@ -45,14 +45,14 @@ it("prioritizes public listings, then discovery, then other known listings by ol
 });
 
 it("enforces age, attempt cooldown and per-run bounds including exact boundaries", () => {
-  const a = row(1, 24, true);
-  const b = { ...row(2, 100, true), lastTargetedAttemptAt: ago(11) };
-  const c = { ...row(3, 30, true), lastTargetedAttemptAt: ago(12) };
-  expect(selectListingRefresh([row(4, 23), a, b, c], now, 1).map((r) => r.externalId)).toEqual([
+  const a = row(1, 6, true);
+  const b = { ...row(2, 100, true), lastTargetedAttemptAt: ago(3) };
+  const c = { ...row(3, 30, true), lastTargetedAttemptAt: ago(4) };
+  expect(selectListingRefresh([row(4, 5), a, b, c], now, 1).map((r) => r.externalId)).toEqual([
     "3",
   ]);
   expect(selectListingRefresh([a, b, c], now, 100).map((r) => r.externalId)).toEqual(["3", "1"]);
-  expect(() => selectListingRefresh([], now, 101)).toThrow(/./u);
+  expect(() => selectListingRefresh([], now, 501)).toThrow(/./u);
 });
 
 it.each([
@@ -85,7 +85,7 @@ it("validates CLI bounds and explicit one-SKU scopes", () => {
 
   for (const args of [
     ["--limit=0"],
-    ["--limit=101"],
+    ["--limit=501"],
     ["--external-id=1"],
     ["--retailer=other"],
     ["--dry-run", "--dry-run"],
@@ -104,7 +104,7 @@ it("prioritizes exact, safe shopping candidates, discovery, useful staples and o
     { ...row(4, 50), shoppingRelevant: true },
     row(5, 30, true),
     { ...row(6, 90), shoppingRelevant: true },
-    { ...row(7, 10), shoppingRelevant: true },
+    { ...row(7, 5), shoppingRelevant: true },
   ];
   const ids = ["5", "6", "4", "3", "2", "1"];
   expect(selectListingRefresh(rows, now, 100).map((r) => r.externalId)).toEqual(ids);
@@ -121,10 +121,10 @@ it("unknown stock remains eligible under freshness rules while explicit unavaila
 it("allows explicit unavailable recovery despite recent unknown category quotes, but respects fresh evidence and cooldown", () => {
   const negative = { ...row(1, 1, true), available: false, availabilityVerifiedAt: ago(25) };
   expect(selectListingRefresh([negative], now, 100)).toEqual([negative]);
-  expect(
-    selectListingRefresh([{ ...negative, availabilityVerifiedAt: ago(23) }], now, 100),
-  ).toEqual([]);
-  expect(selectListingRefresh([{ ...negative, lastTargetedAttemptAt: ago(11) }], now, 100)).toEqual(
+  expect(selectListingRefresh([{ ...negative, availabilityVerifiedAt: ago(5) }], now, 100)).toEqual(
+    [],
+  );
+  expect(selectListingRefresh([{ ...negative, lastTargetedAttemptAt: ago(3) }], now, 100)).toEqual(
     [],
   );
   expect(selectListingRefresh([{ ...negative, available: null }], now, 100)).toEqual([]);

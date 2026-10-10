@@ -35,6 +35,7 @@ export * from "./shopping-creation.ts";
 export * from "./basket-optimization.ts";
 
 export * from "./catalog-policy.ts";
+export * from "./catalog-acquisition.ts";
 
 export * from "./diagnostics.ts";
 

@@ -12,8 +12,11 @@ import {
   usefulSearchQuery,
   discoveryQueryForSearch,
   recordDiscoveryForSearch,
+  requestCatalogRefresh,
 } from "@comprafino/db";
 import type { ProductComparison, GenericProductOffer } from "@comprafino/db";
+import Link from "next/link";
+import { searchFilterQuery } from "@comprafino/core/search-filters";
 import { SearchControls } from "../../components/search-controls";
 import { SearchForm } from "../../components/search-form";
 import { PriceNotice, PublicShell } from "../../components/public-shell";
@@ -61,22 +64,33 @@ async function SearchResults({
   let products: ProductComparison[] = [];
   let offers: GenericProductOffer[] = [];
   let failed = false;
+  const rawPage =
+    typeof params.page === "string" && /^\d{1,4}$/u.test(params.page) ? Number(params.page) : 1;
+  const page = Math.max(1, Math.min(rawPage, 2500));
+  let hasMore = false;
+  let totalOffers = 0;
 
   if (usefulSearchQuery(query)) {
     try {
       const db = createDatabase();
-      const results = await searchPublicProducts(db, query, sort, observedNow, filters);
+      const results = await searchPublicProducts(db, query, sort, observedNow, filters, page);
       products = results.products;
       offers = results.offers;
       units = results.availableUnits;
       underlyingCount = results.usefulResultCount;
+      hasMore = results.hasMore;
+      totalOffers = results.totalOffers;
 
-      if (discoveryQueryForSearch(query, underlyingCount)) {
+      if (
+        discoveryQueryForSearch(query, results.discoveryRetailers.length ? 0 : underlyingCount) ||
+        results.refreshListingIds.length
+      ) {
         // Database demand recording only, after the response. Retailer work is
         // exclusively performed by the scheduled command, never by this route.
         after(async () => {
           try {
-            await recordDiscoveryForSearch(db, query, underlyingCount);
+            await recordDiscoveryForSearch(db, query, underlyingCount, results.discoveryRetailers);
+            await requestCatalogRefresh(db, results.refreshListingIds);
           } catch (error) {
             logDiagnostic(error, {
               stage: "public",
@@ -132,6 +146,29 @@ async function SearchResults({
           />
         }
       </section>
+      {!failed && usefulSearchQuery(query) && (page > 1 || hasMore) && (
+        <nav aria-label="Páginas de resultados" className="mt-6 flex flex-wrap items-center gap-4">
+          {page > 1 && (
+            <Link
+              className="card-link"
+              href={`/search?${searchFilterQuery(query, filters)}&page=${page - 1}`}
+            >
+              Anterior
+            </Link>
+          )}
+          <span className="text-sm text-muted-foreground">
+            Página {page} · {totalOffers} opciones de tienda
+          </span>
+          {hasMore && (
+            <Link
+              className="card-link"
+              href={`/search?${searchFilterQuery(query, filters)}&page=${page + 1}`}
+            >
+              Siguiente
+            </Link>
+          )}
+        </nav>
+      )}
       <PriceNotice />
     </PublicShell>
   );

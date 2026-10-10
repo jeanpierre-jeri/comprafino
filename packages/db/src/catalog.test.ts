@@ -20,7 +20,7 @@ it("validates bounded CLI options before accessing the database", () => {
 
   for (const args of [
     ["--limit=0"],
-    ["--limit=5001"],
+    ["--limit=50001"],
     ["--limit=1.5"],
     ["--retailer=unknown"],
     ["--all"],

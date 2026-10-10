@@ -19,7 +19,7 @@ describe("public discovery boundary", () => {
       }).success,
     ).toBe(false);
     expect(
-      discoveryOutcomeSchema.safeParse({ status: "completed", resultCount: 41, error: null })
+      discoveryOutcomeSchema.safeParse({ status: "completed", resultCount: 81, error: null })
         .success,
     ).toBe(false);
   });
@@ -30,7 +30,7 @@ describe("public discovery boundary", () => {
     ).toBe(true);
   });
 
-  it.each([-1, 1.5, 41])("rejects invalid result count %i", (resultCount) => {
+  it.each([-1, 1.5, 81])("rejects invalid result count %i", (resultCount) => {
     expect(
       discoveryOutcomeSchema.safeParse({ status: "completed", resultCount, error: null }).success,
     ).toBe(false);

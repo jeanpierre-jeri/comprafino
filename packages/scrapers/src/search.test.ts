@@ -68,7 +68,9 @@ describe("public retailer search adapters", () => {
         }),
       ]) {
         const fake = vi.fn<typeof fetch>(async () => response);
-        await expect(create(fake).searchProducts("arroz", 10)).rejects.toThrow(/search/iu);
+        await expect(create(fake).searchProducts("arroz", 10)).rejects.toThrow(
+          /search|restricted/iu,
+        );
         expect(fake).toHaveBeenCalledOnce();
       }
     });
@@ -102,7 +104,7 @@ describe("public retailer search adapters", () => {
       await expect(create(fake).searchProducts("??", 10)).rejects.toThrow(
         "Invalid discovery query",
       );
-      await expect(create(fake).searchProducts("arroz", 11)).rejects.toThrow(/search/iu);
+      await expect(create(fake).searchProducts("arroz", 21)).rejects.toThrow(/search/iu);
     }
 
     expect(fake).not.toHaveBeenCalled();

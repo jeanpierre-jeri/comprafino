@@ -92,6 +92,13 @@
       "when": 1791517807773,
       "tag": "0012_chilly_thunderbolt_ross",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791654547936,
+      "tag": "0013_catalog_expansion",
+      "breakpoints": true
     }
   ]
 }

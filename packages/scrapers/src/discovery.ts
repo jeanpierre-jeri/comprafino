@@ -10,8 +10,10 @@ import type { NormalizedRetailerListing, RetailerId, SafeDiagnostic } from "@com
 import type { DiscoveryClaim, DiscoveryOutcome } from "@comprafino/db";
 import type { SearchRetailerAdapter } from "./adapter.ts";
 import { boundedSearchListings } from "./search.ts";
+import { CatalogAccessRestriction } from "./public-access.ts";
 
 export interface DiscoveryTasks {
+  isRestricted?(retailer: RetailerId): boolean;
   adapters: readonly SearchRetailerAdapter[];
   persist(
     retailer: RetailerId,
@@ -43,12 +45,23 @@ export async function processDiscoveryQuery(claim: DiscoveryClaim, tasks: Discov
     priceStates: number;
     skippedByCapacity: number;
     diagnostic?: SafeDiagnostic;
+    restricted?: boolean;
   }[] = [];
 
-  for (const adapter of tasks.adapters) {
+  const requestedRetailers = claim.requestedRetailers?.length
+    ? claim.requestedRetailers
+    : retailerIdSchema.options;
+  let retailerSearchCalls = 0;
+  for (const adapter of tasks.adapters.filter((candidate) =>
+    requestedRetailers.includes(candidate.retailer),
+  )) {
     let stage: "source" | "persistence" = "source";
 
     try {
+      if (tasks.isRestricted?.(adapter.retailer)) {
+        throw new CatalogAccessRestriction("Retailer already restricted in this invocation");
+      }
+      retailerSearchCalls++;
       const sample = await adapter.searchProducts(claim.query, discoveryRetailerLimit);
       const validated = sample.listings.map((row) => listingSchema.parse(row));
       const rows = boundedSearchListings(
@@ -88,6 +101,7 @@ export async function processDiscoveryQuery(claim: DiscoveryClaim, tasks: Discov
           retailer: adapter.retailer,
           reason: stage === "source" ? "source_request_failed" : "db_write_failed",
         }),
+        restricted: error instanceof CatalogAccessRestriction,
       });
     }
   }
@@ -120,9 +134,15 @@ export async function processDiscoveryQuery(claim: DiscoveryClaim, tasks: Discov
   }
 
   const outcome: DiscoveryOutcome = {
-    status: discoveryStatus(derivationFailed, successes, resultCount, skippedByCapacity),
+    status: discoveryStatus(
+      derivationFailed,
+      successes,
+      resultCount,
+      skippedByCapacity,
+      requestedRetailers.length,
+    ),
     resultCount,
-    error: discoveryFailureMessage(derivationFailed, successes),
+    error: discoveryFailureMessage(derivationFailed, successes, requestedRetailers.length),
   };
 
   try {
@@ -140,7 +160,7 @@ export async function processDiscoveryQuery(claim: DiscoveryClaim, tasks: Discov
     ...(diagnostic ? { diagnostic } : {}),
     ...outcome,
     retailers,
-    retailerSearchCalls: retailers.length,
+    retailerSearchCalls,
     listingsDiscovered: resultCount,
     skippedByCapacity,
     newListings: retailers.reduce((n, r) => n + r.created, 0),
@@ -155,10 +175,11 @@ function discoveryStatus(
   successes: number,
   resultCount: number,
   skippedByCapacity: number,
+  expectedRetailers: number,
 ): DiscoveryOutcome["status"] {
   if (derivationFailed || successes === 0) return "failed";
 
-  if (successes < retailerIdSchema.options.length) return "partial";
+  if (successes < expectedRetailers) return "partial";
 
   if (resultCount === 0 && skippedByCapacity === 0) return "no_results";
 
@@ -168,10 +189,11 @@ function discoveryStatus(
 function discoveryFailureMessage(
   derivationFailed: boolean,
   successes: number,
+  expectedRetailers: number,
 ): DiscoveryOutcome["error"] {
   if (derivationFailed) return "Catalog derivation failed.";
 
-  if (successes < retailerIdSchema.options.length) return "Retailer discovery failed.";
+  if (successes < expectedRetailers) return "Retailer discovery failed.";
 
   return null;
 }

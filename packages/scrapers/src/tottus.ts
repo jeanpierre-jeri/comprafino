@@ -1,3 +1,4 @@
+import { assertPublicAccess } from "./public-access.ts";
 import { parseTottusPage } from "./tottus-parser.ts";
 
 export { parseTottusPage } from "./tottus-parser.ts";
@@ -39,6 +40,8 @@ export function createTottusAdapter(
         redirect: "error",
       });
 
+      assertPublicAccess(response);
+
       if (!response.ok) {
         throw new Error("Tottus search request failed");
       }
@@ -78,6 +81,8 @@ export function createTottusAdapter(
           signal: AbortSignal.timeout(30_000),
           redirect: "error",
         });
+
+        assertPublicAccess(response);
 
         if (!response.ok) {
           throw new Error(`Tottus HTTP ${response.status}; ingestion stopped without retries`);

@@ -55,3 +55,5 @@ Coverage is a bounded grocery/household subset, not the whole supermarket catalo
 ## Positive ordinary purchasing prices (Cleanup A)
 
 An ordinary payable quote must be a positive integer PEN-cent amount. Source listing validation (including Tottus category/search/PDP normalization) rejects zero before ingestion. Existing zero states are withheld by current exact/generic SQL projections and public mapping/ranking, shopping fulfillment and basket approval/optimization. A zero ordinary quote cannot become a current/free winner, even in benefits mode. Valid positive ordinary quotes and reference/conditional price semantics are unchanged. Historical price tables and their nonnegative constraints remain unchanged; historical states are not rewritten.
+
+Search now paginates independent offers and exact groups using `page`, and records demand for stores with fewer than three current options before filters/pagination. It also prioritizes known category paths after the response. Public requests still make no retailer calls. See [catalog expansion](catalog-expansion.md) for budgets, indexed candidate prefilters and rollout requirements.

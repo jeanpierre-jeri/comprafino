@@ -81,11 +81,12 @@ export async function auditCatalogCoverage(db = createDatabase(), now = new Date
   ]);
 
   if ([base, current, detail].some((r) => r.rows.length > catalogPolicy.retainedListingCap)) {
-    throw new Error("Catalog audit exceeds 1000 guard");
+    throw new Error("Catalog audit exceeds retained capacity");
   }
 
   const offers = current.rows.map((r) => genericProductOffer(r, now)).filter((r) => r !== null);
   const offerIds = new Set(offers.map((o) => o.id));
+  const offersById = new Map(offers.map((offer) => [offer.id, offer]));
   const exactIds = new Set(offers.filter((o) => o.canonicalId).map((o) => o.id));
   const details = detail.rows.map((r) => publicRetailerListing(r, now)).filter((r) => r !== null);
   const detailIds = new Set(details.map((r) => r.id));
@@ -115,7 +116,7 @@ export async function auditCatalogCoverage(db = createDatabase(), now = new Date
       );
       const normalization =
         r.version === normalizationVersion && r.fingerprint === catalogFingerprint(r.listing);
-      const safe = offers.find((o) => o.id === r.listing.id);
+      const safe = offersById.get(r.listing.id);
       const context = profile ? genericSubstitutionContexts[profile] : null;
       let dimension;
 
@@ -209,6 +210,7 @@ export async function auditCatalogCoverage(db = createDatabase(), now = new Date
 
   const familyRows = families.map(([family, label]) => {
     const selected = rows.filter((r) => r.family === family);
+    const selectedIds = new Set(selected.map((row) => row.id));
     const metrics = summarize(selected);
     const safeRetailers = [
       ...new Set(selected.filter((r) => r.shoppingGeneric).map((r) => r.retailer)),
@@ -237,9 +239,7 @@ export async function auditCatalogCoverage(db = createDatabase(), now = new Date
         ]),
       ),
       canonicalComparisons: new Set(
-        offers
-          .filter((o) => selected.some((r) => r.id === o.id) && o.canonicalId)
-          .map((o) => o.canonicalId),
+        offers.filter((o) => selectedIds.has(o.id) && o.canonicalId).map((o) => o.canonicalId),
       ).size,
       gaps: coverageGapDescription(metrics.safeProfile, safeRetailers.length),
     };

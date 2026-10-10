@@ -5,6 +5,7 @@ export * from "./schema.ts";
 export * from "./ingestion.ts";
 
 export * from "./catalog.ts";
+export * from "./catalog-acquisition.ts";
 
 export * from "./matching.ts";
 

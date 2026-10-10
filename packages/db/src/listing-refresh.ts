@@ -12,6 +12,7 @@ import {
   getSubstitutionProfile,
   normalizeCatalogListing,
   normalizationVersion,
+  listingRefreshPolicy,
 } from "@comprafino/core";
 import { catalogRecordSchema, catalogFingerprint } from "./catalog.ts";
 import type { KnownListing } from "@comprafino/core";
@@ -19,7 +20,7 @@ import type { createDatabase } from "./client.ts";
 
 type Database = ReturnType<typeof createDatabase>;
 
-export async function knownListings(db: Database) {
+export async function knownListings(db: Database, ids?: readonly string[]) {
   const result =
     await db.execute(sql`select l.id,l.retailer_id as retailer,l.external_id as "externalId",
     l.product_id as "productId",l.url,l.last_seen_at as "observedAt",l.available,
@@ -33,7 +34,9 @@ export async function knownListings(db: Database) {
       and not exists (select 1 from canonical_product_listings bad where bad.canonical_product_id=a.canonical_product_id
         and (bad.method<>'automatic' or bad.matching_version<>${matchingVersion} or bad.confidence<${matchingThresholds.auto}))
       and (select count(*) from canonical_product_listings peer where peer.canonical_product_id=a.canonical_product_id)>=2) as public
-    from retailer_listings l left join listing_normalizations n on n.listing_id=l.id order by l.id limit ${catalogPolicy.overflowSentinel}`);
+    from retailer_listings l left join listing_normalizations n on n.listing_id=l.id
+    where ${ids ? sql`l.id in(select jsonb_array_elements_text(${JSON.stringify(ids)}::jsonb)::uuid)` : sql`true`}
+    order by l.id limit ${catalogPolicy.overflowSentinel}`);
   const rows = result.rows.map((raw) => {
     const row = knownListingSchema.parse(raw);
     const evidence = z
@@ -88,7 +91,22 @@ export async function previewListingRefresh(
   options: ReturnType<typeof parseListingRefreshOptions>,
   now = new Date(),
 ) {
-  const rows = (await knownListings(db)).filter(
+  const pool = await db.execute(sql`select l.id from retailer_listings l
+    where ${options.retailer ? sql`l.retailer_id=${options.retailer}` : sql`true`}
+      and ${
+        options.externalId
+          ? sql`l.external_id=${options.externalId}`
+          : sql`(case when l.available=false then coalesce(l.availability_verified_at,l.last_seen_at) else l.last_seen_at end)<=${new Date(now.getTime() - listingRefreshPolicy.ageHours * 3_600_000).toISOString()}::timestamptz
+        and (l.last_targeted_attempt_at is null or l.last_targeted_attempt_at<=${new Date(now.getTime() - listingRefreshPolicy.cooldownHours * 3_600_000).toISOString()}::timestamptz)`
+      }
+    order by exists(select 1 from canonical_product_listings a where a.listing_id=l.id and a.method='automatic' and a.confidence>=${matchingThresholds.auto}) desc,
+      l.last_seen_at,l.id limit ${options.externalId ? 1 : 5000}`);
+  const ids = z
+    .array(z.object({ id: z.uuid() }))
+    .parse(pool.rows)
+    .map((row) => row.id);
+  if (!ids.length) return [];
+  const rows = (await knownListings(db, ids)).filter(
     (row) =>
       (!options.retailer || row.retailer === options.retailer) &&
       (!options.externalId || row.externalId === options.externalId),

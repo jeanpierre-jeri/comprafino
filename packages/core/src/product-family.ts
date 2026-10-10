@@ -57,6 +57,29 @@ const categories: Record<RetailerId, Partial<Record<ProductFamily, readonly stri
   },
 };
 
+/** SQL acquisition/search prefilter only; classification remains authoritative. */
+export function familySearchEvidence(family: ProductFamily) {
+  const titleHints: Record<ProductFamily, readonly string[]> = {
+    eggs: ["huevo"],
+    rice: ["arroz"],
+    sugar: ["azucar"],
+    cooking_oil: ["aceite"],
+    pasta: ["fideo", "pasta", "spaghetti", "spaguetti", "tallarin"],
+    flour: ["harina"],
+    oats: ["avena"],
+    canned_tuna: ["atun"],
+    detergent: ["detergente"],
+    toilet_paper: ["higienico"],
+  };
+  return {
+    titleHints: titleHints[family],
+    categories: Object.entries(categories).map(([retailer, values]) => ({
+      retailer,
+      ids: values[family] ?? [],
+    })),
+  };
+}
+
 const mismatches: Record<RetailerId, readonly string[]> = {
   tottus: ["J0102010302", "J0102010307", "J0101070507", "J0502050201", "J0502050203"],
   "plaza-vea": ["859", "1652", "785", "1498", "38", "1389", "34", "319"],

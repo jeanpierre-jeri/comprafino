@@ -9,6 +9,8 @@ import {
 } from "@comprafino/core";
 import type { PriceMode, SearchFilters } from "@comprafino/core";
 import { sql } from "drizzle-orm";
+import type { SQL } from "drizzle-orm";
+import type { ProductFamily } from "@comprafino/core";
 import { z } from "zod";
 import {
   calculateUnitPrice,
@@ -17,6 +19,8 @@ import {
   classifyProductFamily,
   resolveProductFamilyQuery,
   selectFamilyOffers,
+  familySearchEvidence,
+  missingDiscoveryRetailers,
   compareUnitPrices,
   genericOfferSort,
   normalizeSearchQuery,
@@ -154,8 +158,17 @@ export function sortGenericOffers(offers: readonly GenericProductOffer[], sort: 
 
 /** Reserve room for every present dimension and unknown quantities before filling
  * spare capacity. The global bound must not hide all litres behind mass results. */
-export function limitGenericOffers(offers: readonly GenericProductOffer[], sort: GenericOfferSort) {
+export function limitGenericOffers(
+  offers: readonly GenericProductOffer[],
+  sort: GenericOfferSort,
+  page = 1,
+): GenericProductOffer[] {
   const sorted = sortGenericOffers(offers, sort);
+
+  if (page > 1) {
+    const first = new Set(limitGenericOffers(offers, sort));
+    return sorted.filter((offer) => !first.has(offer)).slice((page - 2) * 30, (page - 1) * 30);
+  }
 
   if (sort !== "unit-price" || sorted.length <= 30) return sorted.slice(0, 30);
 
@@ -202,10 +215,19 @@ export async function searchGenericProductOffers(
     (token) =>
       sql`exists (select 1 from unnest(string_to_array(identity_text,' ')) word where ${/^\d+$/u.test(token) ? sql`word=${token}` : sql`starts_with(word,${token})`})`,
   );
+  const tokens = [...new Set(requiredQuery.split(" ").filter(Boolean))];
+  const textQuery = tokens
+    .map((token) => `'${token}'${/^\d+$/u.test(token) ? "" : ":*"}`)
+    .join(" & ");
+  const familyPredicate = interpretation
+    ? genericFamilyCandidatePredicate(interpretation.family)
+    : sql`true`;
   const [result] = await db.batch([
     db.execute(sql`${eligibleProducts}, generic as (
     ${currentGenericOfferRows(now)}
   ) select * from generic where ${canonicalId ? sql`"canonicalId"=${canonicalId}::uuid` : sql`true`} and ${predicates.length ? sql.join(predicates, sql` and `) : sql`true`}
+    and ${textQuery ? sql`(search_identity='' or search_vector@@to_tsquery('simple',${textQuery}))` : sql`true`}
+    and ${familyPredicate}
   order by (title_text=${query}) desc, starts_with(title_text,${query}) desc,
     public.similarity(title_text,${query}) desc, title_text collate "C", listing->>'id' limit ${catalogPolicy.overflowSentinel}`),
   ]);
@@ -225,15 +247,41 @@ export async function searchGenericProductOffers(
   return unlimited ? filtered : limitGenericOffers(filtered, genericOfferSort(sort));
 }
 
+/** A conservative SQL superset; core classification/compatibility still decide. */
+export function genericFamilyCandidatePredicate(family: ProductFamily): SQL {
+  const evidence = familySearchEvidence(family);
+  const predicates = [
+    ...evidence.titleHints.map((hint) => sql`folded_title like ${`%${hint}%`}`),
+    ...evidence.categories
+      .filter((entry) => entry.ids.length)
+      .map(
+        (entry) =>
+          sql`listing->>'retailerId'=${entry.retailer} and "sourceCategory" in (${sql.join(
+            entry.ids.map((id) => sql`${id}`),
+            sql`,`,
+          )})`,
+      ),
+  ];
+  return sql`(${sql.join(predicates, sql` or `)})`;
+}
+
 export async function searchPublicProducts(
   db: ReturnType<typeof createDatabase>,
   query: string,
   sort: GenericOfferSort = "relevance",
   now = new Date(),
   filters: SearchFilters = searchFilters({ sort }),
+  page = 1,
 ) {
+  if (
+    !Number.isSafeInteger(page) ||
+    page < 1 ||
+    page > Math.ceil(catalogPolicy.retainedListingCap / 20)
+  ) {
+    throw new Error("Invalid search page");
+  }
   const [products, offers] = await Promise.all([
-    searchCanonicalProducts(db, query, now),
+    searchCanonicalProducts(db, query, now, page),
     searchGenericProductOffers(
       db,
       query,
@@ -263,7 +311,19 @@ export async function searchPublicProducts(
           (!filters.retailer || p.offers.some((o) => o.retailerId === filters.retailer)) &&
           (!filters.unit || filteredOffers.some((o) => o.canonicalId === p.id)),
       ),
-    offers: limitGenericOffers(filteredOffers, sort),
+    offers: limitGenericOffers(filteredOffers, sort, page),
+    page,
+    hasMore: filteredOffers.length > page * 30 || products.length === 20,
+    totalOffers: filteredOffers.length,
+    discoveryRetailers: missingDiscoveryRetailers(
+      Object.fromEntries(
+        retailerIdSchema.options.map((retailer) => [
+          retailer,
+          offers.filter((offer) => offer.retailerId === retailer).length,
+        ]),
+      ),
+    ),
+    refreshListingIds: offers.map((offer) => offer.id),
     availableUnits: [
       ...new Set(
         offers
@@ -318,6 +378,8 @@ export function currentGenericOfferRows(now: Date) {
       p.id as "canonicalId", coalesce(jsonb_array_length(p.offers),0) as "retailerCount",
       ${searchText(sql`n.normalized_title`)} as title_text,
       ${searchText(sql`n.normalized_title || ' ' || coalesce(n.brand,'')`)} as identity_text
+      ,n.search_identity,to_tsvector('simple',n.search_identity) as search_vector,
+      regexp_replace(lower(normalize(n.normalized_title,NFD)), '[^[:alnum:]]+', '', 'g') as folded_title
     from retailer_listings l join retailers r on r.id=l.retailer_id
     join listing_normalizations n on n.listing_id=l.id
     join price_history h on h.listing_id=l.id and h.valid_until is null

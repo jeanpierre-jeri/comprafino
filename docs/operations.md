@@ -2,13 +2,13 @@
 
 ## Refresh coverage and ownership
 
-`pnpm refresh:catalog` runs configured category adapters sequentially, then eligible targeted known-listing lookups, then complete normalization and matching. `refreshCoverage` in `packages/scrapers/src/refresh-adapters.ts` defines each retailer/category limit. Scheduled retailer totals derive from this configuration; `pnpm catalog:budget` derives source counts, observation caps and page/request bounds. Tottus uses validated meat/dairy scopes; Plaza Vea/Metro/Makro use dairy and six staples, with a narrow Metro eggs scope. No arbitrary URL/category input or broad crawl exists.
+`pnpm acquire:catalog` is the scheduled resumable category processor. It discovers public grocery/household category paths, advances durable page cursors, refreshes eligible known listings, then runs incremental normalization/matching. The retained admission guard is 50,000 retailer listings. Work budgets apply per invocation and pending pages/derivation continue later. See [catalog expansion](catalog-expansion.md) for leases, scope, failure isolation, capacity skips and coordinated rollout.
 
-All categories for one retailer fetch before its atomic write. Bounded rotation can add new identities while absent sample rows remain retained. The 2,000-listing admission/read guard fails rather than silently truncating downstream derivation. Review capacity before any expansion.
+`pnpm refresh:catalog` remains the legacy fixed-category manual command. Its `refreshCoverage` configuration and sample request budget are not the scheduled acquisition scope. All category/discovery/targeted writes share the existing retailer locks and preserve ordinary prices, tri-state availability and derived-identity safety.
 
 ## Scheduling and concurrency
 
-The `Catalog refresh` workflow (`.github/workflows/refresh-catalog.yml`) supports manual dispatch and cron `17 11,23 * * *`: **06:17/18:17 Peru**. `Catalog discovery` (`discover-catalog.yml`) runs `43 0,6,12,18 * * *`: **19:43/01:43/07:43/13:43 Peru**. Both use `comprafino-catalog-refresh` with `cancel-in-progress: false`. This serializes their workflow runs; it does not serialize arbitrary manual/local processes or guarantee execution of every queued trigger.
+The `Catalog refresh` workflow runs resumable acquisition at `17 1,3,5,7,9,11,13,15,17,19,21,23 * * *` (every two hours; minute 17 of even Peru hours). Discovery runs at `43 0,2,4,6,8,10,12,14,16,18,20,22 * * *` (minute 43 of odd Peru hours), twenty queries per run and 240 per UTC day. Both share `comprafino-catalog-refresh` with `cancel-in-progress: false`. This serializes workflow runs; timing is not guaranteed, and arbitrary local processes remain separately guarded by database locks/leases.
 
 Retailer ingestion workflows are manual. Operational workflows require a `DATABASE_URL` repository secret, use Node 24/pinned pnpm/frozen installation, and never apply migrations automatically. Refresh/discovery timeouts are 120/60 minutes respectively. Cron is intended cadence, not an exact freshness guarantee; verify actual Actions outcomes when diagnosing missed observations.
 
@@ -22,7 +22,7 @@ Run creation/finish is separate from listing commits; interruption may leave `ru
 
 `freshnessHours` in core classifies latest successful retailer attempt age: healthy through 18h, delayed through 30h, stale thereafter, unknown without success. Latest attempt status and latest success are independent. A manual bounded run can advance retailer health without observing every category/listing.
 
-`listingRefreshPolicy` independently defines purchase freshness (36h), historical visibility (72h), targeted age (24h), cooldown (12h) and request maximum (100). These are separate policies. Public stale prices cannot win current purchase comparisons; historical pages retain disclosed evidence. `/dev/ingestion` displays read-only attempts/successes and returns 404 in production.
+`listingRefreshPolicy` independently defines purchase freshness (36h), historical visibility (72h), targeted age (6h), cooldown (4h) and request maximum (500). These are separate policies. Public stale prices cannot win current purchase comparisons; historical pages retain disclosed evidence. `/dev/ingestion` displays read-only attempts/successes and returns 404 in production.
 
 ## Catalog health monitoring
 
@@ -32,8 +32,10 @@ Run creation/finish is separate from listing commits; interruption may leave `ru
 
 ```sh
 # DATABASE_URL in root .env; existing reviewed migrations applied
-pnpm refresh:catalog
-pnpm refresh:catalog -- --dry-run
+pnpm acquire:catalog -- --pages=100
+pnpm acquire:catalog -- --dry-run
+pnpm derive:catalog -- --limit=50000
+pnpm derive:catalog -- --dry-run
 pnpm refresh:listings -- --dry-run --limit=50
 pnpm discover:catalog -- --dry-run --limit=3
 pnpm coverage:report
@@ -43,10 +45,9 @@ pnpm audit:availability
 pnpm audit:quantity-quality
 pnpm audit:observation-coverage
 pnpm catalog:budget
-# After checking source identity changes and complete scope:
-pnpm normalize:catalog -- --limit=2000
-pnpm match:catalog -- --dry-run --limit=2000
-pnpm match:catalog -- --limit=2000
+# Explicit legacy reconciliation when needed:
+pnpm normalize:catalog -- --limit=50000
+pnpm derive:catalog -- --limit=50000
 ```
 
 Retailer commands support bounded allowlisted `--category`, `--limit` and database-free `--dry-run`; see [retailer guides](../packages/scrapers/README.md). Discovery/targeted dry-runs read the database but make no retailer requests or writes. A failed source/schema response requires inspection, not retries or access-control bypass.

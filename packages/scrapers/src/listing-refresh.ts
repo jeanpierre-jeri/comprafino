@@ -1,4 +1,9 @@
-import { listingSchema, safeDiagnostic, DiagnosticError } from "@comprafino/core";
+import {
+  listingSchema,
+  listingRefreshPolicy,
+  safeDiagnostic,
+  DiagnosticError,
+} from "@comprafino/core";
 import type {
   KnownListing,
   NormalizedRetailerListing,
@@ -6,6 +11,7 @@ import type {
   SafeDiagnostic,
 } from "@comprafino/core";
 import type { TargetedRetailerAdapter } from "./targeted.ts";
+import { CatalogAccessRestriction } from "./public-access.ts";
 
 export interface ListingRefreshTasks {
   adapters: Record<RetailerId, TargetedRetailerAdapter>;
@@ -28,7 +34,7 @@ export async function refreshKnownListings(
   rows: readonly KnownListing[],
   tasks: ListingRefreshTasks,
 ) {
-  if (rows.length > 100) {
+  if (rows.length > listingRefreshPolicy.limit) {
     throw new Error("Targeted refresh exceeds budget");
   }
 
@@ -116,7 +122,10 @@ export async function refreshKnownListings(
         reason: stage === "source" ? "source_request_failed" : "db_write_failed",
       });
       status = "failed";
-      consecutive.set(row.retailer, (consecutive.get(row.retailer) ?? 0) + 1);
+      consecutive.set(
+        row.retailer,
+        error instanceof CatalogAccessRestriction ? 3 : (consecutive.get(row.retailer) ?? 0) + 1,
+      );
     }
 
     try {

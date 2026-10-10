@@ -16,7 +16,8 @@
     "discover:catalog": "node --env-file-if-exists=../../.env --experimental-strip-types src/discovery-cli.ts",
     "refresh:listings": "node --env-file-if-exists=../../.env --experimental-strip-types src/listing-refresh-cli.ts",
     "catalog:budget": "node --env-file-if-exists=../../.env --experimental-strip-types src/catalog-budget-cli.ts",
-    "scrape:makro": "node --env-file-if-exists=../../.env --experimental-strip-types src/cli.ts --retailer=makro"
+    "scrape:makro": "node --env-file-if-exists=../../.env --experimental-strip-types src/cli.ts --retailer=makro",
+    "acquire:catalog": "node --env-file-if-exists=../../.env --experimental-strip-types src/catalog-acquisition-cli.ts"
   },
   "dependencies": {
     "@comprafino/core": "workspace:*",

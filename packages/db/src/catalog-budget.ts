@@ -1,9 +1,8 @@
 import { catalogPolicy } from "@comprafino/core";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
-import { generateCandidates, selectListingRefresh, offerFreshness } from "@comprafino/core";
+import { listingRefreshPolicy, selectListingRefresh, offerFreshness } from "@comprafino/core";
 import { createDatabase } from "./client.ts";
-import { readMatchingSample } from "./matching.ts";
 import { knownListings } from "./listing-refresh.ts";
 
 const countRow = z.object({ rows: z.number().int().nonnegative() });
@@ -35,7 +34,15 @@ export async function catalogBudget(db = createDatabase(), now = new Date()) {
   const rowCounts = Object.fromEntries(counts);
   const [coverage, matching, sizes, history, runs, demand, connections] = await Promise.all([
     knownListings(db),
-    readMatchingSample(db, catalogPolicy.retainedListingCap),
+    db.execute(sql`with stores as (
+      select n.brand_key,n.quantity_value,n.quantity_unit,n.package_count,l.retailer_id,count(*)::bigint as size
+      from listing_normalizations n join retailer_listings l on l.id=n.listing_id where l.active
+        and n.brand_key is not null and n.quantity_value is not null and n.package_count is not null
+        and n.total_quantity_value is not null and not n.sold_by_weight and cardinality(n.issues)=0
+      group by n.brand_key,n.quantity_value,n.quantity_unit,n.package_count,l.retailer_id
+    ), blocks as (select (sum(size)*sum(size)-sum(size*size))/2 as pairs from stores
+      group by brand_key,quantity_value,quantity_unit,package_count)
+    select coalesce(sum(pairs),0)::float8 as candidates from blocks`),
     db.execute(
       sql`select c.relname as name,pg_total_relation_size(c.oid)::float8 as "totalBytes",pg_relation_size(c.oid)::float8 as "tableBytes",pg_indexes_size(c.oid)::float8 as "indexBytes" from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname=current_schema() and c.relkind='r' order by pg_total_relation_size(c.oid) desc limit 15`,
     ),
@@ -65,13 +72,14 @@ export async function catalogBudget(db = createDatabase(), now = new Date()) {
       publicOffers: coverage.filter((r) => r.public).length,
       stalePublic: coverage.filter((r) => r.public && offerFreshness(r.observedAt, now) !== "fresh")
         .length,
-      selectedTargeted: selectListingRefresh(coverage, now, 100).length,
+      selectedTargeted: selectListingRefresh(coverage, now, listingRefreshPolicy.limit).length,
     },
     matching: {
-      processed: matching.length,
-      candidates: generateCandidates(matching).length,
+      processed: rowCounts.listing_normalizations ?? 0,
+      candidates: z.object({ candidates: z.number().int().nonnegative() }).parse(matching.rows[0])
+        .candidates,
       persistedWrites: null,
-      note: "Read-only candidate generation; last matching writes are not stored.",
+      note: "Dimension-block candidate upper bound before title/variant checks; no pairs materialized or matching writes performed.",
     },
     database: z
       .object({

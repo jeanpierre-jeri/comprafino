@@ -1,4 +1,5 @@
 import { retailerIdSchema } from "@comprafino/core";
+import { catalogPolicy } from "@comprafino/core";
 import type { RetailerId } from "@comprafino/core";
 
 export function parseCatalogOptions(args: readonly string[]): {
@@ -27,12 +28,12 @@ export function parseCatalogOptions(args: readonly string[]): {
     } else if (arg === "--dry-run") {
       dryRun = true;
     } else {
-      throw new Error("Use --limit=1..5000, --retailer=tottus|plaza-vea|metro, --dry-run");
+      throw new Error("Use --limit=1..50000, --retailer=tottus|plaza-vea|metro|makro, --dry-run");
     }
   }
 
-  if (!Number.isInteger(limit) || limit < 1 || limit > 5000) {
-    throw new Error("Limit must be an integer from 1 to 5000");
+  if (!Number.isInteger(limit) || limit < 1 || limit > catalogPolicy.retainedListingCap) {
+    throw new Error("Limit must be an integer from 1 to 50000");
   }
 
   return { limit, retailer, dryRun };

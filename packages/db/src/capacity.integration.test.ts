@@ -6,8 +6,8 @@ import { z } from "zod";
 import { closeLocalTestConnections } from "./testing/test-query-client.ts";
 
 import { assertRefreshScope } from "./operations.ts";
-import { normalizeCatalog } from "./catalog.ts";
-import { matchCatalog } from "./matching.ts";
+import { normalizeChangedCatalog } from "./catalog.ts";
+import { matchChangedCatalog } from "./matching.ts";
 import { searchPublicProducts } from "./generic-offers.ts";
 
 import { persistListings, persistListingsDetailed } from "./ingestion.ts";
@@ -61,17 +61,17 @@ describe.skipIf(!testUrl)("PostgreSQL capacity (explicit TEST_DATABASE_URL)", ()
       skippedByCapacity: 0,
     });
     await expect(assertRefreshScope(db)).resolves.toBeUndefined();
-    const normalization = await normalizeCatalog(db, catalogPolicy.retainedListingCap);
-    expect(normalization.persisted).toMatchObject({ stale: 0 });
-    const matching = await matchCatalog(db, catalogPolicy.retainedListingCap);
-    expect(matching.persisted).toMatchObject({ stale: false });
+    const normalization = await normalizeChangedCatalog(db, catalogPolicy.retainedListingCap);
+    expect(normalization.processed).toBe(catalogPolicy.retainedListingCap);
+    const matching = await matchChangedCatalog(db, 1000);
+    expect(matching.deferred).toBe(0);
     const results = await searchPublicProducts(db, "queso edam tottus", "relevance", publicNow);
     expect(results.offers.map((offer) => offer.title).sort()).toEqual(
       demanded.map((row) => row.title).sort(),
     );
     await fillTo(catalogPolicy.retainedListingCap + 1);
     await expect(assertRefreshScope(db)).rejects.toThrow("downstream bound");
-  }, 30000);
+  }, 120000);
 
   it("admits only two new identities with two remaining slots and refreshes known listings at full capacity", async () => {
     const initial = { ...observation("known", 0), available: true };

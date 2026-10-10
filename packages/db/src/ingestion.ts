@@ -122,6 +122,15 @@ export function persistenceStatements(
         where a.listing_id=u.id and a.method='automatic'
           and (l.title,l.price_unit,l.package_text,l.source_brand,l.source_unit_multiplier)
             is distinct from (x.title,x.price_unit,x.package_text,x.source_brand,x.source_unit_multiplier)
+      ), normalization_invalidated as (
+        -- A dirty fingerprint is also the incremental-normalization queue. Every
+        -- identity writer shares this path; unchanged prices never enqueue work.
+        update listing_normalizations n set input_fingerprint='',matched_fingerprint=null,matched_version=null
+        from updated u join retailer_listings l on l.id=u.id
+        join jsonb_to_recordset(${payload}::jsonb) as x(external_id text,title text,price_unit text,
+          package_text text,source_brand text,source_unit_multiplier numeric) on x.external_id=l.external_id
+        where n.listing_id=u.id and (l.title,l.price_unit,l.package_text,l.source_brand,l.source_unit_multiplier)
+          is distinct from (x.title,x.price_unit,x.package_text,x.source_brand,x.source_unit_multiplier)
       ), covered as (
         insert into listing_observation_days (listing_id, observation_date, first_observed_at, last_observed_at, observation_count)
         select u.id, (x.observed_at at time zone 'America/Lima')::date, x.observed_at, x.observed_at, 1

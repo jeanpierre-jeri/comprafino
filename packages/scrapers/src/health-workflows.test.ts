@@ -5,8 +5,8 @@ import { join } from "node:path";
 import { expect, it } from "vitest";
 
 for (const [workflow, command, expectedArguments] of [
-  ["refresh-catalog.yml", "refresh:catalog", "refresh:catalog"],
-  ["discover-catalog.yml", "discover:catalog", "discover:catalog -- --limit=10"],
+  ["refresh-catalog.yml", "acquire:catalog", "acquire:catalog -- --pages=100"],
+  ["discover-catalog.yml", "discover:catalog", "discover:catalog -- --limit=20"],
 ] as const) {
   it(`${workflow} preserves acquisition arguments and failure status while recording stdout`, () => {
     const directory = mkdtempSync(join(tmpdir(), "comprafino-health-workflow-"));

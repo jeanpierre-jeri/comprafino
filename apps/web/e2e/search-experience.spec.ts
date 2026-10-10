@@ -15,6 +15,33 @@ function fixture(name: string): string {
 test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
   test.skip(!raw, "Run pnpm test:e2e:fixtures:local after build");
 
+  test("search pagination exposes all current offers and filter changes reset the page", async ({
+    page,
+  }) => {
+    await page.goto("/search?q=auditpaginacion");
+    const cards = page.locator("[data-offer-id]");
+    await expect(cards).toHaveCount(30);
+    const firstPage = await cards.evaluateAll((elements) =>
+      elements.map((element) => element.getAttribute("data-offer-id")),
+    );
+    const navigation = page.getByRole("navigation", { name: "Páginas de resultados" });
+    await navigation.getByRole("link", { name: "Siguiente" }).click();
+    await expect(page).toHaveURL(/page=2/u);
+    await expect(cards).toHaveCount(7);
+    const secondPage = await cards.evaluateAll((elements) =>
+      elements.map((element) => element.getAttribute("data-offer-id")),
+    );
+    expect(new Set([...firstPage, ...secondPage]).size).toBe(37);
+    await expect(navigation.getByRole("link", { name: "Siguiente" })).toHaveCount(0);
+    await navigation.getByRole("link", { name: "Anterior" }).click();
+    await expect(cards).toHaveCount(30);
+    await navigation.getByRole("link", { name: "Siguiente" }).click();
+    await page.getByRole("combobox", { name: "Ordenar" }).click();
+    await page.getByRole("option", { name: "Menor precio total", exact: true }).click();
+    await expect(page).not.toHaveURL(/page=/u);
+    await expect(cards).toHaveCount(30);
+  });
+
   test("egg quantities, variants and ordinary/CMR unit prices remain independent", async ({
     page,
   }) => {

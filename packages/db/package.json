@@ -27,7 +27,8 @@
     "audit:shopping-list": "node --env-file-if-exists=../../.env --experimental-strip-types src/shopping-list-audit-cli.ts",
     "audit:catalog-coverage": "node --env-file-if-exists=../../.env --experimental-strip-types src/catalog-coverage-cli.ts",
     "audit:availability": "node --env-file-if-exists=../../.env --experimental-strip-types src/catalog-coverage-cli.ts",
-    "health:catalog": "node --env-file-if-exists=../../.env --experimental-strip-types src/catalog-health-cli.ts"
+    "health:catalog": "node --env-file-if-exists=../../.env --experimental-strip-types src/catalog-health-cli.ts",
+    "derive:catalog": "node --env-file-if-exists=../../.env --experimental-strip-types src/catalog-derive-cli.ts"
   },
   "dependencies": {
     "@comprafino/core": "workspace:*",

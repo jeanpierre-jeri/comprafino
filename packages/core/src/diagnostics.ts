@@ -62,7 +62,7 @@ const messages = {
   db_write_failed: "Database write failed.",
   db_read_failed: "Database read failed.",
   invalid_discovery_options:
-    "Invalid discovery options. Use --dry-run, --manual and --limit=1..30 (default: 10; scheduled daily query budget: 30).",
+    "Invalid discovery options. Use --dry-run, --manual and --limit=1..60 (default: 20; scheduled daily query budget: 240).",
   validation_failed: "Boundary validation failed.",
   listing_not_found: "Listing was not found.",
   availability_ambiguous: "Listing availability was ambiguous.",

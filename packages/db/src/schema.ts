@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { discoveryResultLimit } from "@comprafino/core";
+import { discoveryDailyLimit, discoveryResultLimit } from "@comprafino/core";
 import {
   pgTable,
   numeric,
@@ -137,6 +137,10 @@ export const discoveryQueries = pgTable(
     status: text("status").notNull().default("pending"),
     latestResultCount: integer("latest_result_count").notNull().default(0),
     error: text("error"),
+    requestedRetailers: text("requested_retailers")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
   },
   (t) => [
     uniqueIndex("discovery_query_identity").on(t.normalizedQuery),
@@ -167,7 +171,12 @@ export const discoveryDailyBudget = pgTable(
     day: date("day").primaryKey(),
     processed: integer("processed").notNull().default(0),
   },
-  (t) => [check("discovery_daily_cap", sql`${t.processed} between 0 and 30`)],
+  (t) => [
+    check(
+      "discovery_daily_cap",
+      sql`${t.processed} between 0 and ${sql.raw(String(discoveryDailyLimit))}`,
+    ),
+  ],
 );
 
 export const retailerListings = pgTable(
@@ -299,6 +308,9 @@ export const listingNormalizations = pgTable(
     soldByWeight: boolean("sold_by_weight").notNull(),
     issues: text("issues").array().notNull(),
     normalizedAt: time("normalized_at").notNull().defaultNow(),
+    matchedFingerprint: text("matched_fingerprint"),
+    matchedVersion: integer("matched_version"),
+    searchIdentity: text("search_identity").notNull().default(""),
   },
   (t) => [
     index("normalization_dimensions").on(
@@ -306,6 +318,11 @@ export const listingNormalizations = pgTable(
       t.quantityUnit,
       t.quantityValue,
       t.packageCount,
+    ),
+    index("normalization_brand").on(t.brandKey),
+    index("normalization_search_tokens").using(
+      "gin",
+      sql`to_tsvector('simple',${t.searchIdentity})`,
     ),
     check("normalization_version", sql`${t.normalizationVersion} > 0`),
     check(
@@ -431,5 +448,60 @@ export const listingObservationDays = pgTable(
       and (${t.firstObservedAt} at time zone 'America/Lima')::date = ${t.observationDate}
       and (${t.lastObservedAt} at time zone 'America/Lima')::date = ${t.observationDate}`,
     ),
+  ],
+);
+
+/** Durable category cursors. A lease prevents overlapping workers advancing one page. */
+export const catalogSources = pgTable(
+  "catalog_sources",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    retailerId: text("retailer_id")
+      .notNull()
+      .references(() => retailers.id),
+    sourceKey: text("source_key").notNull(),
+    name: text("name").notNull(),
+    url: text("url").notNull(),
+    cursor: integer("cursor").notNull().default(0),
+    active: boolean("active").notNull().default(true),
+    nextEligibleAt: time("next_eligible_at").notNull().defaultNow(),
+    leaseToken: uuid("lease_token"),
+    leaseUntil: time("lease_until"),
+    requestedAt: time("requested_at"),
+    lastAttemptedAt: time("last_attempted_at"),
+    lastCompletedAt: time("last_completed_at"),
+    pagesObserved: integer("pages_observed").notNull().default(0),
+    productsObserved: integer("products_observed").notNull().default(0),
+    cycleProducts: integer("cycle_products").notNull().default(0),
+    cycleCapacitySkips: integer("cycle_capacity_skips").notNull().default(0),
+    lastCycleProducts: integer("last_cycle_products"),
+    lastCycleCapacitySkips: integer("last_cycle_capacity_skips"),
+    error: text("error"),
+  },
+  (table) => [
+    uniqueIndex("catalog_source_identity").on(table.retailerId, table.sourceKey),
+    index("catalog_source_due").on(table.retailerId, table.nextEligibleAt),
+    check(
+      "catalog_source_counts",
+      sql`${table.cursor}>=0 and ${table.pagesObserved}>=0 and ${table.productsObserved}>=0 and ${table.cycleProducts}>=0
+        and ${table.cycleCapacitySkips}>=0 and (${table.lastCycleCapacitySkips} is null or ${table.lastCycleCapacitySkips}>=0)`,
+    ),
+  ],
+);
+
+/** A listing can occur in multiple public categories; retain all acquisition paths. */
+export const catalogSourceListings = pgTable(
+  "catalog_source_listings",
+  {
+    sourceId: uuid("source_id")
+      .notNull()
+      .references(() => catalogSources.id, { onDelete: "cascade" }),
+    listingId: uuid("listing_id")
+      .notNull()
+      .references(() => retailerListings.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.sourceId, table.listingId] }),
+    index("catalog_source_listing_lookup").on(table.listingId),
   ],
 );

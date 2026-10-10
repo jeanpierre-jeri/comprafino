@@ -2,9 +2,9 @@ import { z } from "zod";
 import { retailerIdSchema } from "./listing.ts";
 
 export const listingRefreshPolicy = {
-  ageHours: 24,
-  cooldownHours: 12,
-  limit: 100,
+  ageHours: 6,
+  cooldownHours: 4,
+  limit: 500,
   freshHours: 36,
   visibleHours: 72,
 } as const;
@@ -69,7 +69,7 @@ export function listingNeedsRefresh(row: KnownListing, now: Date): boolean {
 
 export function selectListingRefresh(rows: readonly KnownListing[], now: Date, limit: number) {
   if (!Number.isInteger(limit) || limit < 1 || limit > listingRefreshPolicy.limit) {
-    throw new Error("Limit must be 1–100");
+    throw new Error("Limit must be 1–500");
   }
 
   function priority(row: KnownListing): number {

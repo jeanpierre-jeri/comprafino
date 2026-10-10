@@ -1,3 +1,4 @@
+import { assertPublicAccess } from "./public-access.ts";
 import { z } from "zod";
 import type { KnownListing, NormalizedRetailerListing } from "@comprafino/core";
 import { normalizeTottusProduct } from "./tottus-parser.ts";
@@ -52,6 +53,8 @@ export async function lookupVtex(
   const response = await fetchPage(url, requestOptions("application/json"));
 
   if (response.status === 404) return { status: "not-found" };
+
+  assertPublicAccess(response);
 
   if (!response.ok) {
     throw new Error("Targeted retailer request failed");
@@ -219,6 +222,8 @@ export async function lookupTottus(
   const response = await fetchPage(url, requestOptions("text/html"));
 
   if (response.status === 404 || response.status === 410) return { status: "not-found" };
+
+  assertPublicAccess(response);
 
   if (!response.ok) {
     throw new Error("Targeted retailer request failed");

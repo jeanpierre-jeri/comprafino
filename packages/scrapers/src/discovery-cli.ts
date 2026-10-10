@@ -1,5 +1,5 @@
 import { logDiagnostic } from "./diagnostics.ts";
-import { catalogPolicy, DiagnosticError } from "@comprafino/core";
+import { DiagnosticError } from "@comprafino/core";
 import {
   createDatabase,
   claimDiscoveryQueries,
@@ -8,8 +8,8 @@ import {
   finishDiscoveryQuery,
   inspectDiscovery,
   persistListingsDetailed,
-  normalizeCatalog,
-  matchCatalog,
+  normalizeChangedCatalog,
+  matchChangedCatalog,
   assertRefreshScope,
   parseDiscoveryOptions,
 } from "@comprafino/db";
@@ -18,6 +18,7 @@ import { createTottusAdapter } from "./tottus.ts";
 import { createPlazaVeaAdapter } from "./plaza-vea.ts";
 import { createMetroAdapter } from "./metro.ts";
 import { createMakroAdapter } from "./makro.ts";
+import type { RetailerId } from "@comprafino/core";
 
 try {
   let options: ReturnType<typeof parseDiscoveryOptions>;
@@ -59,7 +60,9 @@ try {
     console.log(JSON.stringify({ operation: "discovery_retention", ...retention }));
     const claims = await claimDiscoveryQueries(db, limit, manual);
     const results: Awaited<ReturnType<typeof processDiscoveryQuery>>[] = [];
+    const restrictedRetailers = new Set<RetailerId>();
     const tasks = {
+      isRestricted: (retailer: RetailerId) => restrictedRetailers.has(retailer),
       adapters: [
         createTottusAdapter(),
         createPlazaVeaAdapter(),
@@ -73,31 +76,14 @@ try {
       ) => persistListingsDetailed(db, retailer, rows, { source: "discovery", queryId: claim.id }),
       async normalize() {
         await assertRefreshScope(db);
-        const r = await normalizeCatalog(db, catalogPolicy.retainedListingCap);
+        const r = await normalizeChangedCatalog(db, 10_000);
 
-        if (!r.persisted || r.persisted.stale) {
-          throw new Error("Stale normalization");
-        }
-
-        return r.persisted.changed;
+        return r.changed;
       },
       async match() {
         await assertRefreshScope(db);
-        const r = await matchCatalog(db, catalogPolicy.retainedListingCap);
-
-        if (!r.persisted || r.persisted.stale) {
-          throw new Error("Stale matching");
-        }
-
-        return {
-          writes:
-            r.persisted.linksCreated +
-            r.persisted.linksRemoved +
-            r.persisted.productsCreated +
-            r.persisted.productsUpdated +
-            r.persisted.productsRemoved,
-          created: r.persisted.productsCreated,
-        };
+        const r = await matchChangedCatalog(db, 250);
+        return { writes: r.associationsChanged + r.productsChanged, created: r.productsCreated };
       },
       finish: (
         claim: Parameters<typeof finishDiscoveryQuery>[1],
@@ -107,6 +93,11 @@ try {
 
     for (const claim of claims) {
       const result = await processDiscoveryQuery(claim, tasks);
+      for (const retailer of result.retailers) {
+        if (retailer.restricted) {
+          restrictedRetailers.add(retailer.retailer);
+        }
+      }
       results.push(result);
       console.log(JSON.stringify(result));
     }
