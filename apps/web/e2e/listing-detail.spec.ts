@@ -293,6 +293,28 @@ test.describe("isolated listing details", () => {
       await expect(
         page.locator(".verified-segment-metro .recharts-scatter-line .recharts-curve"),
       ).toHaveCount(segments);
+      const paths = page.locator(".verified-segment-metro .recharts-scatter-line .recharts-curve");
+      await expect(paths.first()).toHaveAttribute("stroke-width", "2.5");
+      const boundaries = page.locator(".verified-segment-metro .coverage-boundary");
+      await expect(boundaries).toHaveCount(segments * 2);
+      await boundaries.nth(1).dispatchEvent("mouseover");
+      await expect(page.getByRole("tooltip")).toContainText(
+        "Extremo del tramo con cobertura verificada",
+      );
+      await expect(page.getByRole("tooltip")).toContainText("Metro · S/ 6.50");
+      const tickPrices = await page
+        .locator(".recharts-yAxis-tick-labels .recharts-cartesian-axis-tick-value")
+        .allTextContents();
+      expect(tickPrices.length).toBeGreaterThanOrEqual(2);
+      const amounts = tickPrices.map((label) => Number(label.replace("S/", "").trim()));
+      // Constant prices must have a useful scale, rather than a few cents of artificial zoom.
+      expect(Math.max(...amounts) - Math.min(...amounts)).toBeGreaterThanOrEqual(1);
+      await page.getByRole("button", { name: "Metro", exact: true }).click();
+      await expect(boundaries).toHaveCount(0);
+      await expect(paths).toHaveCount(0);
+      await expect(
+        page.getByText("Selecciona un supermercado para ver sus registros."),
+      ).toBeVisible();
     }
   });
   test("listing pages fit mobile and desktop in light and dark", async ({ page }, testInfo) => {

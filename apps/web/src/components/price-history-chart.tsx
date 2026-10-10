@@ -36,7 +36,52 @@ type Series = {
   points: { at: number; priceCents: number; kind: "state-start" | "latest-observation" }[];
 };
 
-const EmptyShape = () => <g aria-hidden="true" />;
+function CoverageBoundary({
+  cx,
+  cy,
+  fill,
+  payload,
+}: {
+  cx?: number;
+  cy?: number;
+  fill?: string;
+  payload?: unknown;
+}) {
+  if (
+    typeof cx !== "number" ||
+    typeof cy !== "number" ||
+    typeof payload !== "object" ||
+    payload === null ||
+    !("boundary" in payload) ||
+    payload.boundary !== true
+  ) {
+    return <g aria-hidden="true" />;
+  }
+
+  return (
+    <circle
+      className="coverage-boundary"
+      cx={cx}
+      cy={cy}
+      r={4}
+      fill="var(--surface)"
+      stroke={fill}
+      strokeWidth={2}
+    />
+  );
+}
+
+function tooltipDescription(raw: object): string {
+  if ("kind" in raw && raw.kind === "coverage-boundary") {
+    return "Extremo del tramo con cobertura verificada";
+  }
+
+  if ("kind" in raw && raw.kind === "latest-observation") {
+    return "Última verificación";
+  }
+
+  return "Inicio del estado registrado";
+}
 
 function EventTooltip({
   active,
@@ -67,11 +112,7 @@ function EventTooltip({
         {raw.retailerName} · {formatPen(raw.priceCents)}
       </p>
       <p className="mt-1">{date(raw.at, true)}</p>
-      <p className="mt-1 text-muted-foreground">
-        {"kind" in raw && raw.kind === "latest-observation"
-          ? "Última verificación"
-          : "Inicio del estado registrado"}
-      </p>
+      <p className="mt-1 text-muted-foreground">{tooltipDescription(raw)}</p>
     </div>
   );
 }
@@ -104,7 +145,7 @@ export function PriceHistoryChart({
             key={s.retailerId}
             type="button"
             aria-pressed={!hidden.includes(s.retailerId)}
-            className="min-h-11 rounded-lg border px-3 text-sm hover:bg-secondary"
+            className="min-h-11 rounded-lg border px-3 text-sm hover:bg-secondary aria-[pressed=false]:opacity-50"
             onClick={() =>
               setHidden((old) =>
                 old.includes(s.retailerId)
@@ -125,7 +166,7 @@ export function PriceHistoryChart({
         className="h-64 w-full min-w-0 aspect-auto"
         aria-label="Eventos observados de precio para todos"
       >
-        <ScatterChart accessibilityLayer margin={{ top: 12, right: 14, bottom: 8, left: 0 }}>
+        <ScatterChart accessibilityLayer margin={{ top: 16, right: 20, bottom: 8, left: 0 }}>
           <CartesianGrid vertical={false} stroke="var(--border)" />
           <XAxis
             type="number"
@@ -133,6 +174,7 @@ export function PriceHistoryChart({
             domain={[start, end]}
             tickFormatter={(v: number) => date(v)}
             tickCount={3}
+            padding={{ left: 8, right: 8 }}
             minTickGap={35}
             tickLine={false}
             axisLine={false}
@@ -142,7 +184,12 @@ export function PriceHistoryChart({
             dataKey="priceCents"
             width={68}
             tickFormatter={(v: number) => formatPen(Math.max(0, Math.round(v)))}
-            domain={["auto", "auto"]}
+            // Leave breathing room for flat prices without magnifying cents into a trend.
+            domain={([minimum, maximum]: readonly [number, number]) => {
+              const padding = Math.max(50, Math.ceil((maximum - minimum) * 0.15));
+
+              return [Math.max(0, minimum - padding), maximum + padding];
+            }}
             tickLine={false}
             axisLine={false}
           />
@@ -151,16 +198,23 @@ export function PriceHistoryChart({
             s.segments.map((segment, index) => (
               <Scatter
                 key={`${s.retailerId}-${index}`}
-                data={segment}
+                name={s.retailerName}
+                data={segment.map((point, pointIndex) => ({
+                  ...point,
+                  retailerName: s.retailerName,
+                  kind: "coverage-boundary",
+                  boundary: pointIndex === 0 || pointIndex === segment.length - 1,
+                }))}
                 className={`verified-segment verified-segment-${s.retailerId}`}
                 // Core expands transitions into horizontal/vertical endpoints.
                 // Joining those endpoints preserves exact steps and item tooltips.
-                line
+                line={{ strokeWidth: 2.5, strokeLinecap: "round", strokeLinejoin: "round" }}
                 lineType="joint"
                 lineJointType="linear"
                 fill={treatment[s.retailerId].color}
                 hide={hidden.includes(s.retailerId)}
-                shape={EmptyShape}
+                shape={CoverageBoundary}
+                activeShape={CoverageBoundary}
                 isAnimationActive={false}
               />
             )),
@@ -179,6 +233,10 @@ export function PriceHistoryChart({
           ))}
         </ScatterChart>
       </ChartContainer>
+      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+        Línea con extremos huecos: tramo verificado. Puntos sólidos: registros de precio. Los cortes
+        indican falta de cobertura, no un cambio de precio.
+      </p>
       {hidden.length === series.length && (
         <p className="text-sm text-muted-foreground">
           Selecciona un supermercado para ver sus registros.
