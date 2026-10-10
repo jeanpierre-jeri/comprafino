@@ -8,6 +8,7 @@ import {
   fetchCatalogPage,
 } from "./catalog-sources.ts";
 import fixture from "./fixtures/tottus.json";
+import productFixture from "./fixtures/tottus-product.json";
 import metro from "./fixtures/metro.json";
 import type { CatalogSourceClaim } from "@comprafino/core";
 
@@ -20,6 +21,84 @@ const claim: CatalogSourceClaim = {
   cursor: 20,
   url: "https://www.metro.pe/api/catalog_system/pub/products/search?fq=C%3A%2F1900%2F1001195%2F1001196%2F&sc=1",
 };
+
+const tottusClaim: CatalogSourceClaim = {
+  ...claim,
+  retailer: "tottus",
+  key: "CATG43329",
+  cursor: 0,
+  url: "https://www.tottus.com.pe/tottus-pe/lista/CATG43329/Simple",
+};
+const productUrl = "https://www.tottus.com.pe/tottus-pe/articulo/113706602/aceite-primor/113706603";
+
+it.each(["valid", "missing-unit", "unavailable"])(
+  "handles a single-product category redirect with %s evidence",
+  async (scenario) => {
+    const data = structuredClone(productFixture);
+    const variant = data.props.pageProps.productData.variants[0]!;
+    if (scenario === "missing-unit") {
+      Reflect.deleteProperty(variant.attributes.measurement, "unidad-de-medida");
+    }
+    if (scenario === "unavailable") {
+      variant.isPurchaseable = false;
+    }
+    const fetchPage = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(new Response(null, { status: 302, headers: { location: productUrl } }))
+      .mockResolvedValueOnce(
+        new Response(`<script id="__NEXT_DATA__">${JSON.stringify(data)}</script>`),
+      );
+    const result = await fetchCatalogPage(tottusClaim, fetchPage);
+    const expectedListing = expect.objectContaining({
+      externalId: "113706603",
+      currentPriceCents: 970,
+    });
+    expect(result.nextCursor).toBeNull();
+    expect(result.discovered).toBe(1);
+    expect(result.listings).toEqual(scenario === "valid" ? [expectedListing] : []);
+    expect(fetchPage.mock.calls[0]![1]?.redirect).toBe("manual");
+    expect(fetchPage.mock.calls[1]![1]?.redirect).toBe("error");
+  },
+);
+
+it("rejects redirected product hydration with a different identity", async () => {
+  const data = structuredClone(productFixture);
+  data.props.pageProps.productData.id = "999";
+  const fetchPage = vi
+    .fn<typeof fetch>()
+    .mockResolvedValueOnce(new Response(null, { status: 302, headers: { location: productUrl } }))
+    .mockResolvedValueOnce(
+      new Response(`<script id="__NEXT_DATA__">${JSON.stringify(data)}</script>`),
+    );
+  await expect(fetchCatalogPage(tottusClaim, fetchPage)).rejects.toThrow(/identity/u);
+});
+
+it.each([
+  "https://example.com/tottus-pe/articulo/113706602/aceite/113706603",
+  "https://www.tottus.com.pe/login",
+  `${productUrl}?token=example`,
+  "https://user:password@www.tottus.com.pe/tottus-pe/articulo/113706602/aceite/113706603",
+  tottusClaim.url,
+])("rejects an untrusted category redirect without another request: %s", async (location) => {
+  const fetchPage = vi
+    .fn<typeof fetch>()
+    .mockResolvedValueOnce(new Response(null, { status: 302, headers: { location } }));
+  await expect(fetchCatalogPage(tottusClaim, fetchPage)).rejects.toThrow(/redirect/u);
+  expect(fetchPage).toHaveBeenCalledOnce();
+});
+
+it("rejects a second redirect and preserves access restriction handling on the product", async () => {
+  for (const status of [302, 403]) {
+    const fetchPage = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(new Response(null, { status: 302, headers: { location: productUrl } }))
+      .mockResolvedValueOnce(new Response(null, { status, headers: { location: productUrl } }));
+    await expect(fetchCatalogPage(tottusClaim, fetchPage)).rejects.toThrow(
+      /Public catalog request failed|public source restricted/u,
+    );
+    expect(fetchPage).toHaveBeenCalledTimes(2);
+  }
+});
 
 function tasks() {
   return {

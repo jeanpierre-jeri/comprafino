@@ -126,7 +126,7 @@ const productPage = z.object({
             attributes: z.object({
               measurement: z.object({
                 formato: z.string().optional(),
-                "unidad-de-medida": z.enum(["KG", "UN"]),
+                "unidad-de-medida": z.enum(["KG", "UN"]).optional(),
               }),
             }),
           }),
@@ -136,7 +136,7 @@ const productPage = z.object({
   }),
 });
 
-export function parseTottusProduct(html: string, known: KnownListing, at: Date): TargetedResult {
+function readTottusProduct(html: string) {
   const script = /<script\b[^>]*\bid=["']__NEXT_DATA__["'][^>]*>([\s\S]*?)<\/script>/u.exec(html);
 
   if (!script) {
@@ -144,7 +144,45 @@ export function parseTottusProduct(html: string, known: KnownListing, at: Date):
   }
 
   const raw: unknown = JSON.parse(script[1]!);
-  const product = productPage.parse(raw).props.pageProps.productData;
+  return productPage.parse(raw).props.pageProps.productData;
+}
+
+/** A category may publicly redirect to exactly one product variant. */
+export function parseTottusCatalogProduct(html: string, url: URL, at: Date) {
+  const identity = /^\/tottus-pe\/articulo\/(\d+)\/[^/]+\/(\d+)\/?$/u.exec(url.pathname);
+  if (!identity) {
+    throw new Error("Untrusted product URL");
+  }
+  const product = readTottusProduct(html);
+  if (product.id !== identity[1]) {
+    throw new Error("Product identity changed");
+  }
+  const variants = product.variants.filter((variant) => variant.id === identity[2]);
+  if (variants.length !== 1) {
+    throw new Error("Missing or ambiguous redirected SKU");
+  }
+  // Match category admission: an absent quote unit cannot become a package price.
+  if (!variants[0]!.attributes.measurement["unidad-de-medida"]) {
+    return { listings: [], discovered: 1, nextCursor: null };
+  }
+  const result = parseTottusProduct(
+    html,
+    { productId: identity[1], externalId: identity[2]!, url: url.href },
+    at,
+  );
+  return {
+    listings: result.status === "observed" ? [result.listing] : [],
+    discovered: 1,
+    nextCursor: null,
+  };
+}
+
+export function parseTottusProduct(
+  html: string,
+  known: Pick<KnownListing, "productId" | "externalId" | "url">,
+  at: Date,
+): TargetedResult {
+  const product = readTottusProduct(html);
 
   if (product.id !== known.productId) {
     throw new Error("Product identity changed");

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { catalogSourceSchema } from "@comprafino/core";
 import type { CatalogSource, CatalogSourceClaim, RetailerId } from "@comprafino/core";
 import { parseTottusPage } from "./tottus-parser.ts";
+import { parseTottusCatalogProduct } from "./targeted.ts";
 import { parsePlazaVeaPage, plazaVeaCatalogUrl } from "./plaza-vea.ts";
 import { parseMetroPage, metroCatalogUrl } from "./metro.ts";
 import { parseMakroPage, makroCatalogUrl } from "./makro.ts";
@@ -176,20 +177,41 @@ export function parseTottusCatalogSources(html: string): CatalogSource[] {
   return [...sources.values()];
 }
 
-async function publicResponse(url: URL, fetchPage: typeof fetch) {
+async function publicResponse(
+  url: URL,
+  fetchPage: typeof fetch,
+  allowProductRedirect = false,
+): Promise<{ response: Response; productUrl: URL | null }> {
   const response = await fetchPage(url, {
     headers: {
       Accept: "application/json,text/html",
       "User-Agent": "CompraFino/0.1 (public catalog acquisition)",
     },
     signal: AbortSignal.timeout(30_000),
-    redirect: "error",
+    redirect: allowProductRedirect ? "manual" : "error",
   });
   assertPublicAccess(response);
+  if (allowProductRedirect && [301, 302, 303, 307, 308].includes(response.status)) {
+    const location = response.headers.get("location");
+    const target = location ? new URL(location, url) : null;
+    if (
+      !target ||
+      target.origin !== "https://www.tottus.com.pe" ||
+      target.username ||
+      target.password ||
+      target.search ||
+      target.hash ||
+      !/^\/tottus-pe\/articulo\/\d+\/[^/]+\/\d+\/?$/u.test(target.pathname)
+    ) {
+      throw new Error("Untrusted catalog redirect");
+    }
+    const followed = await publicResponse(target, fetchPage);
+    return { response: followed.response, productUrl: target };
+  }
   if (!response.ok) {
     throw new Error("Public catalog request failed");
   }
-  return response;
+  return { response, productUrl: null };
 }
 
 export async function discoverCatalogSources(
@@ -197,13 +219,13 @@ export async function discoverCatalogSources(
   fetchPage: typeof fetch = fetch,
 ) {
   if (retailer === "tottus") {
-    const response = await publicResponse(
+    const { response } = await publicResponse(
       new URL("https://www.tottus.com.pe/tottus-pe"),
       fetchPage,
     );
     return parseTottusCatalogSources(await response.text());
   }
-  const response = await publicResponse(
+  const { response } = await publicResponse(
     new URL(`${storefronts[retailer].origin}/api/catalog_system/pub/category/tree/3`),
     fetchPage,
   );
@@ -219,7 +241,10 @@ export async function fetchCatalogPage(
   const url = new URL(source.url);
   if (source.retailer === "tottus") {
     url.searchParams.set("page", String(source.cursor + 1));
-    const response = await publicResponse(url, fetchPage);
+    const { response, productUrl } = await publicResponse(url, fetchPage, true);
+    if (productUrl) {
+      return parseTottusCatalogProduct(await response.text(), productUrl, new Date());
+    }
     const parsed = parseTottusPage(await response.text(), new Date());
     // Category pages can contain sponsored duplicates beyond the 48 native slots.
     if (
@@ -246,7 +271,7 @@ export async function fetchCatalogPage(
   }
   url.searchParams.set("_from", String(source.cursor));
   url.searchParams.set("_to", String(source.cursor + 19));
-  const response = await publicResponse(url, fetchPage);
+  const { response } = await publicResponse(url, fetchPage);
   const raw: unknown = await response.json();
   const products = z.array(z.unknown()).max(20).parse(raw);
   const range = /^(\d+)-(\d+)\/(\d+)$/u.exec(response.headers.get("resources") ?? "");
