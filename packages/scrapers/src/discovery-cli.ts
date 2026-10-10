@@ -1,5 +1,5 @@
 import { logDiagnostic } from "./diagnostics.ts";
-import { catalogPolicy } from "@comprafino/core";
+import { catalogPolicy, DiagnosticError } from "@comprafino/core";
 import {
   createDatabase,
   claimDiscoveryQueries,
@@ -20,7 +20,19 @@ import { createMetroAdapter } from "./metro.ts";
 import { createMakroAdapter } from "./makro.ts";
 
 try {
-  const { limit, dryRun } = parseDiscoveryOptions(process.argv.slice(2));
+  let options: ReturnType<typeof parseDiscoveryOptions>;
+
+  try {
+    options = parseDiscoveryOptions(process.argv.slice(2));
+  } catch (error) {
+    throw new DiagnosticError(error, {
+      stage: "admission",
+      operation: "discovery",
+      reason: "invalid_discovery_options",
+    });
+  }
+
+  const { limit, dryRun, manual } = options;
   const db = createDatabase();
   const { stats } = await inspectDiscovery(db);
 
@@ -29,8 +41,10 @@ try {
       JSON.stringify(
         {
           dryRun,
+          manual,
+          dailyBudgetApplied: !manual,
           ...stats,
-          eligible: await previewDiscoveryQueries(db, limit),
+          eligible: await previewDiscoveryQueries(db, limit, manual),
           retailerSearchCalls: 0,
           writes: 0,
         },
@@ -43,7 +57,7 @@ try {
     await assertRefreshScope(db);
     const retention = await cleanupDiscoveryDemand(db);
     console.log(JSON.stringify({ operation: "discovery_retention", ...retention }));
-    const claims = await claimDiscoveryQueries(db, limit);
+    const claims = await claimDiscoveryQueries(db, limit, manual);
     const results: Awaited<ReturnType<typeof processDiscoveryQuery>>[] = [];
     const tasks = {
       adapters: [
@@ -111,6 +125,8 @@ try {
       JSON.stringify(
         {
           dryRun,
+          manual,
+          dailyBudgetApplied: !manual,
           queriesProcessed: claims.length,
           queriesSkippedByCooldown: stats.cooldown,
           processedToday: (await inspectDiscovery(db)).stats.processedToday,

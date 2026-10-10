@@ -29,7 +29,7 @@ Cleanup is safe to rerun, bounded per scheduled invocation and logs only an oper
 
 ## Admission, cooldown and priority
 
-Normal processing reserves at most the CLI limit and **30 queries per UTC day**, using database time. UTC days begin at 00:00 UTC / 19:00 Peru on the preceding local date. Limits apply to attempts, including successful empty searches, partial failures, all-retailer failures and interrupted work.
+Default processing reserves at most the CLI limit and **30 queries per UTC day**, using database time. UTC days begin at 00:00 UTC / 19:00 Peru on the preceding local date. Limits apply to attempts, including successful empty searches, partial failures, all-retailer failures and interrupted work. Explicit `--manual` runs are outside that daily budget; see the commands below.
 
 A transactional batch creates the day counter, locks it, then reads the current counter in a separate READ COMMITTED statement before selecting queries and incrementing budget. Concurrent local/workflow processors cannot both claim the same remaining budget. Query rows are locked with `SKIP LOCKED`; claiming sets `processing`, last attempt and next eligibility to 24 hours later before retailer work starts. Millisecond attempt timestamps round-trip through JavaScript; completion is guarded by ID and attempt timestamp so an obsolete processor cannot overwrite a later attempt. Day accounting uses the transaction timestamp consistently, even across midnight.
 
@@ -49,7 +49,7 @@ Never-attempted queries are eligible immediately. After 24 hours, `failed`, `par
 
 VTEX phrases use ordinary URI percent-encoded whitespace (`%20`), rather than form-style `+`; the public endpoints returned HTTP 400 for the latter in live investigation. Empty arrays with zero total are successful empty searches; malformed payloads/ranges and HTTP errors are failures. A larger total is not a reason to fetch another page. Tottus pagination must be page one; explicit empty hydration results are successful empty searches.
 
-All requests are sequential, with an identifying CompraFino user agent, 30-second timeout and no retries or redirect following. At most four retailer search calls occur per admitted query, so the daily cap allows at most 120 calls. No full catalog is crawled. Public endpoints and source payloads were observed with representative rice/oil/detergent queries, including accents and phrases. No browser automation, authentication, CAPTCHA or protection bypass is used.
+All requests are sequential, with an identifying CompraFino user agent, 30-second timeout and no retries or redirect following. At most four retailer search calls occur per admitted query, so the scheduled daily cap allows at most 120 calls; explicit manual runs add at most 120 calls per invocation outside that budget. No full catalog is crawled. Public endpoints and source payloads were observed with representative rice/oil/detergent queries, including accents and phrases. No browser automation, authentication, CAPTCHA or protection bypass is used.
 
 Search acquisition now prioritizes listings containing every normalized query term in the title or structured source brand **before** applying the ten-SKU limit to the parsed source page. Stable ordering retains source rank within matching/nonmatching tiers. Discovery persists only listings that satisfy those terms, using the public search word-prefix and exact-number semantics; accents, quantities and variant terms remain required. Broad suggestions cannot consume admission slots or establish coverage for a different requested brand. This is acquisition relevance, never canonical identity evidence. No extra pages or retailer requests are added.
 
@@ -81,6 +81,17 @@ pnpm discover:catalog -- --limit=3  # immediate repeat: cooldown prevents retail
 ```
 
 Default batch limit is 10; accepted bounds are 1–30. Unknown/duplicate options fail before database access. Both modes require root `DATABASE_URL` and migrated tables. **Dry-run only previews admission:** no claim, budget update, retailer calls, persistence, normalization or matching. Normal summaries report attempts, existing cooldown rows, retailer calls, usable listings, actual new listing inserts, normalization writes, matching writes and newly created canonical groups. Insert counts are distinct from updated observations and newly opened price states. Cooldown counts describe all stored rows currently in cooldown, not selected/attempted rows.
+
+`--limit` counts demand queries, not products. For example, `pnpm discover:catalog -- --limit=100` fails before database access with `invalid_discovery_options` and the accepted range. Use `--limit=30` for the largest batch; without `--manual`, the shared daily budget caps processing at 30 queries across all runs. Invalid options are distinct from `db_read_failed` diagnostics.
+
+For an explicit manual run after the daily budget is exhausted:
+
+```sh
+pnpm discover:catalog -- --manual --dry-run --limit=10
+pnpm discover:catalog -- --manual --limit=10
+```
+
+`--manual` previews or claims existing eligible demand outside the scheduled daily budget. It uses the same configured `DATABASE_URL`, including a shared database when that is what root `.env` configures; running the command locally does not make a separate catalog. Manual runs remain bounded to 1–30 queries per invocation, preserve 24-hour cooldown and claim row locks, and use the existing retailer request limits, catalog capacity and derivation guards. They neither reset nor increment `discovery_daily_budget`; per-query attempt timestamps and outcomes are still recorded. Repeated manual invocations have no aggregate daily cap, so use this flag only for deliberate operator runs. Scheduled commands omit the flag and retain their shared 30-query UTC daily budget. Summaries include `manual` and `dailyBudgetApplied`; `processedToday` reports budgeted attempts only, excluding manual work. A manual dry-run still makes no retailer calls or writes. No migration is needed.
 
 `.github/workflows/discover-catalog.yml` runs at `43 0,6,12,18 * * *` (00:43, 06:43, 12:43, 18:43 UTC; 19:43 preceding Peru day, 01:43, 07:43, 13:43 Peru). It processes ten queries per run, with the database cap limiting the day to thirty. Manual `workflow_dispatch` shares the same cap. It reuses `DATABASE_URL`, pinned pnpm/Node and frozen installation; it never applies migrations automatically. Its 60-minute timeout bounds slow source/downstream work. It shares refresh's `comprafino-catalog-refresh` concurrency group, with `cancel-in-progress: false`, to prevent overlapping scheduled full-scope pipelines. Database locks remain necessary for independent local/manual invocations. Schedules may be delayed; no per-user workflow is triggered.
 

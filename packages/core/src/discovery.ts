@@ -49,6 +49,7 @@ export function discoveryQueryForSearch(value: string, resultCount: number): str
 export function parseDiscoveryOptions(args: readonly string[]) {
   let limit: number = discoveryDefaultQueryLimit;
   let dryRun = false;
+  let manual = false;
   const seen = new Set<string>();
 
   for (const arg of args.filter((value) => value !== "--")) {
@@ -62,10 +63,12 @@ export function parseDiscoveryOptions(args: readonly string[]) {
 
     if (arg === "--dry-run") {
       dryRun = true;
+    } else if (arg === "--manual") {
+      manual = true;
     } else if (/^--limit=\d+$/u.test(arg)) {
       limit = Number(arg.slice(8));
     } else {
-      throw new Error("Use --dry-run and --limit=1..30");
+      throw new Error("Use --dry-run, --manual and --limit=1..30");
     }
   }
 
@@ -73,7 +76,7 @@ export function parseDiscoveryOptions(args: readonly string[]) {
     throw new Error("Discovery limit must be 1..30");
   }
 
-  return { limit, dryRun };
+  return { limit, dryRun, manual };
 }
 
 /** Acquisition relevance only: query text never establishes product identity. */

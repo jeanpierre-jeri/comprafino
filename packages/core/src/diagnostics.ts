@@ -61,6 +61,8 @@ const messages = {
   invalid_source_response: "Retailer response was invalid.",
   db_write_failed: "Database write failed.",
   db_read_failed: "Database read failed.",
+  invalid_discovery_options:
+    "Invalid discovery options. Use --dry-run, --manual and --limit=1..30 (default: 10; scheduled daily query budget: 30).",
   validation_failed: "Boundary validation failed.",
   listing_not_found: "Listing was not found.",
   availability_ambiguous: "Listing availability was ambiguous.",

@@ -52,6 +52,12 @@ describe("discovery query boundary", () => {
     expect(parseDiscoveryOptions(["--", "--dry-run", "--limit=3"])).toEqual({
       dryRun: true,
       limit: 3,
+      manual: false,
+    });
+    expect(parseDiscoveryOptions(["--manual", "--dry-run", "--limit=30"])).toEqual({
+      dryRun: true,
+      limit: 30,
+      manual: true,
     });
 
     for (const args of [
@@ -60,6 +66,9 @@ describe("discovery query boundary", () => {
       ["--limit=3.5"],
       ["--limit=3", "--limit=4"],
       ["--dry-run", "--dry-run"],
+      ["--manual", "--manual"],
+      ["--manual=true"],
+      ["--manual", "--limit=100"],
       ["--unknown"],
     ]) {
       expect(() => parseDiscoveryOptions(args)).toThrow(/option|limit/iu);

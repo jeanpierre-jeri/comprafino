@@ -172,6 +172,52 @@ describe.skipIf(!testUrl)("PostgreSQL discovery (explicit TEST_DATABASE_URL)", (
     expect(await previewDiscoveryQueries(db, 3)).toEqual([{ query: "arroz popular" }]);
   }, 30_000);
 
+  it("manual discovery works after daily exhaustion, preserves accounting and respects cooldown", async () => {
+    for (let index = 0; index < 4; index++) {
+      await recordDiscoveryForSearch(db, `manual arroz ${index}`, 0);
+    }
+
+    await query(
+      "insert into discovery_daily_budget(day,processed) values ((statement_timestamp() at time zone 'UTC')::date,30)",
+    );
+    const beforeQueries = await query("select * from discovery_queries order by id");
+    const beforeBudget = await query("select * from discovery_daily_budget");
+    expect(await previewDiscoveryQueries(db, 30)).toEqual([]);
+    expect(await previewDiscoveryQueries(db, 2, true)).toHaveLength(2);
+    expect(await query("select * from discovery_queries order by id")).toEqual(beforeQueries);
+    expect(await query("select * from discovery_daily_budget")).toEqual(beforeBudget);
+
+    const batches = await Promise.all([
+      claimDiscoveryQueries(db, 3, true),
+      claimDiscoveryQueries(db, 3, true),
+      claimDiscoveryQueries(db, 3),
+    ]);
+    const manualClaims = batches.slice(0, 2).flat();
+    expect(manualClaims).toHaveLength(4);
+    expect(new Set(manualClaims.map((claim) => claim.id)).size).toBe(4);
+    expect(batches[2]).toEqual([]);
+    expect(await query("select * from discovery_daily_budget")).toEqual(beforeBudget);
+    expect((await inspectDiscovery(db)).stats.cooldown).toBe(4);
+    expect(await claimDiscoveryQueries(db, 30, true)).toEqual([]);
+    expect(await previewDiscoveryQueries(db, 30, true)).toEqual([]);
+  }, 30_000);
+
+  it("manual claims share row locks with scheduled claims and do not consume the scheduled budget", async () => {
+    for (let index = 0; index < 6; index++) {
+      await recordDiscoveryForSearch(db, `mixed arroz ${index}`, 0);
+    }
+
+    const [manual, scheduled] = await Promise.all([
+      claimDiscoveryQueries(db, 3, true),
+      claimDiscoveryQueries(db, 3),
+    ]);
+    expect(manual).toHaveLength(3);
+    expect(scheduled).toHaveLength(3);
+    expect(new Set([...manual, ...scheduled].map((claim) => claim.id)).size).toBe(6);
+    expect((await inspectDiscovery(db)).stats.processedToday).toBe(3);
+    expect(await previewDiscoveryQueries(db, 30, true)).toEqual([]);
+  }, 30_000);
+
   it("expires bounded inactive demand, detaches acquisition FKs, and preserves processing/cooldown/recent demand", async () => {
     for (const value of [
       "old pending",

@@ -82,50 +82,67 @@ const eligible = sql`q.next_eligible_at <= statement_timestamp() and (
 
 const utcDay = sql`(transaction_timestamp() at time zone 'UTC')::date`;
 
-export function discoveryClaimStatements(limit: number) {
+export function discoveryClaimStatements(limit: number, manual = false) {
   parseDiscoveryOptions([`--limit=${limit}`]);
+  z.boolean().parse(manual);
 
-  return [
-    sql`insert into discovery_daily_budget(day) values (${utcDay}) on conflict (day) do nothing`,
-    // Separate statements under READ COMMITTED: concurrent claimers see the
-    // updated counter AFTER acquiring this lock, rather than a stale CTE snapshot.
-    sql`select day from discovery_daily_budget where day=${utcDay} for update`,
-    sql`with candidates as (
+  const available = manual
+    ? sql`${limit}`
+    : sql`least(${limit}, (select ${discoveryDailyLimit}-processed from discovery_daily_budget where day=${utcDay}))`;
+  // Manual acquisition still records attempts/cooldowns under row locks. It is
+  // separate from scheduled daily accounting; never reset or raise that counter.
+  const completion = manual
+    ? sql`select * from claimed`
+    : sql`, budget as (
+      update discovery_daily_budget set processed=processed+(select count(*)::integer from claimed)
+      where day=${utcDay} and exists (select 1 from claimed) returning day
+    ) select c.* from claimed c cross join budget`;
+  const claim = sql`with candidates as (
       select q.id from discovery_queries q where ${eligible}
       order by q.request_count desc, q.next_eligible_at, q.first_requested_at, q.id
-      limit least(${limit}, (select ${discoveryDailyLimit}-processed from discovery_daily_budget where day=${utcDay}))
+      limit ${available}
       for update skip locked
     ), claimed as (
       update discovery_queries q set status='processing', last_attempted_at=date_trunc('milliseconds',statement_timestamp()),
         next_eligible_at=statement_timestamp()+interval '24 hours', error=null
       from candidates c where q.id=c.id
       returning q.id, q.normalized_query as query, q.last_attempted_at as "attemptedAt"
-    ), budget as (
-      update discovery_daily_budget set processed=processed+(select count(*)::integer from claimed)
-      where day=${utcDay} and exists (select 1 from claimed) returning day
-    ) select c.* from claimed c cross join budget`,
+    ) ${completion}`;
+
+  if (manual) return [claim] as const;
+
+  return [
+    sql`insert into discovery_daily_budget(day) values (${utcDay}) on conflict (day) do nothing`,
+    // Separate statements under READ COMMITTED: concurrent claimers see the
+    // updated counter AFTER acquiring this lock, rather than a stale CTE snapshot.
+    sql`select day from discovery_daily_budget where day=${utcDay} for update`,
+    claim,
   ] as const;
 }
 
 export async function claimDiscoveryQueries(
   db: Database,
   limit: number,
+  manual = false,
 ): Promise<DiscoveryClaim[]> {
-  const statements = discoveryClaimStatements(limit);
+  const [first, ...remaining] = discoveryClaimStatements(limit, manual);
   const results = await db.batch([
-    db.execute(statements[0]),
-    db.execute(statements[1]),
-    db.execute(statements[2]),
+    db.execute(first),
+    ...remaining.map((statement) => db.execute(statement)),
   ]);
 
-  return z.array(claimSchema).parse(results[2].rows);
+  return z.array(claimSchema).parse(results.at(-1)?.rows);
 }
 
-export async function previewDiscoveryQueries(db: Database, limit: number) {
+export async function previewDiscoveryQueries(db: Database, limit: number, manual = false) {
   parseDiscoveryOptions([`--limit=${limit}`]);
+  z.boolean().parse(manual);
+  const available = manual
+    ? sql`${limit}`
+    : sql`least(${limit}, ${discoveryDailyLimit}-coalesce((select processed from discovery_daily_budget where day=${utcDay}),0))`;
   const result = await db.execute(sql`select q.normalized_query as query from discovery_queries q
     where ${eligible} order by q.request_count desc, q.next_eligible_at, q.first_requested_at, q.id
-    limit least(${limit}, ${discoveryDailyLimit}-coalesce((select processed from discovery_daily_budget where day=${utcDay}),0))`);
+    limit ${available}`);
 
   return z.array(z.object({ query: z.string() })).parse(result.rows);
 }
