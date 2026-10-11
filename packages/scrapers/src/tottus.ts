@@ -1,5 +1,7 @@
 import { assertPublicAccess } from "./public-access.ts";
 import { parseTottusPage } from "./tottus-parser.ts";
+import { publicResponse } from "./catalog-sources.ts";
+import { parseTottusCatalogProduct } from "./targeted.ts";
 
 export { parseTottusPage } from "./tottus-parser.ts";
 
@@ -31,19 +33,13 @@ export function createTottusAdapter(
       const url = new URL("https://www.tottus.com.pe/tottus-pe/buscar");
       url.searchParams.set("Ntt", query);
       url.searchParams.set("page", "1");
-      const response = await fetchPage(url, {
-        headers: {
-          "User-Agent": "CompraFino/0.1 (bounded public catalog discovery)",
-          Accept: "text/html",
-        },
-        signal: AbortSignal.timeout(30_000),
-        redirect: "error",
-      });
-
-      assertPublicAccess(response);
-
-      if (!response.ok) {
-        throw new Error("Tottus search request failed");
+      const { response, productUrl } = await publicResponse(url, fetchPage, true);
+      if (productUrl) {
+        const parsed = parseTottusCatalogProduct(await response.text(), productUrl, new Date());
+        return {
+          listings: boundedSearchListings(parsed.listings, limit, query),
+          discovered: parsed.discovered,
+        };
       }
 
       const parsed = parseTottusPage(await response.text(), new Date());

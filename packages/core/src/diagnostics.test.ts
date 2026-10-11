@@ -1,6 +1,29 @@
 import { expect, it } from "vitest";
 import { z } from "zod";
-import { DiagnosticError, safeDiagnostic } from "./diagnostics.ts";
+import { DiagnosticError, safeDiagnostic, SourceResponseError } from "./diagnostics.ts";
+
+it("reports fixed retailer response classifications without arbitrary messages or URLs", () => {
+  const context = {
+    stage: "source",
+    operation: "ingestion",
+    reason: "source_request_failed",
+    retailer: "tottus",
+  } as const;
+  const error = new SourceResponseError("redirect_to_home", 302);
+  error.message = "private connection or source URL";
+  expect(safeDiagnostic(error, context)).toMatchObject({
+    sourceResponseCode: "redirect_to_home",
+    httpStatus: 302,
+  });
+  expect(JSON.stringify(safeDiagnostic(error, context))).not.toContain("private");
+  expect(
+    safeDiagnostic({ sourceResponseCode: "private", httpStatus: 302 }, context).sourceResponseCode,
+  ).toBeUndefined();
+  expect(
+    safeDiagnostic(new SourceResponseError("http_error", 999), context).httpStatus,
+  ).toBeUndefined();
+  expect(() => Reflect.construct(SourceResponseError, ["private-code", 302])).toThrow(/Invalid/u);
+});
 
 it("allowlists reasons and SQLSTATE without copying arbitrary errors or sensitive causes", () => {
   const context = {

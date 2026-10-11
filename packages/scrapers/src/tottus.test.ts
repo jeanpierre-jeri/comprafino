@@ -1,11 +1,38 @@
 import { describe, expect, it, vi } from "vitest";
 import fixture from "./fixtures/tottus.json";
+import productFixture from "./fixtures/tottus-product.json";
 import { createTottusAdapter, parseTottusPage } from "./tottus.ts";
 
 const observed = new Date("2026-10-03T14:00:00Z");
 
 const html = (data: unknown) =>
   `<html><script id="__NEXT_DATA__" type="application/json">${JSON.stringify(data)}</script></html>`;
+
+it("discovers a single search result through one public product redirect with ordinary-price validation", async () => {
+  const url = "https://www.tottus.com.pe/tottus-pe/articulo/113706602/aceite-primor/113706603";
+  const fetchPage = vi
+    .fn<typeof fetch>()
+    .mockResolvedValueOnce(new Response(null, { status: 301, headers: { location: url } }))
+    .mockResolvedValueOnce(new Response(html(productFixture)));
+  const result = await createTottusAdapter(fetchPage).searchProducts("aceite primor", 20);
+  expect(result.discovered).toBe(1);
+  expect(result.listings).toHaveLength(1);
+  expect(result.listings[0]).toMatchObject({ externalId: "113706603", currentPriceCents: 970 });
+  expect(fetchPage).toHaveBeenCalledTimes(2);
+  expect(fetchPage.mock.calls[1]![1]?.redirect).toBe("error");
+});
+
+it("does not follow search redirects to authentication or an unrelated host", async () => {
+  for (const location of ["https://www.tottus.com.pe/login", "https://example.com/product"]) {
+    const fetchPage = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(new Response(null, { status: 302, headers: { location } }));
+    await expect(
+      createTottusAdapter(fetchPage).searchProducts("aceite primor", 20),
+    ).rejects.toThrow(/redirect/u);
+    expect(fetchPage).toHaveBeenCalledOnce();
+  }
+});
 
 describe("sanitized live Tottus hydration fixture", () => {
   it("keeps SKU identity, internet rather than card price, reference price and weighted unit", () => {

@@ -128,6 +128,27 @@ it("rejects a second redirect and preserves access restriction handling on the p
   }
 });
 
+it("classifies homepage redirects without treating them as empty completed categories", async () => {
+  const work = tasks();
+  work.fetchPage.mockImplementation(() =>
+    fetchCatalogPage(
+      tottusClaim,
+      async () =>
+        new Response(null, {
+          status: 302,
+          headers: { location: "https://www.tottus.com.pe/tottus-pe" },
+        }),
+    ),
+  );
+  const result = await acquireCatalogPages(work, 1);
+  expect(result.failedPages).toBe(1);
+  expect(result.failures[0]?.diagnostic).toMatchObject({
+    sourceResponseCode: "redirect_to_home",
+    httpStatus: 302,
+  });
+  expect(work.complete).not.toHaveBeenCalled();
+});
+
 function tasks() {
   return {
     claim: vi

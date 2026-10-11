@@ -99,6 +99,44 @@ export interface SafeDiagnostic extends DiagnosticContext {
   databaseCode?: string;
   validationType?: "schema" | "json_syntax";
   validationIssues?: { code: string; path: string }[];
+  sourceResponseCode?:
+    | "http_error"
+    | "access_restricted"
+    | "redirect_to_home"
+    | "untrusted_redirect"
+    | "pagination_mismatch"
+    | "unexpected_empty_page";
+  httpStatus?: number;
+}
+
+/** A fixed source classification, never a retailer response body or URL. */
+export class SourceResponseError extends Error {
+  readonly sourceResponseCode: NonNullable<SafeDiagnostic["sourceResponseCode"]>;
+  readonly httpStatus: number | undefined;
+
+  constructor(code: NonNullable<SafeDiagnostic["sourceResponseCode"]>, httpStatus?: number) {
+    const responseMessages = {
+      http_error: "Public catalog request failed",
+      access_restricted: "Retailer public source restricted",
+      redirect_to_home: "Catalog category redirects to homepage",
+      untrusted_redirect: "Untrusted catalog redirect",
+      pagination_mismatch: "Public catalog pagination range mismatch",
+      unexpected_empty_page: "Public catalog unexpectedly empty page",
+    } as const;
+    const validated = z
+      .enum([
+        "http_error",
+        "access_restricted",
+        "redirect_to_home",
+        "untrusted_redirect",
+        "pagination_mismatch",
+        "unexpected_empty_page",
+      ])
+      .parse(code);
+    super(responseMessages[validated]);
+    this.sourceResponseCode = validated;
+    this.httpStatus = httpStatus;
+  }
 }
 
 /** Allowlisted context, SQLSTATE and schema paths only. Never copy messages or payloads. */
@@ -109,9 +147,22 @@ export function safeDiagnostic(error: unknown, context: DiagnosticContext): Safe
   let databaseCode: string | undefined;
   let validationType: SafeDiagnostic["validationType"];
   let validationIssues: SafeDiagnostic["validationIssues"];
+  let sourceResponseCode: SafeDiagnostic["sourceResponseCode"];
+  let httpStatus: number | undefined;
   let current = error;
 
   for (let depth = 0; depth < 3 && typeof current === "object" && current !== null; depth++) {
+    if (context.stage === "source" && current instanceof SourceResponseError) {
+      sourceResponseCode = current.sourceResponseCode;
+      if (
+        typeof current.httpStatus === "number" &&
+        Number.isInteger(current.httpStatus) &&
+        current.httpStatus >= 100 &&
+        current.httpStatus <= 599
+      ) {
+        httpStatus = current.httpStatus;
+      }
+    }
     if ("name" in current) {
       if (
         context.stage === "source" &&
@@ -162,6 +213,8 @@ export function safeDiagnostic(error: unknown, context: DiagnosticContext): Safe
     ...(databaseCode ? { databaseCode } : {}),
     ...(validationType ? { validationType } : {}),
     ...(validationIssues ? { validationIssues } : {}),
+    ...(sourceResponseCode ? { sourceResponseCode } : {}),
+    ...(httpStatus !== undefined ? { httpStatus } : {}),
   };
 }
 

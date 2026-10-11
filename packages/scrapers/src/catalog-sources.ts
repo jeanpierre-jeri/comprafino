@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { catalogSourceSchema } from "@comprafino/core";
+import { catalogSourceSchema, SourceResponseError } from "@comprafino/core";
 import type { CatalogSource, CatalogSourceClaim, RetailerId } from "@comprafino/core";
 import { parseTottusPage } from "./tottus-parser.ts";
 import { parseTottusCatalogProduct } from "./targeted.ts";
@@ -177,7 +177,7 @@ export function parseTottusCatalogSources(html: string): CatalogSource[] {
   return [...sources.values()];
 }
 
-async function publicResponse(
+export async function publicResponse(
   url: URL,
   fetchPage: typeof fetch,
   allowCatalogRedirect = false,
@@ -194,6 +194,9 @@ async function publicResponse(
   if (allowCatalogRedirect && [301, 302, 303, 307, 308].includes(response.status)) {
     const location = response.headers.get("location");
     const target = location ? new URL(location, url) : null;
+    if (target?.origin === "https://www.tottus.com.pe" && target.pathname === "/tottus-pe") {
+      throw new SourceResponseError("redirect_to_home", response.status);
+    }
     const category = /^\/tottus-pe\/lista\/(CATG\d+)\/[^/]+$/u.exec(url.pathname)?.[1];
     const redirectedCategory = target
       ? /^\/tottus-pe\/lista\/(CATG\d+)\/[^/]+$/u.exec(target.pathname)?.[1]
@@ -214,7 +217,7 @@ async function publicResponse(
       target.hash ||
       (!sameCategory && !productRedirect)
     ) {
-      throw new Error("Untrusted catalog redirect");
+      throw new SourceResponseError("untrusted_redirect", response.status);
     }
     if (sameCategory) {
       // A renamed slug must keep the exact category and requested page.
@@ -224,7 +227,7 @@ async function publicResponse(
     return { response: followed.response, productUrl: productRedirect ? target : null };
   }
   if (!response.ok) {
-    throw new Error("Public catalog request failed");
+    throw new SourceResponseError("http_error", response.status);
   }
   return { response, productUrl: null };
 }
@@ -267,13 +270,13 @@ export async function fetchCatalogPage(
       parsed.pagination.perPage > 48 ||
       parsed.discovered > 64
     ) {
-      throw new Error("Tottus catalog pagination mismatch");
+      throw new SourceResponseError("pagination_mismatch");
     }
     if (
       parsed.pagination.count > source.cursor * parsed.pagination.perPage &&
       parsed.discovered === 0
     ) {
-      throw new Error("Tottus unexpectedly empty catalog page");
+      throw new SourceResponseError("unexpected_empty_page");
     }
     return {
       listings: [...new Map(parsed.listings.map((row) => [row.externalId, row])).values()],
@@ -291,7 +294,7 @@ export async function fetchCatalogPage(
   const products = z.array(z.unknown()).max(20).parse(raw);
   const range = /^(\d+)-(\d+)\/(\d+)$/u.exec(response.headers.get("resources") ?? "");
   if (!range) {
-    throw new Error("VTEX catalog pagination range missing");
+    throw new SourceResponseError("pagination_mismatch");
   }
   const start = Number(range[1]),
     end = Number(range[2]),
@@ -304,7 +307,7 @@ export async function fetchCatalogPage(
     products.length !== Math.max(0, Math.min(end + 1, total) - start) ||
     (products.length === 0 && total > start)
   ) {
-    throw new Error("VTEX catalog page does not match range");
+    throw new SourceResponseError("pagination_mismatch");
   }
   let parsed;
   if (source.retailer === "metro") {
