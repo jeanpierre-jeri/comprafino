@@ -1,3 +1,4 @@
+import { createCliProgress } from "../../../scripts/cli-progress.ts";
 import { logDiagnostic } from "./diagnostics.ts";
 import { DiagnosticError } from "@comprafino/core";
 import {
@@ -19,6 +20,8 @@ import { createPlazaVeaAdapter } from "./plaza-vea.ts";
 import { createMetroAdapter } from "./metro.ts";
 import { createMakroAdapter } from "./makro.ts";
 import type { RetailerId } from "@comprafino/core";
+
+const progress = createCliProgress();
 
 try {
   let options: ReturnType<typeof parseDiscoveryOptions>;
@@ -76,13 +79,13 @@ try {
       ) => persistListingsDetailed(db, retailer, rows, { source: "discovery", queryId: claim.id }),
       async normalize() {
         await assertRefreshScope(db);
-        const r = await normalizeChangedCatalog(db, 10_000);
+        const r = await normalizeChangedCatalog(db, 10_000, progress);
 
         return r.changed;
       },
       async match() {
         await assertRefreshScope(db);
-        const r = await matchChangedCatalog(db, 250);
+        const r = await matchChangedCatalog(db, 250, progress);
         return { writes: r.associationsChanged + r.productsChanged, created: r.productsCreated };
       },
       finish: (
@@ -91,7 +94,8 @@ try {
       ) => finishDiscoveryQuery(db, claim, outcome),
     };
 
-    for (const claim of claims) {
+    for (const [index, claim] of claims.entries()) {
+      progress("Búsquedas seleccionadas", index, claims.length);
       const result = await processDiscoveryQuery(claim, tasks);
       for (const retailer of result.retailers) {
         if (retailer.restricted) {
@@ -99,6 +103,7 @@ try {
         }
       }
       results.push(result);
+      progress("Búsquedas seleccionadas", index + 1, claims.length);
       console.log(JSON.stringify(result));
     }
 

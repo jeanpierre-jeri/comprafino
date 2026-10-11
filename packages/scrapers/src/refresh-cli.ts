@@ -1,3 +1,4 @@
+import { createCliProgress } from "../../../scripts/cli-progress.ts";
 import { logDiagnostic } from "./diagnostics.ts";
 import { listingRefreshPolicy } from "@comprafino/core";
 import { refreshKnownListings } from "./listing-refresh.ts";
@@ -13,6 +14,8 @@ import {
 import { ingest } from "./ingestion.ts";
 import { refreshCatalog, parseRefreshOptions } from "./refresh.ts";
 import { createRefreshAdapters } from "./refresh-adapters.ts";
+
+const progress = createCliProgress();
 
 try {
   const { dryRun } = parseRefreshOptions(process.argv.slice(2));
@@ -60,6 +63,7 @@ try {
             externalId: undefined,
           }),
           listingRefreshTasks(db),
+          progress,
         );
       },
       async normalize() {
@@ -68,7 +72,7 @@ try {
         }
 
         await assertRefreshScope(db);
-        const r = await normalizeChangedCatalog(db, 10_000);
+        const r = await normalizeChangedCatalog(db, 10_000, progress);
 
         return r;
       },
@@ -78,7 +82,7 @@ try {
         }
 
         await assertRefreshScope(db);
-        const r = await matchChangedCatalog(db, 250);
+        const r = await matchChangedCatalog(db, 250, progress);
 
         return r;
       },

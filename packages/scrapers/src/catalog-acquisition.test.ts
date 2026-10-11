@@ -11,6 +11,7 @@ import fixture from "./fixtures/tottus.json";
 import productFixture from "./fixtures/tottus-product.json";
 import metro from "./fixtures/metro.json";
 import type { CatalogSourceClaim } from "@comprafino/core";
+import type { ReportProgress } from "../../../scripts/cli-progress.ts";
 
 const claim: CatalogSourceClaim = {
   id: "00000000-0000-4000-8000-000000000001",
@@ -79,12 +80,39 @@ it.each([
   `${productUrl}?token=example`,
   "https://user:password@www.tottus.com.pe/tottus-pe/articulo/113706602/aceite/113706603",
   tottusClaim.url,
+  "https://www.tottus.com.pe/tottus-pe",
+  "https://www.tottus.com.pe/tottus-pe/lista/CATG999/Other",
+  "https://www.tottus.com.pe/tottus-pe/lista/CATG43329/Renamed?page=9",
 ])("rejects an untrusted category redirect without another request: %s", async (location) => {
   const fetchPage = vi
     .fn<typeof fetch>()
     .mockResolvedValueOnce(new Response(null, { status: 302, headers: { location } }));
   await expect(fetchCatalogPage(tottusClaim, fetchPage)).rejects.toThrow(/redirect/u);
   expect(fetchPage).toHaveBeenCalledOnce();
+});
+
+it("follows one renamed category slug preserving the category and requested page", async () => {
+  const data = structuredClone(fixture);
+  data.props.pageProps.pagination.currentPage = 5;
+  const fetchPage = vi
+    .fn<typeof fetch>()
+    .mockResolvedValueOnce(
+      new Response(null, {
+        status: 301,
+        headers: { location: "/tottus-pe/lista/CATG43329/Renamed" },
+      }),
+    )
+    .mockResolvedValueOnce(
+      new Response(`<script id="__NEXT_DATA__">${JSON.stringify(data)}</script>`),
+    );
+  const result = await fetchCatalogPage({ ...tottusClaim, cursor: 4 }, fetchPage);
+  expect(result.discovered).toBe(data.props.pageProps.results.length);
+  const target = fetchPage.mock.calls[1]![0];
+  if (!(target instanceof URL)) {
+    throw new Error("Expected a public category URL");
+  }
+  expect(target.href).toBe("https://www.tottus.com.pe/tottus-pe/lista/CATG43329/Renamed?page=5");
+  expect(fetchPage.mock.calls[1]![1]?.redirect).toBe("error");
 });
 
 it("rejects a second redirect and preserves access restriction handling on the product", async () => {
@@ -127,6 +155,19 @@ it("advances an empty usable page without confusing zero seller offers with end 
   });
   expect(work.persist).not.toHaveBeenCalled();
   expect(work.complete).toHaveBeenCalledWith(claim, 40, 20, [], 0);
+});
+
+it("reports real page progress and early exhaustion without claiming the whole budget completed", async () => {
+  const work = tasks();
+  const progress = vi.fn<ReportProgress>();
+  await acquireCatalogPages(work, 100, progress);
+  expect(progress).toHaveBeenCalledWith(
+    "metro: páginas de esta corrida",
+    1,
+    100,
+    "0 observaciones guardadas; 0 fallos",
+  );
+  expect(progress).toHaveBeenLastCalledWith("Adquisición sin más categorías elegibles", 1, 100);
 });
 
 it("retains the cursor when fetching fails and stops the retailer on access restriction", async () => {

@@ -71,6 +71,8 @@ Oxlint lints, Oxfmt formats and TypeScript is authoritative. Vitest covers pure 
 
 ## Operational commands
 
+In a local terminal, root commands show start/completion and elapsed time every fifteen seconds. Catalogue acquisition, derivation, discovery and targeted refresh also report work counters and phases. Additional progress stays off in CI/production and uses stderr, preserving JSON reports on stdout. Use `COMPRAFINO_PROGRESS=0 pnpm acquire:catalog -- --pages=100` to silence it locally. See [catalogue progress and budgets](docs/catalog-expansion.md#acquisition-and-coverage).
+
 Commands below use root `DATABASE_URL` unless marked database-free. Apply migrations before writers and readers, and roll out all ingestion/identity writers together.
 
 | Command                                                                                   | Purpose                                                                                                                        |

@@ -14,6 +14,7 @@ import type { CatalogInput, RetailerId } from "@comprafino/core";
 import { z } from "zod";
 import { createDatabase } from "./client.ts";
 import { listingNormalizations, retailerListings, priceHistory } from "./schema.ts";
+import type { ReportProgress } from "../../../scripts/cli-progress.ts";
 
 type Database = ReturnType<typeof createDatabase>;
 
@@ -175,13 +176,16 @@ export async function normalizeCatalog(
   limit: number,
   retailer?: RetailerId,
   dryRun = false,
+  progress?: ReportProgress,
 ) {
+  progress?.("Leyendo catálogo para normalizar");
   const rows = await readCatalogSample(db, limit, retailer);
   const samples = rows.map((input) => ({ input, attributes: normalizeCatalogListing(input) }));
   let persisted: Awaited<ReturnType<typeof persistCatalogNormalizations>> | null = null;
   if (!dryRun) {
     persisted = { changed: 0, unchanged: 0, stale: 0 };
     for (let offset = 0; offset < rows.length; offset += catalogPolicy.batchSize) {
+      progress?.("Normalización de productos seleccionados", offset, rows.length);
       const batch = await persistCatalogNormalizations(
         db,
         rows.slice(offset, offset + catalogPolicy.batchSize),
@@ -190,6 +194,7 @@ export async function normalizeCatalog(
       persisted.unchanged += batch.unchanged;
       persisted.stale += batch.stale;
     }
+    progress?.("Normalización de productos seleccionados", rows.length, rows.length);
   }
   const coverage = {
     processed: samples.length,
@@ -213,13 +218,18 @@ export async function normalizeCatalog(
 }
 
 /** Accepted raw identity changes invalidate their fingerprint in the shared writer. */
-export async function normalizeChangedCatalog(db: Database, limit = 5000) {
+export async function normalizeChangedCatalog(
+  db: Database,
+  limit = 5000,
+  progress?: ReportProgress,
+) {
   if (!Number.isSafeInteger(limit) || limit < 1 || limit > catalogPolicy.retainedListingCap) {
     throw new Error("Invalid normalization work limit");
   }
   let processed = 0,
     changed = 0;
   while (processed < limit) {
+    progress?.("Normalización: presupuesto de esta corrida", processed, limit);
     const records = await db
       .select({ listing: retailerListings })
       .from(retailerListings)
@@ -242,6 +252,7 @@ export async function normalizeChangedCatalog(db: Database, limit = 5000) {
     processed += records.length;
     changed += result.changed;
   }
+  progress?.("Normalización terminada", processed, undefined, `${changed} cambios`);
   return { processed, changed };
 }
 

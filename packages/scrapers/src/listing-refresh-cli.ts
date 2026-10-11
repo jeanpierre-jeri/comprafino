@@ -1,3 +1,4 @@
+import { createCliProgress } from "../../../scripts/cli-progress.ts";
 import { logDiagnostic } from "./diagnostics.ts";
 import { catalogPolicy } from "@comprafino/core";
 import { parseListingRefreshOptions } from "@comprafino/core";
@@ -11,7 +12,10 @@ import {
 import { refreshKnownListings } from "./listing-refresh.ts";
 import { listingRefreshTasks } from "./listing-refresh-tasks.ts";
 
+const progress = createCliProgress();
+
 try {
+  progress("Preparando comando");
   const options = parseListingRefreshOptions(process.argv.slice(2));
   const db = createDatabase();
   const rows = await previewListingRefresh(db, options);
@@ -19,7 +23,7 @@ try {
   if (options.dryRun) {
     console.log(JSON.stringify({ dryRun: true, selected: rows, requests: 0, writes: 0 }, null, 2));
   } else {
-    const result = await refreshKnownListings(rows, listingRefreshTasks(db));
+    const result = await refreshKnownListings(rows, listingRefreshTasks(db), progress);
     let normalizationWrites = 0;
     let matchingWrites = 0;
     let normalization: "skipped" | "success" | "failed" = "skipped";

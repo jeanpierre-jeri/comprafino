@@ -1,3 +1,4 @@
+import { createCliProgress } from "../../../scripts/cli-progress.ts";
 import {
   catalogPolicy,
   listingRefreshPolicy,
@@ -30,7 +31,10 @@ import { logDiagnostic } from "./diagnostics.ts";
 import { refreshKnownListings } from "./listing-refresh.ts";
 import { listingRefreshTasks } from "./listing-refresh-tasks.ts";
 
+const progress = createCliProgress();
+
 try {
+  progress("Preparando comando");
   const options = parseAcquisitionOptions(process.argv.slice(2));
   const db = createDatabase();
   await assertRefreshScope(db);
@@ -54,10 +58,14 @@ try {
     const retailers = options.retailer ? [options.retailer] : retailerIdSchema.options;
     let skippedByCapacity = 0;
     const restrictedRetailers = new Set<RetailerId>();
-    for (const retailer of retailers) {
+    for (const [index, retailer] of retailers.entries()) {
       try {
+        progress(
+          `Tienda ${index + 1}/${retailers.length}: ${retailer}; leyendo categorías públicas`,
+        );
         const sources = await discoverCatalogSources(retailer);
         await registerCatalogSources(db, retailer, sources);
+        progress(`${retailer}: ${sources.length} categorías registradas; iniciando páginas`);
         const run = await store.start(retailer);
         await new Promise((resolve) => setTimeout(resolve, 1000));
         const result = await acquireCatalogPages(
@@ -72,6 +80,7 @@ try {
             pause: () => new Promise((resolve) => setTimeout(resolve, 1000)),
           },
           options.pages,
+          progress,
         );
         await store.finish(run, {
           status: result.failedPages || result.skippedByCapacity ? "failed" : "success",
@@ -102,6 +111,7 @@ try {
       }
     }
     // Accepted pages remain useful even when another category/retailer failed.
+    progress("Seleccionando productos para actualizar");
     const targeted = await refreshKnownListings(
       (
         await previewListingRefresh(db, {
@@ -112,6 +122,7 @@ try {
         })
       ).filter((row) => !restrictedRetailers.has(row.retailer)),
       listingRefreshTasks(db),
+      progress,
     );
     console.log(JSON.stringify({ targeted }));
     if (targeted.failures) {
@@ -119,8 +130,8 @@ try {
     }
     console.log(
       JSON.stringify({
-        normalization: await normalizeChangedCatalog(db, 10_000),
-        matching: await matchChangedCatalog(db, 250),
+        normalization: await normalizeChangedCatalog(db, 10_000, progress),
+        matching: await matchChangedCatalog(db, 250, progress),
       }),
     );
     console.log(JSON.stringify({ operation: "catalog_capacity", skippedByCapacity }));

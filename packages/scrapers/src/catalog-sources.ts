@@ -180,7 +180,7 @@ export function parseTottusCatalogSources(html: string): CatalogSource[] {
 async function publicResponse(
   url: URL,
   fetchPage: typeof fetch,
-  allowProductRedirect = false,
+  allowCatalogRedirect = false,
 ): Promise<{ response: Response; productUrl: URL | null }> {
   const response = await fetchPage(url, {
     headers: {
@@ -188,25 +188,40 @@ async function publicResponse(
       "User-Agent": "CompraFino/0.1 (public catalog acquisition)",
     },
     signal: AbortSignal.timeout(30_000),
-    redirect: allowProductRedirect ? "manual" : "error",
+    redirect: allowCatalogRedirect ? "manual" : "error",
   });
   assertPublicAccess(response);
-  if (allowProductRedirect && [301, 302, 303, 307, 308].includes(response.status)) {
+  if (allowCatalogRedirect && [301, 302, 303, 307, 308].includes(response.status)) {
     const location = response.headers.get("location");
     const target = location ? new URL(location, url) : null;
+    const category = /^\/tottus-pe\/lista\/(CATG\d+)\/[^/]+$/u.exec(url.pathname)?.[1];
+    const redirectedCategory = target
+      ? /^\/tottus-pe\/lista\/(CATG\d+)\/[^/]+$/u.exec(target.pathname)?.[1]
+      : undefined;
+    const sameCategory = Boolean(
+      category && redirectedCategory === category && target?.pathname !== url.pathname,
+    );
+    const productRedirect = Boolean(
+      target && /^\/tottus-pe\/articulo\/\d+\/[^/]+\/\d+\/?$/u.test(target.pathname),
+    );
+    const allowedQuery = !target?.search || (sameCategory && target.search === url.search);
     if (
       !target ||
       target.origin !== "https://www.tottus.com.pe" ||
       target.username ||
       target.password ||
-      target.search ||
+      !allowedQuery ||
       target.hash ||
-      !/^\/tottus-pe\/articulo\/\d+\/[^/]+\/\d+\/?$/u.test(target.pathname)
+      (!sameCategory && !productRedirect)
     ) {
       throw new Error("Untrusted catalog redirect");
     }
+    if (sameCategory) {
+      // A renamed slug must keep the exact category and requested page.
+      target.search = url.search;
+    }
     const followed = await publicResponse(target, fetchPage);
-    return { response: followed.response, productUrl: target };
+    return { response: followed.response, productUrl: productRedirect ? target : null };
   }
   if (!response.ok) {
     throw new Error("Public catalog request failed");

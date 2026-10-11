@@ -2,6 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { persistListings } from "./ingestion.ts";
 import { normalizeCatalog } from "./catalog.ts";
 import { inspectCatalogHealth } from "./catalog-health.ts";
+import { auditCatalogCoverage } from "./catalog-coverage.ts";
 import { ownedTestDatabase } from "./testing/database.ts";
 import { closeLocalTestConnections } from "./testing/test-query-client.ts";
 import { seedShoppingListFixtures } from "./shopping-list-e2e-fixtures.ts";
@@ -54,6 +55,11 @@ describe.skipIf(!testUrl)("catalog health with an explicit owned test database",
       "select count(*)::int as runs,(select count(*)::int from price_history) as history from ingestion_runs",
     );
     const report = await inspectCatalogHealth(harness.db);
+    const coverage = await auditCatalogCoverage(harness.db);
+    expect(report.retainedListings).toBe(coverage.totals.known);
+    expect(report.retailers.map((row) => row.freshSearchableOffers)).toEqual(
+      report.retailers.map((row) => coverage.retailers[row.retailer]!.publicGeneric),
+    );
     expect(report.status).toBe("healthy");
     expect(report.retailers.every((row) => row.freshSearchableOffers > 0)).toBe(true);
     expect(report.skippedByCapacity).toBeNull();
@@ -63,6 +69,38 @@ describe.skipIf(!testUrl)("catalog health with an explicit owned test database",
       ),
     ).toEqual(before);
     expect(JSON.stringify(report)).not.toContain("Huevos");
+  });
+
+  it("counts the same eligible offers as the complete audit across multiple pages", async () => {
+    await persistListings(
+      harness.db,
+      "makro",
+      Array.from({ length: 501 }, (_, index) => ({
+        retailer: "makro" as const,
+        externalId: `health-page-${index}`,
+        productId: `health-page-${index}`,
+        title: "Arroz ARO Bolsa 1Kg",
+        sourceBrand: "ARO",
+        category: "444",
+        url: "https://www.makro.plazavea.com.pe/arroz/p",
+        currentPriceCents: 1000,
+        currency: "PEN" as const,
+        priceUnit: "UN" as const,
+        available: true,
+        observedAt: new Date(),
+      })),
+    );
+    await normalizeCatalog(harness.db, 50_000);
+    const now = new Date();
+    const report = await inspectCatalogHealth(harness.db, now);
+    const coverage = await auditCatalogCoverage(harness.db, now);
+    expect(report.retainedListings).toBe(coverage.totals.known);
+    expect(report.retailers.map((row) => row.freshSearchableOffers)).toEqual(
+      report.retailers.map((row) => coverage.retailers[row.retailer]!.publicGeneric),
+    );
+    expect(
+      report.retailers.find((row) => row.retailer === "makro")!.freshSearchableOffers,
+    ).toBeGreaterThan(500);
   });
 
   it("fails when recent successful attempts mask stale quotes or explicit unavailable stock", async () => {

@@ -12,6 +12,7 @@ import type {
 } from "@comprafino/core";
 import type { TargetedRetailerAdapter } from "./targeted.ts";
 import { CatalogAccessRestriction } from "./public-access.ts";
+import type { ReportProgress } from "../../../scripts/cli-progress.ts";
 
 export interface ListingRefreshTasks {
   adapters: Record<RetailerId, TargetedRetailerAdapter>;
@@ -33,6 +34,7 @@ export interface ListingRefreshTasks {
 export async function refreshKnownListings(
   rows: readonly KnownListing[],
   tasks: ListingRefreshTasks,
+  progress?: ReportProgress,
 ) {
   if (rows.length > listingRefreshPolicy.limit) {
     throw new Error("Targeted refresh exceeds budget");
@@ -49,6 +51,12 @@ export async function refreshKnownListings(
   let requests = 0;
 
   for (const row of rows) {
+    progress?.(
+      "Actualización de productos seleccionados",
+      results.length,
+      rows.length,
+      row.retailer,
+    );
     if ((consecutive.get(row.retailer) ?? 0) >= 3) {
       results.push({
         retailer: row.retailer,
@@ -148,6 +156,7 @@ export async function refreshKnownListings(
     });
   }
 
+  progress?.("Actualización de productos seleccionados", results.length, rows.length);
   return {
     requests,
     results,

@@ -1,14 +1,19 @@
+import { createCliProgress } from "../../../scripts/cli-progress.ts";
 import { createDatabase } from "./client.ts";
 import { normalizeCatalog } from "./catalog.ts";
 import { parseCatalogOptions } from "./catalog-options.ts";
 
+const progress = createCliProgress();
+
 try {
+  progress("Preparando comando");
   const options = parseCatalogOptions(process.argv.slice(2));
   const result = await normalizeCatalog(
     createDatabase(),
     options.limit,
     options.retailer,
     options.dryRun,
+    progress,
   );
   console.log(
     JSON.stringify(

@@ -2,6 +2,7 @@ import { listingSchema, safeDiagnostic } from "@comprafino/core";
 import type { SafeDiagnostic } from "@comprafino/core";
 import type { CatalogSourceClaim, NormalizedRetailerListing } from "@comprafino/core";
 import { CatalogAccessRestriction } from "./catalog-sources.ts";
+import type { ReportProgress } from "../../../scripts/cli-progress.ts";
 
 export interface CatalogAcquisitionTasks {
   claim(): Promise<CatalogSourceClaim | null>;
@@ -26,7 +27,11 @@ export interface CatalogAcquisitionTasks {
 }
 
 /** One sequential retailer stream; per-page persistence precedes durable progress. */
-export async function acquireCatalogPages(tasks: CatalogAcquisitionTasks, pages: number) {
+export async function acquireCatalogPages(
+  tasks: CatalogAcquisitionTasks,
+  pages: number,
+  progress?: ReportProgress,
+) {
   let fetched = 0,
     persisted = 0,
     changed = 0,
@@ -38,12 +43,19 @@ export async function acquireCatalogPages(tasks: CatalogAcquisitionTasks, pages:
   for (let page = 0; page < pages; page++) {
     const claim = await tasks.claim();
     if (!claim) {
+      progress?.("Adquisición sin más categorías elegibles", page, pages);
       break;
     }
     if (page > 0) {
       await tasks.pause();
     }
     let stage: "source" | "persistence" | "completion" = "source";
+    progress?.(
+      `${claim.retailer}: páginas de esta corrida`,
+      page,
+      pages,
+      `${claim.name} (${claim.key}); cursor ${claim.cursor}`,
+    );
     try {
       const result = await tasks.fetchPage(claim);
       const listings = result.listings.map((listing) => listingSchema.parse(listing));
@@ -69,6 +81,12 @@ export async function acquireCatalogPages(tasks: CatalogAcquisitionTasks, pages:
         saved.skippedByCapacity,
       );
       completedPages++;
+      progress?.(
+        `${claim.retailer}: páginas de esta corrida`,
+        page + 1,
+        pages,
+        `${persisted} observaciones guardadas; ${failedPages} fallos`,
+      );
     } catch (error) {
       failures.push({
         sourceKey: claim.key,
@@ -81,6 +99,12 @@ export async function acquireCatalogPages(tasks: CatalogAcquisitionTasks, pages:
       });
       await tasks.fail(claim);
       failedPages++;
+      progress?.(
+        `${claim.retailer}: página fallida (${claim.key})`,
+        page + 1,
+        pages,
+        `avance conservado; ${failedPages} fallos`,
+      );
       if (error instanceof CatalogAccessRestriction) {
         restricted = true;
         break;

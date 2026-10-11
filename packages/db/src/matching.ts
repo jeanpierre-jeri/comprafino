@@ -1,3 +1,4 @@
+import type { ReportProgress } from "../../../scripts/cli-progress.ts";
 import { createHash } from "node:crypto";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { catalogPolicy } from "@comprafino/core";
@@ -175,7 +176,7 @@ async function changedMatchingScope(db: Database, seed: string) {
   }
 }
 
-export async function matchChangedCatalog(db: Database, blocks = 100) {
+export async function matchChangedCatalog(db: Database, blocks = 100, progress?: ReportProgress) {
   if (!Number.isSafeInteger(blocks) || blocks < 1 || blocks > 1000) {
     throw new Error("Invalid matching block budget");
   }
@@ -201,6 +202,12 @@ export async function matchChangedCatalog(db: Database, blocks = 100) {
     deferred = 0;
   const attempted = new Set<string>();
   for (let block = 0; block < blocks; block++) {
+    progress?.(
+      "Matching: presupuesto de bloques",
+      block,
+      blocks,
+      `${processed} registros procesados; ${productsCreated} grupos nuevos`,
+    );
     const pending = await db
       .select({ id: listingNormalizations.listingId })
       .from(listingNormalizations)
@@ -267,6 +274,12 @@ export async function matchChangedCatalog(db: Database, blocks = 100) {
     productsChanged += writes.productsCreated + writes.productsUpdated + writes.productsRemoved;
     productsCreated += writes.productsCreated;
   }
+  progress?.(
+    "Matching terminado",
+    processed,
+    undefined,
+    `${productsCreated} grupos nuevos; ${deferred} registros diferidos`,
+  );
   return { processed, candidates, associationsChanged, productsChanged, productsCreated, deferred };
 }
 
