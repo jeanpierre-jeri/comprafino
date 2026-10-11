@@ -228,37 +228,63 @@ describe.skipIf(!url)("batched current shopping snapshot", () => {
       );
     }
   });
-  it("retains options beyond the presentation cutoff and rejects snapshot overflow", async () => {
+  it("rejects snapshot overflow and excludes unrelated offers at catalog capacity", async () => {
     const existing = z
       .object({ count: z.number().int() })
       .parse((await scoped.query("select count(*)::int as count from retailer_listings"))[0]).count;
-    const listings = Array.from(
-      { length: catalogPolicy.retainedListingCap - existing },
-      (_, i) => ({
-        retailer: "metro" as const,
-        externalId: `basket-guard-${i}`,
-        productId: `basket-guard-${i}`,
-        title: "Arroz Blanco Guard 1kg",
-        url: "https://www.metro.pe/rice/p",
-        currentPriceCents: 500,
-        currency: "PEN" as const,
-        priceUnit: "UN" as const,
-        observedAt: new Date(),
-      }),
-    );
-    await persistListings(db, "metro", listings);
-    const rows = z
-      .array(z.object({ id: z.uuid(), external_id: z.string() }))
+    const template = {
+      retailer: "metro" as const,
+      externalId: "basket-guard-0",
+      productId: "basket-guard-0",
+      title: "Arroz Blanco Guard 1kg",
+      url: "https://www.metro.pe/rice/p",
+      currentPriceCents: 500,
+      currency: "PEN" as const,
+      priceUnit: "UN" as const,
+      observedAt: new Date(),
+    };
+    await persistListings(db, "metro", [template]);
+    const { id } = z
+      .object({ id: z.uuid() })
       .parse(
-        await scoped.query(
-          "select id, external_id from retailer_listings where external_id like 'basket-guard-%'",
-        ),
+        (
+          await scoped.query("select id from retailer_listings where external_id='basket-guard-0'")
+        )[0],
       );
-    const ids = new Map(rows.map((r) => [r.external_id, r.id]));
-    await persistCatalogNormalizations(
-      db,
-      listings.map((l) => ({ ...l, id: ids.get(l.externalId)!, retailerId: "metro" })),
+    await persistCatalogNormalizations(db, [{ ...template, id, retailerId: "metro" }]);
+    // This tests the reader's full-catalog bound, not ingestion throughput. Clone
+    // one validated template inside our owned schema rather than serializing and
+    // normalizing 50,000 identical objects in the shared CI runner.
+    // Only IDs change; every fingerprint input and positive ordinary quote stays identical.
+    await scoped.query(
+      `insert into retailer_listings
+      select (jsonb_populate_record(null::retailer_listings,to_jsonb(template)||jsonb_build_object(
+        'id',gen_random_uuid(),'external_id','basket-guard-'||g.i,'product_id','basket-guard-'||g.i))).*
+      from retailer_listings template cross join generate_series(1,$1::int) g(i)
+      where template.external_id='basket-guard-0'`,
+      [catalogPolicy.retainedListingCap - existing - 1],
     );
+    await scoped.query(`with template as materialized (
+      select to_jsonb(n) as data from listing_normalizations n
+      join retailer_listings l on l.id=n.listing_id where l.external_id='basket-guard-0'
+    ) insert into listing_normalizations
+      select (jsonb_populate_record(null::listing_normalizations,template.data||jsonb_build_object('listing_id',l.id))).*
+      from template cross join retailer_listings l
+      where l.external_id like 'basket-guard-%' and l.external_id<>'basket-guard-0'`);
+    await scoped.query(`with template as materialized (
+      select to_jsonb(h) as data from price_history h
+      join retailer_listings l on l.id=h.listing_id where l.external_id='basket-guard-0'
+    ) insert into price_history
+      select (jsonb_populate_record(null::price_history,template.data||jsonb_build_object(
+        'id',gen_random_uuid(),'listing_id',l.id))).*
+      from template cross join retailer_listings l
+      where l.external_id like 'basket-guard-%' and l.external_id<>'basket-guard-0'`);
+    expect(
+      z
+        .object({ count: z.number().int() })
+        .parse((await scoped.query("select count(*)::int as count from retailer_listings"))[0])
+        .count,
+    ).toBe(catalogPolicy.retainedListingCap);
     // The writer now rejects new identities above the configured cap. Deliberately inject one
     // extra isolated row to retain the independent reader overflow regression.
     await scoped.query(`insert into retailer_listings select (jsonb_populate_record(null::retailer_listings,
@@ -278,14 +304,40 @@ describe.skipIf(!url)("batched current shopping snapshot", () => {
     await scoped.query(
       "update retailer_listings set active=false where external_id in ('basket-guard-0','basket-guard-1')",
     );
-    expect(
-      (await evaluateCurrentShoppingList(db, { version: 2, items: [make("generic")] }, "standard"))
-        .baskets[0].status,
-    ).toBe("complete");
+    const batch = vi.spyOn(db, "batch");
+    try {
+      const evaluation = await evaluateCurrentShoppingList(
+        db,
+        { version: 2, items: [make("generic")] },
+        "standard",
+      );
+      expect(evaluation.baskets[0].status).toBe("complete");
+      const raw: unknown = await batch.mock.results[0]?.value;
+      const result = z
+        .array(
+          z.object({
+            rows: z.array(
+              z.object({
+                snapshot: z.object({
+                  currentCount: z.number().int(),
+                  listings: z.array(z.object({ listing: z.object({ title: z.string() }) })),
+                }),
+              }),
+            ),
+          }),
+        )
+        .parse(raw);
+      const snapshot = result[0]!.rows[0]!.snapshot;
+      expect(snapshot.currentCount).toBeGreaterThan(49_000);
+      expect(snapshot.listings.some((row) => row.listing.title === template.title)).toBe(false);
+    } finally {
+      batch.mockRestore();
+    }
     await scoped.query(
       "update retailer_listings set active=false where external_id like 'basket-guard-%'",
     );
-  }, 30000);
+    // Full-capacity SQL fixture creation needs headroom on shared CI runners.
+  }, 120_000);
   it("weekday SQL uses real days, separates retailers/intent and ignores CMR and reference changes", async () => {
     const evaluationTime = new Date();
     const { start } = weekdayEvidenceWindow(evaluationTime);

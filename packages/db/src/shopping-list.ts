@@ -122,8 +122,8 @@ function shoppingCandidate(
   };
 }
 
-/** One statement gives exact metadata and all current candidates a consistent
- * snapshot. Bounded full-catalog retrieval is intentional at the current scale. */
+/** One statement gives exact metadata and needed current candidates a consistent
+ * snapshot. The overflow count still covers the complete current catalog. */
 export async function evaluateCurrentShoppingList(
   db: ReturnType<typeof createDatabase>,
   list: ShoppingList,
@@ -141,15 +141,24 @@ export async function evaluateCurrentShoppingList(
       ...new Set(list.items.flatMap((i) => (i.intent === "generic" ? [] : [i.canonicalId]))),
     ];
     const queryStarted = performance.now();
+    const marketQueries = list.items.flatMap((item) => {
+      if (item.intent === "strict") return [];
+      // A preference's safe alternatives depend on its current canonical title,
+      // not a saved query/profile. Keep the supported-family superset for it.
+      if (item.intent === "preferred") {
+        return Object.values(genericSubstitutionContexts).map((context) => context.query);
+      }
+      return [shoppingMarketQuery(item)];
+    });
     const families = [
       ...new Set(
-        Object.values(genericSubstitutionContexts).flatMap((context) => {
-          const interpretation = resolveProductFamilyQuery(context.query);
+        marketQueries.flatMap((query) => {
+          const interpretation = resolveProductFamilyQuery(query);
           return interpretation ? [interpretation.family] : [];
         }),
       ),
     ];
-    const alternativePredicate = list.items.some((item) => item.intent !== "strict")
+    const alternativePredicate = families.length
       ? sql`(${sql.join(families.map(genericFamilyCandidatePredicate), sql` or `)})`
       : sql`false`;
     const exactPredicate = ids.length
@@ -159,7 +168,9 @@ export async function evaluateCurrentShoppingList(
         )})`
       : sql`false`;
     const [result] = await db.batch([
-      db.execute(sql`${eligibleProducts}, current_listings as (
+      // Inline the projection so counting the full catalog does not materialize
+      // every listing's JSON/benefits before filtering the requested families.
+      db.execute(sql`${eligibleProducts}, current_listings as not materialized (
       ${currentGenericOfferRows(now)}
     ) select jsonb_build_object(
       'currentCount',(select count(*)::int from current_listings),
