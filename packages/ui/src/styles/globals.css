@@ -254,10 +254,6 @@
   .empty-surface p {
     @apply max-w-xl leading-relaxed;
   }
-  .exact-section {
-    @apply rounded-2xl bg-secondary p-4 sm:p-5;
-    border-left: 3px solid var(--accent-border);
-  }
   .product-card {
     @apply relative flex h-full min-w-0 flex-col rounded-xl bg-surface p-4;
     border: 1px solid transparent;
@@ -354,9 +350,6 @@
   .card-amount {
     @apply text-4xl font-semibold tracking-[-0.045em] text-foreground tabular-nums;
   }
-  .exact-card .card-amount {
-    color: var(--primary);
-  }
   .card-provenance {
     @apply flex flex-wrap items-center justify-between gap-x-2 gap-y-1;
   }
@@ -368,12 +361,6 @@
   }
   .comparison-link {
     @apply relative z-10 mt-2 inline-flex min-h-10 items-center rounded text-sm font-semibold text-primary hover:underline;
-  }
-  .exact-card .freshness {
-    @apply mt-1;
-  }
-  .exact-card .product-summary {
-    align-items: center;
   }
   .retailer-badge::before {
     content: "";

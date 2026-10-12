@@ -186,7 +186,7 @@ for (const theme of ["light", "dark"] as const) {
   });
 }
 
-test("exact comparison cards immediately respond while detail data is delayed", async ({
+test("product comparison links immediately respond while detail data is delayed", async ({
   page,
 }) => {
   test.skip(
@@ -197,7 +197,7 @@ test("exact comparison cards immediately respond while detail data is delayed", 
   // request, including Link prefetches, before any card can populate the router cache.
   const held = await holdNavigation(page, /^\/products\/[^/]+$/u, undefined, true);
   await page.goto("/search?q=gloria+946");
-  const card = page.locator(".exact-card a.navigation-link").first();
+  const card = page.locator("[data-offer-id] a.comparison-link").first();
   await expect(card).toBeVisible();
   const href = await card.getAttribute("href");
 
@@ -211,11 +211,13 @@ test("exact comparison cards immediately respond while detail data is delayed", 
     await card.click();
     await expect(
       page
-        .locator('.exact-card a[aria-busy="true"], [aria-label="Cargando comparación de producto"]')
+        .locator(
+          '[data-offer-id] a.comparison-link[aria-busy="true"], [aria-label="Cargando comparación de producto"]',
+        )
         .first(),
     ).toBeVisible({ timeout: 1000 });
     await page.evaluate((destination) => {
-      const link = Array.from(document.querySelectorAll(".exact-card a.navigation-link")).find(
+      const link = Array.from(document.querySelectorAll("[data-offer-id] a.comparison-link")).find(
         (element) => element.getAttribute("href") === destination,
       );
 

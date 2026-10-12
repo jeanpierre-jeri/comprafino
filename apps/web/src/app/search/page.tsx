@@ -14,7 +14,7 @@ import {
   recordDiscoveryForSearch,
   requestCatalogRefresh,
 } from "@comprafino/db";
-import type { ProductComparison, GenericProductOffer } from "@comprafino/db";
+import type { GenericProductOffer } from "@comprafino/db";
 import Link from "next/link";
 import { searchFilterQuery } from "@comprafino/core/search-filters";
 import { searchCategory, usefulSearchRequest } from "@comprafino/core";
@@ -64,7 +64,6 @@ async function SearchResults({
   const sort = filters.sort;
   let units: string[] = [];
   let underlyingCount = 0;
-  let products: ProductComparison[] = [];
   let offers: GenericProductOffer[] = [];
   let failed = false;
   const rawPage =
@@ -75,9 +74,10 @@ async function SearchResults({
 
   if (validRequest) {
     try {
-      const db = createDatabase();
-      const results = await searchPublicProducts(db, query, sort, observedNow, filters, page);
-      products = results.products;
+      const db = createDatabase(process.env, { requestTimeoutMs: 12_000 });
+      const results = await searchPublicProducts(db, query, sort, observedNow, filters, page, {
+        includeComparisons: false,
+      });
       offers = results.offers;
       units = results.availableUnits;
       underlyingCount = results.usefulResultCount;
@@ -150,7 +150,6 @@ async function SearchResults({
           <SearchResultsContent
             query={query}
             filters={filters}
-            products={products}
             offers={offers}
             failed={failed}
             underlyingCount={underlyingCount}

@@ -1,11 +1,31 @@
 import { randomUUID } from "node:crypto";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { SQL, sql } from "drizzle-orm";
+import { z } from "zod";
 import { searchFilters } from "@comprafino/core";
-import { searchPublicProducts } from "./generic-offers.ts";
+import { searchPublicProducts, searchGenericProductOffers } from "./generic-offers.ts";
 import { catalogTestContext, publicNow } from "./testing/catalog-fixtures.ts";
 import { closeLocalTestConnections } from "./testing/test-query-client.ts";
 
 const testUrl = process.env.TEST_DATABASE_URL;
+
+type CategoryPlanNode = {
+  "Actual Loops": number;
+  "Group Key"?: string[];
+  Plans?: CategoryPlanNode[];
+};
+
+const categoryPlanNode: z.ZodType<CategoryPlanNode> = z.lazy(() =>
+  z.object({
+    "Actual Loops": z.number(),
+    "Group Key": z.array(z.string()).optional(),
+    Plans: z.array(categoryPlanNode).optional(),
+  }),
+);
+
+function flattenPlan(node: CategoryPlanNode): CategoryPlanNode[] {
+  return [node, ...(node.Plans ?? []).flatMap(flattenPlan)];
+}
 
 describe.skipIf(!testUrl)("category search (explicit owned PostgreSQL schema)", () => {
   const harness = catalogTestContext();
@@ -37,7 +57,81 @@ describe.skipIf(!testUrl)("category search (explicit owned PostgreSQL schema)", 
       sourceId,
       listingId,
     ]);
+    return sourceId;
   }
+
+  it("browses a broad category without recomputing exact groups for each listing", async () => {
+    for (let index = 0; index < 40; index++) {
+      await seedPublicProduct(`category-plan-${index}`, "Leche Gloria Entera Caja 946ml");
+    }
+    const template = await seedGeneric("Leche Auditcategoryscale Caja 1L", 900);
+    const sourceId = await attachCategory(template.id, "Lácteos / Leche");
+    // Clones retain the real writer's positive quote and normalization fingerprint.
+    // All bulk fixture writes and ANALYZE calls stay in this suite's owned schema.
+    await query(
+      `insert into retailer_listings
+      select (jsonb_populate_record(null::retailer_listings,to_jsonb(template)||jsonb_build_object(
+        'id',gen_random_uuid(),'external_id','category-scale-'||g.i))).*
+      from retailer_listings template cross join generate_series(1,1199) g(i) where template.id=$1`,
+      [template.id],
+    );
+    await query(
+      `insert into listing_normalizations
+      select (jsonb_populate_record(null::listing_normalizations,to_jsonb(template)||jsonb_build_object('listing_id',listing.id))).*
+      from listing_normalizations template cross join retailer_listings listing
+      where template.listing_id=$1 and listing.external_id like 'category-scale-%'`,
+      [template.id],
+    );
+    await query(
+      `insert into price_history
+      select (jsonb_populate_record(null::price_history,to_jsonb(template)||jsonb_build_object(
+        'id',gen_random_uuid(),'listing_id',listing.id))).*
+      from price_history template cross join retailer_listings listing
+      where template.listing_id=$1 and listing.external_id like 'category-scale-%'`,
+      [template.id],
+    );
+    await query(
+      `insert into catalog_source_listings(source_id,listing_id)
+      select $1,id from retailer_listings where external_id like 'category-scale-%'`,
+      [sourceId],
+    );
+    await query(
+      "analyze retailer_listings,listing_normalizations,price_history,canonical_products,canonical_product_listings,catalog_sources,catalog_source_listings,retailers",
+    );
+
+    const querySpy = vi.spyOn(db, "execute");
+    let statement: SQL | undefined;
+    try {
+      const offers = await searchGenericProductOffers(
+        db,
+        "",
+        "relevance",
+        publicNow,
+        searchFilters({ category: "lacteos-huevos" }),
+        true,
+      );
+      expect(offers).toHaveLength(1200);
+      const captured = querySpy.mock.calls[0]?.[0];
+      if (captured instanceof SQL) {
+        statement = captured;
+      }
+    } finally {
+      querySpy.mockRestore();
+    }
+    if (!statement) {
+      throw new Error("Missing category query for execution-plan regression");
+    }
+    const result = await db.execute(sql`explain (analyze,format json,timing off) ${statement}`);
+    const plans = z
+      .array(z.object({ "QUERY PLAN": z.array(z.object({ Plan: categoryPlanNode })) }))
+      .parse(result.rows);
+    const nodes = plans.flatMap((row) =>
+      row["QUERY PLAN"].flatMap((entry) => flattenPlan(entry.Plan)),
+    );
+    const exactAggregations = nodes.filter((node) => node["Group Key"]?.includes("c.id"));
+    expect(exactAggregations.length).toBeGreaterThan(0);
+    expect(exactAggregations.every((node) => node["Actual Loops"] <= 1)).toBe(true);
+  }, 30_000);
 
   it("browses acquired paths without title guesses, duplicate offers or missing-product demand", async () => {
     const milk = await seedGeneric("Leche Auditcategoria 1L", 500);
@@ -172,5 +266,29 @@ describe.skipIf(!testUrl)("category search (explicit owned PostgreSQL schema)", 
     );
     expect(results.offers.map((offer) => offer.id)).toEqual([unknown.id]);
     expect(results.offers[0]!.available).toBeNull();
+  });
+
+  it("offers-only search skips comparison reads and paginates only the visible products", async () => {
+    const product = await seedPublicProduct("offers-only", "Leche Gloria Entera Caja 946ml");
+    const querySpy = vi.spyOn(db, "execute");
+    try {
+      const results = await searchPublicProducts(
+        db,
+        "gloria",
+        "relevance",
+        publicNow,
+        searchFilters(),
+        1,
+        { includeComparisons: false },
+      );
+      expect(querySpy).toHaveBeenCalledOnce();
+      expect(results.products).toEqual([]);
+      expect(results.offers).toHaveLength(2);
+      expect(results.offers.every((offer) => offer.canonicalId === product.id)).toBe(true);
+      expect(results.hasMore).toBe(false);
+      expect(results.totalOffers).toBe(2);
+    } finally {
+      querySpy.mockRestore();
+    }
   });
 });

@@ -9,7 +9,7 @@ import {
   rankedPrice,
   searchFilters,
 } from "@comprafino/core";
-import type { PriceMode, SearchFilters } from "@comprafino/core";
+import type { PriceMode, SearchFilters, SearchCategoryId } from "@comprafino/core";
 import { sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import type { ProductFamily } from "@comprafino/core";
@@ -231,11 +231,10 @@ export async function searchGenericProductOffers(
     : sql`true`;
   const [result] = await db.batch([
     db.execute(sql`${eligibleProducts}, generic as (
-    ${currentGenericOfferRows(now)}
+    ${currentGenericOfferRows(now, filters.category)}
   ) select * from generic where ${canonicalId ? sql`"canonicalId"=${canonicalId}::uuid` : sql`true`} and ${predicates.length ? sql.join(predicates, sql` and `) : sql`true`}
     and ${textQuery ? sql`(search_identity='' or search_vector@@to_tsquery('simple',${textQuery}))` : sql`true`}
     and ${familyPredicate}
-    and ${categoryListingPredicate(sql`(listing->>'id')::uuid`, filters.category)}
   order by (title_text=${query}) desc, starts_with(title_text,${query}) desc,
     public.similarity(title_text,${query}) desc, title_text collate "C", listing->>'id' limit ${catalogPolicy.overflowSentinel}`),
   ]);
@@ -280,6 +279,7 @@ export async function searchPublicProducts(
   now = new Date(),
   filters: SearchFilters = searchFilters({ sort }),
   page = 1,
+  options: { includeComparisons?: boolean } = {},
 ) {
   if (
     !Number.isSafeInteger(page) ||
@@ -289,7 +289,9 @@ export async function searchPublicProducts(
     throw new Error("Invalid search page");
   }
   const [products, offers, underlyingProducts, underlyingOffers] = await Promise.all([
-    searchCanonicalProducts(db, query, now, page, filters.category),
+    options.includeComparisons === false
+      ? []
+      : searchCanonicalProducts(db, query, now, page, filters.category),
     searchGenericProductOffers(
       db,
       query,
@@ -298,7 +300,7 @@ export async function searchPublicProducts(
       searchFilters({ sort, priceMode: filters.priceMode, category: filters.category }),
       true,
     ),
-    filters.category && usefulSearchQuery(query)
+    options.includeComparisons !== false && filters.category && usefulSearchQuery(query)
       ? searchCanonicalProducts(db, query, now, page)
       : null,
     filters.category && usefulSearchQuery(query)
@@ -396,7 +398,7 @@ export function getCanonicalCurrentProductOffers(
 }
 
 /** Shared current normalized listing boundary, also used by basket snapshots. */
-export function currentGenericOfferRows(now: Date) {
+export function currentGenericOfferRows(now: Date, category: SearchCategoryId | null = null) {
   return sql`    select jsonb_build_object('id',l.id,'retailerId',l.retailer_id,'title',l.title,
       'priceUnit',h.price_unit,'packageText',l.package_text,'sourceBrand',l.source_brand,
       'sourceUnitMultiplier',l.source_unit_multiplier::float8) as listing,
@@ -416,5 +418,8 @@ export function currentGenericOfferRows(now: Date) {
     where l.active and l.available is distinct from false and h.currency='PEN' and h.current_price_cents>0
       and h.price_unit=l.price_unit and h.price_unit in ('UN','KG')
       and l.last_seen_at between ${new Date(now.getTime() - listingRefreshPolicy.freshHours * 60 * 60 * 1000).toISOString()}::timestamptz and ${now.toISOString()}::timestamptz
+      -- Filter the indexed UUID before JSON projection. Filtering listing->>'id'
+      -- hides column statistics and can rescan all exact groups for every listing.
+      and ${categoryListingPredicate(sql`l.id`, category)}
 `;
 }

@@ -50,8 +50,8 @@ test.describe("persisted public catalog (explicit DATABASE_URL)", () => {
     await page.getByRole("button", { name: "Buscar" }).click();
     await expect(page).toHaveURL(/\/search\?q=gloria\+946$/);
     await page
-      .getByRole("link")
-      .filter({ has: page.getByRole("heading", { name: product!.displayName, exact: true }) })
+      .locator(`[data-offer-id] a.comparison-link[href="/products/${product!.id}"]`)
+      .first()
       .click();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(product!.displayName);
     await expect(page).toHaveTitle(`${product!.displayName} – precios | CompraFino`);

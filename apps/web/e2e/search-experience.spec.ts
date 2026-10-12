@@ -25,7 +25,7 @@ test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Lácteos y huevos");
     const cards = page.locator("[data-offer-id]");
     await expect(cards).toHaveCount(5);
-    await expect(page.locator(".exact-card")).toHaveCount(1);
+    await expect(page.getByRole("heading", { name: "Compara el mismo producto" })).toHaveCount(0);
     await expect(
       page.getByRole("button", { name: "Agregar como necesidad", exact: true }),
     ).toHaveCount(0);
@@ -126,7 +126,6 @@ test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
     );
     await expect(offers).toContainText("Las marcas, variedades y calidades pueden diferir.");
     await expect(large).toContainText("Disponibilidad no confirmada.");
-    await expect(page.locator(".exact-card")).toContainText("2 ofertas vigentes");
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
     ).toBe(true);
@@ -136,21 +135,18 @@ test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
     await expect(page.locator(".detail-best-price")).toContainText("la cantidad no está indicada");
   });
 
-  test("retailer and sorting controls disclose full exact comparisons while filtering independent offers", async ({
+  test("retailer filters affect the product list and card links retain full store comparisons", async ({
     page,
   }) => {
     await page.goto("/search?q=huevos+auditexperiencia&sort=total-price&retailer=plaza-vea");
-    await expect(
-      page.getByText(/El orden elegido se aplica a «Opciones en supermercados»/),
-    ).toBeVisible();
-    await expect(page.getByRole("region", { name: "Opciones en supermercados" })).toHaveCount(0);
-    const exact = page.locator(".exact-card");
-    await expect(exact).toContainText("Ver registros en 4 supermercados");
-    await expect(exact).toContainText("2 ofertas vigentes");
-    await expect(exact).toContainText("S/ 60.00");
-    await expect(exact).toContainText("Metro y Tottus");
-    await expect(page.getByText(/El precio «Desde» considera sus ofertas vigentes/)).toBeVisible();
-    await exact.getByRole("link").click();
+    await expect(page.getByText("No hay opciones con estos filtros.")).toBeVisible();
+    await expect(page.locator("[data-offer-id]")).toHaveCount(0);
+    await expect(page.locator(".exact-card")).toHaveCount(0);
+    await page.getByRole("combobox", { name: "Supermercado" }).click();
+    await page.getByRole("option", { name: "Metro", exact: true }).click();
+    const card = page.locator(`[data-offer-id="${fixture("search-metro")}"]`);
+    await expect(card).toBeVisible();
+    await card.getByRole("link", { name: "Ver comparación entre supermercados" }).click();
     await expect(page).toHaveURL(`/products/${fixture("search-product")}`);
     const records = page.getByRole("region", { name: "Precios y registros en 4 supermercados" });
     await expect(records).toContainText("2 ofertas vigentes");

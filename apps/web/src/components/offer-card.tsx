@@ -1,13 +1,12 @@
 import { UnitPriceReference } from "./unit-price-reference";
-import { ComparisonCoverage } from "./comparison-coverage";
-import { repriceUnitPrice, canonicalUnitPrice, classifyProductFamily } from "@comprafino/core";
+import { repriceUnitPrice } from "@comprafino/core";
 import { AvailabilityNotice } from "./availability-notice";
 import { AddShoppingItem } from "./shopping-list/shopping-item-editor";
-import { shoppingQueryForTitle, shoppingSeedForRetailerOffer } from "@comprafino/core";
-import { ArrowRight, ArrowUpRight } from "@comprafino/ui";
+import { shoppingSeedForRetailerOffer } from "@comprafino/core";
+import { ArrowUpRight } from "@comprafino/ui";
 import { NavigationLink } from "./navigation-link";
 import { formatPen } from "@comprafino/db";
-import type { GenericProductOffer, ProductComparison } from "@comprafino/db";
+import type { GenericProductOffer } from "@comprafino/db";
 import { ProductImage } from "./product-image";
 import { ObservedAt, packageSummary, RetailerBadge } from "./product-info";
 
@@ -15,10 +14,12 @@ export function GenericOfferCard({
   offer,
   benefits,
   observedNow,
+  eager = false,
 }: {
   observedNow: Date;
   offer: GenericProductOffer;
   benefits: boolean;
+  eager?: boolean;
 }) {
   const ordinaryUnitPrice = repriceUnitPrice(
     offer.unitPrice,
@@ -29,7 +30,12 @@ export function GenericOfferCard({
   return (
     <article data-offer-id={offer.id} className="product-card">
       <div className="product-summary">
-        <ProductImage compact src={offer.imageUrl} name={offer.title} loading="lazy" />
+        <ProductImage
+          compact
+          src={offer.imageUrl}
+          name={offer.title}
+          loading={eager ? "eager" : "lazy"}
+        />
         <div className="min-w-0">
           <h3 className="product-title">
             <NavigationLink className="product-title-link" href={`/listings/${offer.id}`}>
@@ -115,130 +121,6 @@ export function GenericOfferCard({
           compact
           buttonLabel="Agregar a mi lista"
           seed={shoppingSeedForRetailerOffer(offer)}
-        />
-      </div>
-    </article>
-  );
-}
-
-export function ExactProductCard({
-  product,
-  benefits,
-  eager,
-  observedNow,
-}: {
-  product: ProductComparison;
-  benefits: boolean;
-  eager: boolean;
-  observedNow: Date;
-}) {
-  const conditionalRanking = product.lowestBenefit;
-  const benefitSource = product.offers.find((offer) =>
-    offer.conditionalOffers.some(
-      (benefit) => benefit.priceCents === conditionalRanking?.priceCents,
-    ),
-  );
-  const benefitUnitPrice =
-    conditionalRanking && benefitSource
-      ? canonicalUnitPrice(
-          {
-            title: benefitSource.title,
-            quantityValue: product.quantityValue,
-            quantityUnit: product.quantityUnit,
-            packageCount: product.packageCount,
-            priceCents: conditionalRanking.priceCents,
-            observedAt: benefitSource.observedAt,
-            available: benefitSource.available,
-          },
-          observedNow,
-        )
-      : null;
-  // One conservative freshness label for ordinary-price ties; detail keeps every timestamp.
-  const winningOffers = product.offers.filter(
-    (offer) =>
-      offer.freshness === "fresh" &&
-      offer.available !== false &&
-      offer.currentPriceCents === product.lowestPriceCents,
-  );
-  const observedAt = winningOffers.reduce<Date | null>(
-    (oldest, offer) => (!oldest || offer.observedAt < oldest ? offer.observedAt : oldest),
-    null,
-  );
-  const hasUnknownStock =
-    winningOffers.some((offer) => offer.available == null) ||
-    product.offers.some(
-      (offer) =>
-        offer.available == null && conditionalRanking?.retailers.includes(offer.retailerName),
-    );
-
-  return (
-    <article className="product-card exact-card">
-      <NavigationLink
-        href={`/products/${product.id}${benefits ? "?priceMode=benefits" : ""}`}
-        className="group block rounded-xl"
-      >
-        <div className="product-summary">
-          <ProductImage
-            compact
-            src={product.imageUrl}
-            name={product.displayName}
-            loading={eager ? "eager" : "lazy"}
-          />
-          <div className="min-w-0">
-            <h3 className="product-title group-hover:text-primary">{product.displayName}</h3>
-            <p className="mt-2 text-xs text-muted-foreground">{packageSummary(product)}</p>
-          </div>
-        </div>
-        <div className="card-price">
-          {product.lowestPriceCents === null ? (
-            <p className="text-sm text-muted-foreground">Estamos actualizando este producto.</p>
-          ) : (
-            <>
-              <p className="text-xs text-muted-foreground">Desde · para todos</p>
-              <p className="mt-1 card-amount">{formatPen(product.lowestPriceCents)}</p>
-              <p className="mt-1 text-sm">{product.cheapestRetailers.join(" y ")}</p>
-              {conditionalRanking && (
-                <div className="benefit-surface">
-                  <p className="text-sm font-semibold">
-                    Con CMR: {formatPen(conditionalRanking.priceCents)}
-                  </p>
-                  <UnitPriceReference
-                    conditional
-                    price={benefitUnitPrice}
-                    family={
-                      benefitSource
-                        ? classifyProductFamily({ title: benefitSource.title }).family
-                        : null
-                    }
-                  />
-                  <p className="mt-1 text-xs">
-                    {conditionalRanking.retailers.join(" y ")} ·{" "}
-                    {conditionalRanking.conditions.join(" · ")}
-                  </p>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-        <p className="comparison-link">
-          Ver registros en {product.retailerCount} supermercados
-          <ArrowRight
-            aria-hidden="true"
-            size={14}
-            className="ml-1 inline-block shrink-0 align-middle"
-          />
-        </p>
-        <ComparisonCoverage product={product} />
-      </NavigationLink>
-      <div className="mt-auto">
-        {observedAt && <ObservedAt date={observedAt} relativeTo={observedNow} />}
-        {hasUnknownStock && <AvailabilityNotice available={null} />}
-        <AddShoppingItem
-          seed={{
-            label: product.displayName,
-            query: shoppingQueryForTitle(product.displayName),
-            canonicalId: product.id,
-          }}
         />
       </div>
     </article>
