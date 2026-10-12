@@ -20,6 +20,8 @@ export * from "./conditional-pricing.ts";
 
 export * from "./search-filters.ts";
 
+export * from "./search-categories.ts";
+
 export * from "./price-history.ts";
 
 export * from "./observation-coverage.ts";

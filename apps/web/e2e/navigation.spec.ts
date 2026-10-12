@@ -120,10 +120,10 @@ for (const theme of ["light", "dark"] as const) {
     await page.emulateMedia({ colorScheme: theme, reducedMotion: "reduce" });
     // Hold prefetch as well as navigation before the chip enters the viewport.
     // Both requests still reach the real server once feedback is checked.
-    const held = await holdNavigation(page, "/search", "huevos", true);
+    const held = await holdNavigation(page, "/search", undefined, true);
     await page.goto("/");
     await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
-    const chip = page.locator('.search-chip[href="/search?q=huevos"]');
+    const chip = page.locator('.search-chip[href="/search?category=lacteos-huevos"]');
 
     try {
       await chip.focus();
@@ -139,7 +139,7 @@ for (const theme of ["light", "dark"] as const) {
       // The loading boundary may replace the homepage between Playwright calls.
       // Inspect and exercise an attached chip in one browser task.
       const pendingState = await page.evaluate(() => {
-        const link = document.querySelector('.search-chip[href="/search?q=huevos"]');
+        const link = document.querySelector('.search-chip[href="/search?category=lacteos-huevos"]');
         const attributes =
           link instanceof HTMLAnchorElement
             ? { busy: link.getAttribute("aria-busy"), disabled: link.getAttribute("aria-disabled") }
@@ -176,7 +176,7 @@ for (const theme of ["light", "dark"] as const) {
       held.release();
     }
 
-    await expect(page).toHaveURL(/\/search\?q=huevos$/);
+    await expect(page).toHaveURL(/\/search\?category=lacteos-huevos$/);
     // URL commit can precede the streamed catalog response. Retry readiness
     // within the test budget rather than treating ordinary query latency as failure.
     await expect(page.getByRole("button", { name: "Buscar", exact: true })).toBeEnabled({

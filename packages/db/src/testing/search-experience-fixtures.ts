@@ -146,5 +146,20 @@ export async function seedSearchExperienceFixtures(
       return { ...row, id, retailerId: row.retailer };
     }),
   );
+
+  // Acquired category paths are independent of raw identity and exact matching.
+  await client.query(`insert into catalog_sources(retailer_id,source_key,name,url)
+    select id,'search-experience-dairy','Lácteos y Huevos / Huevos',
+      'https://www.metro.pe/api/catalog_system/pub/products/search?fq=C%3A%2F1%2F'
+    from retailers where id in ('metro','tottus','plaza-vea','makro')`);
+  await client.query(`insert into catalog_source_listings(source_id,listing_id)
+    select s.id,l.id from catalog_sources s join retailer_listings l on l.retailer_id=s.retailer_id
+    where s.source_key='search-experience-dairy' and l.external_id like 'search-experience-%'`);
+  await client.query(`insert into catalog_sources(retailer_id,source_key,name,url)
+    values('metro','search-experience-cleaning','Limpieza / Detergentes',
+      'https://www.metro.pe/api/catalog_system/pub/products/search?fq=C%3A%2F2%2F')`);
+  await client.query(`insert into catalog_source_listings(source_id,listing_id)
+    select s.id,l.id from catalog_sources s join retailer_listings l on l.retailer_id=s.retailer_id
+    where s.source_key='search-experience-cleaning' and l.external_id like 'search-pagination-%'`);
   return fixtures;
 }

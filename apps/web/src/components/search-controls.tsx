@@ -6,6 +6,7 @@ import { useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { searchFilters, searchFilterQuery } from "@comprafino/core/search-filters";
 import type { SearchFilters } from "@comprafino/core/search-filters";
+import { searchCategories } from "@comprafino/core";
 
 export function SearchControls({
   query,
@@ -52,7 +53,7 @@ export function SearchControls({
   );
 
   const showUnitFilter = units.length > 1 || Boolean(filters.unit);
-  const searchColumns = showUnitFilter ? "lg:grid-cols-4" : "lg:grid-cols-3";
+  const searchColumns = showUnitFilter ? "lg:grid-cols-5" : "lg:grid-cols-4";
   const fieldsetLayout = comparisonPath
     ? "sm:max-w-sm"
     : cn("grid-cols-1 min-[380px]:grid-cols-2", searchColumns);
@@ -66,6 +67,19 @@ export function SearchControls({
         <legend className="sr-only">Filtros de precios</legend>
         {!comparisonPath && (
           <>
+            <ChoiceSelect
+              label="Categoría"
+              value={filters.category ?? ""}
+              disabled={pending}
+              onValueChange={(value) => change("category", value)}
+              options={[
+                { value: "", label: "Todas las categorías" },
+                ...searchCategories.map((category) => ({
+                  value: category.id,
+                  label: category.label,
+                })),
+              ]}
+            />
             <ChoiceSelect
               label="Ordenar"
               value={filters.sort}
@@ -106,9 +120,7 @@ export function SearchControls({
           value={filters.priceMode}
           disabled={pending}
           className={
-            !comparisonPath && units.length <= 1 && !filters.unit
-              ? "min-[380px]:col-span-2 lg:col-span-1"
-              : ""
+            !comparisonPath && showUnitFilter ? "min-[380px]:col-span-2 lg:col-span-1" : ""
           }
           onValueChange={(value) => change("priceMode", value)}
           options={[

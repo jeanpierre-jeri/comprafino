@@ -2,7 +2,13 @@ import { expect, it } from "vitest";
 import { searchFilters, searchFilterQuery } from "./search-filters.ts";
 
 it("parses defaults, invalid and repeated URL values safely", () => {
-  const defaults = { sort: "relevance", retailer: null, unit: null, priceMode: "standard" };
+  const defaults = {
+    sort: "relevance",
+    retailer: null,
+    unit: null,
+    priceMode: "standard",
+    category: null,
+  };
   expect(searchFilters()).toEqual(defaults);
   expect(
     searchFilters({ sort: ["unit-price"], retailer: "unknown", unit: "g", priceMode: true }),
@@ -17,11 +23,23 @@ it("retains supported retailer, sort, unit and benefit URL state", () => {
         retailer,
         unit,
         priceMode: "benefits",
+        category: null,
       });
     }
   }
 
   expect(searchFilters({ sort: "total-price" }).sort).toBe("total-price");
+});
+
+it("validates category URL state and retains it when other filters change", () => {
+  for (const category of ["unknown", ["limpieza"], true, null]) {
+    expect(searchFilters({ category }).category).toBeNull();
+  }
+  const filters = searchFilters({ category: "lacteos-huevos", retailer: "metro" });
+  expect(searchFilterQuery("gloria", filters)).toBe(
+    "q=gloria&category=lacteos-huevos&retailer=metro",
+  );
+  expect(searchFilters({ ...filters, sort: "unit-price" }).category).toBe("lacteos-huevos");
 });
 
 it("serializes shareable URL state, omitting defaults and escaping query text", () => {

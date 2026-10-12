@@ -53,8 +53,8 @@ test("mobile starter links and keyboard skip link lead to useful content", async
   await expect(page.getByRole("link", { name: "Saltar al contenido" })).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/#main-content$/);
-  const starter = page.getByRole("link", { name: "Huevos", exact: false });
-  await expect(starter).toHaveAttribute("href", "/search?q=huevos");
+  const starter = page.locator(".search-chip").filter({ hasText: "Lácteos y huevos" });
+  await expect(starter).toHaveAttribute("href", "/search?category=lacteos-huevos");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   // A short query keeps this smoke test database-independent.
   await page.getByLabel("¿Qué necesitas comprar?").fill("a");

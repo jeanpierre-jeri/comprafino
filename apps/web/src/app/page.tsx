@@ -2,8 +2,7 @@ import { ArrowRight, ArrowUpRight } from "@comprafino/ui";
 import { NavigationLink } from "../components/navigation-link";
 import { SearchForm } from "../components/search-form";
 import { PublicShell } from "../components/public-shell";
-
-const examples = ["Huevos", "Arroz", "Aceite", "Leche"];
+import { searchCategories } from "@comprafino/core";
 
 export default function Home() {
   return (
@@ -32,16 +31,13 @@ export default function Home() {
           <SearchForm />
           <div className="mt-4 pt-3">
             <p className="mb-2 text-xs font-medium text-muted-foreground">
-              Prueba con lo de cada día
+              Empieza por una categoría
             </p>
             <ul className="flex flex-wrap gap-2">
-              {examples.map((name) => (
-                <li key={name}>
-                  <NavigationLink
-                    className="search-chip"
-                    href={`/search?q=${encodeURIComponent(name.toLowerCase())}`}
-                  >
-                    {name}
+              {searchCategories.slice(0, 3).map((category) => (
+                <li key={category.id}>
+                  <NavigationLink className="search-chip" href={`/search?category=${category.id}`}>
+                    {category.label}
                     <ArrowUpRight
                       aria-hidden="true"
                       size={14}
@@ -59,28 +55,19 @@ export default function Home() {
           <div>
             <p className="eyebrow">Para tu próxima compra</p>
             <h2 id="browse-title" className="mt-2 text-2xl font-semibold tracking-tight">
-              Explora lo de cada día.
+              Explora por categoría.
             </h2>
           </div>
           <p className="text-sm text-muted-foreground">Elige por dónde empezar.</p>
         </div>
         <ul className="browse-grid">
-          {[
-            [
-              "Leche Gloria",
-              "Encuentra tu presentación de siempre",
-              "leche+gloria",
-              "Comparar leche",
-            ],
-            ["Mantequilla", "Opciones para tu desayuno", "mantequilla", "Ver mantequillas"],
-            ["Limpieza", "Lo esencial para tu casa", "detergente", "Ver detergentes"],
-          ].map(([title, copy, query, action]) => (
-            <li key={query}>
-              <NavigationLink href={`/search?q=${query}`} className="browse-link">
-                <h3 className="text-xl font-semibold tracking-tight">{title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{copy}</p>
+          {searchCategories.map((category) => (
+            <li key={category.id}>
+              <NavigationLink href={`/search?category=${category.id}`} className="browse-link">
+                <h3 className="text-xl font-semibold tracking-tight">{category.label}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{category.description}</p>
                 <span className="mt-5 block text-sm font-semibold">
-                  {action}
+                  Explorar categoría
                   <ArrowRight
                     aria-hidden="true"
                     size={14}

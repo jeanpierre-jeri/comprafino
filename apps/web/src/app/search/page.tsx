@@ -17,6 +17,7 @@ import {
 import type { ProductComparison, GenericProductOffer } from "@comprafino/db";
 import Link from "next/link";
 import { searchFilterQuery } from "@comprafino/core/search-filters";
+import { searchCategory, usefulSearchRequest } from "@comprafino/core";
 import { SearchControls } from "../../components/search-controls";
 import { SearchForm } from "../../components/search-form";
 import { PriceNotice, PublicShell } from "../../components/public-shell";
@@ -58,6 +59,8 @@ async function SearchResults({
 }) {
   const query = typeof params.q === "string" ? params.q : "";
   const filters = searchFilters(params);
+  const category = searchCategory(filters.category);
+  const validRequest = usefulSearchRequest(query, filters.category);
   const sort = filters.sort;
   let units: string[] = [];
   let underlyingCount = 0;
@@ -70,7 +73,7 @@ async function SearchResults({
   let hasMore = false;
   let totalOffers = 0;
 
-  if (usefulSearchQuery(query)) {
+  if (validRequest) {
     try {
       const db = createDatabase();
       const results = await searchPublicProducts(db, query, sort, observedNow, filters, page);
@@ -82,14 +85,25 @@ async function SearchResults({
       totalOffers = results.totalOffers;
 
       if (
-        discoveryQueryForSearch(query, results.discoveryRetailers.length ? 0 : underlyingCount) ||
+        (usefulSearchQuery(query) &&
+          discoveryQueryForSearch(
+            query,
+            results.discoveryRetailers.length ? 0 : underlyingCount,
+          )) ||
         results.refreshListingIds.length
       ) {
         // Database demand recording only, after the response. Retailer work is
         // exclusively performed by the scheduled command, never by this route.
         after(async () => {
           try {
-            await recordDiscoveryForSearch(db, query, underlyingCount, results.discoveryRetailers);
+            if (usefulSearchQuery(query)) {
+              await recordDiscoveryForSearch(
+                db,
+                query,
+                underlyingCount,
+                results.discoveryRetailers,
+              );
+            }
             await requestCatalogRefresh(db, results.refreshListingIds);
           } catch (error) {
             logDiagnostic(error, {
@@ -112,17 +126,15 @@ async function SearchResults({
         <div>
           <p className="eyebrow">Precios con contexto</p>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-            Encuentra y compara
+            {category?.label ?? "Encuentra y compara"}
           </h1>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
             Compara opciones para tu próxima compra.
           </p>
         </div>
-        <SearchForm query={query.slice(0, maximumSearchLength)} />
+        <SearchForm query={query.slice(0, maximumSearchLength)} filters={filters} />
       </div>
-      {usefulSearchQuery(query) && !failed && (
-        <SearchControls query={query} filters={filters} units={units} />
-      )}
+      {!failed && <SearchControls query={query} filters={filters} units={units} />}
       {usefulSearchQuery(query) && (
         <AddShoppingItem
           seed={{
@@ -146,7 +158,7 @@ async function SearchResults({
           />
         }
       </section>
-      {!failed && usefulSearchQuery(query) && (page > 1 || hasMore) && (
+      {!failed && validRequest && (page > 1 || hasMore) && (
         <nav aria-label="Páginas de resultados" className="mt-6 flex flex-wrap items-center gap-4">
           {page > 1 && (
             <Link

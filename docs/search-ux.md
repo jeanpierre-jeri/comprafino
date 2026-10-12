@@ -2,13 +2,14 @@
 
 Search remains server-rendered and shareable. The query form submits a GET search. A small client toolbar immediately navigates with App Router `router.push(..., {scroll:false})` when a select changes. There is no Apply button, browser-side results cache, state-management dependency or persistent filter preference. Labelled Base UI custom Select triggers/popups support keyboards; navigation disables the fieldset while pending and announces “Actualizando resultados…” using an output/status element. Back/forward restores controls from server URL props.
 
-| Parameter   | Default (omitted) | Supported values                        |
-| ----------- | ----------------- | --------------------------------------- |
-| `q`         | empty             | existing validated query                |
-| `sort`      | `relevance`       | `total-price`, `unit-price`             |
-| `retailer`  | all               | `tottus`, `plaza-vea`, `metro`, `makro` |
-| `unit`      | all bases         | `kg`, `L`, `unit`, `roll`               |
-| `priceMode` | `standard`        | `benefits`                              |
+| Parameter   | Default (omitted) | Supported values                                                         |
+| ----------- | ----------------- | ------------------------------------------------------------------------ |
+| `q`         | empty             | existing validated query                                                 |
+| `category`  | all               | `abarrotes`, `lacteos-huevos`, `bebidas`, `limpieza`, `cuidado-personal` |
+| `sort`      | `relevance`       | `total-price`, `unit-price`                                              |
+| `retailer`  | all               | `tottus`, `plaza-vea`, `metro`, `makro`                                  |
+| `unit`      | all bases         | `kg`, `L`, `unit`, `roll`                                                |
+| `priceMode` | `standard`        | `benefits`                                                               |
 
 Invalid, duplicate/repeated or unsupported filter values fall back independently to defaults. Query text is encoded. Example: `/search?q=huevos&sort=unit-price&unit=unit&retailer=metro&priceMode=benefits`. Exact detail supports `priceMode=benefits` too; comparison links preserve that preference.
 
@@ -36,7 +37,17 @@ Controlled `apps/web/e2e/search-experience.spec.ts` cases run with `pnpm test:e2
 
 The URL/state behavior above is unchanged. The heading is borderless, with compact sage controls, a distinct exact-comparison surface and independent shopping options on the warm page background. The toolbar uses 44px custom controls in two columns from 380px (one below that), three/four on desktop according to available bases; an odd final control spans the mobile row. Product cards use compact images beside complete titles on desktop and mobile, larger ordinary prices, stronger unit prices and small retailer labels. Result dates use relative “Observado hace …” wording with exact ISO/tooltip timestamps; detail keeps full Peru dates. Generic title links extend across the card and now open `/listings/[id]`, with external source links kept separate. Ordinary prices remain primary even in benefits mode; calculated conditional unit prices keep “con CMR”, and CMR totals/requirements have a separate warm surface. Exact cards show the existing best conditional offer separately from the ordinary minimum. Detail groups ordinary minima and lower conditional benefits in its product hero, with distinct compact retailer rows. Empty states provide a same-query filter reset or starter search. See [UI polish](ui-polish.md) for the manual audit, visual system and validation.
 
-No history chart, new facet, aggregation, filter preference persistence, client caching or filter modal is included.
+No history chart, aggregation, filter preference persistence, client caching or filter modal is included.
+
+## Category navigation
+
+The homepage now links to five CompraFino categories instead of product examples. `/search?category=lacteos-huevos` browses without query text; `/search?q=gloria&category=lacteos-huevos` searches within that category. Nonempty text keeps the existing 2–120 character validation. The category selector includes “Todas las categorías”; invalid/repeated category values fall back to that option. Filter changes reset pagination, browser back/forward restores URL state, and submitting search preserves the current category, retailer, sort, unit and price mode.
+
+`packages/core/src/search-categories.ts` defines the public category IDs, labels and explicit source-department mapping. Membership comes from active acquired `catalog_sources` paths through `catalog_source_listings`, using their first department name. A product in multiple acquired paths appears once. Missing or unrecognized category evidence is not guessed from titles: those listings remain available in general search. This initial navigation covers pantry/breakfast, dairy/eggs, nonalcoholic drinks, cleaning and personal care; other departments remain outside these five categories.
+
+Both independent candidates and exact groups are category-filtered in SQL before pagination. An exact group qualifies when a retained eligible member belongs to the category; its comparison still shows all retained stores. Category membership does not change exact identity, family classification, substitution policy or price eligibility. Category-only browsing never records missing-product discovery or creates a shopping-list item from a department name. A category filter on a textual search preserves unfiltered discovery counts; an empty filtered result is not new missing-product demand. Refresh requests remain bounded to the category search candidates, and public requests make no retailer calls.
+
+No migration, dependency, ingestion change or separate endpoint is required. Availability of category results depends on acquired membership already stored in the catalog. Pure URL/request tests, owned-schema SQL tests and controlled Chromium category navigation/pagination tests exercise this behavior.
 
 Public appearance supports System/Light/Dark independently of filter URLs. An explicit light/dark preference is stored locally; System removes that override. See [UI polish](ui-polish.md) for initialization and token details.
 

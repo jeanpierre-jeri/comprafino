@@ -190,7 +190,9 @@ for (const operation of ["add", "edit", "remove"] as const) {
       // Use client links: a full page.goto would reload and remove the failing
       // Storage prototype, so it would not exercise the mounted-session bug.
       await page.getByRole("link", { name: "CompraFino, inicio", exact: true }).click();
-      await page.getByRole("link", { name: "Aceite", exact: true }).click();
+      await page.locator('.search-chip[href="/search?category=abarrotes"]').click();
+      await page.getByLabel("Buscar en Abarrotes").fill("aceite");
+      await page.getByRole("button", { name: "Buscar", exact: true }).click();
       await page.getByRole("button", { name: "Agregar como necesidad" }).click();
       await expect(page.getByRole("dialog")).toBeVisible();
       expect(

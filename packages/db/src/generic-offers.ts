@@ -1,5 +1,7 @@
 import { listingRefreshPolicy } from "@comprafino/core";
 import { catalogPolicy } from "@comprafino/core";
+import { usefulSearchRequest } from "@comprafino/core";
+import { categoryListingPredicate } from "./search-categories.ts";
 import { listingOffers } from "./conditional-pricing.ts";
 import {
   conditionalOfferSchema,
@@ -31,6 +33,7 @@ import {
 } from "@comprafino/core";
 import type { GenericOfferSort } from "@comprafino/core";
 import type { createDatabase } from "./client.ts";
+import type { ProductComparison } from "./public-products.ts";
 import { catalogFingerprint, catalogRecordSchema } from "./catalog.ts";
 import {
   publicProduct,
@@ -204,7 +207,11 @@ export async function searchGenericProductOffers(
   unlimited = false,
   canonicalId: string | null = null,
 ): Promise<GenericProductOffer[]> {
-  if (canonicalId ? !z.uuid().safeParse(canonicalId).success : !usefulSearchQuery(rawQuery)) {
+  if (
+    canonicalId
+      ? !z.uuid().safeParse(canonicalId).success
+      : !usefulSearchRequest(rawQuery, filters.category)
+  ) {
     return [];
   }
 
@@ -228,6 +235,7 @@ export async function searchGenericProductOffers(
   ) select * from generic where ${canonicalId ? sql`"canonicalId"=${canonicalId}::uuid` : sql`true`} and ${predicates.length ? sql.join(predicates, sql` and `) : sql`true`}
     and ${textQuery ? sql`(search_identity='' or search_vector@@to_tsquery('simple',${textQuery}))` : sql`true`}
     and ${familyPredicate}
+    and ${categoryListingPredicate(sql`(listing->>'id')::uuid`, filters.category)}
   order by (title_text=${query}) desc, starts_with(title_text,${query}) desc,
     public.similarity(title_text,${query}) desc, title_text collate "C", listing->>'id' limit ${catalogPolicy.overflowSentinel}`),
   ]);
@@ -280,27 +288,35 @@ export async function searchPublicProducts(
   ) {
     throw new Error("Invalid search page");
   }
-  const [products, offers] = await Promise.all([
-    searchCanonicalProducts(db, query, now, page),
+  const [products, offers, underlyingProducts, underlyingOffers] = await Promise.all([
+    searchCanonicalProducts(db, query, now, page, filters.category),
     searchGenericProductOffers(
       db,
       query,
       sort,
       now,
-      searchFilters({ sort, priceMode: filters.priceMode }),
+      searchFilters({ sort, priceMode: filters.priceMode, category: filters.category }),
       true,
     ),
+    filters.category && usefulSearchQuery(query)
+      ? searchCanonicalProducts(db, query, now, page)
+      : null,
+    filters.category && usefulSearchQuery(query)
+      ? searchGenericProductOffers(
+          db,
+          query,
+          sort,
+          now,
+          searchFilters({ sort, priceMode: filters.priceMode }),
+          true,
+        )
+      : null,
   ]);
   // Exact comparison identity/routes remain unchanged. In a recognized family
   // search, an incidental ingredient in an exact group is not useful coverage.
   const interpretation = resolveProductFamilyQuery(query);
-  const relevantProducts = interpretation
-    ? products.filter((product) =>
-        product.offers.some(
-          (offer) => classifyProductFamily({ title: offer.title }).family === interpretation.family,
-        ),
-      )
-    : products;
+  const family = interpretation?.family ?? null;
+  const relevantProducts = productsInQueryFamily(products, family);
   const filteredOffers = filterGenericOffers(offers, filters);
 
   return {
@@ -315,14 +331,16 @@ export async function searchPublicProducts(
     page,
     hasMore: filteredOffers.length > page * 30 || products.length === 20,
     totalOffers: filteredOffers.length,
-    discoveryRetailers: missingDiscoveryRetailers(
-      Object.fromEntries(
-        retailerIdSchema.options.map((retailer) => [
-          retailer,
-          offers.filter((offer) => offer.retailerId === retailer).length,
-        ]),
-      ),
-    ),
+    discoveryRetailers: usefulSearchQuery(query)
+      ? missingDiscoveryRetailers(
+          Object.fromEntries(
+            retailerIdSchema.options.map((retailer) => [
+              retailer,
+              (underlyingOffers ?? offers).filter((offer) => offer.retailerId === retailer).length,
+            ]),
+          ),
+        )
+      : [],
     refreshListingIds: offers.map((offer) => offer.id),
     availableUnits: [
       ...new Set(
@@ -333,8 +351,18 @@ export async function searchPublicProducts(
           ),
       ),
     ],
-    usefulResultCount: relevantProducts.length + offers.length,
+    usefulResultCount:
+      productsInQueryFamily(underlyingProducts ?? products, family).length +
+      (underlyingOffers ?? offers).length,
   };
+}
+
+function productsInQueryFamily(products: ProductComparison[], family: ProductFamily | null) {
+  if (!family) return products;
+
+  return products.filter((product) =>
+    product.offers.some((offer) => classifyProductFamily({ title: offer.title }).family === family),
+  );
 }
 
 export function filterGenericOffers(

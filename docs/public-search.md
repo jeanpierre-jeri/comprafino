@@ -5,7 +5,7 @@ Current domain guidance. Dated audits, measurements and acceptance narratives ar
 ## Scope and routes
 
 - `/`: static homepage with a labeled GET search form; no database required.
-- `/search?q=gloria`: request-rendered, bounded product search.
+- `/search?q=gloria`: request-rendered, bounded product search; `category` also supports browsing without query text and filtering textual searches. See [category navigation](search-ux.md#category-navigation).
 - `/products/[id]`: request-rendered comparison of an existing verified group. Invalid/unknown/ineligible IDs use Next.js `notFound()` and a public Spanish empty page. Next.js may stream a not-found response with HTTP 200; the not-found UI and framework noindex behavior remain authoritative for streamed responses.
 
 Only existing canonical associations are read. Each displayed group requires at least two distinct retailers with active listings, normalizations and positive open ordinary PEN/UN states. Associations must be automatic, from the current matcher version (1), with confidence at least 0.90. A group containing any manual, obsolete-version or lower-confidence link is excluded entirely. Review decisions are not persisted as public associations; unmatched listings never appear as cross-store equivalents. Search never runs matching; a true empty search can record discovery demand after the response. The matcher is unchanged.
@@ -26,7 +26,7 @@ Every distinct query token must match a word prefix in the combined identity tex
 4. Highest `public.similarity()` against canonical or associated normalized retailer titles.
 5. Display name using PostgreSQL C collation, then product UUID.
 
-SQL is parameterized through Drizzle; query text cannot introduce wildcard or SQL behavior. The current bounded aggregate search uses the existing schema and requires no additional search service. Broader fuzzy recall, autocomplete, taxonomy and synonyms are deferred.
+SQL is parameterized through Drizzle; query text cannot introduce wildcard or SQL behavior. The current bounded aggregate search uses the existing schema and requires no additional search service. Five navigation categories use existing acquired source memberships. Broader fuzzy recall, autocomplete, deeper taxonomy and synonyms are deferred.
 
 ## Database and price boundaries
 

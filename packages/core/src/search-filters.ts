@@ -1,6 +1,7 @@
 import { retailerIdSchema } from "./listing.ts";
 import { genericOfferSort } from "./unit-price.ts";
 import { priceMode } from "./conditional-pricing.ts";
+import { searchCategory } from "./search-categories.ts";
 
 export function searchFilters(params: Record<string, unknown> = {}) {
   const retailer = retailerIdSchema.safeParse(params.retailer);
@@ -16,6 +17,7 @@ export function searchFilters(params: Record<string, unknown> = {}) {
         ? params.unit
         : null,
     priceMode: priceMode(params.priceMode),
+    category: searchCategory(params.category)?.id ?? null,
   };
 }
 
@@ -23,6 +25,10 @@ export type SearchFilters = ReturnType<typeof searchFilters>;
 
 export function searchFilterQuery(query: string, filters: SearchFilters) {
   const params: [string, string][] = [["q", query]];
+
+  if (filters.category) {
+    params.push(["category", filters.category]);
+  }
 
   if (filters.sort !== "relevance") {
     params.push(["sort", filters.sort]);

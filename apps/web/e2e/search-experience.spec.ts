@@ -15,6 +15,63 @@ function fixture(name: string): string {
 test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
   test.skip(!raw, "Run pnpm test:e2e:fixtures:local after build");
 
+  test("category links browse without text and search retains category and retailer", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    await page.locator(".search-chip").filter({ hasText: "Lácteos y huevos" }).click();
+    await expect(page).toHaveURL(/category=lacteos-huevos/u);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Lácteos y huevos");
+    const cards = page.locator("[data-offer-id]");
+    await expect(cards).toHaveCount(5);
+    await expect(page.locator(".exact-card")).toHaveCount(1);
+    await expect(
+      page.getByRole("button", { name: "Agregar como necesidad", exact: true }),
+    ).toHaveCount(0);
+    await page.getByRole("combobox", { name: "Supermercado" }).click();
+    await page.getByRole("option", { name: "Metro", exact: true }).click();
+    await expect(cards).toHaveCount(4);
+    await page.getByLabel("Buscar en Lácteos y huevos").fill("auditexperiencia");
+    await page.getByRole("button", { name: "Buscar", exact: true }).click();
+    await expect(page).toHaveURL(/q=auditexperiencia/u);
+    await expect(page).toHaveURL(/category=lacteos-huevos/u);
+    await expect(page).toHaveURL(/retailer=metro/u);
+    await expect(cards).toHaveCount(4);
+    await page.getByRole("combobox", { name: "Categoría" }).click();
+    await page.getByRole("option", { name: "Limpieza", exact: true }).click();
+    await expect(
+      page.getByText("No hay opciones con esta categoría y estos filtros."),
+    ).toBeVisible();
+    await page.getByRole("link", { name: "Buscar en todas las categorías" }).click();
+    await expect(page).not.toHaveURL(/category=/u);
+    await expect(cards).toHaveCount(5);
+    await page.goBack();
+    await expect(page.getByRole("combobox", { name: "Categoría" })).toContainText("Limpieza");
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+  });
+
+  test("category-only pagination preserves category and changing it resets the page", async ({
+    page,
+  }) => {
+    await page.goto("/search?category=limpieza&sort=total-price");
+    const cards = page.locator("[data-offer-id]");
+    await expect(cards).toHaveCount(30);
+    await page.getByRole("link", { name: "Siguiente", exact: true }).click();
+    await expect(page).toHaveURL(/category=limpieza/u);
+    await expect(page).toHaveURL(/page=2/u);
+    await expect(cards).toHaveCount(7);
+    await page.getByRole("combobox", { name: "Categoría" }).click();
+    await page.getByRole("option", { name: "Lácteos y huevos", exact: true }).click();
+    await expect(page).not.toHaveURL(/page=/u);
+    await expect(cards).toHaveCount(5);
+    await expect(page.getByRole("combobox", { name: "Ordenar" })).toContainText(
+      "Menor precio total",
+    );
+  });
+
   test("search pagination exposes all current offers and filter changes reset the page", async ({
     page,
   }) => {

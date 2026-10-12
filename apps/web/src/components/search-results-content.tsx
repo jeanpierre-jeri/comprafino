@@ -6,6 +6,7 @@ import type { UnitPriceBasis, ShoppingListItem } from "@comprafino/core";
 import { maximumSearchLength, usefulSearchQuery } from "@comprafino/db";
 import type { ProductComparison, GenericProductOffer } from "@comprafino/db";
 import type { SearchFilters } from "@comprafino/core/search-filters";
+import { usefulSearchRequest } from "@comprafino/core";
 import { PublicDataError } from "./public-shell";
 import { ExactProductCard, GenericOfferCard } from "./offer-card";
 
@@ -32,7 +33,7 @@ export function SearchResultsContent({
 }: Props) {
   if (failed) return <PublicDataError />;
 
-  if (!usefulSearchQuery(query)) {
+  if (!usefulSearchRequest(query, filters.category)) {
     return (
       <p className="empty-surface">
         Escribe entre 2 y {maximumSearchLength} caracteres para buscar un producto.
@@ -41,6 +42,24 @@ export function SearchResultsContent({
   }
 
   if (!products.length && !offers.length) {
+    if (filters.category) {
+      return (
+        <div className="empty-surface">
+          <h2 className="text-xl font-semibold">
+            No hay opciones con esta categoría y estos filtros.
+          </h2>
+          <p className="mt-2 text-muted-foreground">
+            Nuestra cobertura sigue creciendo. Prueba otra categoría o busca en todas.
+          </p>
+          <Link
+            href={usefulSearchQuery(query) ? `/search?q=${encodeURIComponent(query)}` : "/"}
+            className="card-link"
+          >
+            {usefulSearchQuery(query) ? "Buscar en todas las categorías" : "Ver otras categorías"}
+          </Link>
+        </div>
+      );
+    }
     return (
       <div className="empty-surface">
         <h2 className="text-xl font-semibold">

@@ -1,4 +1,7 @@
 import { matchingThresholds } from "@comprafino/core";
+import { usefulSearchRequest } from "@comprafino/core";
+import type { SearchCategoryId } from "@comprafino/core";
+import { categoryListingPredicate } from "./search-categories.ts";
 import { listingOffers } from "./conditional-pricing.ts";
 import { conditionalOfferSchema, currentConditionalOffers, rankedPrice } from "@comprafino/core";
 import type { PriceMode } from "@comprafino/core";
@@ -12,7 +15,6 @@ import {
   meaningfulReferencePrice,
   normalizeSearchQuery,
   retailerIdSchema,
-  usefulSearchQuery,
 } from "@comprafino/core";
 import type { RetailerId } from "@comprafino/core";
 import type { createDatabase } from "./client.ts";
@@ -204,7 +206,7 @@ export function searchText(text: SQL): SQL {
 // No review table or unmatched listing participates. Reject groups with a manual,
 // obsolete-version or below-auto-confidence link, even if two other links qualify.
 export const eligibleProducts = sql`with offers as (
-  select a.canonical_product_id, r.id as retailer_id, r.name as retailer_name,
+  select a.canonical_product_id, l.id as listing_id, r.id as retailer_id, r.name as retailer_name,
     l.title, l.url, l.image_url, l.last_seen_at, l.available, n.brand, n.normalized_title,
     h.current_price_cents, h.regular_price_cents,
     ${listingOffers(sql`l.id`, sql`l.last_seen_at`)} as conditional_offers
@@ -239,11 +241,12 @@ export async function searchCanonicalProducts(
   rawQuery: string,
   now = new Date(),
   page = 1,
+  category: SearchCategoryId | null = null,
 ): Promise<ProductComparison[]> {
-  if (!usefulSearchQuery(rawQuery)) return [];
+  if (!usefulSearchRequest(rawQuery, category)) return [];
 
   const query = normalizeSearchQuery(rawQuery);
-  const tokens = [...new Set(query.split(" "))];
+  const tokens = [...new Set(query.split(" ").filter(Boolean))];
   // All terms must be present. Prefixes are allowed for words; numbers are exact.
   // Trigrams rank admitted results only, so fuzziness cannot discard variant terms.
   const predicates = tokens.map(
@@ -254,7 +257,8 @@ export async function searchCanonicalProducts(
   );
   const [result] = await db.batch([
     db.execute(sql`${eligibleProducts}
-    select ${publicColumns} from products where ${sql.join(predicates, sql` and `)}
+    select ${publicColumns} from products where ${predicates.length ? sql.join(predicates, sql` and `) : sql`true`}
+      and ${category ? sql`exists (select 1 from offers category_offer where category_offer.canonical_product_id=products.id and ${categoryListingPredicate(sql`category_offer.listing_id`, category)})` : sql`true`}
     order by (title_text=${query}) desc, starts_with(title_text,${query}) desc,
       (brand_text=${query}) desc,
       greatest(public.similarity(title_text,${query}),
