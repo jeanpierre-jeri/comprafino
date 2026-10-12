@@ -6,6 +6,7 @@ import {
   claimCatalogSource,
   completeCatalogPage,
   requestCatalogRefresh,
+  failCatalogPage,
 } from "./catalog-acquisition.ts";
 import { normalizeChangedCatalog } from "./catalog.ts";
 import { matchChangedCatalog } from "./matching.ts";
@@ -76,6 +77,50 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)(
       expect(await recordDiscoveryForSearch(db, "papel higienico", 40, ["tottus"])).toBe(true);
       const claims = await claimDiscoveryQueries(db, 1);
       expect(claims[0]?.requestedRetailers).toEqual(["tottus"]);
+    });
+
+    it("pauses homepage redirects for seven days without losing listings or allowing demand to bypass the pause", async () => {
+      const source = {
+        retailer: "tottus" as const,
+        key: "CATG16682",
+        name: "Papel",
+        url: "https://www.tottus.com.pe/tottus-pe/lista/CATG16682/Papeles",
+      };
+      await registerCatalogSources(db, "tottus", [source]);
+      const claim = await claimCatalogSource(db, "tottus");
+      if (!claim) throw new Error("Missing claim");
+      await persistListingsDetailed(db, "tottus", [observation("paused-paper", 1)]);
+      await completeCatalogPage(db, claim, 1, 1, ["paused-paper"]);
+      const next = await claimCatalogSource(db, "tottus");
+      if (!next) throw new Error("Missing next claim");
+      await failCatalogPage(db, next, "redirect_to_home");
+      const rows = await scoped.query(
+        "select id from retailer_listings where external_id='paused-paper'",
+      );
+      const id = rows[0]?.id;
+      if (typeof id !== "string") throw new Error("Missing listing");
+      await requestCatalogRefresh(db, [id]);
+      await registerCatalogSources(db, "tottus", [source]);
+      expect(await claimCatalogSource(db, "tottus")).toBeNull();
+      expect(
+        await scoped.query(
+          "select cursor,error,next_eligible_at>now()+interval '6 days' as paused from catalog_sources",
+        ),
+      ).toEqual([{ cursor: 1, error: "redirect_to_home", paused: true }]);
+      expect(
+        await scoped.query(
+          "select count(*)::int as count from retailer_listings where external_id='paused-paper'",
+        ),
+      ).toEqual([{ count: 1 }]);
+      await scoped.query("update catalog_sources set next_eligible_at=now()-interval '1 second'");
+      const retried = await claimCatalogSource(db, "tottus");
+      expect(retried?.cursor).toBe(1);
+      if (!retried) throw new Error("Missing periodic recheck");
+      await failCatalogPage(db, retried, "redirect_to_home");
+      await registerCatalogSources(db, "tottus", [
+        { ...source, url: "https://www.tottus.com.pe/tottus-pe/lista/CATG16682/Nuevo-Papel" },
+      ]);
+      expect((await claimCatalogSource(db, "tottus"))?.cursor).toBe(0);
     });
 
     it("paginates current offers without losing results or changing numeric-unit search semantics", async () => {

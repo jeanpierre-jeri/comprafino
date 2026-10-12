@@ -71,10 +71,23 @@ export function evaluateCatalogHealth(input: unknown, now = new Date()) {
   const retailers = snapshot.retailers.map((row) => {
     const health = retailerFreshness(row.latestAttempt, row.latestSuccess, now);
     if (health.freshness === "unknown" || health.freshness === "stale") {
-      issues.push({ severity: "error", reason: "refresh_overdue", retailer: row.retailer });
+      issues.push({
+        severity: row.freshSearchableOffers > 0 ? "warning" : "error",
+        reason: "refresh_overdue",
+        retailer: row.retailer,
+      });
     }
     if (health.latestAttemptStatus === "failed") {
-      issues.push({ severity: "error", reason: "latest_attempt_failed", retailer: row.retailer });
+      const usefulPartial =
+        row.latestAttempt?.failureKind === "partial_source" &&
+        row.latestAttempt.endedAt !== null &&
+        row.latestAttempt.listingsPersisted > 0 &&
+        row.freshSearchableOffers > 0;
+      issues.push({
+        severity: usefulPartial ? "warning" : "error",
+        reason: "latest_attempt_failed",
+        retailer: row.retailer,
+      });
     }
     // The existing search boundary enforces 36-hour quote freshness, current
     // normalization, positive ordinary price and tri-state stock eligibility.
@@ -93,6 +106,8 @@ export function evaluateCatalogHealth(input: unknown, now = new Date()) {
       lastSuccessfulAttemptAt: row.latestSuccess?.startedAt.toISOString() ?? null,
       ageHours: health.ageHours,
       freshness: health.freshness,
+      priceFreshness: row.freshSearchableOffers > 0 ? "fresh_offers_present" : "no_fresh_offers",
+      latestAttemptFailureKind: row.latestAttempt?.failureKind ?? null,
     };
   });
 
@@ -105,10 +120,16 @@ export function evaluateCatalogHealth(input: unknown, now = new Date()) {
     issues.push({ severity: "error", reason: "capacity_skips", retailer: null });
   }
 
+  let status = "healthy";
+  if (issues.some((issue) => issue.severity === "error")) {
+    status = "attention";
+  } else if (issues.length) {
+    status = "warning";
+  }
   return {
     observedAt: now.toISOString(),
     readOnly: true,
-    status: issues.some((issue) => issue.severity === "error") ? "attention" : "healthy",
+    status,
     retainedListings: snapshot.retainedListings,
     capacity: catalogPolicy.retainedListingCap,
     skippedByCapacity: snapshot.skippedByCapacity,

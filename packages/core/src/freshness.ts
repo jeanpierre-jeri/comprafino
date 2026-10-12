@@ -14,6 +14,9 @@ export const operationalRunSchema = z.object({
   listingsFetched: z.number().int().nonnegative(),
   listingsPersisted: z.number().int().nonnegative(),
   listingsChanged: z.number().int().nonnegative(),
+  failureKind: z
+    .enum(["partial_source", "access_restricted", "persistence_failed", "capacity_skips"])
+    .optional(),
 });
 
 export type OperationalRun = z.infer<typeof operationalRunSchema>;

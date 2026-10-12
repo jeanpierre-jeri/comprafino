@@ -22,7 +22,7 @@ export interface CatalogAcquisitionTasks {
     externalIds: readonly string[],
     capacitySkips: number,
   ): Promise<void>;
-  fail(claim: CatalogSourceClaim): Promise<void>;
+  fail(claim: CatalogSourceClaim, reason?: "redirect_to_home"): Promise<void>;
   pause(): Promise<void>;
 }
 
@@ -88,7 +88,7 @@ export async function acquireCatalogPages(
         `${persisted} observaciones guardadas; ${failedPages} fallos`,
       );
     } catch (error) {
-      failures.push({
+      const failure = {
         sourceKey: claim.key,
         diagnostic: safeDiagnostic(error, {
           stage,
@@ -96,8 +96,13 @@ export async function acquireCatalogPages(
           retailer: claim.retailer,
           reason: stage === "source" ? "source_request_failed" : "db_write_failed",
         }),
-      });
-      await tasks.fail(claim);
+      };
+      failures.push(failure);
+      if (failure.diagnostic.sourceResponseCode === "redirect_to_home") {
+        await tasks.fail(claim, "redirect_to_home");
+      } else {
+        await tasks.fail(claim);
+      }
       failedPages++;
       progress?.(
         `${claim.retailer}: página fallida (${claim.key})`,

@@ -1,4 +1,4 @@
-import { catalogPolicy } from "@comprafino/core";
+import { catalogPolicy, catalogRunFailureKind } from "@comprafino/core";
 import { and, count, desc, eq } from "drizzle-orm";
 import { operationalRunSchema, retailerFreshness, retailerIdSchema } from "@comprafino/core";
 import { createDatabase } from "./client.ts";
@@ -39,7 +39,12 @@ export async function inspectOperations(
     return {
       retailer,
       ...retailerFreshness(
-        attempts[0] ? operationalRunSchema.parse(attempts[0]) : null,
+        attempts[0]
+          ? operationalRunSchema.parse({
+              ...attempts[0],
+              failureKind: catalogRunFailureKind(attempts[0].error),
+            })
+          : null,
         successes[0] ? operationalRunSchema.parse(successes[0]) : null,
         now,
       ),

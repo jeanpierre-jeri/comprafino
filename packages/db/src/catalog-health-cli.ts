@@ -36,7 +36,7 @@ try {
         .join("\n");
       appendFileSync(
         process.env.GITHUB_STEP_SUMMARY,
-        `## Catalog health: ${report.status}\n\nObserved: ${report.observedAt}\n\n| Retailer | Refresh health | Fresh searchable offers | Latest attempt |\n| --- | --- | --- | --- |\n${rows}\n\nRetained: ${report.retainedListings}/${report.capacity}. Capacity skips: ${report.skippedByCapacity ?? "not measured in this run"}.\n\n${report.issues.map((issue) => `- ${issue.severity}: ${issue.retailer ?? "catalog"} ${issue.reason}`).join("\n")}\n`,
+        `## Catalog health: ${report.status}\n\nObserved: ${report.observedAt}\n\n| Retailer | Last complete cycle | Fresh searchable offers | Latest attempt |\n| --- | --- | --- | --- |\n${rows}\n\nRetained: ${report.retainedListings}/${report.capacity}. Capacity skips: ${report.skippedByCapacity ?? "not measured in this run"}.\n\n${report.issues.map((issue) => `- ${issue.severity}: ${issue.retailer ?? "catalog"} ${issue.reason}`).join("\n")}\n`,
       );
     }
   }

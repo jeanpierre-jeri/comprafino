@@ -146,6 +146,7 @@ it("classifies homepage redirects without treating them as empty completed categ
     sourceResponseCode: "redirect_to_home",
     httpStatus: 302,
   });
+  expect(work.fail).toHaveBeenCalledWith(claim, "redirect_to_home");
   expect(work.complete).not.toHaveBeenCalled();
 });
 

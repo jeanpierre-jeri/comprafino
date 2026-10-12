@@ -1,6 +1,6 @@
 import { createCliProgress } from "../../../scripts/cli-progress.ts";
-import { logDiagnostic } from "./diagnostics.ts";
-import { DiagnosticError } from "@comprafino/core";
+import { logDiagnostic, reportCatalogAlert } from "./diagnostics.ts";
+import { DiagnosticError, catalogFailureSeverity } from "@comprafino/core";
 import {
   createDatabase,
   claimDiscoveryQueries,
@@ -146,8 +146,35 @@ try {
       }),
     );
 
-    if (results.some((r) => r.status === "failed" || r.status === "partial")) {
-      process.exitCode = 1;
+    if (!claims.length) {
+      console.log(
+        JSON.stringify({
+          operation: "discovery_idle",
+          status: "no_work",
+          reason: "no_eligible_queries",
+        }),
+      );
+    }
+    const useful = results.some((result) => result.listingsDiscovered > 0);
+    for (const result of results) {
+      if (result.status === "failed" || result.diagnostic || result.skippedByCapacity > 0) {
+        process.exitCode = 1;
+      }
+      for (const retailer of result.retailers) {
+        if (retailer.diagnostic) {
+          const severity = catalogFailureSeverity(
+            retailer.diagnostic,
+            useful && result.status !== "failed",
+          );
+          reportCatalogAlert(
+            severity,
+            `${retailer.retailer} discovery: ${retailer.diagnostic.sourceResponseCode ?? retailer.diagnostic.reason}`,
+          );
+          if (severity === "error" || retailer.restricted) {
+            process.exitCode = 1;
+          }
+        }
+      }
     }
   }
 } catch (error) {

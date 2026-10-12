@@ -26,6 +26,7 @@ export async function registerCatalogSources(
     db.execute(sql`insert into catalog_sources(retailer_id,source_key,name,url)
       select retailer,key,name,url from jsonb_to_recordset(${JSON.stringify(sources)}::jsonb) x(retailer text,key text,name text,url text)
       on conflict(retailer_id,source_key) do update set name=excluded.name,url=excluded.url,active=true,
+        error=case when catalog_sources.url<>excluded.url then null else catalog_sources.error end,
         cursor=case when catalog_sources.url<>excluded.url then 0 else catalog_sources.cursor end,
         cycle_products=case when catalog_sources.url<>excluded.url then 0 else catalog_sources.cycle_products end,
         lease_token=case when catalog_sources.url<>excluded.url then null else catalog_sources.lease_token end,
@@ -90,10 +91,15 @@ export async function completeCatalogPage(
   }
 }
 
-export async function failCatalogPage(db: Database, rawClaim: CatalogSourceClaim) {
+export async function failCatalogPage(
+  db: Database,
+  rawClaim: CatalogSourceClaim,
+  reason?: "redirect_to_home",
+) {
   const claim = catalogSourceClaimSchema.parse(rawClaim);
+  z.literal("redirect_to_home").optional().parse(reason);
   await db.execute(sql`update catalog_sources set lease_token=null,lease_until=null,
-    next_eligible_at=statement_timestamp()+interval '6 hours',error='source_or_persistence_failed'
+    next_eligible_at=statement_timestamp()+${reason === "redirect_to_home" ? sql`interval '7 days'` : sql`interval '6 hours'`},error=${reason ?? "source_or_persistence_failed"}
     where id=${claim.id} and lease_token=${claim.token}::uuid`);
 }
 
@@ -102,7 +108,7 @@ export async function requestCatalogRefresh(db: Database, listingIds: readonly s
   if (!ids.length) return;
   await db.execute(sql`update catalog_sources s set requested_at=statement_timestamp(),
     next_eligible_at=least(next_eligible_at,coalesce(last_completed_at,statement_timestamp()-interval '4 hours')+interval '4 hours')
-    where exists(select 1 from catalog_source_listings link where link.source_id=s.id
+    where s.error is distinct from 'redirect_to_home' and exists(select 1 from catalog_source_listings link where link.source_id=s.id
       and link.listing_id in(select jsonb_array_elements_text(${JSON.stringify(ids)}::jsonb)::uuid))`);
 }
 
@@ -113,6 +119,7 @@ export async function inspectCatalogAcquisition(db: Database) {
     count(*) filter(where last_completed_at is null)::int as never_completed,
     count(*) filter(where next_eligible_at<=statement_timestamp())::int as due,
     count(*) filter(where error is not null)::int as failed,
+    count(*) filter(where error='redirect_to_home' and next_eligible_at>statement_timestamp())::int as paused_homepage_redirects,
     count(*) filter(where cycle_capacity_skips>0 or last_cycle_capacity_skips>0)::int as capacity_limited,
     min(last_completed_at) as oldest_cycle,max(last_completed_at) as latest_cycle,
     sum(pages_observed)::bigint::text as pages,sum(products_observed)::bigint::text as products

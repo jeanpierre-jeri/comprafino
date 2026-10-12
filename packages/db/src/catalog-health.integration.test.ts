@@ -120,4 +120,24 @@ describe.skipIf(!testUrl)("catalog health with an explicit owned test database",
       ]),
     );
   });
+
+  it("reads explicit partial markers as warnings while retaining access errors and complete-cycle age", async () => {
+    await harness.scoped.query(
+      "update ingestion_runs set started_at=now()-interval '40 hours',ended_at=now()-interval '39 hours' where retailer_id='tottus'",
+    );
+    await harness.scoped
+      .query(`insert into ingestion_runs(retailer_id,status,started_at,ended_at,listings_fetched,listings_persisted,listings_changed,error)
+      values('tottus','failed',now()-interval '1 minute',now(),1,1,0,'catalog_partial_source')`);
+    const report = await inspectCatalogHealth(harness.db);
+    expect(report.status).toBe("warning");
+    expect(report.retailers.find((row) => row.retailer === "tottus")).toMatchObject({
+      freshness: "stale",
+      priceFreshness: "fresh_offers_present",
+      latestAttemptFailureKind: "partial_source",
+    });
+    await harness.scoped.query(
+      "update ingestion_runs set error='catalog_access_restricted' where retailer_id='tottus' and status='failed'",
+    );
+    expect((await inspectCatalogHealth(harness.db)).status).toBe("attention");
+  });
 });

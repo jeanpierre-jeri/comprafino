@@ -33,6 +33,56 @@ function snapshot(): CatalogHealthSnapshot {
 }
 
 describe("catalog health monitoring", () => {
+  it("warns for a marked useful partial run with fresh offers despite an old complete cycle", () => {
+    const input = snapshot();
+    const row = input.retailers[0]!;
+    row.latestSuccess!.startedAt = new Date(now.getTime() - 40 * 3_600_000);
+    row.latestAttempt = {
+      ...row.latestSuccess!,
+      startedAt: new Date(now.getTime() - 3600000),
+      endedAt: now,
+      status: "failed",
+      failureKind: "partial_source",
+    };
+    expect(evaluateCatalogHealth(input, now)).toMatchObject({
+      status: "warning",
+      issues: [
+        { severity: "warning", reason: "refresh_overdue" },
+        { severity: "warning", reason: "latest_attempt_failed" },
+      ],
+    });
+    expect(evaluateCatalogHealth(input, now).retailers[0]).toMatchObject({
+      freshness: "stale",
+      priceFreshness: "fresh_offers_present",
+    });
+  });
+
+  it.each(["access_restricted", "persistence_failed", "capacity_skips"] as const)(
+    "keeps %s fatal even with fresh offers and useful prior writes",
+    (failureKind) => {
+      const input = snapshot();
+      input.retailers[0]!.latestAttempt = {
+        ...input.retailers[0]!.latestSuccess!,
+        status: "failed",
+        failureKind,
+      };
+      expect(evaluateCatalogHealth(input, now)).toMatchObject({
+        status: "attention",
+        issues: [{ severity: "error", reason: "latest_attempt_failed" }],
+      });
+    },
+  );
+
+  it("does not downgrade a marked partial run without fresh offers", () => {
+    const input = snapshot();
+    input.retailers[0]!.latestAttempt = {
+      ...input.retailers[0]!.latestSuccess!,
+      status: "failed",
+      failureKind: "partial_source",
+    };
+    input.retailers[0]!.freshSearchableOffers = 0;
+    expect(evaluateCatalogHealth(input, now).status).toBe("attention");
+  });
   it("keeps successful bounded catalogs healthy without inventing capacity measurements", () => {
     expect(evaluateCatalogHealth(snapshot(), now)).toMatchObject({
       readOnly: true,
@@ -48,7 +98,7 @@ describe("catalog health monitoring", () => {
     expect(evaluateCatalogHealth(input, now).issues).toEqual([]);
     input.retailers[0]!.latestSuccess!.startedAt = new Date(now.getTime() - 30 * 3_600_000 - 1);
     expect(evaluateCatalogHealth(input, now).issues).toContainEqual({
-      severity: "error",
+      severity: "warning",
       reason: "refresh_overdue",
       retailer: "tottus",
     });
@@ -92,7 +142,7 @@ describe("catalog health monitoring", () => {
     input.retailers[0]!.known =
       catalogPolicy.retainedListingCap - (retailerIdSchema.options.length - 1) * 10;
     expect(evaluateCatalogHealth(input, now)).toMatchObject({
-      status: "healthy",
+      status: "warning",
       issues: [{ severity: "warning", reason: "catalog_full" }],
     });
     input.skippedByCapacity = 3;

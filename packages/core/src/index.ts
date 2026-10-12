@@ -42,6 +42,7 @@ export * from "./diagnostics.ts";
 export * from "./shopping-list-merge.ts";
 
 export * from "./catalog-health.ts";
+export * from "./catalog-alerts.ts";
 
 export * from "./shopping-savings.ts";
 

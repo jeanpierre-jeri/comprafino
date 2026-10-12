@@ -4,6 +4,7 @@ import {
   listingRefreshPolicy,
   parseAcquisitionOptions,
   retailerIdSchema,
+  catalogFailureSeverity,
 } from "@comprafino/core";
 import {
   createDatabase,
@@ -27,7 +28,7 @@ import {
 } from "./catalog-sources.ts";
 import type { RetailerId } from "@comprafino/core";
 import { acquireCatalogPages } from "./catalog-acquisition.ts";
-import { logDiagnostic } from "./diagnostics.ts";
+import { logDiagnostic, reportCatalogAlert } from "./diagnostics.ts";
 import { refreshKnownListings } from "./listing-refresh.ts";
 import { listingRefreshTasks } from "./listing-refresh-tasks.ts";
 
@@ -59,14 +60,18 @@ try {
     let skippedByCapacity = 0;
     const restrictedRetailers = new Set<RetailerId>();
     for (const [index, retailer] of retailers.entries()) {
+      let run: string | undefined;
+      let stage: "admission" | "source" | "persistence" = "admission";
       try {
+        run = await store.start(retailer);
+        stage = "source";
         progress(
           `Tienda ${index + 1}/${retailers.length}: ${retailer}; leyendo categorías públicas`,
         );
         const sources = await discoverCatalogSources(retailer);
+        stage = "persistence";
         await registerCatalogSources(db, retailer, sources);
         progress(`${retailer}: ${sources.length} categorías registradas; iniciando páginas`);
-        const run = await store.start(retailer);
         await new Promise((resolve) => setTimeout(resolve, 1000));
         const result = await acquireCatalogPages(
           {
@@ -76,36 +81,75 @@ try {
               persistListingsDetailed(db, claim.retailer, listings, { source: "category" }),
             complete: (claim, cursor, discovered, ids, skips) =>
               completeCatalogPage(db, claim, cursor, discovered, ids, skips),
-            fail: (claim) => failCatalogPage(db, claim),
+            fail: (claim, reason) => failCatalogPage(db, claim, reason),
             pause: () => new Promise((resolve) => setTimeout(resolve, 1000)),
           },
           options.pages,
           progress,
         );
+        const persistenceFailure = result.failures.some(
+          (failure) => failure.diagnostic.stage !== "source",
+        );
+        let errorCode: string | undefined;
+        if (result.restricted) {
+          errorCode = "catalog_access_restricted";
+        } else if (result.skippedByCapacity > 0) {
+          errorCode = "catalog_capacity_skips";
+        } else if (persistenceFailure) {
+          errorCode = "catalog_persistence_failed";
+        } else if (result.failedPages) {
+          errorCode = result.persisted > 0 ? "catalog_partial_source" : "catalog_source_failed";
+        }
         await store.finish(run, {
           status: result.failedPages || result.skippedByCapacity ? "failed" : "success",
           fetched: result.fetched,
           persisted: result.persisted,
           changed: result.changed,
-          ...(result.failedPages ? { error: "Catalog page failure; progress retained" } : {}),
+          ...(errorCode ? { error: errorCode } : {}),
         });
+        run = undefined;
         skippedByCapacity += result.skippedByCapacity;
         if (result.restricted) {
           restrictedRetailers.add(retailer);
         }
         console.log(JSON.stringify({ retailer, registeredCategories: sources.length, ...result }));
-        if (result.failedPages || result.skippedByCapacity) {
+        for (const failure of result.failures) {
+          const severity = catalogFailureSeverity(failure.diagnostic, result.persisted > 0);
+          reportCatalogAlert(
+            severity,
+            `${retailer} category ${failure.sourceKey}: ${failure.diagnostic.sourceResponseCode ?? failure.diagnostic.reason}; progress retained`,
+          );
+          if (severity === "error") {
+            process.exitCode = 1;
+          }
+        }
+        if (result.restricted || result.skippedByCapacity) {
           process.exitCode = 1;
         }
       } catch (error) {
         if (error instanceof CatalogAccessRestriction) {
           restrictedRetailers.add(retailer);
         }
+        if (run) {
+          let errorCode = "catalog_source_failed";
+          if (error instanceof CatalogAccessRestriction) {
+            errorCode = "catalog_access_restricted";
+          } else if (stage !== "source") {
+            errorCode = "catalog_persistence_failed";
+          }
+          await store.finish(run, {
+            status: "failed",
+            fetched: 0,
+            persisted: 0,
+            changed: 0,
+            error: errorCode,
+          });
+        }
         logDiagnostic(error, {
-          stage: "source",
+          stage,
           operation: "ingestion",
           retailer,
-          reason: "source_request_failed",
+          reason: stage === "source" ? "source_request_failed" : "db_write_failed",
         });
         process.exitCode = 1;
       }
@@ -125,8 +169,17 @@ try {
       progress,
     );
     console.log(JSON.stringify({ targeted }));
-    if (targeted.failures) {
-      process.exitCode = 1;
+    for (const row of targeted.results) {
+      if (row.diagnostic) {
+        const severity = catalogFailureSeverity(row.diagnostic, targeted.observed > 0);
+        reportCatalogAlert(
+          severity,
+          `${row.retailer} targeted refresh: ${row.diagnostic.sourceResponseCode ?? row.diagnostic.reason}`,
+        );
+        if (severity === "error") {
+          process.exitCode = 1;
+        }
+      }
     }
     console.log(
       JSON.stringify({
