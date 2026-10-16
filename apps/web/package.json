@@ -11,7 +11,9 @@
     "test:e2e": "playwright test",
     "test": "playwright test --config playwright.stream.config.ts",
     "test:integration": "playwright test --config playwright.auth.config.ts",
-    "benchmark:basket": "node --experimental-strip-types testing/basket-benchmark-cli.ts"
+    "benchmark:basket": "node --experimental-strip-types testing/basket-benchmark-cli.ts",
+    "benchmark:catalog": "node --expose-gc --experimental-strip-types testing/catalog-benchmark-cli.ts",
+    "benchmark:catalog:http": "node --experimental-strip-types testing/catalog-http-benchmark-cli.ts"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "1.7.7",

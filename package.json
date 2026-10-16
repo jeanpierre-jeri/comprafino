@@ -47,7 +47,9 @@
     "health:catalog": "node scripts/run-command.mjs pnpm --filter @comprafino/db health:catalog",
     "scrape:makro": "node scripts/run-command.mjs pnpm --filter @comprafino/scrapers scrape:makro",
     "acquire:catalog": "node scripts/run-command.mjs pnpm --filter @comprafino/scrapers acquire:catalog",
-    "derive:catalog": "node scripts/run-command.mjs pnpm --filter @comprafino/db derive:catalog"
+    "derive:catalog": "node scripts/run-command.mjs pnpm --filter @comprafino/db derive:catalog",
+    "benchmark:catalog:local": "node scripts/run-command.mjs node --experimental-strip-types packages/db/src/local-test-cli.ts catalog",
+    "benchmark:catalog:http:local": "node scripts/run-command.mjs node --experimental-strip-types packages/db/src/local-test-cli.ts catalog-http"
   },
   "devDependencies": {
     "oxfmt": "0.71.0",

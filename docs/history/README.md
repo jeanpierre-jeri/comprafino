@@ -43,6 +43,8 @@ These reports and the full [original roadmap](engineering-notes-2026-10-05.md#or
 
 ## New reports
 
+- [Rendimiento HTTP de búsquedas y canastas 03E](catalog-http-performance-2026-10-16.md): producción Next local, tres escalas, cuatro solicitudes simultáneas, cancelación, memoria y controles de estabilidad.
+
 - [Category and text search performance 03B](catalog-category-performance-2026-10-16.md): shared offer read, category/global response equivalence and concurrent basket controls.
 - [Canastas genéricas y estabilidad concurrente, prompt 03D](catalog-generic-performance-2026-10-16.md): filtros y orden con claves nativas, comparación pareada con 03F y repetición de la matriz.
 - [Memoria compartida y canastas concurrentes, prompt 03F](catalog-shared-memory-performance-2026-10-15.md): reproducción del fallo a 64 MiB, experimentos de SQL/paralelismo, reutilización de precios vigentes y verificación de estabilidad.
