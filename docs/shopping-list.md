@@ -91,3 +91,5 @@ Storage rereads use the latest provider/session list as their fallback when loca
 Working storage still supplies the latest persisted state before mutation and cross-tab events still synchronize it, including removal/clear. Missing or malformed/incompatible stored data retains the existing empty-list recovery semantics; it is distinct from inaccessible storage. No state-management dependency was added.
 
 Current item and basket responses are rendered only for the list object, price mode and refresh revision that produced them. When an item is removed or edited, the previous response is withheld immediately during rendering, before effects start reevaluation. This prevents a deleted item's basket assignment from being rendered against the updated list and preserves the remaining session items.
+
+Public evaluation has a 15 s operation budget, 12 s DB fetch budget and 10 s SQL statement limit; body reads are bounded to 5 s and browser evaluation to 20 s. The 60 s visible-tab/focus refresh policy remains. A pending/failed refresh hides recommendations; manual refresh joins an in-flight fetch. See [public request budgets and recovery](request-budgets.md).
