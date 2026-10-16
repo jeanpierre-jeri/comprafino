@@ -75,7 +75,7 @@ describe.skipIf(!url)("saved canonical identity continuity", () => {
 
   async function weekdayEvidence(id: string, now: Date) {
     const result = await db.execute(sql`with products as (select id from canonical_products),
-      current_listings as (select jsonb_build_object('id',id) as listing from retailer_listings)
+      current_listings as (select id as listing_id from retailer_listings)
       ${shoppingWeekdayRows([id], now)}`);
     return z.array(z.object({ coalesce: weekdayRowsSchema })).parse(result.rows)[0]!.coalesce;
   }

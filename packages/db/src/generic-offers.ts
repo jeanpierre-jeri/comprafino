@@ -33,11 +33,12 @@ import {
 } from "@comprafino/core";
 import type { GenericOfferSort } from "@comprafino/core";
 import type { createDatabase } from "./client.ts";
-import type { ProductComparison } from "./public-products.ts";
+import type { CurrentPriceSource, ProductComparison } from "./public-products.ts";
 import { catalogFingerprint, catalogRecordSchema } from "./catalog.ts";
 import {
   publicProduct,
-  eligibleProducts,
+  eligibleProductIdentities,
+  currentPriceJoin,
   productImageUrl,
   retailerProductUrl,
   searchCanonicalProducts,
@@ -68,6 +69,14 @@ const rowSchema = z.object({
   canonicalId: z.uuid().nullable(),
   retailerCount: z.number().int().nonnegative(),
 });
+
+const categoryMembershipSchema = z.object({ matchesCategory: z.boolean() });
+
+/** Only the offer boundary crosses the DB transport. Search helpers stay in the
+ * relation for filtering/ordering; baskets share the same validated offer data. */
+export const genericOfferProjection = sql`listing, "sourceCategory", "retailerName", url, "imageUrl",
+  "currentPriceCents", "regularPriceCents", "conditionalOffers", "observedAt", available,
+  fingerprint, version, "canonicalId", "retailerCount"`;
 
 export function genericProductOffer(raw: unknown, now = new Date(), mode: PriceMode = "standard") {
   const row = rowSchema.parse(raw);
@@ -207,12 +216,27 @@ export async function searchGenericProductOffers(
   unlimited = false,
   canonicalId: string | null = null,
 ): Promise<GenericProductOffer[]> {
+  const { offers } = await readGenericProductOffers(db, rawQuery, now, filters, canonicalId);
+
+  return unlimited ? offers : limitGenericOffers(offers, genericOfferSort(sort));
+}
+
+/** Read every candidate once. Optional category membership partitions the same
+ * ordered snapshot for public results and unfiltered discovery coverage. */
+async function readGenericProductOffers(
+  db: ReturnType<typeof createDatabase>,
+  rawQuery: string,
+  now: Date,
+  filters: SearchFilters,
+  canonicalId: string | null = null,
+  membershipCategory: SearchCategoryId | null = null,
+): Promise<{ offers: GenericProductOffer[]; categoryOffers: GenericProductOffer[] | null }> {
   if (
     canonicalId
       ? !z.uuid().safeParse(canonicalId).success
       : !usefulSearchRequest(rawQuery, filters.category)
   ) {
-    return [];
+    return { offers: [], categoryOffers: membershipCategory ? [] : null };
   }
 
   const query = normalizeSearchQuery(rawQuery);
@@ -230,9 +254,9 @@ export async function searchGenericProductOffers(
     ? genericFamilyCandidatePredicate(interpretation.family)
     : sql`true`;
   const [result] = await db.batch([
-    db.execute(sql`${eligibleProducts}, generic as (
-    ${currentGenericOfferRows(now, filters.category)}
-  ) select * from generic where ${canonicalId ? sql`"canonicalId"=${canonicalId}::uuid` : sql`true`} and ${predicates.length ? sql.join(predicates, sql` and `) : sql`true`}
+    db.execute(sql`${eligibleProductIdentities}, generic as (
+    ${currentGenericOfferRows(now, filters.category, "history", membershipCategory)}
+  ) select ${genericOfferProjection}${membershipCategory ? sql`, "matchesCategory"` : sql``} from generic where ${canonicalId ? sql`"canonicalId"=${canonicalId}::uuid` : sql`true`} and ${predicates.length ? sql.join(predicates, sql` and `) : sql`true`}
     and ${textQuery ? sql`(search_identity='' or search_vector@@to_tsquery('simple',${textQuery}))` : sql`true`}
     and ${familyPredicate}
   order by (title_text=${query}) desc, starts_with(title_text,${query}) desc,
@@ -245,17 +269,68 @@ export async function searchGenericProductOffers(
     throw new Error("Generic search candidate bound exceeded");
   }
 
-  const offers = result.rows
-    .map((row) => genericProductOffer(row, now, filters.priceMode))
-    .filter((offer) => offer !== null);
-  const relevant = interpretation ? selectFamilyOffers(offers, interpretation.family) : offers;
-  const filtered = filterGenericOffers(relevant, filters);
+  const offers: GenericProductOffer[] = [];
+  const categoryOffers: GenericProductOffer[] | null = membershipCategory ? [] : null;
 
-  return unlimited ? filtered : limitGenericOffers(filtered, genericOfferSort(sort));
+  for (const row of result.rows) {
+    const matchesCategory = membershipCategory
+      ? categoryMembershipSchema.parse(row).matchesCategory
+      : false;
+    const offer = genericProductOffer(row, now, filters.priceMode);
+    if (!offer) {
+      continue;
+    }
+
+    offers.push(offer);
+    if (matchesCategory) {
+      categoryOffers?.push(offer);
+    }
+  }
+
+  const select = (candidates: GenericProductOffer[]) =>
+    filterGenericOffers(
+      interpretation ? selectFamilyOffers(candidates, interpretation.family) : candidates,
+      filters,
+    );
+
+  return { offers: select(offers), categoryOffers: categoryOffers && select(categoryOffers) };
+}
+
+async function publicSearchOfferScopes(
+  db: ReturnType<typeof createDatabase>,
+  query: string,
+  now: Date,
+  filters: SearchFilters,
+) {
+  const scopeFilters = searchFilters({
+    sort: filters.sort,
+    priceMode: filters.priceMode,
+    category: filters.category,
+  });
+  if (filters.category && usefulSearchQuery(query)) {
+    // Global candidates already contain the complete category subset. Membership
+    // uses acquired source paths on the native UUID, never title/family guesses.
+    // Apply the existing global overflow guard before partitioning or pagination.
+    const { offers, categoryOffers } = await readGenericProductOffers(
+      db,
+      query,
+      now,
+      { ...scopeFilters, category: null },
+      null,
+      filters.category,
+    );
+    return { offers: categoryOffers ?? [], underlyingOffers: offers };
+  }
+
+  const { offers } = await readGenericProductOffers(db, query, now, scopeFilters);
+  return { offers, underlyingOffers: null };
 }
 
 /** A conservative SQL superset; core classification/compatibility still decide. */
-export function genericFamilyCandidatePredicate(family: ProductFamily): SQL {
+export function genericFamilyCandidatePredicate(
+  family: ProductFamily,
+  retailerId: SQL = sql`listing->>'retailerId'`,
+): SQL {
   const evidence = familySearchEvidence(family);
   const predicates = [
     ...evidence.titleHints.map((hint) => sql`folded_title like ${`%${hint}%`}`),
@@ -263,7 +338,7 @@ export function genericFamilyCandidatePredicate(family: ProductFamily): SQL {
       .filter((entry) => entry.ids.length)
       .map(
         (entry) =>
-          sql`listing->>'retailerId'=${entry.retailer} and "sourceCategory" in (${sql.join(
+          sql`${retailerId}=${entry.retailer} and "sourceCategory" in (${sql.join(
             entry.ids.map((id) => sql`${id}`),
             sql`,`,
           )})`,
@@ -288,32 +363,16 @@ export async function searchPublicProducts(
   ) {
     throw new Error("Invalid search page");
   }
-  const [products, offers, underlyingProducts, underlyingOffers] = await Promise.all([
+  const [products, offerScopes, underlyingProducts] = await Promise.all([
     options.includeComparisons === false
       ? []
       : searchCanonicalProducts(db, query, now, page, filters.category),
-    searchGenericProductOffers(
-      db,
-      query,
-      sort,
-      now,
-      searchFilters({ sort, priceMode: filters.priceMode, category: filters.category }),
-      true,
-    ),
+    publicSearchOfferScopes(db, query, now, filters),
     options.includeComparisons !== false && filters.category && usefulSearchQuery(query)
       ? searchCanonicalProducts(db, query, now, page)
       : null,
-    filters.category && usefulSearchQuery(query)
-      ? searchGenericProductOffers(
-          db,
-          query,
-          sort,
-          now,
-          searchFilters({ sort, priceMode: filters.priceMode }),
-          true,
-        )
-      : null,
   ]);
+  const { offers, underlyingOffers } = offerScopes;
   // Exact comparison identity/routes remain unchanged. In a recognized family
   // search, an incidental ingredient in an exact group is not useful coverage.
   const interpretation = resolveProductFamilyQuery(query);
@@ -397,22 +456,32 @@ export function getCanonicalCurrentProductOffers(
   );
 }
 
-/** Shared current normalized listing boundary, also used by basket snapshots. */
-export function currentGenericOfferRows(now: Date, category: SearchCategoryId | null = null) {
-  return sql`    select jsonb_build_object('id',l.id,'retailerId',l.retailer_id,'title',l.title,
+/** Shared current normalized listing boundary, also used by basket snapshots.
+ * Requires the narrow products CTE from eligibleProductIdentities. Basket
+ * snapshots supply their shared current_prices relation as the price source. */
+export function currentGenericOfferRows(
+  now: Date,
+  category: SearchCategoryId | null = null,
+  priceSource: CurrentPriceSource = "history",
+  membershipCategory: SearchCategoryId | null = null,
+) {
+  // Native basket keys stay outside the transport projection. They preserve
+  // history join statistics and avoid rebuilding listing JSON in each family
+  // category predicate or just to sort candidates by their textual UUID.
+  return sql`    select ${priceSource === "snapshot" ? sql`l.id as listing_id,l.retailer_id as retailer_id,` : sql``}${membershipCategory ? sql`${categoryListingPredicate(sql`l.id`, membershipCategory)} as "matchesCategory",` : sql``} jsonb_build_object('id',l.id,'retailerId',l.retailer_id,'title',l.title,
       'priceUnit',h.price_unit,'packageText',l.package_text,'sourceBrand',l.source_brand,
       'sourceUnitMultiplier',l.source_unit_multiplier::float8) as listing,
       l.category as "sourceCategory", r.name as "retailerName", l.url, l.image_url as "imageUrl", h.current_price_cents as "currentPriceCents", h.regular_price_cents as "regularPriceCents",
       ${listingOffers(sql`l.id`, sql`l.last_seen_at`)} as "conditionalOffers",
       l.last_seen_at as "observedAt", l.available, n.input_fingerprint as fingerprint, n.normalization_version as version,
-      p.id as "canonicalId", coalesce(jsonb_array_length(p.offers),0) as "retailerCount",
+      p.id as "canonicalId", coalesce(p."retailerCount",0) as "retailerCount",
       ${searchText(sql`n.normalized_title`)} as title_text,
       ${searchText(sql`n.normalized_title || ' ' || coalesce(n.brand,'')`)} as identity_text
       ,n.search_identity,to_tsvector('simple',n.search_identity) as search_vector,
       regexp_replace(lower(normalize(n.normalized_title,NFD)), '[^[:alnum:]]+', '', 'g') as folded_title
     from retailer_listings l join retailers r on r.id=l.retailer_id
     join listing_normalizations n on n.listing_id=l.id
-    join price_history h on h.listing_id=l.id and h.valid_until is null
+    ${currentPriceJoin(priceSource)}
     left join canonical_product_listings a on a.listing_id=l.id
     left join products p on p.id=a.canonical_product_id
     where l.active and l.available is distinct from false and h.currency='PEN' and h.current_price_cents>0

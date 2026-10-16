@@ -14,7 +14,7 @@ import {
 } from "@comprafino/core";
 import { createDatabase } from "./client.ts";
 import { catalogFingerprint, catalogRecordSchema } from "./catalog.ts";
-import { eligibleProducts } from "./public-products.ts";
+import { eligibleProductIdentities, eligibleProducts } from "./public-products.ts";
 import { currentGenericOfferRows, genericProductOffer } from "./generic-offers.ts";
 import {
   publicListingDetailRows,
@@ -70,7 +70,7 @@ export async function auditCatalogCoverage(db = createDatabase(), now = new Date
       from retailer_listings l left join listing_normalizations n on n.listing_id=l.id
       order by l.id limit ${catalogPolicy.overflowSentinel}`),
     db.execute(
-      sql`${eligibleProducts} ${currentGenericOfferRows(now)} order by l.id limit ${catalogPolicy.overflowSentinel}`,
+      sql`${eligibleProductIdentities} ${currentGenericOfferRows(now)} order by l.id limit ${catalogPolicy.overflowSentinel}`,
     ),
     db.execute(
       sql`${eligibleProducts} ${publicListingDetailRows(sql`true`, now)} order by l.id limit ${catalogPolicy.overflowSentinel}`,

@@ -43,8 +43,18 @@ These reports and the full [original roadmap](engineering-notes-2026-10-05.md#or
 
 ## New reports
 
+- [Category and text search performance 03B](catalog-category-performance-2026-10-16.md): shared offer read, category/global response equivalence and concurrent basket controls.
+- [Canastas genéricas y estabilidad concurrente, prompt 03D](catalog-generic-performance-2026-10-16.md): filtros y orden con claves nativas, comparación pareada con 03F y repetición de la matriz.
+- [Memoria compartida y canastas concurrentes, prompt 03F](catalog-shared-memory-performance-2026-10-15.md): reproducción del fallo a 64 MiB, experimentos de SQL/paralelismo, reutilización de precios vigentes y verificación de estabilidad.
+
 Routine basket benchmarks now write new ignored `.artifacts/` files; explicit destinations are supported and existing files are refused. Read-only audits emit stdout without writing permanent documentation. Reviewed historical baselines are never automatic output targets. See [local testing](../local-testing.md#basket-benchmark-outputs).
 
 Run `pnpm docs:check` to validate Markdown paths/anchors, root README commands and literal runtime JSON/workflow references. This dependency-free checker does not fetch external URLs or infer deployment state.
 
 - [Account rollout observations, October 6](account-rollout-2026-10-06.md): anonymous production boundaries, scoped migration evidence, publication checks and user-confirmed production sync; detailed acceptance limits are recorded.
+
+- [Rendimiento de búsquedas y canastas, 15 de octubre](catalog-performance-2026-10-15.md): mediciones locales aisladas a 2.000, 10.000 y 50.000 listings, planes SQL, límites de interpretación y prompts de mejora.
+
+- [Proyección de ofertas, prompt 03A](catalog-projection-performance-2026-10-15.md): equivalencia de resultados y comparación de bytes, memoria, latencia y planes después de reducir los campos transferidos.
+
+- [Joins y elegibilidad canónica, prompt 03C](catalog-eligibility-performance-2026-10-15.md): lectura mínima de identidades, equivalencia contra el SQL anterior y mediciones de búsquedas/canastas con los mismos recursos de 03A.

@@ -30,7 +30,7 @@ export function shoppingWeekdayRows(ids: readonly string[], now: Date): SQL {
         and (x.current_price_cents<>h.current_price_cents or x.currency<>'PEN' or x.price_unit<>'UN'))
       then h.current_price_cents else null end)), '[]'::jsonb)
     from canonical_product_listings a join products p on p.id=a.canonical_product_id
-    join current_listings c on (c.listing->>'id')::uuid=a.listing_id
+    join current_listings c on c.listing_id=a.listing_id
     join listing_observation_days d on d.listing_id=a.listing_id
     left join price_history h on h.listing_id=d.listing_id and h.valid_from<=d.last_observed_at
       and (h.valid_until>d.last_observed_at or h.valid_until is null)

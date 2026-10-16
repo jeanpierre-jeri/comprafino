@@ -27,9 +27,13 @@ import {
   getCanonicalCurrentProductOffers,
   currentGenericOfferRows,
   genericProductOffer,
+  genericOfferProjection,
   genericFamilyCandidatePredicate,
 } from "./generic-offers.ts";
-import { getCanonicalProductComparison, eligibleProducts } from "./public-products.ts";
+import {
+  getCanonicalProductComparison,
+  eligibleProductIdentitiesWithCurrentPrices,
+} from "./public-products.ts";
 
 import { shoppingWeekdayRows, weekdayRowsSchema } from "./weekday-recommendation.ts";
 
@@ -159,7 +163,10 @@ export async function evaluateCurrentShoppingList(
       ),
     ];
     const alternativePredicate = families.length
-      ? sql`(${sql.join(families.map(genericFamilyCandidatePredicate), sql` or `)})`
+      ? sql`(${sql.join(
+          families.map((family) => genericFamilyCandidatePredicate(family, sql`retailer_id`)),
+          sql` or `,
+        )})`
       : sql`false`;
     const exactPredicate = ids.length
       ? sql`"canonicalId" in (${sql.join(
@@ -170,8 +177,8 @@ export async function evaluateCurrentShoppingList(
     const [result] = await db.batch([
       // Inline the projection so counting the full catalog does not materialize
       // every listing's JSON/benefits before filtering the requested families.
-      db.execute(sql`${eligibleProducts}, current_listings as not materialized (
-      ${currentGenericOfferRows(now)}
+      db.execute(sql`${eligibleProductIdentitiesWithCurrentPrices}, current_listings as not materialized (
+      ${currentGenericOfferRows(now, null, "snapshot")}
     ) select jsonb_build_object(
       'currentCount',(select count(*)::int from current_listings),
       'weekdayRows', (${shoppingWeekdayRows(ids, now)}),
@@ -185,8 +192,8 @@ export async function evaluateCurrentShoppingList(
             : sql`false`
         }), '[]'::jsonb),
       'listings', coalesce((select jsonb_agg(row_to_json(bounded)) from
-        (select * from current_listings where ${exactPredicate} or ${alternativePredicate}
-          order by listing->>'id' limit ${catalogPolicy.overflowSentinel}) bounded), '[]'::jsonb)
+        (select ${genericOfferProjection} from current_listings where ${exactPredicate} or ${alternativePredicate}
+          order by listing_id::text limit ${catalogPolicy.overflowSentinel}) bounded), '[]'::jsonb)
     ) as snapshot`),
     ]);
     queryMs = performance.now() - queryStarted;

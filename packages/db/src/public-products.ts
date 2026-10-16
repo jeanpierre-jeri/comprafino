@@ -203,20 +203,68 @@ export function searchText(text: SQL): SQL {
     '[^[:alnum:]]+', ' ', 'g'))`;
 }
 
-// No review table or unmatched listing participates. Reject groups with a manual,
-// obsolete-version or below-auto-confidence link, even if two other links qualify.
+export type CurrentPriceSource = "history" | "snapshot";
+
+/** The snapshot relation has already selected only open states. Reapplying
+ * valid_until IS NULL there uses the historical null fraction again, severely
+ * underestimates candidates and can repeatedly rescan all canonical products. */
+export function currentPriceJoin(source: CurrentPriceSource): SQL {
+  if (source === "snapshot") return sql`join current_prices h on h.listing_id=l.id`;
+
+  return sql`join price_history h on h.listing_id=l.id and h.valid_until is null`;
+}
+
+// No review table or unmatched listing participates. Both public projections
+// share these gates; current stock/freshness remain a separate purchase decision.
+function canonicalOfferSource(priceSource: CurrentPriceSource) {
+  return sql`from canonical_product_listings a
+  join retailer_listings l on l.id=a.listing_id and l.retailer_id=a.retailer_id
+  join retailers r on r.id=l.retailer_id
+  join listing_normalizations n on n.listing_id=l.id
+  ${currentPriceJoin(priceSource)}
+  where a.method='automatic' and a.matching_version=${matchingVersion} and a.confidence>=${matchingThresholds.auto}
+    and l.active and h.currency='PEN' and h.price_unit='UN' and h.current_price_cents>0`;
+}
+
+// Reject the entire group for any manual, obsolete or low-confidence link,
+// including links whose listing is inactive or has no qualifying open price.
+const canonicalGroupScope = sql`where not exists (select 1 from canonical_product_listings a where a.canonical_product_id=c.id
+    and (a.method<>'automatic' or a.matching_version<>${matchingVersion} or a.confidence<${matchingThresholds.auto}))
+  group by c.id having count(distinct o.retailer_id)>=2`;
+
+/** Identity only: generic offers and baskets need no comparison JSON, benefit
+ * aggregation or canonical search text. Materialize the narrow group relation
+ * once so selective listing joins cannot repeatedly rebuild every group. */
+function canonicalIdentityRows(priceSource: CurrentPriceSource) {
+  return sql`select c.id, c.display_name as "displayName", count(*)::int as "retailerCount"
+  from canonical_products c join (
+    select a.canonical_product_id, r.id as retailer_id
+    ${canonicalOfferSource(priceSource)}
+  ) o on o.canonical_product_id=c.id
+  ${canonicalGroupScope}`;
+}
+
+export const eligibleProductIdentities = sql`with products as materialized (
+  ${canonicalIdentityRows("history")}
+)`;
+
+/** Basket reads reuse these narrow open states for identity, count, history
+ * admission and candidates. This avoids repeated parallel history/hash joins
+ * without materializing every listing's JSON or benefits. Historical evidence
+ * still reads the complete price_history relation in the same SQL snapshot. */
+export const eligibleProductIdentitiesWithCurrentPrices = sql`with current_prices as materialized (
+  select listing_id,current_price_cents,regular_price_cents,currency,price_unit
+  from price_history where valid_until is null
+), products as materialized (
+  ${canonicalIdentityRows("snapshot")}
+)`;
+
 export const eligibleProducts = sql`with offers as (
   select a.canonical_product_id, l.id as listing_id, r.id as retailer_id, r.name as retailer_name,
     l.title, l.url, l.image_url, l.last_seen_at, l.available, n.brand, n.normalized_title,
     h.current_price_cents, h.regular_price_cents,
     ${listingOffers(sql`l.id`, sql`l.last_seen_at`)} as conditional_offers
-  from canonical_product_listings a
-  join retailer_listings l on l.id=a.listing_id and l.retailer_id=a.retailer_id
-  join retailers r on r.id=l.retailer_id
-  join listing_normalizations n on n.listing_id=l.id
-  join price_history h on h.listing_id=l.id and h.valid_until is null
-  where a.method='automatic' and a.matching_version=${matchingVersion} and a.confidence>=${matchingThresholds.auto}
-    and l.active and h.currency='PEN' and h.price_unit='UN' and h.current_price_cents>0
+  ${canonicalOfferSource("history")}
 ), products as (
   select c.id, c.display_name as "displayName", c.brand_key,
     c.quantity_value as "quantityValue", c.quantity_unit as "quantityUnit", c.package_count as "packageCount",
@@ -229,9 +277,7 @@ export const eligibleProducts = sql`with offers as (
       'regularPriceCents',o.regular_price_cents,'observedAt',o.last_seen_at,'available',o.available,'conditionalOffers',o.conditional_offers) order by o.retailer_id) as offers,
     array_agg(${searchText(sql`o.normalized_title`)}) as retailer_titles
   from canonical_products c join offers o on o.canonical_product_id=c.id
-  where not exists (select 1 from canonical_product_listings a where a.canonical_product_id=c.id
-    and (a.method<>'automatic' or a.matching_version<>${matchingVersion} or a.confidence<${matchingThresholds.auto}))
-  group by c.id having count(distinct o.retailer_id)>=2
+  ${canonicalGroupScope}
 )`;
 
 const publicColumns = sql`id,"displayName",brand,"quantityValue","quantityUnit","packageCount",offers`;
