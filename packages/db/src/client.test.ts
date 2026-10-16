@@ -1,6 +1,7 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { sql } from "drizzle-orm";
 import { createDatabase } from "./client.ts";
+import { statementBudgetSql } from "./statement-budget.ts";
 
 const env = { DATABASE_URL: "postgresql://test@fixture.neon.invalid/comprafino_test" };
 
@@ -71,8 +72,55 @@ it("preserves the default transport and rejects invalid deadlines before connect
   vi.stubGlobal("fetch", mockFetch);
   for (const requestTimeoutMs of [0, -1, 1.5, NaN, Infinity, 2_147_483_648]) {
     expect(() => createDatabase(env, { requestTimeoutMs })).toThrow(/timeout/u);
+    expect(() => createDatabase(env, { statementTimeoutMs: requestTimeoutMs })).toThrow(/timeout/u);
   }
   expect(mockFetch).not.toHaveBeenCalled();
   await createDatabase(env).execute(sql`select 1 as value`);
   expect(mockFetch).toHaveBeenCalledOnce();
+});
+
+it("propagates request cancellation and never starts a later query on that request's client", async () => {
+  const controller = new AbortController();
+  const mockFetch = vi.fn<typeof fetch>(async (_input, init) => {
+    const signal = init?.signal;
+    if (!signal) throw new Error("Missing cancellation signal");
+    controller.abort();
+    signal.throwIfAborted();
+    return queryResponse();
+  });
+  vi.stubGlobal("fetch", mockFetch);
+  const db = createDatabase(env, { signal: controller.signal, requestTimeoutMs: 1000 });
+  await expect(db.execute(sql`select 1`)).rejects.toThrow(/query/iu);
+  await expect(db.execute(sql`select 2`)).rejects.toThrow(/query/iu);
+  expect(mockFetch).toHaveBeenCalledTimes(1);
+  mockFetch.mockResolvedValue(queryResponse());
+  expect(
+    (await createDatabase(env, { requestTimeoutMs: 1000 }).execute(sql`select 1`)).rows,
+  ).toEqual([{ value: 1 }]);
+});
+
+it("applies SET LOCAL in the same single HTTP batch and preserves Drizzle direct/batch results", async () => {
+  const payloads: unknown[] = [];
+  vi.stubGlobal(
+    "fetch",
+    vi.fn<typeof fetch>(async (_input, init) => {
+      if (typeof init?.body !== "string") throw new Error("Missing SQL body");
+      const body: unknown = JSON.parse(init.body);
+      payloads.push(body);
+      const result: unknown = await queryResponse().json();
+      return Response.json({ results: [result, result] });
+    }),
+  );
+  const db = createDatabase(env, { statementTimeoutMs: 123, requestTimeoutMs: 1000 });
+  expect(payloads).toHaveLength(0);
+  expect((await db.execute(sql`select 1 as value`)).rows).toEqual([{ value: 1 }]);
+  expect((await db.batch([db.execute(sql`select 1 as value`)]))[0].rows).toEqual([{ value: 1 }]);
+  expect(payloads).toEqual(
+    Array.from({ length: 2 }, () => ({
+      queries: [
+        { query: statementBudgetSql, params: ["123"] },
+        { query: "select 1 as value", params: [] },
+      ],
+    })),
+  );
 });
