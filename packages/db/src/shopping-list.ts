@@ -12,6 +12,7 @@ import {
   shoppingQueryForTitle,
   shoppingMarketQuery,
   shoppingWeekdays,
+  shoppingPriceHistories,
   genericSubstitutionContexts,
   resolveProductFamilyQuery,
 } from "@comprafino/core";
@@ -35,6 +36,7 @@ import {
   eligibleProductIdentitiesWithCurrentPrices,
 } from "./public-products.ts";
 
+import { shoppingHistoryRows, historyRowsSchema } from "./shopping-price-history.ts";
 import { shoppingWeekdayRows, weekdayRowsSchema } from "./weekday-recommendation.ts";
 
 /** Read-only current market boundary. Exact eligibility and generic quantity
@@ -45,9 +47,14 @@ export async function evaluateCurrentShoppingItem(
   mode: PriceMode,
   now = new Date(),
 ) {
+  if (item.listingId) {
+    const result = await evaluateCurrentShoppingList(db, { version: 2, items: [item] }, mode, now);
+    return result.evaluations[0]!;
+  }
+
   const candidates: ShoppingCandidate[] = [];
   const product =
-    item.intent === "generic"
+    item.intent === "generic" || !item.canonicalId
       ? null
       : await getCanonicalProductComparison(db, item.canonicalId, now, mode);
 
@@ -106,6 +113,7 @@ function shoppingCandidate(
     id: o.id,
     canonicalId: o.canonicalId,
     title: o.title,
+    imageUrl: o.imageUrl,
     retailerId: o.retailerId,
     retailerName: o.retailerName,
     url: o.url,
@@ -139,11 +147,23 @@ export async function evaluateCurrentShoppingList(
   let candidates: ShoppingCandidate[] = [];
   const titles = new Map<string, string>();
   let weekdayRows: unknown = [];
+  let historyRows: unknown = [];
 
   if (list.items.length) {
     const ids = [
-      ...new Set(list.items.flatMap((i) => (i.intent === "generic" ? [] : [i.canonicalId]))),
+      ...new Set(
+        list.items.flatMap((i) =>
+          i.intent === "generic" || !i.canonicalId || i.listingId ? [] : [i.canonicalId],
+        ),
+      ),
     ];
+    const listingIds = list.items.flatMap((item) => (item.listingId ? [item.listingId] : []));
+    const listingPredicate = listingIds.length
+      ? sql`listing_id in (${sql.join(
+          listingIds.map((id) => sql`${id}::uuid`),
+          sql`,`,
+        )})`
+      : sql`false`;
     const queryStarted = performance.now();
     const marketQueries = list.items.flatMap((item) => {
       if (item.intent === "strict") return [];
@@ -181,7 +201,8 @@ export async function evaluateCurrentShoppingList(
       ${currentGenericOfferRows(now, null, "snapshot")}
     ) select jsonb_build_object(
       'currentCount',(select count(*)::int from current_listings),
-      'weekdayRows', (${shoppingWeekdayRows(ids, now)}),
+      'weekdayRows', (${shoppingWeekdayRows(ids, now, listingIds)}),
+      'historyRows', (${shoppingHistoryRows(ids, listingIds, now)}),
       'products', coalesce((select jsonb_agg(jsonb_build_object('id',id,'title',"displayName"))
         from products where ${
           ids.length
@@ -192,7 +213,8 @@ export async function evaluateCurrentShoppingList(
             : sql`false`
         }), '[]'::jsonb),
       'listings', coalesce((select jsonb_agg(row_to_json(bounded)) from
-        (select ${genericOfferProjection} from current_listings where ${exactPredicate} or ${alternativePredicate}
+        (select ${genericOfferProjection} from current_listings where ${exactPredicate} or ${alternativePredicate} or ${listingPredicate}
+          or "canonicalId" in (select "canonicalId" from current_listings where ${listingPredicate})
           order by listing_id::text limit ${catalogPolicy.overflowSentinel}) bounded), '[]'::jsonb)
     ) as snapshot`),
     ]);
@@ -200,6 +222,7 @@ export async function evaluateCurrentShoppingList(
     const snapshot = z
       .object({
         weekdayRows: z.unknown(),
+        historyRows: z.unknown(),
         currentCount: z.number().int().nonnegative(),
         products: z.array(z.object({ id: z.uuid(), title: z.string().min(1) })),
         listings: z.array(z.unknown()),
@@ -214,6 +237,7 @@ export async function evaluateCurrentShoppingList(
     }
 
     weekdayRows = snapshot.weekdayRows;
+    historyRows = snapshot.historyRows;
 
     for (const product of snapshot.products) {
       titles.set(product.id, product.title);
@@ -227,7 +251,9 @@ export async function evaluateCurrentShoppingList(
 
   const fulfillments = list.items.map((item) => {
     // Missing public identity cannot authorize either exact purchase or preference fallback.
-    const title = item.intent === "generic" ? undefined : titles.get(item.canonicalId);
+    const title = item.listingId
+      ? candidates.find((candidate) => candidate.id === item.listingId)?.title
+      : titles.get(item.canonicalId ?? "");
 
     return evaluateShoppingFulfillment(
       item,
@@ -244,6 +270,12 @@ export async function evaluateCurrentShoppingList(
       list,
       candidates,
       weekdayRowsSchema.parse(weekdayRows),
+      now,
+    ),
+    priceHistories: shoppingPriceHistories(
+      list,
+      fulfillments.map((f) => f.evaluation),
+      historyRowsSchema.parse(historyRows),
       now,
     ),
     baskets: optimizeBasket(

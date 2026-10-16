@@ -460,4 +460,84 @@ describe.skipIf(!url)("batched current shopping snapshot", () => {
         .coveredDays,
     ).toBe(0);
   });
+  it("retains a selected independent SKU and separates cheaper fulfillment without inventing a canonical ID", async () => {
+    const item = make("preferred", {
+      canonicalId: null,
+      listingId: fixtures.independent,
+      label: "Huevos Independientes Bandeja 30un",
+    });
+    const list = shoppingListSchema.parse({ version: 2, items: [item] });
+    const result = await evaluateCurrentShoppingList(db, list, "standard");
+    expect(result.evaluations[0]?.best).toMatchObject({
+      id: fixtures.independent,
+      canonicalId: null,
+      totalCostCents: 4990,
+      imageUrl: "https://metroio.vteximg.com.br/arquivos/ids/fixture-eggs.jpg",
+    });
+    expect(result.evaluations[0]?.alternative?.totalCostCents).toBe(1490);
+    expect(result.weekdayRecommendations[0]?.series.map((series) => series.listingId)).toEqual([
+      fixtures.independent,
+    ]);
+    expect(result.priceHistories[0]).toMatchObject({
+      listingId: fixtures.independent,
+      periods: [
+        { minimumCents: 4990, coveredDays: 1 },
+        { minimumCents: 4990, coveredDays: 1 },
+        { minimumCents: 4990, coveredDays: 1 },
+      ],
+    });
+    await scoped.query(
+      "update listing_normalizations set input_fingerprint='invalid' where listing_id=$1::uuid",
+      [fixtures.independent],
+    );
+    const invalid = await evaluateCurrentShoppingList(db, list, "standard");
+    expect(invalid.evaluations[0]?.best).toBeNull();
+    expect(invalid.priceHistories).toEqual([]);
+  });
+  it("historical minima retain intraday observations and exclude missing dates, other SKUs and KG prices", async () => {
+    const evaluationTime = new Date();
+    const date = shiftObservationDay(weekdayEvidenceWindow(evaluationTime).end, -2);
+    const listingId = fixtures.independent;
+    await scoped.query(
+      `insert into listing_observation_days(listing_id,observation_date,first_observed_at,last_observed_at,observation_count)
+      values($1::uuid,$2::date,$3::timestamptz,$4::timestamptz,3)`,
+      [listingId, date, `${date}T12:00:00Z`, `${date}T20:00:00Z`],
+    );
+    for (const [price, unit, start, end] of [
+      [1000, "UN", 10, 14],
+      [900, "UN", 14, 16],
+      [1, "KG", 16, 21],
+    ] as const) {
+      await scoped.query(
+        `insert into price_history(listing_id,current_price_cents,currency,price_unit,valid_from,valid_until)
+        values($1::uuid,$2,'PEN',$3,$4::timestamptz,$5::timestamptz)`,
+        [listingId, price, unit, `${date}T${start}:00:00Z`, `${date}T${end}:00:00Z`],
+      );
+    }
+    const item = make("preferred", { canonicalId: null, listingId });
+    const result = await evaluateCurrentShoppingList(
+      db,
+      { version: 2, items: [item] },
+      "benefits",
+      evaluationTime,
+    );
+    expect(result.priceHistories[0]?.periods[2]).toMatchObject({
+      minimumCents: 900,
+      coveredDays: 2,
+      observedAt: `${date}T14:00:00.000Z`,
+    });
+    await scoped.query(
+      "delete from listing_observation_days where listing_id=$1::uuid and observation_date=$2::date",
+      [listingId, date],
+    );
+    const withoutCoverage = await evaluateCurrentShoppingList(
+      db,
+      { version: 2, items: [item] },
+      "standard",
+    );
+    expect(withoutCoverage.priceHistories[0]?.periods[2]).toMatchObject({
+      minimumCents: 4990,
+      coveredDays: 1,
+    });
+  });
 });

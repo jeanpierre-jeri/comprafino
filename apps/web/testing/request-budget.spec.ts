@@ -13,6 +13,7 @@ const empty = () => ({ revision: 0, list: { version: 2 as const, items: [] } });
 const evaluation = () => ({
   evaluations: [],
   weekdayRecommendations: [],
+  priceHistories: [],
   baskets: optimizeBasket([]),
   evaluatedAt: new Date().toISOString(),
   timings: { queryMs: 0, totalMs: 0 },

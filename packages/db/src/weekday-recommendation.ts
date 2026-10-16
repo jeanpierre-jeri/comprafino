@@ -6,11 +6,22 @@ import type { SQL } from "drizzle-orm";
 /** Runs inside the existing bounded shopping snapshot. History is restricted to
  * requested exact products and current public candidates. No generic attribution,
  * conditional prices, state-start coverage or missing-date backfill. */
-export function shoppingWeekdayRows(ids: readonly string[], now: Date): SQL {
+export function shoppingWeekdayRows(
+  ids: readonly string[],
+  now: Date,
+  listingIds: readonly string[] = [],
+): SQL {
   const { start, end } = weekdayEvidenceWindow(now);
   const scope = ids.length
-    ? sql`a.canonical_product_id in (${sql.join(
+    ? sql`c."canonicalId" in (${sql.join(
         ids.map((id) => sql`${id}::uuid`),
+        sql`, `,
+      )})`
+    : sql`false`;
+
+  const selected = listingIds.length
+    ? sql`c.listing_id in (${sql.join(
+        listingIds.map((id) => sql`${id}::uuid`),
         sql`, `,
       )})`
     : sql`false`;
@@ -29,13 +40,13 @@ export function shoppingWeekdayRows(ids: readonly string[], now: Date): SQL {
         and x.valid_from<=d.last_observed_at and (x.valid_until>d.first_observed_at or x.valid_until is null)
         and (x.current_price_cents<>h.current_price_cents or x.currency<>'PEN' or x.price_unit<>'UN'))
       then h.current_price_cents else null end)), '[]'::jsonb)
-    from canonical_product_listings a join products p on p.id=a.canonical_product_id
-    join current_listings c on c.listing_id=a.listing_id
-    join listing_observation_days d on d.listing_id=a.listing_id
+    from current_listings c
+    left join canonical_product_listings a on a.listing_id=c.listing_id
+    join listing_observation_days d on d.listing_id=c.listing_id
     left join price_history h on h.listing_id=d.listing_id and h.valid_from<=d.last_observed_at
       and (h.valid_until>d.last_observed_at or h.valid_until is null)
-    where ${scope} and d.observation_date between ${start}::date and ${end}::date
-      and d.first_observed_at>=a.linked_at and d.last_observed_at<=${now.toISOString()}::timestamptz`;
+    where ((${scope} and d.first_observed_at>=a.linked_at) or ${selected}) and d.observation_date between ${start}::date and ${end}::date
+      and d.last_observed_at<=${now.toISOString()}::timestamptz`;
 }
 
 export const weekdayRowsSchema = z.array(

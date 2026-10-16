@@ -19,6 +19,7 @@ export function useShoppingEvaluation(
   return {
     evaluations: data?.evaluations ?? [],
     weekdayRecommendations: data?.weekdayRecommendations ?? [],
+    priceHistories: data?.priceHistories ?? [],
     baskets: data?.baskets ?? [],
     pending: enabled && (query.isPending || query.isFetching),
     error: enabled && query.isError ? "No pudimos cargar los precios. Intenta nuevamente." : "",

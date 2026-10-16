@@ -59,6 +59,7 @@ const common = {
   frequency: z.enum(["weekly", "biweekly", "monthly"]),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
+  listingId: z.uuid().optional(),
 };
 
 function validPackageQuantity(item: {
@@ -74,16 +75,19 @@ function validPackageQuantity(item: {
 export const shoppingListItemSchema = z.discriminatedUnion("intent", [
   z.object({
     ...common,
+    listingId: z.undefined().optional(),
     quantityMode: z.literal("normalized").default("normalized"),
     intent: z.literal("generic"),
     canonicalId: z.null(),
   }),
   z
-    .object({ ...common, intent: z.literal("preferred"), canonicalId: z.uuid() })
-    .refine(validPackageQuantity, "Package count must be whole units"),
+    .object({ ...common, intent: z.literal("preferred"), canonicalId: z.uuid().nullable() })
+    .refine(validPackageQuantity, "Package count must be whole units")
+    .refine((item) => Boolean(item.canonicalId || item.listingId), "Product identity required"),
   z
-    .object({ ...common, intent: z.literal("strict"), canonicalId: z.uuid() })
-    .refine(validPackageQuantity, "Package count must be whole units"),
+    .object({ ...common, intent: z.literal("strict"), canonicalId: z.uuid().nullable() })
+    .refine(validPackageQuantity, "Package count must be whole units")
+    .refine((item) => Boolean(item.canonicalId || item.listingId), "Product identity required"),
 ]);
 
 export type ShoppingListItem = z.infer<typeof shoppingListItemSchema>;
@@ -149,7 +153,7 @@ export function serializeShoppingList(list: ShoppingList): string {
 
 export function shoppingItemKey(item: ShoppingListItem): string {
   // Frequency/amount are editable metadata; adding again updates the existing need.
-  return `${item.intent}:${item.intent === "generic" ? shoppingGenericNeedKey(item.query, item.quantity.unit) : item.canonicalId}:${item.intent === "generic" ? (item.substitutionProfile ?? "withheld") : ""}:${item.quantityMode}:${item.quantity.unit}`;
+  return `${item.intent}:${item.intent === "generic" ? shoppingGenericNeedKey(item.query, item.quantity.unit) : (item.listingId ?? item.canonicalId)}:${item.intent === "generic" ? (item.substitutionProfile ?? "withheld") : ""}:${item.quantityMode}:${item.quantity.unit}`;
 }
 
 export function saveShoppingItem(list: ShoppingList, raw: ShoppingListItem): ShoppingList {
@@ -242,6 +246,7 @@ export const shoppingCandidateSchema = z.object({
   id: z.string().min(1),
   canonicalId: z.uuid().nullable(),
   title: z.string().min(1),
+  imageUrl: z.string().url().nullable().optional(),
   retailerId: retailerIdSchema.optional(),
   retailerName: z.string().min(1),
   url: z.string().url(),
@@ -262,6 +267,7 @@ export const shoppingOptionSchema = z.object({
   id: z.string(),
   canonicalId: z.uuid().nullable(),
   title: z.string(),
+  imageUrl: z.string().url().nullable().optional(),
   retailerId: retailerIdSchema.optional(),
   retailerName: z.string(),
   url: z.string().url(),
@@ -285,6 +291,7 @@ export const shoppingEvaluationSchema = z.object({
   alternative: shoppingOptionSchema.nullable(),
   savingsCents: z.number().int().nonnegative(),
   options: z.array(shoppingOptionSchema).max(3),
+  alternatives: z.array(shoppingOptionSchema).max(3).optional(),
 });
 
 export type ShoppingEvaluation = z.infer<typeof shoppingEvaluationSchema>;
@@ -296,14 +303,25 @@ export function evaluateShoppingFulfillment(
   now = new Date(),
   preferredTitle?: string,
 ) {
-  const compatibility = preferredTitle ? getSubstitutionProfile({ title: preferredTitle }) : null;
+  const selected = item.listingId ? candidates.find((c) => c.id === item.listingId) : undefined;
+  // A saved listing never authorizes an old canonical association. Resolve it
+  // from today's validated catalog, and keep its own quote as the baseline.
+  const canonicalId = item.listingId ? selected?.canonicalId : item.canonicalId;
+  const exactCandidate = (candidate: Pick<ShoppingCandidate, "id" | "canonicalId">) =>
+    item.intent !== "generic" &&
+    (candidate.id === item.listingId ||
+      Boolean(canonicalId && candidate.canonicalId === canonicalId));
+  let compatibility = preferredTitle ? getSubstitutionProfile({ title: preferredTitle }) : null;
+  if (item.listingId) {
+    compatibility = selected?.substitutionProfile ?? null;
+  }
   const reference =
     item.intent !== "generic" && item.quantityMode === "packages"
       ? [...candidates]
           .sort((a, b) => a.id.localeCompare(b.id))
           .find(
             (c) =>
-              c.canonicalId === item.canonicalId &&
+              (item.listingId ? c.id === item.listingId : exactCandidate(c)) &&
               c.pricingBasis !== "kg" &&
               c.strongQuantity &&
               Number.isSafeInteger(c.ordinaryPriceCents) &&
@@ -326,7 +344,7 @@ export function evaluateShoppingFulfillment(
       continue;
     }
 
-    const exact = item.intent !== "generic" && c.canonicalId === item.canonicalId;
+    const exact = exactCandidate(c);
 
     if (item.intent === "strict" && !exact) {
       continue;
@@ -395,6 +413,7 @@ export function evaluateShoppingFulfillment(
       id: c.id,
       canonicalId: c.canonicalId,
       title: c.title,
+      imageUrl: c.imageUrl ?? null,
       retailerId: c.retailerId,
       retailerName: c.retailerName,
       url: c.url,
@@ -413,18 +432,20 @@ export function evaluateShoppingFulfillment(
   evaluated.sort(compareShoppingOptions);
   const preferred =
     item.intent === "preferred"
-      ? (evaluated.find((o) => o.canonicalId === item.canonicalId) ?? null)
+      ? (evaluated.find((o) => (item.listingId ? o.id === item.listingId : exactCandidate(o))) ??
+        null)
       : null;
   const cheapestAlternative =
     item.intent === "preferred"
-      ? (evaluated.find((o) => o.canonicalId !== item.canonicalId) ?? null)
+      ? (evaluated.find((o) => (item.listingId ? o.id !== item.listingId : !exactCandidate(o))) ??
+        null)
       : null;
   // Global preference gate: all alternatives use the same exact market baseline.
   const approved =
     item.intent === "preferred"
       ? evaluated.filter(
           (option) =>
-            option.canonicalId === item.canonicalId ||
+            exactCandidate(option) ||
             !preferred ||
             preferred.totalCostCents - option.totalCostCents >=
               Math.max(
@@ -434,8 +455,24 @@ export function evaluateShoppingFulfillment(
         )
       : evaluated;
   const alternative =
-    cheapestAlternative && approved.includes(cheapestAlternative) ? cheapestAlternative : null;
-  const best = item.intent === "preferred" ? (preferred ?? alternative) : (evaluated[0] ?? null);
+    cheapestAlternative &&
+    approved.includes(cheapestAlternative) &&
+    (!preferred ||
+      preferred.totalCostCents - cheapestAlternative.totalCostCents >=
+        Math.max(
+          shoppingListPolicy.preferredSavingsCents,
+          Math.ceil(preferred.totalCostCents * shoppingListPolicy.preferredSavingsFraction),
+        ))
+      ? cheapestAlternative
+      : null;
+  let best = evaluated[0] ?? null;
+  if (item.intent === "preferred") {
+    best = preferred ?? alternative;
+  } else if (item.listingId) {
+    best = evaluated.find((option) => option.id === item.listingId) ?? null;
+  }
+  const baseline = item.intent === "preferred" ? preferred : best;
+
   const evaluation: ShoppingEvaluation = {
     itemId: item.id,
     best,
@@ -444,6 +481,13 @@ export function evaluateShoppingFulfillment(
     savingsCents:
       preferred && alternative ? preferred.totalCostCents - alternative.totalCostCents : 0,
     options: evaluated.slice(0, 3),
+    alternatives: approved
+      .filter(
+        (option) =>
+          option.id !== baseline?.id &&
+          (!baseline || option.totalCostCents < baseline.totalCostCents),
+      )
+      .slice(0, 3),
   };
 
   return { evaluation, approved };

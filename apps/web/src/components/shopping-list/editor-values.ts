@@ -2,7 +2,7 @@ import { normalizeSearchQuery } from "@comprafino/core";
 import type { ShoppingCreationSeed, ShoppingListItem } from "@comprafino/core";
 
 export function shoppingEditorDefaults(seed: ShoppingCreationSeed, item?: ShoppingListItem) {
-  const generic = item ? item.intent === "generic" : !seed.canonicalId;
+  const generic = item ? item.intent === "generic" : !seed.canonicalId && !seed.listingId;
   const quantityMode = item?.quantityMode ?? (generic ? "normalized" : "packages");
   let initialQuantity: ShoppingListItem["quantity"] = { amount: 1, unit: "unit" };
 
@@ -23,6 +23,7 @@ export function shoppingEditorDefaults(seed: ShoppingCreationSeed, item?: Shoppi
     label: item?.label ?? seed.label,
     query: normalizeSearchQuery(item?.query ?? seed.query),
     canonicalId: item?.canonicalId ?? seed.canonicalId,
+    listingId: item?.listingId ?? seed.listingId,
     substitutionsWithheld:
       generic && (item ? item.substitutionProfile === null : seed.substitutionProfile === null),
   };

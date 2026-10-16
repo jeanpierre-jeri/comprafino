@@ -88,6 +88,7 @@ export async function seedShoppingListFixtures(
       productId: `shopping-${kind}-metro`,
       title,
       sourceBrand: "Independientes",
+      imageUrl: "https://metroio.vteximg.com.br/arquivos/ids/fixture-eggs.jpg",
       url: `https://www.metro.pe/shopping-${kind}/p`,
       currentPriceCents: kind === "independent" ? 4990 : 100,
       currency: "PEN" as const,
@@ -115,7 +116,7 @@ export async function seedShoppingListFixtures(
   if (
     !independent ||
     independent.canonicalId !== null ||
-    shoppingSeedForRetailerOffer(independent).substitutionProfile !== "eggs:regular"
+    shoppingSeedForRetailerOffer(independent).listingId !== independent.id
   ) {
     throw new Error("Independent retailer-option fixture failed");
   }
@@ -123,7 +124,7 @@ export async function seedShoppingListFixtures(
   if (
     !unsupported ||
     unsupported.canonicalId !== null ||
-    shoppingSeedForRetailerOffer(unsupported).substitutionProfile !== null
+    shoppingSeedForRetailerOffer(unsupported).listingId !== unsupported.id
   ) {
     throw new Error("Unsupported retailer-option fixture failed");
   }

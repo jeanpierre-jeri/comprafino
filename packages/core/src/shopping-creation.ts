@@ -13,13 +13,15 @@ export type ShoppingCreationSeed = {
   label: string;
   query: string;
   canonicalId: string | null;
+  listingId?: string;
   quantity?: ShoppingListItem["quantity"];
   substitutionProfile?: string | null;
 };
 
-/** canonicalId must come from the existing safe public association boundary.
- * Never promote an independent retailer listing to an exact product identity. */
+/** canonicalId must come from the safe public association boundary.
+ * An independent SKU keeps its own listingId, never an invented canonical link. */
 export function shoppingSeedForRetailerOffer(offer: {
+  id?: string;
   title: string;
   canonicalId: string | null;
   family?: FamilyEvidence;
@@ -27,6 +29,14 @@ export function shoppingSeedForRetailerOffer(offer: {
   unitPrice: { quality: string } | null;
   pricingBasis: "unit" | "kg";
 }): ShoppingCreationSeed {
+  if (offer.id) {
+    return {
+      label: offer.title.slice(0, 120),
+      query: shoppingQueryForTitle(offer.title),
+      canonicalId: offer.canonicalId,
+      listingId: offer.id,
+    };
+  }
   if (offer.canonicalId) {
     return {
       label: offer.title.slice(0, 120),

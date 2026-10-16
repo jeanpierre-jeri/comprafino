@@ -67,10 +67,13 @@ export function BasketComparison({
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
             <div className="min-w-0">
               <h2 className="text-sm text-muted-foreground">
-                Tu canasta hoy
+                Plan de ahorro sugerido
                 {plan.retailerIds.length > 0 &&
                   ` · ${plan.retailerIds.length} ${plan.retailerIds.length === 1 ? "supermercado" : "supermercados"}`}
               </h2>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Puede incluir alternativas a tus productos. Revisa el plan antes de elegir.
+              </p>
               <p className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
                 <strong className="text-2xl font-semibold tabular-nums">
                   {formatPen(plan.totalCostCents ?? plan.partialSubtotalCents ?? 0)}

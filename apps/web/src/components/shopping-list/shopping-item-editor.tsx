@@ -106,6 +106,7 @@ function ShoppingItemForm({
       query,
       intent,
       canonicalId: generic ? null : canonicalId,
+      listingId: defaults.listingId,
       quantity: { amount: Number(amount), unit },
       quantityMode,
       substitutionProfile:
@@ -301,7 +302,8 @@ export function AddShoppingItem({
           setSaved(false);
         }}
       >
-        {buttonLabel ?? (seed.canonicalId ? "Agregar a mi lista" : "Agregar como necesidad")}
+        {buttonLabel ??
+          (seed.canonicalId || seed.listingId ? "Agregar a mi lista" : "Agregar como necesidad")}
       </button>
       {saved && !open && <output className="mt-2 block text-sm">Guardado en Mi lista.</output>}
       {warning && <output className="mt-2 block text-sm">{warning}</output>}

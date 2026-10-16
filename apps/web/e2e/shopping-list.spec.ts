@@ -598,50 +598,73 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       quantityMode: "packages",
     });
   });
-  test("unmatched retailer-option card saves a supported generic need without strict identity", async ({
+  test("unmatched retailer-option card preserves the selected SKU, image and price after reload", async ({
     page,
-  }) => {
+  }, testInfo) => {
+    await page.route("https://metroio.vteximg.com.br/arquivos/ids/fixture-eggs.jpg", (route) =>
+      route.fulfill({
+        contentType: "image/svg+xml",
+        body: '<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><rect width="96" height="96" fill="white"/><ellipse cx="48" cy="44" rx="23" ry="30" fill="#e8d5b7"/></svg>',
+      }),
+    );
     await page.goto("/search?q=huevos");
-    const card = page.locator(`[data-offer-id="${fixture("independent")}"]`);
-    await expect(card.getByRole("link", { name: /Comparar este producto/ })).toHaveCount(0);
-    const add = card.getByRole("button", { name: "Agregar a mi lista", exact: true });
-    await add.click();
-    await expect(page.getByRole("dialog").getByRole("radio")).toHaveCount(0);
-    await expect(
-      page.getByRole("radio", { name: "Solo quiero este producto", exact: true }),
-    ).toHaveCount(0);
-    await expect(page.getByRole("dialog")).toContainText("Compararemos opciones equivalentes");
-    await expect(page.getByLabel("Cantidad", { exact: true })).toHaveValue("30");
-    await page.keyboard.press("Escape");
-    await expect(add).toBeFocused();
-    await add.click();
+    const source = page.locator(`[data-offer-id="${fixture("independent")}"]`);
+    await source.getByRole("button", { name: "Agregar a mi lista", exact: true }).click();
+    await expect(page.getByRole("dialog").getByRole("radio")).toHaveCount(2);
+    await expect(page.getByLabel("Paquetes", { exact: true })).toHaveValue("1");
     await page.getByRole("button", { name: "Agregar", exact: true }).click();
+    await page.getByRole("link", { name: "Mi lista", exact: true }).click();
+    const card = page.getByRole("article", {
+      name: "Huevos Independientes Bandeja 30un",
+      exact: true,
+    });
+    await expect(card.getByRole("heading", { level: 3 })).toHaveText(
+      "Huevos Independientes Bandeja 30un",
+    );
+    await expect(card).toContainText("S/ 49.90");
+    await expect(
+      card.getByRole("img", { name: "Huevos Independientes Bandeja 30un" }).first(),
+    ).toBeVisible();
+    await page.reload();
+    await expect(card).toContainText("S/ 49.90");
+    await openItemDetails(card);
+    await expect(card.getByRole("region", { name: "Historial de tu producto" })).toContainText(
+      "Mínimo en 30 días",
+    );
+    await expect(card.getByRole("region", { name: "Historial de tu producto" })).toContainText(
+      "hoy",
+    );
+    await expect(card.getByRole("region", { name: "Alternativas más baratas" })).toContainText(
+      "Huevos Tottus",
+    );
+    await expect(card.getByRole("region", { name: "Alternativas más baratas" })).not.toContainText(
+      "Codorniz",
+    );
     const saved = shoppingListSchema.parse(
       JSON.parse(
         (await page.evaluate(() => localStorage.getItem("comprafino-shopping-list"))) ?? "null",
       ) as unknown,
     );
     expect(saved.items[0]).toMatchObject({
+      listingId: fixture("independent"),
       canonicalId: null,
-      intent: "generic",
-      label: "Huevos",
-      substitutionProfile: "eggs:regular",
-      quantityMode: "normalized",
-      quantity: { amount: 30, unit: "unit" },
+      label: "Huevos Independientes Bandeja 30un",
+      intent: "preferred",
+      quantityMode: "packages",
     });
-    await page.getByRole("link", { name: "Mi lista", exact: true }).click();
-    await expect(
-      page
-        .getByRole("region", { name: /Cada semana|Cada 2 semanas|Cada mes/ })
-        .getByRole("article")
-        .first(),
-    ).toContainText("Huevos Tottus");
-    await expect(
-      page
-        .getByRole("region", { name: /Cada semana|Cada 2 semanas|Cada mes/ })
-        .getByRole("article")
-        .first(),
-    ).not.toContainText("Codorniz");
+    for (const width of [390, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await expect(card.getByRole("button", { name: /^Quitar / })).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+        true,
+      );
+      await page.screenshot({
+        path: testInfo.outputPath(`selected-product-${width}.png`),
+        fullPage: true,
+        animations: "disabled",
+      });
+    }
   });
   test("unsupported independent retailer-option card retains its description and withholds alternatives", async ({
     page,
@@ -649,9 +672,9 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
     await page.goto("/search?q=huevos");
     const card = page.locator(`[data-offer-id="${fixture("unsupported")}"]`);
     await card.getByRole("button", { name: "Agregar a mi lista", exact: true }).click();
-    await expect(page.getByRole("dialog").getByRole("radio")).toHaveCount(0);
+    await expect(page.getByRole("dialog").getByRole("radio")).toHaveCount(2);
     await expect(page.getByRole("dialog")).toContainText(
-      "No encontramos alternativas suficientemente comparables",
+      "Huevos de Codorniz Independientes Bandeja 30un",
     );
     await page.getByRole("button", { name: "Agregar", exact: true }).click();
     const saved = shoppingListSchema.parse(
@@ -661,7 +684,8 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
     );
     expect(saved.items[0]).toMatchObject({
       canonicalId: null,
-      intent: "generic",
+      intent: "preferred",
+      listingId: fixture("unsupported"),
       label: "Huevos de Codorniz Independientes Bandeja 30un",
       substitutionProfile: null,
     });
@@ -671,7 +695,7 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
         .getByRole("region", { name: /Cada semana|Cada 2 semanas|Cada mes/ })
         .getByRole("article")
         .first(),
-    ).toContainText("No encontramos alternativas suficientemente comparables");
+    ).toContainText("No encontramos una opción comparable más barata");
   });
   test("preferred product exposes a cheaper compatible option and preserves its identity", async ({
     page,
@@ -681,7 +705,7 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       .getByRole("region", { name: /Cada semana|Cada 2 semanas|Cada mes/ })
       .getByRole("article")
       .first();
-    await expect(card).toContainText("Tu producto preferido");
+    await expect(card).toContainText("Tu producto guardado");
     await expect(card).toContainText("Ahorra S/ 3.00");
     const notice = page.getByRole("region", { name: "Hay una oportunidad de ahorro hoy" });
     await expect(notice).toContainText("S/ 3.00 menos en Tottus");
@@ -731,9 +755,7 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       "href",
       `/products/${fixture("preferred")}`,
     );
-    await expect(
-      card.getByRole("heading", { name: "Otras tiendas del mismo producto" }),
-    ).toBeVisible();
+    await expect(card.getByRole("heading", { name: "¿Hay algo más barato?" })).toBeVisible();
     await expect(card).toContainText("Plaza Vea");
   });
   test("generic need selects a supported CMR benefit only after changing price mode", async ({
@@ -990,7 +1012,7 @@ test.describe("current basket optimization fixtures", () => {
     const comparison = page.getByRole("region", { name: "Comparación de canastas" });
     const card = page.getByRole("article", { name: "Huevos", exact: true });
     await expect(comparison).toBeVisible();
-    await expect(comparison).toContainText("Tu canasta hoy · 1 supermercado");
+    await expect(comparison).toContainText("Plan de ahorro sugerido · 1 supermercado");
     await expect(card).toContainText("S/ 14.90");
     await expect(comparison.getByRole("button", { name: "Ver plan", exact: true })).toHaveAttribute(
       "aria-haspopup",
@@ -1016,7 +1038,8 @@ test.describe("current basket optimization fixtures", () => {
         );
         await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
         const bounds = await card.boundingBox();
-        expect(bounds?.height).toBeLessThan(180);
+        // Product cards now include a thumbnail and a clear generic-selection notice.
+        expect(bounds?.height).toBeLessThan(320);
         await page.screenshot({
           path: testInfo.outputPath(`compact-list-${width}-${theme}.png`),
           fullPage: true,

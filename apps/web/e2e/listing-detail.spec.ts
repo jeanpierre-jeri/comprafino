@@ -65,7 +65,11 @@ test.describe("isolated listing details", () => {
     await popup.close();
     await card.getByRole("button", { name: "Agregar a mi lista", exact: true }).click();
     await expect(page.getByRole("dialog")).toBeVisible();
-    await expect(page.getByRole("dialog")).not.toContainText("Prefiero este producto");
+    await expect(page.getByRole("dialog").getByRole("radio")).toHaveCount(2);
+    await expect(
+      page.getByRole("radio", { name: "Prefiero este producto", exact: true }),
+    ).toBeChecked();
+    await expect(page.getByLabel("Paquetes", { exact: true })).toHaveValue("1");
     await expect(page).toHaveURL(/\/search/);
     await page.keyboard.press("Escape");
     await expect(page.getByRole("dialog")).toHaveCount(0);

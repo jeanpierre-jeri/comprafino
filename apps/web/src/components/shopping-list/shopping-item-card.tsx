@@ -1,6 +1,7 @@
 "use client";
 
 import type { Ref } from "react";
+import Link from "next/link";
 import { Button } from "@comprafino/ui/components/button";
 import { ChevronDown, Pencil } from "@comprafino/ui";
 import {
@@ -14,9 +15,16 @@ import {
   shoppingFrequencyLabels,
   weekdayLabels,
 } from "@comprafino/core";
-import type { ShoppingListItem, ShoppingEvaluation, ShoppingWeekday } from "@comprafino/core";
+import type {
+  ShoppingListItem,
+  ShoppingEvaluation,
+  ShoppingWeekday,
+  ShoppingPriceHistory,
+} from "@comprafino/core";
 import { ShoppingSavingsMessage } from "./shopping-savings-notices";
 import { CurrentOption } from "../current-shopping-option";
+import { ProductImage } from "../product-image";
+import { ShoppingHistory, elapsedPriceLabel } from "./shopping-price-history";
 import { AvailabilityNotice } from "../availability-notice";
 
 const intentLabels: Record<ShoppingListItem["intent"], string> = {
@@ -35,6 +43,7 @@ type CardProps = {
   item: ShoppingListItem;
   result?: ShoppingEvaluation;
   weekday?: ShoppingWeekday;
+  history?: ShoppingPriceHistory;
   pending: boolean;
   error: string;
   busy: boolean;
@@ -82,6 +91,7 @@ function MissingPriceDetails({
 export function ShoppingItemCard({
   item,
   weekday,
+  history,
   result,
   pending,
   error,
@@ -97,25 +107,39 @@ export function ShoppingItemCard({
     !pending && !error && (item.intent !== "preferred" || result?.preferred)
       ? result?.best
       : undefined;
+  const minimum = history?.periods.find((period) => period.days === 90);
+  const alternatives = result?.alternatives ?? (result?.alternative ? [result.alternative] : []);
   const recommendedDay = weekday?.series.find((series) => series.pattern.status === "recommended");
 
   return (
     <article
       id={`shopping-item-${item.id}`}
       tabIndex={-1}
-      className="scroll-mt-6 px-4 py-3 sm:px-5"
+      className="scroll-mt-6 rounded-2xl border bg-surface p-4 sm:p-5"
       aria-label={item.label}
     >
       <Collapsible>
-        <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-start gap-x-2 sm:gap-x-4">
+        <div className="grid grid-cols-[5rem_minmax(0,1fr)_auto] sm:grid-cols-[6rem_minmax(0,1fr)_auto_auto] items-start gap-x-2 sm:gap-x-4">
+          <div className="row-span-2 sm:row-span-1">
+            <ProductImage
+              key={option?.imageUrl}
+              src={option?.imageUrl ?? null}
+              name={item.label}
+              thumbnail
+            />
+          </div>
           <div className="min-w-0">
+            <p className="mb-1 text-xs font-medium text-muted-foreground">
+              {item.intent === "generic" ? "Compra genérica" : "Tu producto"}
+            </p>
             <h3 className="font-semibold wrap-anywhere">{item.label}</h3>
             <p className="mt-1 text-sm text-muted-foreground">
               {item.quantity.amount} {quantityLabel(item)}
               {option && ` · ${option.retailerName}`}
             </p>
           </div>
-          <div className="pt-0.5">
+          <div className="col-start-2 row-start-2 sm:col-start-3 sm:row-start-1 sm:text-right">
+            {option && <p className="text-xs text-muted-foreground">Precio de tu compra</p>}
             {option ? (
               <p className="text-lg font-semibold tabular-nums">
                 {formatPen(option.totalCostCents)}
@@ -127,7 +151,7 @@ export function ShoppingItemCard({
           <Button
             variant="ghost"
             size="icon"
-            className="size-11"
+            className="col-start-3 row-start-1 size-11 sm:col-start-4"
             title={`Editar ${item.label}`}
             ref={editButtonRef}
             disabled={busy}
@@ -137,6 +161,24 @@ export function ShoppingItemCard({
             <span className="sr-only">Editar {item.label}</span>
           </Button>
         </div>
+        {item.intent === "generic" && (
+          <p className="mt-3 text-xs text-muted-foreground">
+            Esta compra aún no tiene un producto elegido.{" "}
+            <Link
+              className="inline-flex min-h-11 items-center font-medium text-primary underline underline-offset-4"
+              href={`/search?q=${encodeURIComponent(item.query)}`}
+            >
+              Elegir producto
+            </Link>
+          </p>
+        )}
+        {!pending && !error && minimum?.minimumCents && (
+          <p className="mt-3 text-sm text-muted-foreground">
+            Mínimo observado:{" "}
+            <span className="font-medium text-foreground">{formatPen(minimum.minimumCents)}</span>{" "}
+            por paquete · {elapsedPriceLabel(minimum.daysAgo)} · últimos 90 días
+          </p>
+        )}
         {option?.condition && (
           <p className="mt-1 text-sm text-primary">
             Precio potencial · {option.condition} · Para todos:{" "}
@@ -171,7 +213,7 @@ export function ShoppingItemCard({
             render={<Button variant="ghost" className="group min-h-11" />}
             aria-label={`Ver detalles de ${item.label}`}
           >
-            Ver detalles
+            Precio, historial y alternativas
             <ChevronDown
               data-icon="inline-end"
               aria-hidden="true"
@@ -188,47 +230,65 @@ export function ShoppingItemCard({
               {option ? (
                 <section aria-label="Producto y precio">
                   <h4 className="text-sm font-semibold">
-                    {item.intent === "preferred" ? "Tu producto preferido" : "Mejor opción actual"}
+                    {item.intent === "generic"
+                      ? "Opción para tu compra genérica"
+                      : "Tu producto guardado"}
                   </h4>
-                  <CurrentOption option={option} />
+                  {item.intent === "generic" && (
+                    <p className="mt-2 text-sm font-medium">{option.title}</p>
+                  )}
+                  <CurrentOption option={option} selected />
                 </section>
               ) : (
                 <MissingPriceDetails item={item} result={result} pending={pending} error={error} />
               )}
-              {notice && <ShoppingSavingsMessage notice={notice} />}
-              {!pending && !error && result?.alternative && (
-                <section aria-label="Alternativa compatible hoy">
-                  <h4 className="text-sm font-semibold">Alternativa compatible hoy</h4>
-                  <CurrentOption option={result.alternative} />
+              {!pending && !error && result && item.intent !== "generic" && (
+                <ShoppingHistory history={history} option={option} />
+              )}
+              {!pending && !error && result && (
+                <section aria-label="Cuándo comprar" className="rounded-xl bg-muted/40 p-4">
+                  <h4 className="mb-2 font-semibold">¿Cuándo conviene comprarlo?</h4>
+                  <WeekdayAdvice recommendation={weekday} />
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Los mínimos de la semana y del mes describen precios pasados. No garantizan que
+                    esperar sea más barato.
+                  </p>
                 </section>
               )}
-              {!pending &&
-                !error &&
-                item.intent !== "preferred" &&
-                result &&
-                result.options.length > 1 && (
-                  <section
-                    aria-label={
-                      item.intent === "strict"
-                        ? "Otras tiendas del mismo producto"
-                        : "Otras opciones compatibles"
-                    }
-                  >
-                    <h4 className="text-sm font-semibold">
-                      {item.intent === "strict"
-                        ? "Otras tiendas del mismo producto"
-                        : "Otras opciones compatibles"}
-                    </h4>
-                    <ul className="flex flex-col gap-4">
-                      {result.options.slice(1).map((otherOption) => (
-                        <li key={otherOption.id}>
-                          <CurrentOption option={otherOption} />
+              {notice && <ShoppingSavingsMessage notice={notice} />}
+              {!pending && !error && result && (
+                <section aria-label="Alternativas más baratas">
+                  <h4 className="font-semibold">¿Hay algo más barato?</h4>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Tu producto sigue en la lista. Estas opciones son para que tú decidas.
+                  </p>
+                  {alternatives.length ? (
+                    <ul className="mt-2 grid gap-3 lg:grid-cols-2">
+                      {alternatives.map((alternative) => (
+                        <li key={alternative.id}>
+                          <CurrentOption option={alternative}>
+                            <p className="text-sm font-medium text-primary">
+                              {option &&
+                                `${formatPen(option.totalCostCents - alternative.totalCostCents)} menos por tu compra · `}
+                              {alternative.canonicalId &&
+                              alternative.canonicalId === option?.canonicalId
+                                ? "Mismo producto"
+                                : "Otro producto compatible"}
+                              {alternative.retailerName === option?.retailerName
+                                ? " · Misma tienda"
+                                : " · Otra tienda"}
+                            </p>
+                          </CurrentOption>
                         </li>
                       ))}
                     </ul>
-                  </section>
-                )}
-              {!pending && !error && result && <WeekdayAdvice recommendation={weekday} />}
+                  ) : (
+                    <p className="mt-3 text-sm text-muted-foreground">
+                      No encontramos una opción comparable más barata por ahora.
+                    </p>
+                  )}
+                </section>
+              )}
               <div>
                 <Button
                   variant="destructive"

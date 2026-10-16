@@ -32,6 +32,7 @@ function evaluation(input: ShoppingList) {
   const results = input.items.map((item) => evaluateShoppingFulfillment(item, [], "standard"));
   return {
     weekdayRecommendations: [],
+    priceHistories: [],
     evaluations: results.map((result) => result.evaluation),
     baskets: optimizeBasket(input.items.map((item) => ({ itemId: item.id, options: [] }))),
     evaluatedAt: "2026-10-06T00:00:00.000Z",

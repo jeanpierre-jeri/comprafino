@@ -110,7 +110,7 @@ export function ShoppingListView() {
               <h2 className="text-sm font-semibold text-muted-foreground">
                 {label} · {items.length} {items.length === 1 ? "producto" : "productos"}
               </h2>
-              <ul className="mt-2 divide-y overflow-hidden rounded-xl border bg-surface">
+              <ul className="mt-3 flex flex-col gap-3">
                 {items.map((item) => {
                   const result = evaluations.find((e) => e.itemId === item.id);
 
@@ -121,6 +121,9 @@ export function ShoppingListView() {
                         result={result}
                         weekday={market.weekdayRecommendations.find(
                           (recommendation) => recommendation.itemId === item.id,
+                        )}
+                        history={market.priceHistories.find(
+                          (history) => history.itemId === item.id,
                         )}
                         pending={pending}
                         error={error}
@@ -154,6 +157,7 @@ export function ShoppingListView() {
     <>
       <h1 className="text-2xl font-semibold sm:text-3xl">Mi lista de compras</h1>
       <p className="mt-2 text-sm text-muted-foreground">
+        Tus productos, su historial y opciones para ahorrar.{" "}
         {authenticated ? "Sincronizada con tu cuenta." : "Se guarda en este navegador."}
       </p>
       {warning && <output className="empty-surface mt-4 block">{warning}</output>}

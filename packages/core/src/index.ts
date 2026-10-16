@@ -49,3 +49,4 @@ export * from "./catalog-alerts.ts";
 export * from "./shopping-savings.ts";
 
 export * from "./weekday-recommendation.ts";
+export * from "./shopping-price-history.ts";

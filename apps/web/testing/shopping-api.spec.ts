@@ -76,6 +76,7 @@ test("valid normal and maximum payloads use the HTTP handler and preserve mode/t
       return {
         evaluations: [],
         weekdayRecommendations: [],
+        priceHistories: [],
         baskets: optimizeBasket([]),
         evaluatedAt: new Date().toISOString(),
         timings: { queryMs: 12, totalMs: 15 },
@@ -142,6 +143,7 @@ test("query failures and malformed domain responses remain safe 503 errors", asy
       const result = {
         evaluations: [],
         weekdayRecommendations: [],
+        priceHistories: [],
         baskets: optimizeBasket([]),
         evaluatedAt: new Date().toISOString(),
         timings: { queryMs: 12, totalMs: 15 },

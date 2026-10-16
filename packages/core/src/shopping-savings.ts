@@ -23,21 +23,34 @@ export function shoppingSavingsNotice(
   if (item.intent === "preferred" && evaluation.preferred && evaluation.alternative) {
     option = evaluation.alternative;
     baseline = evaluation.preferred;
-    kind = "preferred-alternative";
+    kind =
+      option.canonicalId && option.canonicalId === baseline.canonicalId
+        ? "same-product"
+        : "preferred-alternative";
   } else {
     if (!option) return null;
 
     const best = option;
 
     if (item.intent !== "generic") {
-      if (option.canonicalId !== item.canonicalId) return null;
+      if (item.listingId) {
+        baseline = best;
+        option =
+          evaluation.options.find(
+            (candidate) =>
+              candidate.id !== best.id &&
+              Boolean(best.canonicalId && candidate.canonicalId === best.canonicalId),
+          ) ?? null;
+      } else {
+        if (option.canonicalId !== item.canonicalId) return null;
 
-      baseline = evaluation.options.find(
-        (candidate) =>
-          candidate.id !== best.id &&
-          candidate.canonicalId === item.canonicalId &&
-          candidate.retailerName !== best.retailerName,
-      );
+        baseline = evaluation.options.find(
+          (candidate) =>
+            candidate.id !== best.id &&
+            candidate.canonicalId === item.canonicalId &&
+            candidate.retailerName !== best.retailerName,
+        );
+      }
       kind = "same-product";
     } else {
       // The immediate next evaluated option is the baseline. A tied cheapest

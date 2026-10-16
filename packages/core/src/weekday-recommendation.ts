@@ -121,7 +121,9 @@ export function shoppingWeekdays(
           : candidates
               .filter(
                 (candidate) =>
-                  candidate.canonicalId === item.canonicalId &&
+                  (item.listingId
+                    ? candidate.id === item.listingId
+                    : Boolean(item.canonicalId && candidate.canonicalId === item.canonicalId)) &&
                   candidate.pricingBasis !== "kg" &&
                   candidate.available !== false,
               )
