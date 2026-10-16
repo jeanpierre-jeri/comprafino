@@ -78,6 +78,47 @@ function tokens(listing: MatchingListing): Set<string> {
   return new Set(comparisonTitle(listing).split(" ").filter(Boolean));
 }
 
+function containers(listing: MatchingListing): string[] {
+  return normalizeTitle(listing.title).match(/\b(?:bolsa|caja|lata|botella)\b/gu) ?? [];
+}
+
+/** Durable identity evidence, never a substitute for complete-link matching.
+ * Excludes retailer membership and display word order; retains every identity token
+ * and explicit container. Version this format if its meaning changes. */
+export function canonicalIdentityKey(rows: readonly MatchingListing[]): string | null {
+  const identities = rows.map((row) => {
+    const a = row.attributes;
+    const identityTokens = [...tokens(row)].sort();
+    if (
+      !a.brandKey ||
+      !a.quantity ||
+      !a.totalQuantity ||
+      a.packageCount === null ||
+      a.soldByWeight ||
+      a.issues.length ||
+      !identityTokens.length
+    ) {
+      return null;
+    }
+
+    return JSON.stringify([
+      a.brandKey,
+      a.quantity.value,
+      a.quantity.unit,
+      a.packageCount,
+      a.totalQuantity.value,
+      a.totalQuantity.unit,
+      a.pricingBasis,
+      identityTokens,
+    ]);
+  });
+  if (!identities.length || identities.some((key) => key === null || key !== identities[0])) {
+    return null;
+  }
+
+  return JSON.stringify([1, identities[0], [...new Set(rows.flatMap(containers))].sort()]);
+}
+
 function family(listing: MatchingListing): string | undefined {
   return [...tokens(listing)].find((t) =>
     ["leche", "yogurt", "queso", "mantequilla", "huevos", "mezcla", "kefir"].includes(t),
@@ -200,8 +241,6 @@ export function hardConflicts(a: MatchingListing, b: MatchingListing): string[] 
 
   const tx = tokens(a),
     ty = tokens(b);
-  const containers = (row: MatchingListing) =>
-    normalizeTitle(row.title).match(/\b(?:bolsa|caja|lata|botella)\b/gu) ?? [];
   const ca = containers(a),
     cb = containers(b);
 

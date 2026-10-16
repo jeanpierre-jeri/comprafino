@@ -59,6 +59,7 @@ try {
 
           matchingWrites =
             matched.persisted.linksCreated +
+            matched.persisted.linksUpdated +
             matched.persisted.linksRemoved +
             matched.persisted.productsCreated +
             matched.persisted.productsUpdated +

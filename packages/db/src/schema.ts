@@ -349,6 +349,8 @@ export const canonicalProducts = pgTable(
   "canonical_products",
   {
     id: uuid("id").primaryKey(),
+    // Null only for legacy/externally seeded groups; establish from current evidence.
+    identityKey: text("identity_key"),
     displayName: text("display_name").notNull(),
     brandKey: text("brand_key").notNull(),
     quantityValue: integer("quantity_value").notNull(),

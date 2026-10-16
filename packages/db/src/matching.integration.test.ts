@@ -272,8 +272,9 @@ describe.skipIf(!testUrl)("PostgreSQL matching (explicit TEST_DATABASE_URL)", ()
     expect(await persistMatching(db, renamed, renamedPairs)).toMatchObject({
       productsCreated: 0,
       productsUpdated: 1,
-      linksCreated: 2,
-      linksRemoved: 2,
+      linksCreated: 0,
+      linksUpdated: 2,
+      linksRemoved: 0,
     });
   }, 30_000);
   it("refuses stale snapshots and scopes splitting groups; protects manual decisions and rebuilds obsolete links", async () => {

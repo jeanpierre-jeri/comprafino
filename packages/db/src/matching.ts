@@ -1,15 +1,17 @@
 import type { ReportProgress } from "../../../scripts/cli-progress.ts";
-import { createHash } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { catalogPolicy } from "@comprafino/core";
 import { z } from "zod";
 import {
   canonicalGroups,
+  canonicalIdentityKey,
   comparisonTitle,
   generateCandidates,
   generateAutomaticCandidates,
   hardConflicts,
   matchingVersion,
+  matchingThresholds,
   normalizationVersion,
   normalizeCatalogListing,
   scoreMatch,
@@ -270,7 +272,7 @@ export async function matchChangedCatalog(db: Database, blocks = 100, progress?:
     }
     processed += rows.length;
     candidates += pairs.length;
-    associationsChanged += writes.linksCreated + writes.linksRemoved;
+    associationsChanged += writes.linksCreated + writes.linksUpdated + writes.linksRemoved;
     productsChanged += writes.productsCreated + writes.productsUpdated + writes.productsRemoved;
     productsCreated += writes.productsCreated;
   }
@@ -281,15 +283,6 @@ export async function matchChangedCatalog(db: Database, blocks = 100, progress?:
     `${productsCreated} grupos nuevos; ${deferred} registros diferidos`,
   );
   return { processed, candidates, associationsChanged, productsChanged, productsCreated, deferred };
-}
-
-export function canonicalGroupId(ids: readonly string[]): string {
-  const hash = createHash("sha256")
-    .update(`comprafino:canonical:${[...ids].sort().join("|")}`)
-    .digest("hex")
-    .slice(0, 32);
-
-  return `${hash.slice(0, 8)}-${hash.slice(8, 12)}-${"8" + hash.slice(13, 16)}-${((Number.parseInt(hash[16]!, 16) & 3) | 8).toString(16) + hash.slice(17, 20)}-${hash.slice(20)}`;
 }
 
 export function matchingPersistenceStatements(
@@ -308,9 +301,17 @@ export function matchingPersistenceStatements(
       (a, b) => a.title.length - b.title.length || a.id.localeCompare(b.id),
     )[0]!;
     const a = representative.attributes;
+    const identityKey = canonicalIdentityKey(members);
+    if (!identityKey) {
+      throw new Error("Canonical group lacks complete identity evidence");
+    }
 
     return {
-      id: canonicalGroupId(ids),
+      // A new identity must never recreate a retired membership-derived ID.
+      // Current predecessors are resolved under the lock below, including retries.
+      proposed_id: randomUUID(),
+      member_ids: ids,
+      identity_key: identityKey,
       display_name: representative.title,
       brand_key: a.brandKey,
       quantity_value: a.quantity!.value,
@@ -319,7 +320,7 @@ export function matchingPersistenceStatements(
       total_quantity_value: a.totalQuantity!.value,
     };
   });
-  const links = groups.flatMap((ids) =>
+  const links = groups.flatMap((ids, groupIndex) =>
     ids.map((id) => {
       const supporting = pairs.filter(
         (p) => ids.includes(p.a) && ids.includes(p.b) && (p.a === id || p.b === id),
@@ -327,7 +328,7 @@ export function matchingPersistenceStatements(
 
       return {
         listing_id: id,
-        canonical_product_id: canonicalGroupId(ids),
+        proposed_id: products[groupIndex]!.proposed_id,
         retailer_id: rows.find((r) => r.id === id)!.retailer,
         confidence: Math.min(...supporting.map((p) => p.result.score)),
         matching_version: matchingVersion,
@@ -353,24 +354,51 @@ export function matchingPersistenceStatements(
     where to_jsonb(l) is distinct from x.raw or to_jsonb(n) is distinct from x.normalized)
     and not exists(select 1 from canonical_product_listings c where c.listing_id in (${selected}) and
       (c.method='manual' or exists(select 1 from canonical_product_listings other where other.canonical_product_id=c.canonical_product_id and other.listing_id not in (${selected}))))`;
-  const desiredLinks = sql`select * from jsonb_to_recordset(${linkJson}::jsonb) x(listing_id uuid,canonical_product_id uuid,retailer_id text,confidence numeric,matching_version integer,method text,reasons text[])`;
-  const desiredProducts = sql`select * from jsonb_to_recordset(${productJson}::jsonb) x(id uuid,display_name text,brand_key text,quantity_value integer,quantity_unit text,package_count integer,total_quantity_value integer)`;
+  // Resolve continuity from CURRENT associations under the retailer locks, not from
+  // the evaluator's priorGroupId snapshot. Keep at least two anchors, exactly one
+  // predecessor and no split. Legacy groups need every old link still validated.
+  // Kept anchors are updated in place below, so this resolution remains stable
+  // across the batch even when obsolete links have already been removed.
+  const desiredProducts = sql`with proposed as (
+    select * from jsonb_to_recordset(${productJson}::jsonb)
+      x(proposed_id uuid,member_ids uuid[],identity_key text,display_name text,brand_key text,
+        quantity_value integer,quantity_unit text,package_count integer,total_quantity_value integer)
+  ) select g.*,coalesce((select p.id from canonical_products p
+      where p.id=(select min(a.canonical_product_id::text)::uuid from canonical_product_listings a
+        where a.listing_id=any(g.member_ids)
+        having count(*)>=2 and count(distinct a.canonical_product_id)=1)
+      and (p.identity_key=g.identity_key or (p.identity_key is null and not exists(
+        select 1 from canonical_product_listings old where old.canonical_product_id=p.id
+          and (old.method<>'automatic' or old.matching_version<>${matchingVersion} or old.confidence<${matchingThresholds.auto}))))
+      and not exists(select 1 from canonical_product_listings old join proposed other
+        on old.listing_id=any(other.member_ids) where old.canonical_product_id=p.id and other.proposed_id<>g.proposed_id)
+    ),g.proposed_id) as id from proposed g`;
+  const desiredLinks = sql`select x.listing_id,p.id as canonical_product_id,x.retailer_id,x.confidence,x.matching_version,x.method,x.reasons
+    from jsonb_to_recordset(${linkJson}::jsonb)
+      x(listing_id uuid,proposed_id uuid,retailer_id text,confidence numeric,matching_version integer,method text,reasons text[])
+    join (${desiredProducts}) p on p.proposed_id=x.proposed_id`;
 
   return [
     sql`select id from retailers order by id for update`,
     sql`select (${guard}) as eligible`,
     sql`delete from canonical_product_listings c where (${guard}) and c.method='automatic' and c.listing_id in (${selected}) and not exists
-      (select 1 from (${desiredLinks}) d where (c.listing_id,c.canonical_product_id,c.retailer_id,c.confidence,c.matching_version,c.method,c.reasons) is not distinct from (d.listing_id,d.canonical_product_id,d.retailer_id,d.confidence,d.matching_version,d.method,d.reasons)) returning c.listing_id`,
-    sql`insert into canonical_products(id,display_name,brand_key,quantity_value,quantity_unit,package_count,total_quantity_value)
-      select id,display_name,brand_key,quantity_value,quantity_unit,package_count,total_quantity_value from (${desiredProducts}) d where (${guard})
-      on conflict(id) do update set display_name=excluded.display_name,brand_key=excluded.brand_key,
+      (select 1 from (${desiredLinks}) d where (c.listing_id,c.canonical_product_id,c.retailer_id) is not distinct from (d.listing_id,d.canonical_product_id,d.retailer_id)) returning c.listing_id`,
+    sql`insert into canonical_products(id,identity_key,display_name,brand_key,quantity_value,quantity_unit,package_count,total_quantity_value)
+      select id,identity_key,display_name,brand_key,quantity_value,quantity_unit,package_count,total_quantity_value from (${desiredProducts}) d where (${guard})
+      on conflict(id) do update set identity_key=excluded.identity_key,display_name=excluded.display_name,brand_key=excluded.brand_key,
         quantity_value=excluded.quantity_value,quantity_unit=excluded.quantity_unit,package_count=excluded.package_count,total_quantity_value=excluded.total_quantity_value
-      where (canonical_products.display_name,canonical_products.brand_key,canonical_products.quantity_value,canonical_products.quantity_unit,canonical_products.package_count,canonical_products.total_quantity_value)
-      is distinct from (excluded.display_name,excluded.brand_key,excluded.quantity_value,excluded.quantity_unit,excluded.package_count,excluded.total_quantity_value)
+      where (canonical_products.identity_key,canonical_products.display_name,canonical_products.brand_key,canonical_products.quantity_value,canonical_products.quantity_unit,canonical_products.package_count,canonical_products.total_quantity_value)
+      is distinct from (excluded.identity_key,excluded.display_name,excluded.brand_key,excluded.quantity_value,excluded.quantity_unit,excluded.package_count,excluded.total_quantity_value)
       returning id,(xmax=0) as inserted`,
-    sql`insert into canonical_product_listings(listing_id,canonical_product_id,retailer_id,confidence,matching_version,method,reasons)
+    sql`insert into canonical_product_listings as current(listing_id,canonical_product_id,retailer_id,confidence,matching_version,method,reasons)
       select listing_id,canonical_product_id,retailer_id,confidence,matching_version,method,reasons from (${desiredLinks}) d where (${guard})
-      on conflict(listing_id) do nothing returning listing_id`,
+      on conflict(listing_id) do update set confidence=excluded.confidence,matching_version=excluded.matching_version,
+        method=excluded.method,reasons=excluded.reasons,
+        linked_at=case when current.method='automatic' and current.matching_version=${matchingVersion}
+          and current.confidence>=${matchingThresholds.auto} then current.linked_at else now() end
+      where (current.confidence,current.matching_version,current.method,current.reasons)
+        is distinct from (excluded.confidence,excluded.matching_version,excluded.method,excluded.reasons)
+      returning listing_id,(xmax=0) as inserted`,
     // Delete only derived orphan groups this sample used to own; leave unrelated products alone.
     sql`delete from canonical_products p where (${guard}) and not exists(select 1 from canonical_product_listings c where c.canonical_product_id=p.id)
       and p.id in (select jsonb_array_elements_text(${JSON.stringify(priorGroupIds)}::jsonb)::uuid) returning id`,
@@ -387,6 +415,7 @@ export async function persistMatching(
       productsCreated: 0,
       productsUpdated: 0,
       linksCreated: 0,
+      linksUpdated: 0,
       linksRemoved: 0,
       productsRemoved: 0,
       stale: false,
@@ -408,11 +437,15 @@ export async function persistMatching(
   ]);
   const [{ eligible }] = z.tuple([z.object({ eligible: z.boolean() })]).parse(r[1].rows);
   const productWrites = z.array(z.object({ id: z.uuid(), inserted: z.boolean() })).parse(r[3].rows);
+  const linkWrites = z
+    .array(z.object({ listing_id: z.uuid(), inserted: z.boolean() }))
+    .parse(r[4].rows);
 
   return {
     productsCreated: productWrites.filter((p) => p.inserted).length,
     productsUpdated: productWrites.filter((p) => !p.inserted).length,
-    linksCreated: r[4].rows.length,
+    linksCreated: linkWrites.filter((link) => link.inserted).length,
+    linksUpdated: linkWrites.filter((link) => !link.inserted).length,
     linksRemoved: r[2].rows.length,
     productsRemoved: r[5].rows.length,
     stale: !eligible,

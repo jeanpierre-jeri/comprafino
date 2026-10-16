@@ -99,6 +99,13 @@
       "when": 1791654547936,
       "tag": "0013_catalog_expansion",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792074656217,
+      "tag": "0014_canonical_identity",
+      "breakpoints": true
     }
   ]
 }
