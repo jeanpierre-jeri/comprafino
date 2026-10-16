@@ -29,7 +29,15 @@ try {
   const now = Date.now();
   const fixtures: Record<string, string> = {};
 
-  for (const kind of ["rich", "sparse", "old", "continuous", "gap", "decrease"] as const) {
+  for (const kind of [
+    "rich",
+    "sparse",
+    "old",
+    "continuous",
+    "gap",
+    "decrease",
+    "metadata",
+  ] as const) {
     const productId = randomUUID();
     fixtures[kind] = productId;
     await scopedClient.query(
@@ -126,6 +134,16 @@ try {
       );
     }
   }
+
+  // Test-only observation/failure control for one product that no other spec uses.
+  // The explicit HTTP preload records comparison attempts here, never production.
+  await scopedClient.query(`create table fixture_product_reads (
+    product_id uuid primary key, attempts integer not null default 0,
+    fail_reads boolean not null default false
+  )`);
+  await scopedClient.query("insert into fixture_product_reads(product_id) values($1)", [
+    fixtures.metadata,
+  ]);
 
   if (listings) {
     const value: NormalizedRetailerListing = {
@@ -356,6 +374,7 @@ try {
             COMPRAFINO_E2E_PRELOAD: new URL("./testing/http-preload.ts", import.meta.url).href,
             COMPRAFINO_CONTROLLED_E2E: all ? "1" : "",
             COMPRAFINO_E2E_SCHEMA: schema,
+            COMPRAFINO_E2E_PRODUCT_READ_ID: fixtures.metadata,
             PRICE_HISTORY_FIXTURE_IDS: JSON.stringify(fixtures),
             SHOPPING_LIST_FIXTURE_IDS: JSON.stringify(shoppingFixtures),
           },

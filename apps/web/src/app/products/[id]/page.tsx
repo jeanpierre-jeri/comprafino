@@ -27,8 +27,9 @@ import { ProductImage } from "../../../components/product-image";
 import { ObservedAt, packageSummary, RetailerBadge } from "../../../components/product-info";
 import { PriceNotice, PublicDataError, PublicShell } from "../../../components/public-shell";
 
-// React cache deduplicates metadata/page reads within this request only.
-const loadProduct = cache(async (id: string, mode: "standard" | "benefits" = "standard") => {
+// Metadata and page explicitly pass the same ID and normalized price mode.
+// React cache shares this comparison read only within the current request.
+const loadProduct = cache(async (id: string, mode: "standard" | "benefits") => {
   if (!isPublicProductId(id)) return { product: null, failed: false };
 
   await connection();
@@ -53,8 +54,9 @@ type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { product } = await loadProduct((await params).id);
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
+  const { priceMode } = searchFilters(await searchParams);
+  const { product } = await loadProduct((await params).id, priceMode);
 
   return {
     title: product

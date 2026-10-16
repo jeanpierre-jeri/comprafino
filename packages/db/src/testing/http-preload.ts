@@ -3,6 +3,7 @@ import { fixtureDatabaseUrl } from "./fixture-url.ts";
 import { z } from "zod";
 import { requireDatabaseUrl } from "../env.ts";
 import { createTestQueryClient } from "./test-query-client.ts";
+import { testSchemaClient } from "./test-schema-client.ts";
 
 // Explicit node --import preload for the owned fixture server, never imported by
 // production. Intercept the HTTP wire boundary so bundled Neon uses the same API.
@@ -20,6 +21,10 @@ if (mode !== undefined && mode !== "local") {
 }
 
 const localClient = mode === "local" ? createTestQueryClient(url, mode) : null;
+const trackedProductId = z.uuid().optional().parse(process.env.COMPRAFINO_E2E_PRODUCT_READ_ID);
+const trackingClient = trackedProductId
+  ? testSchemaClient(localClient ?? createTestQueryClient(url, mode), schema)
+  : null;
 
 const nativeFetch = globalThis.fetch;
 
@@ -56,6 +61,29 @@ const fixtureFetch: typeof fetch = async (input, init) => {
   const value: unknown = JSON.parse(init.body);
   const batch = batchSchema.safeParse(value);
   const queries = [path, ...(batch.success ? batch.data.queries : [querySchema.parse(value)])];
+
+  // Count only the dedicated product's current comparison SQL, not its independent
+  // history query or other specs' traffic. Exercise the real Next/React cache.
+  const trackedReads = queries.filter(
+    (query) =>
+      query.query.includes("from products where id=") && query.params.includes(trackedProductId),
+  ).length;
+  if (trackingClient && trackedReads) {
+    const [state] = z
+      .array(z.object({ fail_reads: z.boolean() }))
+      .parse(
+        await trackingClient.query(
+          "update fixture_product_reads set attempts=attempts+$2 where product_id=$1 returning fail_reads",
+          [trackedProductId, trackedReads],
+        ),
+      );
+    if (!state) {
+      throw new Error("Missing product read fixture");
+    }
+    if (state.fail_reads) {
+      return Response.json({ message: "Controlled fixture read failure" }, { status: 400 });
+    }
+  }
 
   if (!localClient) {
     const response = await nativeFetch(input, { ...init, body: JSON.stringify({ queries }) });
