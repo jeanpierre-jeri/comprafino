@@ -1,5 +1,7 @@
 const syncMessages = {
   unavailable: "No pudimos sincronizar tu lista. Intenta nuevamente.",
+  uncertain:
+    "No pudimos confirmar si el cambio se guardó. Vuelve a consultar la lista antes de editar; no repetimos el cambio automáticamente.",
   expired: "Tu sesión ya no está disponible. Inicia sesión nuevamente para sincronizar.",
   conflict: "Tu lista cambió en otra pestaña o dispositivo. Intenta nuevamente.",
   busy: "Espera a que termine la sincronización de tu lista.",

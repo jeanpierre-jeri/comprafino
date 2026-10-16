@@ -787,6 +787,30 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
     await page.getByRole("button", { name: "Reintentar", exact: true }).click();
     await expect(summary).toBeVisible();
   });
+  test("a slow evaluation expires, hides recommendations and recovers without duplicating refreshes", async ({
+    page,
+  }) => {
+    await addSpecific(page, "preferred");
+    const summary = page.getByRole("region", { name: "Hay una oportunidad de ahorro hoy" });
+    await expect(summary).toBeVisible();
+    let stalled = 0;
+    await page.route("**/api/list/evaluate*", () => {
+      stalled++;
+    });
+    await page.clock.install();
+    await page.reload();
+    await expect.poll(() => stalled).toBe(1);
+    await page.clock.fastForward(20_001);
+    await expect(
+      page.getByText("No pudimos cargar los precios. Intenta nuevamente.", { exact: true }),
+    ).toBeVisible();
+    await expect(summary).toHaveCount(0);
+    await expect(page.getByRole("note", { name: /más barata/ })).toHaveCount(0);
+    expect(stalled).toBe(1);
+    await page.unroute("**/api/list/evaluate*");
+    await page.getByRole("button", { name: "Reintentar", exact: true }).click();
+    await expect(summary).toBeVisible();
+  });
   test("generic winner changes after fresh fixture price observations", async ({ page }) => {
     await addGeneric(page);
     const card = page

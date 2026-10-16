@@ -9,17 +9,15 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { parseHistoryRange, shoppingSeedForRetailerOffer } from "@comprafino/core";
 import type { HistoryRange } from "@comprafino/core";
-import {
-  createDatabase,
-  formatPen,
-  getPublicRetailerListingDetail,
-  isPublicProductId,
-} from "@comprafino/db";
+import { formatPen, getPublicRetailerListingDetail, isPublicProductId } from "@comprafino/db";
 import { AddShoppingItem } from "../../../components/shopping-list/shopping-item-editor";
 import { PriceHistoryPresentation } from "../../../components/price-history";
 import { ProductImage } from "../../../components/product-image";
 import { ObservedAt, packageSummary, RetailerBadge } from "../../../components/product-info";
 import { PriceNotice, PublicDataError, PublicShell } from "../../../components/public-shell";
+import { withPublicDatabase } from "../../../server/public-database.ts";
+
+export const maxDuration = 20;
 
 const loadListing = cache(async (id: string, range: HistoryRange) => {
   if (!isPublicProductId(id)) return { listing: null, failed: false };
@@ -28,7 +26,7 @@ const loadListing = cache(async (id: string, range: HistoryRange) => {
 
   try {
     return {
-      listing: await getPublicRetailerListingDetail(createDatabase(), id, { range }),
+      listing: await withPublicDatabase((db) => getPublicRetailerListingDetail(db, id, { range })),
       failed: false,
     };
   } catch (error) {

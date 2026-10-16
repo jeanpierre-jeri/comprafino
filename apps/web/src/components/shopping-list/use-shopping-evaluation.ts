@@ -23,7 +23,7 @@ export function useShoppingEvaluation(
     pending: enabled && (query.isPending || query.isFetching),
     error: enabled && query.isError ? "No pudimos cargar los precios. Intenta nuevamente." : "",
     refresh: () => {
-      void query.refetch();
+      void query.refetch({ cancelRefetch: false });
     },
   };
 }

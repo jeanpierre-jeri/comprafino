@@ -2,7 +2,8 @@ import { logDiagnostic } from "../server/diagnostics.ts";
 import Link from "next/link";
 import { formatPen, historyRanges } from "@comprafino/core";
 import type { HistoryRange } from "@comprafino/core";
-import { createDatabase, getCanonicalProductPriceHistory } from "@comprafino/db";
+import { getCanonicalProductPriceHistory } from "@comprafino/db";
+import { withPublicDatabase } from "../server/public-database.ts";
 import { RetailerBadge, ObservedAt } from "./product-info";
 import { PriceHistoryChart } from "./price-history-chart";
 
@@ -28,7 +29,9 @@ export async function PriceHistory({
   let history;
 
   try {
-    history = await getCanonicalProductPriceHistory(createDatabase(), productId, { range });
+    history = await withPublicDatabase((db) =>
+      getCanonicalProductPriceHistory(db, productId, { range }),
+    );
   } catch (error) {
     logDiagnostic(error, { stage: "public", operation: "history", reason: "db_read_failed" });
   }

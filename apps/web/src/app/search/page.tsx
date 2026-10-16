@@ -25,6 +25,11 @@ import {
   SearchResultsContent,
   shoppingQuantityForSearch,
 } from "../../components/search-results-content";
+import { withPublicDatabase } from "../../server/public-database.ts";
+import { withinRequestBudget } from "../../lib/request-budget.ts";
+import { publicRequestPolicy } from "../../lib/public-request-policy.ts";
+
+export const maxDuration = 30;
 
 export const metadata: Metadata = {
   title: "Buscar productos y precios | CompraFino",
@@ -74,10 +79,11 @@ async function SearchResults({
 
   if (validRequest) {
     try {
-      const db = createDatabase(process.env, { requestTimeoutMs: 12_000 });
-      const results = await searchPublicProducts(db, query, sort, observedNow, filters, page, {
-        includeComparisons: false,
-      });
+      const results = await withPublicDatabase((db) =>
+        searchPublicProducts(db, query, sort, observedNow, filters, page, {
+          includeComparisons: false,
+        }),
+      );
       offers = results.offers;
       units = results.availableUnits;
       underlyingCount = results.usefulResultCount;
@@ -96,15 +102,22 @@ async function SearchResults({
         // exclusively performed by the scheduled command, never by this route.
         after(async () => {
           try {
-            if (usefulSearchQuery(query)) {
-              await recordDiscoveryForSearch(
-                db,
-                query,
-                underlyingCount,
-                results.discoveryRetailers,
-              );
-            }
-            await requestCatalogRefresh(db, results.refreshListingIds);
+            await withinRequestBudget(publicRequestPolicy.demandMs, undefined, async (signal) => {
+              const db = createDatabase(process.env, {
+                signal,
+                requestTimeoutMs: publicRequestPolicy.demandMs,
+                statementTimeoutMs: publicRequestPolicy.demandStatementMs,
+              });
+              if (usefulSearchQuery(query)) {
+                await recordDiscoveryForSearch(
+                  db,
+                  query,
+                  underlyingCount,
+                  results.discoveryRetailers,
+                );
+              }
+              await requestCatalogRefresh(db, results.refreshListingIds);
+            });
           } catch (error) {
             logDiagnostic(error, {
               stage: "public",

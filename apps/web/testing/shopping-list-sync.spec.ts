@@ -175,7 +175,8 @@ test("response validation, domain rejection and raw DB errors remain safe", asyn
     }).POST(post(body));
     expect(result.status).toBe(failure instanceof ShoppingListDomainError ? 422 : 503);
     expect(await result.json()).toEqual({
-      error: failure instanceof ShoppingListDomainError ? "mutation_rejected" : "list_unavailable",
+      error:
+        failure instanceof ShoppingListDomainError ? "mutation_rejected" : "mutation_uncertain",
     });
     expect(result.headers.get("cache-control")).toBe("no-store");
   }

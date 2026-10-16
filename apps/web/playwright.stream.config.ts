@@ -9,6 +9,7 @@ export default defineConfig({
     "testing/shopping-list-sync.spec.ts",
     "testing/shopping-list-client.spec.ts",
     "testing/shopping-query.spec.ts",
+    "testing/request-budget.spec.ts",
   ],
   workers: 1,
   reporter: "list",

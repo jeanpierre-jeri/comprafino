@@ -22,7 +22,7 @@ const state = (revision = 0, items: ShoppingList["items"] = []) => ({
   list: { version: 2, items },
 });
 
-function harness(anonymous: ShoppingList = emptyShoppingList()) {
+function harness(anonymous: ShoppingList = emptyShoppingList(), budgetMs?: number) {
   let stored = anonymous;
   let claim: string | null = null;
   let clears = 0,
@@ -72,6 +72,7 @@ function harness(anonymous: ShoppingList = emptyShoppingList()) {
     () => {
       broadcasts++;
     },
+    budgetMs,
   );
 
   return {
@@ -123,7 +124,10 @@ test("partial transport failure retains all anonymous items and retries from aut
   await idle(h);
   expect(h.stored()).toEqual(anonymous);
   expect(h.clears()).toBe(0);
-  expect(h.client.getSnapshot().list.items).toHaveLength(1);
+  expect(h.client.getSnapshot().ready).toBe(false);
+  expect(
+    h.client.queryClient.getQueryData(remoteShoppingQueryKey(h.client.getSnapshot().session)),
+  ).toEqual(state(1, [item(1)]));
   h.reply(state(1, [item(1)]));
   h.reply(state(2, [item(1), item(2)]));
   await h.client.importAnonymous();
@@ -201,6 +205,7 @@ test("logout and account/session changes ignore late GET and POST results", asyn
       }),
   );
   h.client.setSession({ status: "authenticated", userId: "A", sessionId: "s1" });
+  await expect.poll(() => Boolean(resolve)).toBe(true);
   h.client.setSession({ status: "anonymous" });
   resolve(Response.json(state(1, [item(1)])));
   await idle(h);
@@ -462,4 +467,64 @@ test("logout before Query starts a mutation cannot send an old-account write", a
   await rejected;
   expect(h.calls.filter((call) => call.init?.method === "POST")).toHaveLength(0);
   expect(h.stored().items).toEqual([]);
+});
+
+test("a timed-out committed mutation is never replayed and requires a read before editing", async () => {
+  const h = harness(emptyShoppingList(), 25);
+  h.reply(state(1, [item(1)]));
+  h.client.setSession({ status: "authenticated", userId: "A", sessionId: "s1" });
+  await idle(h);
+  let release: ((response: Response) => void) | undefined;
+  h.replies.push(
+    () =>
+      new Promise<Response>((resolve) => {
+        release = resolve;
+      }),
+  );
+  await expect(h.client.change(() => emptyShoppingList())).rejects.toMatchObject({
+    code: "uncertain",
+  });
+  expect(h.calls).toHaveLength(2);
+  expect(h.calls[1]?.init?.signal?.aborted).toBe(true);
+  expect(h.client.getSnapshot().ready).toBe(false);
+  expect(
+    h.client.queryClient.getQueryData(remoteShoppingQueryKey(h.client.getSnapshot().session)),
+  ).toEqual(state(1, [item(1)]));
+  await expect(h.client.change(() => emptyShoppingList())).rejects.toMatchObject({ code: "busy" });
+  release?.(Response.json(state(2)));
+  // The write committed but its late response cannot repopulate authoritative state.
+  h.reply(state(2));
+  await h.client.refreshRemote();
+  expect(h.calls).toHaveLength(3);
+  expect(h.calls[2]?.init?.method).toBeUndefined();
+  expect(h.client.getSnapshot()).toMatchObject({
+    ready: true,
+    warning: "",
+    list: emptyShoppingList(),
+  });
+  expect(h.broadcasts()).toBe(0);
+  h.client.dispose();
+});
+
+test("slow list reads release busy state and allow later recovery without clearing saved data", async () => {
+  const h = harness(emptyShoppingList(), 25);
+  let release: ((response: Response) => void) | undefined;
+  h.replies.push(
+    () =>
+      new Promise<Response>((resolve) => {
+        release = resolve;
+      }),
+  );
+  h.client.setSession({ status: "authenticated", userId: "A", sessionId: "s1" });
+  await idle(h);
+  expect(h.client.getSnapshot().ready).toBe(false);
+  expect(h.client.getSnapshot().warning).not.toBe("");
+  expect(h.calls).toHaveLength(1);
+  release?.(Response.json(state(1, [item(1)])));
+  h.reply(state(2, [item(2)]));
+  await h.client.importAnonymous();
+  expect(h.client.getSnapshot().list.items).toEqual([item(2)]);
+  expect(h.calls).toHaveLength(2);
+  expect(h.writes()).toBe(0);
+  h.client.dispose();
 });

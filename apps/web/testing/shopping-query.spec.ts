@@ -133,3 +133,44 @@ test("evaluation corruption and HTTP failure do not cache empty success or retry
     }
   }
 });
+
+test("evaluation bounds the complete body, stays failed without retries, then recovers", async () => {
+  const client = createShoppingQueryClient();
+  let signal: AbortSignal | null | undefined;
+  let requests = 0;
+  let body: ReadableStreamDefaultController<Uint8Array> | undefined;
+  const options = shoppingEvaluationQuery(
+    list(1),
+    "standard",
+    true,
+    { status: "anonymous" },
+    async (_url, init) => {
+      requests++;
+      signal = init?.signal;
+      if (requests > 1) return Response.json(evaluation(list(1)));
+      return new Response(
+        new ReadableStream<Uint8Array>({
+          start(controller) {
+            body = controller;
+          },
+        }),
+      );
+    },
+    25,
+  );
+  try {
+    await expect(client.fetchQuery(options)).rejects.toMatchObject({ name: "TimeoutError" });
+    expect(signal?.aborted).toBe(true);
+    expect(requests).toBe(1);
+    expect(client.getQueryData(options.queryKey)).toBeUndefined();
+    body?.enqueue(new TextEncoder().encode(JSON.stringify(evaluation(list(1)))));
+    body?.close();
+    expect(await client.fetchQuery(options)).toEqual(evaluation(list(1)));
+    expect(requests).toBe(2);
+    expect(options.refetchInterval).toBe(60_000);
+    expect(options.refetchIntervalInBackground).toBe(false);
+    expect(options.refetchOnWindowFocus).toBe("always");
+  } finally {
+    client.clear();
+  }
+});

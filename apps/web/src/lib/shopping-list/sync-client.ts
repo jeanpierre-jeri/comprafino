@@ -18,6 +18,8 @@ import type {
 import { sameShoppingSession } from "./session";
 import type { ShoppingSession } from "./session";
 import { ShoppingListSyncError, shoppingSyncFailure } from "./sync-errors";
+import { withinRequestBudget } from "../request-budget";
+import { publicRequestPolicy } from "../public-request-policy";
 
 export type ShoppingListClientState = {
   anonymousList: ShoppingList;
@@ -83,11 +85,13 @@ export class ShoppingListSyncClient {
   private controller = new AbortController();
   private refreshAgain = false;
   private expired = false;
+  private uncertain = false;
 
   constructor(
     private storage: ShoppingStorage,
     private request: typeof fetch,
     private broadcast: () => void,
+    private budgetMs: number = publicRequestPolicy.browserMs,
   ) {}
 
   getSnapshot = () => {
@@ -122,6 +126,7 @@ export class ShoppingListSyncClient {
     this.generation++;
     this.clearServerState();
     this.refreshAgain = false;
+    this.uncertain = false;
     this.update(initialSnapshot());
   }
 
@@ -133,6 +138,7 @@ export class ShoppingListSyncClient {
     this.generation++;
     this.clearServerState();
     this.expired = false;
+    this.uncertain = false;
     this.refreshAgain = false;
     this.update({ session, warning: "", ready: false, busy: false });
 
@@ -163,10 +169,12 @@ export class ShoppingListSyncClient {
     return generation === this.generation;
   }
 
-  private assertActive(generation: number) {
+  private assertActive(generation: number, signal?: AbortSignal) {
     if (!this.active(generation)) {
       throw new ShoppingListSyncError("accountChanged");
     }
+
+    signal?.throwIfAborted();
   }
 
   private async parseResponse(response: Response): Promise<RemoteShoppingListState> {
@@ -191,12 +199,16 @@ export class ShoppingListSyncClient {
     this.queryClient.setQueryData(remoteShoppingQueryKey(session), state);
   }
 
-  private async mutate(operation: ShoppingListSyncOperation, generation: number) {
+  private async mutate(
+    operation: ShoppingListSyncOperation,
+    generation: number,
+    signal: AbortSignal,
+  ) {
     let pending = shoppingListSyncOperationSchema.parse(operation);
 
     // One initial attempt and one replay; every await is guarded by session generation.
     for (let attempt = 0; attempt < 2; attempt++) {
-      this.assertActive(generation);
+      this.assertActive(generation, signal);
 
       if (!this.remote) {
         throw new ShoppingListSyncError("unavailable");
@@ -215,13 +227,13 @@ export class ShoppingListSyncClient {
         cache: "no-store",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ expectedRevision: this.remote.revision, operation: pending }),
-        signal: this.controller.signal,
+        signal,
       });
-      this.assertActive(generation);
+      this.assertActive(generation, signal);
 
       if (response.status === 409) {
         const conflict = shoppingListRevisionConflictSchema.parse(await response.json());
-        this.assertActive(generation);
+        this.assertActive(generation, signal);
         this.applyRemote(conflict.current);
 
         if (attempt === 1) {
@@ -239,8 +251,12 @@ export class ShoppingListSyncClient {
         continue;
       }
 
+      if ([400, 403, 413, 415, 422].includes(response.status)) {
+        throw new ShoppingListSyncError("invalidMutation");
+      }
+
       const state = await this.parseResponse(response);
-      this.assertActive(generation);
+      this.assertActive(generation, signal);
 
       if (
         state.revision !== expectedRevision ||
@@ -261,19 +277,20 @@ export class ShoppingListSyncClient {
     const session = this.store.getState().session;
     await this.queryClient.fetchQuery({
       queryKey: remoteShoppingQueryKey(session),
-      queryFn: async ({ signal }) => {
-        this.assertActive(generation);
-        const response = await this.request("/api/list/sync", {
-          cache: "no-store",
-          credentials: "same-origin",
-          signal,
-        });
-        this.assertActive(generation);
+      queryFn: ({ signal }) =>
+        withinRequestBudget(this.budgetMs, signal, async (requestSignal) => {
+          this.assertActive(generation);
+          const response = await this.request("/api/list/sync", {
+            cache: "no-store",
+            credentials: "same-origin",
+            signal: requestSignal,
+          });
+          this.assertActive(generation, requestSignal);
 
-        const state = await this.parseResponse(response);
-        this.assertActive(generation);
-        return state;
-      },
+          const state = await this.parseResponse(response);
+          this.assertActive(generation, requestSignal);
+          return state;
+        }),
     });
     this.assertActive(generation);
     this.update({ ready: true });
@@ -286,13 +303,25 @@ export class ShoppingListSyncClient {
         ...remoteShoppingQueryKey(this.store.getState().session),
       ],
       mutationFn: (input: { operation: ShoppingListSyncOperation; generation: number }) =>
-        this.mutate(input.operation, input.generation),
+        withinRequestBudget(this.budgetMs, this.controller.signal, (signal) =>
+          this.mutate(input.operation, input.generation, signal),
+        ),
       retry: false,
       networkMode: "always",
       gcTime: 0,
     });
     try {
       await mutation.mutate({ operation, generation });
+    } catch (error) {
+      this.assertActive(generation);
+
+      if (error instanceof ShoppingListSyncError && error.code !== "unavailable") throw error;
+
+      // Preserve Query's last document and anonymous storage, but withhold quotes
+      // and further mutations until a successful GET establishes the saved state.
+      this.uncertain = true;
+      this.update({ ready: false });
+      throw new ShoppingListSyncError("uncertain", { cause: error });
     } finally {
       mutation.reset();
     }
@@ -376,11 +405,17 @@ export class ShoppingListSyncClient {
     }
 
     const generation = this.generation;
+    const reconcileOnly = this.uncertain;
     const warning = mode === "import-anonymous" ? "" : snapshot.warning;
     this.update({ busy: true, warning });
 
     try {
       await this.readRemote(generation);
+
+      if (reconcileOnly) {
+        this.uncertain = false;
+        this.update({ warning: "" });
+      }
 
       if (mode === "import-anonymous") {
         await this.persistAnonymous(snapshot.session.userId, generation);

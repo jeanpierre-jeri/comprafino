@@ -15,7 +15,6 @@ import { connection } from "next/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
-  createDatabase,
   formatPen,
   getCanonicalProductComparison,
   isPublicProductId,
@@ -26,6 +25,10 @@ import { SearchControls } from "../../../components/search-controls";
 import { ProductImage } from "../../../components/product-image";
 import { ObservedAt, packageSummary, RetailerBadge } from "../../../components/product-info";
 import { PriceNotice, PublicDataError, PublicShell } from "../../../components/public-shell";
+import { withPublicDatabase } from "../../../server/public-database.ts";
+
+// Comparison and the independent history each have a 15 s cooperative budget.
+export const maxDuration = 35;
 
 // Metadata and page explicitly pass the same ID and normalized price mode.
 // React cache shares this comparison read only within the current request.
@@ -39,7 +42,9 @@ const loadProduct = cache(async (id: string, mode: "standard" | "benefits") => {
 
     return {
       observedNow,
-      product: await getCanonicalProductComparison(createDatabase(), id, observedNow, mode),
+      product: await withPublicDatabase((db) =>
+        getCanonicalProductComparison(db, id, observedNow, mode),
+      ),
       failed: false,
     };
   } catch (error) {

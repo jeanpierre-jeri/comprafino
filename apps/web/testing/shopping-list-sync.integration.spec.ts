@@ -250,16 +250,18 @@ test.describe("sync HTTP with real Better Auth and explicit owned TEST_DATABASE_
       ]);
       const corrupt = await harness.scoped.query("select * from user_shopping_lists");
 
-      for (const response of [
+      for (const [index, response] of [
         await get(loggedIn.headers),
         await post(loggedIn.headers, remove(shoppingListRevisionMaximum)),
         await post(loggedIn.headers, {
           expectedRevision: 0,
           operation: { type: "save", item: value },
         }),
-      ]) {
+      ].entries()) {
         expect(response.status).toBe(503);
-        expect(await response.json()).toEqual({ error: "list_unavailable" });
+        expect(await response.json()).toEqual({
+          error: index === 0 ? "list_unavailable" : "mutation_uncertain",
+        });
       }
 
       expect(await harness.scoped.query("select * from user_shopping_lists")).toEqual(corrupt);
