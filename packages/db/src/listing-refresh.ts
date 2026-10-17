@@ -91,12 +91,18 @@ export async function previewListingRefresh(
   options: ReturnType<typeof parseListingRefreshOptions>,
   now = new Date(),
 ) {
+  // Apply hasTargetedRefreshPath's lookup boundary before the bounded pool.
+  // Otherwise unrefreshable exact/old rows can consume all 5,000 slots and
+  // disappear only in selectListingRefresh, hiding eligible rows indefinitely.
+  // Explicit one-SKU diagnostics retain their existing unrestricted scope.
   const pool = await db.execute(sql`select l.id from retailer_listings l
     where ${options.retailer ? sql`l.retailer_id=${options.retailer}` : sql`true`}
       and ${
         options.externalId
           ? sql`l.external_id=${options.externalId}`
-          : sql`(case when l.available=false then coalesce(l.availability_verified_at,l.last_seen_at) else l.last_seen_at end)<=${new Date(now.getTime() - listingRefreshPolicy.ageHours * 3_600_000).toISOString()}::timestamptz
+          : sql`l.external_id ~ '^[0-9]+$' and l.product_id ~ '^[0-9]+$'
+        and (l.retailer_id<>'tottus' or starts_with(l.url,'https://www.tottus.com.pe/tottus-pe/articulo/'||l.product_id||'/'))
+        and (case when l.available=false then coalesce(l.availability_verified_at,l.last_seen_at) else l.last_seen_at end)<=${new Date(now.getTime() - listingRefreshPolicy.ageHours * 3_600_000).toISOString()}::timestamptz
         and (l.last_targeted_attempt_at is null or l.last_targeted_attempt_at<=${new Date(now.getTime() - listingRefreshPolicy.cooldownHours * 3_600_000).toISOString()}::timestamptz)`
       }
     order by exists(select 1 from canonical_product_listings a where a.listing_id=l.id and a.method='automatic' and a.confidence>=${matchingThresholds.auto}) desc,

@@ -154,6 +154,8 @@ The read-only audit can be repeated with `pnpm --filter @comprafino/db exec node
 
 ## Selected-product list checks
 
+`packages/db/src/listing-refresh.integration.test.ts` reproduces the targeted selector's former pool starvation in an owned schema. Real ingestion/normalization/matching establish a paired exact seed; volume copies create more than 5,000 unrefreshable legacy IDs without changing fingerprint inputs or positive quotes. Four numeric, supported purchases remain outside that old pool. The regression verifies their selection after early lookup admission, read-only preview, the unchanged one-request restriction, failure quote retention, retailer scope, four-hour cooldown, negative-stock recovery and explicit diagnostic scope. It does not call retailers or establish the production proportion affected by this cause. Run with the existing explicit local integration command; no application URL is used.
+
 `packages/core/src/shopping-selection.test.ts` covers independent SKU persistence/account validation, distinct selections, source-store baselines, compatible whole-package alternatives, revoked/null identity safety and withheld source evidence. `shopping-price-history.test.ts` covers Lima 7/30/90-day boundaries, ordinary package minima, latest tied observation, sparse coverage, future/invalid samples and separation from substitutes/generic needs. The shopping SQL suite checks independent product images/prices and intraday minima with real observation coverage in its owned schema. Chromium shopping fixtures exercise independent product selection through reload, historical summaries and alternative cards at mobile/desktop widths. Run the existing integration, build and fixture E2E commands above.
 
 ## Isolated hosting preparation
