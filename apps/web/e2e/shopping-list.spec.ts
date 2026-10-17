@@ -999,6 +999,134 @@ async function storeBasket(page: Page, count: number, unsupported = false) {
   await openBasketComparison(page);
 }
 
+test.describe("mobile shopping journey 13A", () => {
+  test.skip(!process.env.SHOPPING_LIST_FIXTURE_IDS, "Requires owned shopping fixtures");
+  test.use({ hasTouch: true, isMobile: true });
+
+  test("search, detail, saved selection, quantity edit and suggested plan remain distinct", async ({
+    page,
+  }, testInfo) => {
+    test.setTimeout(120_000);
+    await page.route("https://**/*", (route) => route.abort());
+    const label = "Huevos Independientes Bandeja 30un";
+
+    for (const width of [320, 390]) {
+      for (const theme of ["light", "dark"] as const) {
+        await page.setViewportSize({ width, height: 568 });
+        await page.emulateMedia({ colorScheme: theme, reducedMotion: "reduce" });
+        await page.goto("/list");
+        await page.evaluate(() => localStorage.removeItem("comprafino-shopping-list"));
+        await page.goto("/search?q=huevos");
+        const source = page.locator(`[data-offer-id="${fixture("independent")}"]`);
+        await source.getByRole("link", { name: label, exact: true }).tap();
+        await expect(page).toHaveURL(new RegExp(`/listings/${fixture("independent")}$`));
+        await expect(page.getByRole("heading", { level: 1 })).toHaveText(label);
+        await page.getByRole("button", { name: "Agregar a mi lista", exact: true }).tap();
+        const dialog = page.getByRole("dialog");
+        await expect(page.getByLabel("Paquetes", { exact: true })).toBeFocused();
+        await page.screenshot({
+          path: testInfo.outputPath(`13a-create-${width}-${theme}.png`),
+          animations: "disabled",
+        });
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+          true,
+        );
+        const bounds = await dialog.boundingBox();
+        expect(bounds?.width).toBeLessThanOrEqual(width);
+        expect(bounds?.height).toBeLessThanOrEqual(568);
+        await dialog.getByRole("button", { name: "Agregar", exact: true }).tap();
+        await expect(dialog).toHaveCount(0);
+        await page.getByRole("link", { name: "Mi lista", exact: true }).tap();
+        const card = page.getByRole("article", { name: label, exact: true });
+        await expect(card).toContainText("S/ 49.90");
+        const edit = card.getByRole("button", { name: `Editar ${label}`, exact: true });
+        const target = await edit.boundingBox();
+        expect(target?.width).toBeGreaterThanOrEqual(44);
+        expect(target?.height).toBeGreaterThanOrEqual(44);
+        await edit.tap();
+        await page.getByLabel("Paquetes", { exact: true }).fill("2");
+        await page.getByLabel("Frecuencia", { exact: true }).selectOption("biweekly");
+        await dialog.getByRole("button", { name: "Guardar cambios", exact: true }).tap();
+        await expect(dialog).toHaveCount(0);
+        await expect(edit).toBeFocused();
+        await expect(card).toContainText("S/ 99.80");
+        await expect(
+          page.getByRole("region", { name: "Cada 2 semanas", exact: true }),
+        ).toContainText(label);
+        await page.reload();
+        await expect(card).toContainText("S/ 99.80");
+        await expect(card).toContainText("Precio de tu compra");
+        const savedBeforePlan = shoppingListSchema.parse(
+          JSON.parse(
+            (await page.evaluate(() => localStorage.getItem("comprafino-shopping-list"))) ?? "null",
+          ) as unknown,
+        );
+        expect(savedBeforePlan.items).toHaveLength(1);
+        expect(savedBeforePlan.items[0]).toMatchObject({
+          listingId: fixture("independent"),
+          label,
+          quantity: { amount: 2, unit: "unit" },
+          quantityMode: "packages",
+          intent: "preferred",
+          frequency: "biweekly",
+        });
+        const comparison = page.getByRole("region", { name: "Comparación de canastas" });
+        await expect(comparison).toContainText("Plan de ahorro sugerido");
+        await expect(comparison).toContainText("S/ 29.80");
+        await expect(comparison).toContainText("Puede incluir alternativas a tus productos");
+        await comparison.getByRole("button", { name: "Ver plan", exact: true }).tap();
+        await expect(
+          page.getByRole("region", { name: "Compras del plan seleccionado" }),
+        ).toBeVisible();
+        await page
+          .getByRole("dialog")
+          .getByRole("button", { name: "Comparar supermercados", exact: true })
+          .tap();
+        await page
+          .getByRole("article", { name: "Límite 3", exact: true })
+          .getByRole("button")
+          .tap();
+        await page.screenshot({
+          path: testInfo.outputPath(`13a-plan-${width}-${theme}.png`),
+          animations: "disabled",
+        });
+        await expect(
+          page
+            .getByRole("dialog")
+            .getByRole("heading", { name: "Compras por supermercado", level: 2, exact: true }),
+        ).toBeInViewport();
+        await expect(
+          page.getByRole("dialog").getByRole("button", { name: "Cerrar diálogo", exact: true }),
+        ).toBeInViewport();
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+          true,
+        );
+        if (theme === "light") {
+          await page
+            .getByRole("dialog")
+            .getByRole("button", { name: "Cerrar diálogo", exact: true })
+            .tap();
+        } else {
+          await page.keyboard.press("Escape");
+        }
+        await expect(page.getByRole("dialog")).toHaveCount(0);
+        await expect(
+          comparison.getByRole("button", { name: "Ver plan", exact: true }),
+        ).toBeFocused();
+        await expect(card).toContainText("S/ 99.80");
+        expect(await page.evaluate(() => localStorage.getItem("comprafino-shopping-list"))).toBe(
+          JSON.stringify(savedBeforePlan),
+        );
+        await page.screenshot({
+          path: testInfo.outputPath(`13a-list-${width}-${theme}.png`),
+          fullPage: true,
+          animations: "disabled",
+        });
+      }
+    }
+  });
+});
+
 test.describe("current basket optimization fixtures", () => {
   test.skip(
     !process.env.SHOPPING_LIST_FIXTURE_IDS,
@@ -1159,6 +1287,14 @@ test.describe("current basket optimization fixtures", () => {
     await page.keyboard.press("Escape");
     const comparison = page.getByRole("region", { name: "Comparación de canastas", exact: true });
     await expect(comparison.getByRole("button")).toHaveCount(1);
+    await expect(comparison).toContainText("S/ 60.00");
+    const itemRows = page.locator('article[id^="shopping-item-"]');
+    await expect(itemRows).toHaveCount(3);
+    for (const row of await itemRows.all()) {
+      await expect(row).toContainText("Precio de tu compra");
+      await expect(row).toContainText("S/ 10.00");
+    }
+    await expect(comparison).toContainText("puede diferir de los precios individuales de tu lista");
     for (const width of [390, 1280]) {
       await page.setViewportSize({ width, height: 900 });
       for (const theme of ["light", "dark"] as const) {
@@ -1199,6 +1335,10 @@ test.describe("current basket optimization fixtures", () => {
     await expect(details).toContainText("Disponibilidad no confirmada.");
     await page.keyboard.press("Escape");
     const card = page.getByRole("article", { name: "Leche para canasta 1", exact: true });
+    await expect(comparison).toContainText("S/ 30.00");
+    for (const row of await itemRows.all()) {
+      await expect(row).toContainText("S/ 10.00");
+    }
     await card.getByRole("button", { name: "Editar Leche para canasta 1" }).click();
     await page.getByLabel("Paquetes", { exact: true }).fill("2");
     await page.getByRole("button", { name: "Guardar cambios" }).click();

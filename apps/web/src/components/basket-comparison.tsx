@@ -1,5 +1,6 @@
 "use client";
 
+import { useLayoutEffect, useRef } from "react";
 import { Button } from "@comprafino/ui/components/button";
 import { ArrowLeftRight, ShoppingBag } from "@comprafino/ui";
 import {
@@ -52,6 +53,15 @@ export function BasketComparison({
 }) {
   const selected = selectedLimit ?? defaultBasketLimit(plans);
   const plan = plans.find((p) => p.maxRetailers === selected);
+  const content = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    // A selection at the bottom of the comparison must open purchases at its
+    // heading, rather than reusing that view's scroll and hiding the close control.
+    if (panel.open && content.current) {
+      content.current.scrollTop = 0;
+    }
+  }, [panel]);
 
   return (
     <Dialog
@@ -72,7 +82,8 @@ export function BasketComparison({
                   ` · ${plan.retailerIds.length} ${plan.retailerIds.length === 1 ? "supermercado" : "supermercados"}`}
               </h2>
               <p className="mt-1 text-xs text-muted-foreground">
-                Puede incluir alternativas a tus productos. Revisa el plan antes de elegir.
+                Puede incluir alternativas a tus productos. Su importe depende de las tiendas del
+                plan y puede diferir de los precios individuales de tu lista.
               </p>
               <p className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
                 <strong className="text-2xl font-semibold tabular-nums">
@@ -113,7 +124,10 @@ export function BasketComparison({
           </div>
         )}
       </section>
-      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-4xl">
+      <DialogContent
+        ref={content}
+        className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-4xl"
+      >
         <DialogHeader className="pr-12">
           <DialogTitle>
             {panel.view === "comparison" ? "Comparar supermercados" : "Compras por supermercado"}
