@@ -35,7 +35,10 @@ export function useShoppingList() {
 
   let warning = "";
 
-  if (session.status === "unavailable") {
+  if (client.isAccountSessionWithheld(session)) {
+    warning =
+      "Esta sesión se pausó tras solicitar la eliminación. Comprueba la sesión; si la cuenta sigue disponible, vuelve a iniciar sesión antes de usar su lista.";
+  } else if (session.status === "unavailable") {
     warning = "No pudimos comprobar tu sesión. Intenta nuevamente.";
   } else if (current) {
     warning = snapshot.warning;

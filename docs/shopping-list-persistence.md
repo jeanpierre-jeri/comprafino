@@ -111,6 +111,16 @@ The account menu offers **Descargar lista de cuenta**. `GET /api/list/export` re
 
 Only the saved list is exported; pending edits and anonymous recovery data are excluded. Empty lists produce a distinct message without a file, while expired/changed sessions and unavailable downloads remain distinguishable. Export does not mutate either list and adds no restore, deletion or general account-management flow. Already initiated downloads cannot be recalled. See [11A verification and limits](history/account-list-export-2026-10-17.md).
 
+## Own-account deletion
+
+The account menu offers **Eliminar cuenta…**, a confirmation bound to its initiating user and session, with the existing 11A download available before confirming. POST `/api/auth/delete-user` uses Better Auth 1.7.7's authoritative session and native 24-hour freshness check. Application guards require exact configured Origin, an explicit confirmation header, matching user/session headers and an empty JSON object. Alternate token/password/callback parameters and the deletion-token callback are blocked. Native CSRF checks remain enabled; no Google permissions are added.
+
+Successful deletion removes the user, all their sessions, provider links and saved list, leaving other accounts intact. Existing FK cascades are tested with real migrations. Better Auth's adapter deletes in sequential steps without an interactive transaction: an error may leave partial deletion, or occur after a complete commit. Only the exact native success response confirms completion. Network/deadline/malformed/server failures stay uncertain, with no automatic retry. Reading a missing session does not prove deletion. Cancelling before confirmation sends no deletion; abort after dispatch cannot guarantee rollback.
+
+Before dispatch, the coordinator withholds the initiating session, aborts its list work and clears server-state cache. It cannot resume that identity from stale session data; a different validated account loads independently. Rejected deletion requires a fresh login to resume that list in the current client. Deletion replies never forward `Set-Cookie`, preventing a late response from clearing another account's newer cookie. Authentication is refreshed independently, without a forced logout of the current account.
+
+The browser's anonymous copy and import-owner marker are preserved, even when the marker refers to a deleted user. They are never released or reassigned by deletion; explicit recovery keeps its existing guards. No remote account list is copied into anonymous storage. Google accounts/grants, transient OAuth verification records, backups/logs and already downloaded files are outside the account-row cascades. See [11B verification and limits](history/account-deletion-2026-10-17.md). This is a local implementation, not deployment evidence; 04A remains deferred.
+
 ## Guided pending-import recovery
 
 The list distinguishes another account, unavailable storage, capacity, changed snapshots, interrupted requests and unavailable cross-tab coordination. Recovery can preserve the snapshot, download validated anonymous JSON, sign out to return to the original account, or explicitly discard only the browser copy after confirmation. It never exports a cloud account document or automatically transfers ownership. The JSON download is a backup; file restoration is not implemented.

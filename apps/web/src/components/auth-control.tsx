@@ -26,6 +26,8 @@ import { AccountListExportError, exportAccountList } from "../lib/shopping-list/
 import { downloadShoppingList } from "../lib/shopping-list/download";
 import { useShoppingClient } from "./shopping-list/shopping-list-provider";
 import { GoogleMark } from "./google-mark";
+import { AccountDeletionDialog } from "./account-deletion-dialog";
+import type { AccountDeletionConfirmation } from "./account-deletion-dialog";
 
 type SessionUser = NonNullable<ReturnType<typeof authClient.useSession>["data"]>["user"];
 
@@ -113,11 +115,13 @@ function LoginDialog({ onClose }: { onClose: () => void }) {
 }
 
 export function AuthControl() {
-  const { data, isPending, error: sessionError } = authClient.useSession();
+  const { data, isPending, error: sessionError, refetch } = authClient.useSession();
   const shopping = useShoppingClient();
   const [exporting, setExporting] = useState(false);
   const exportController = useRef<AbortController | null>(null);
   const exportIdentity = useRef<string | null>(null);
+  const [deletion, setDeletion] = useState<AccountDeletionConfirmation | null>(null);
+  const deletionController = useRef<AbortController | null>(null);
   const [loginOpen, setLoginOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -128,6 +132,13 @@ export function AuthControl() {
   const sessionId = data?.session.id;
   const userId = data?.user.id;
   const sessionUnavailable = isPending || Boolean(sessionError);
+  const accountWithheld =
+    data &&
+    shopping.isAccountSessionWithheld({
+      status: "authenticated",
+      userId: data.user.id,
+      sessionId: data.session.id,
+    });
 
   useLayoutEffect(() => {
     exportIdentity.current = null;
@@ -137,11 +148,20 @@ export function AuthControl() {
     return () => {
       exportIdentity.current = null;
       exportController.current?.abort();
+      deletionController.current?.abort();
     };
   }, [sessionId, userId, sessionUnavailable]);
 
   async function downloadAccount() {
-    if (!data || sessionUnavailable || inFlight.current || exportController.current) return;
+    if (
+      !data ||
+      sessionUnavailable ||
+      accountWithheld ||
+      inFlight.current ||
+      exportController.current
+    ) {
+      return;
+    }
     const controller = new AbortController();
     exportController.current = controller;
     setExporting(true);
@@ -222,6 +242,7 @@ export function AuthControl() {
       {user ? (
         <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} modal={false}>
           <DropdownMenuTrigger
+            ref={trigger}
             render={<Button variant="ghost" className="h-11 max-w-44 gap-2 px-2" />}
             aria-label={`Cuenta de ${user.name.trim() || user.email}`}
           >
@@ -260,7 +281,7 @@ export function AuthControl() {
               </DropdownMenuLabel>
               <DropdownMenuItem
                 closeOnClick={false}
-                disabled={loggingOut || exporting || sessionUnavailable || !data}
+                disabled={loggingOut || exporting || sessionUnavailable || accountWithheld || !data}
                 aria-busy={exporting}
                 onClick={() => void downloadAccount()}
                 className="min-h-11 px-3"
@@ -279,6 +300,29 @@ export function AuthControl() {
                   <LogOut className="size-4" aria-hidden="true" />
                 )}
                 {loggingOut ? "Cerrando sesión…" : "Cerrar sesión"}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                disabled={loggingOut || exporting || sessionUnavailable || accountWithheld || !data}
+                className="min-h-11 px-3"
+                onClick={() => {
+                  if (!data) return;
+                  const controller = new AbortController();
+                  deletionController.current = controller;
+                  setMenuOpen(false);
+                  setDeletion({
+                    session: {
+                      status: "authenticated",
+                      userId: data.user.id,
+                      sessionId: data.session.id,
+                    },
+                    email: data.user.email,
+                    controller,
+                  });
+                }}
+              >
+                Eliminar cuenta…
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>
@@ -303,6 +347,23 @@ export function AuthControl() {
           }}
         />
       )}
+      {deletion &&
+        !deletion.controller.signal.aborted &&
+        deletion.session.userId === userId &&
+        deletion.session.sessionId === sessionId &&
+        !sessionUnavailable && (
+          <AccountDeletionDialog
+            confirmation={deletion}
+            exporting={exporting}
+            download={downloadAccount}
+            trigger={trigger}
+            refreshSession={() => refetch({ query: { disableCookieCache: true } })}
+            close={() => {
+              deletion.controller.abort();
+              setDeletion(null);
+            }}
+          />
+        )}
     </div>
   );
 }

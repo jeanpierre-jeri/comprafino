@@ -2,7 +2,7 @@ import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { account, session, user, verification } from "@comprafino/db";
 import type { createDatabase } from "@comprafino/db";
 import type { BetterAuthOptions } from "better-auth";
-import { APIError, createAuthMiddleware } from "better-auth/api";
+import { APIError, createAuthMiddleware, getAuthoritativeSessionFromCtx } from "better-auth/api";
 
 /** Shared production configuration; tests supply only an owned, isolated database. */
 export function authOptions(
@@ -52,8 +52,51 @@ export function authOptions(
     advanced: { database: { generateId: "uuid" } },
     account: { encryptOAuthTokens: true },
     emailAndPassword: { enabled: false },
+    user: { deleteUser: { enabled: true } },
     hooks: {
       before: createAuthMiddleware(async (ctx) => {
+        // There is no deletion-token/email flow in this application. Keep the
+        // native API's authoritative-session/freshness checks, and bind the
+        // explicit confirmation to the initiating account AND session.
+        if (ctx.path === "/delete-user/callback") {
+          throw new APIError("FORBIDDEN", {
+            code: "DELETE_CONFIRMATION_REQUIRED",
+            message: "Use account confirmation",
+          });
+        }
+        if (ctx.path === "/delete-user") {
+          if (
+            ctx.headers?.get("origin") !== baseURL ||
+            ctx.headers.get("x-comprafino-confirm-delete") !== "delete-own-account"
+          ) {
+            throw new APIError("FORBIDDEN", {
+              code: "DELETE_CONFIRMATION_REQUIRED",
+              message: "Account confirmation required",
+            });
+          }
+          if (Object.keys(ctx.body ?? {}).length) {
+            throw new APIError("BAD_REQUEST", {
+              code: "DELETE_INVALID_REQUEST",
+              message: "Deletion parameters are server-configured",
+            });
+          }
+          const current = await getAuthoritativeSessionFromCtx(ctx);
+          if (!current) {
+            throw new APIError("UNAUTHORIZED", {
+              code: "UNAUTHORIZED",
+              message: "Session unavailable",
+            });
+          }
+          if (
+            ctx.headers.get("x-comprafino-delete-session") !== current.session.id ||
+            ctx.headers.get("x-comprafino-delete-owner") !== current.user.id
+          ) {
+            throw new APIError("CONFLICT", {
+              code: "ACCOUNT_SESSION_CHANGED",
+              message: "Account or session changed",
+            });
+          }
+        }
         if (
           ["/sign-in/social", "/link-social"].includes(ctx.path) &&
           (ctx.body?.scopes !== undefined || ctx.body?.additionalParams !== undefined)

@@ -108,6 +108,7 @@ export class ShoppingListSyncClient {
   private refreshAgain = false;
   private expired = false;
   private uncertain = false;
+  private withheldSession: ShoppingSession | null = null;
 
   constructor(
     private storage: ShoppingStorage,
@@ -153,6 +154,9 @@ export class ShoppingListSyncClient {
   }
 
   setSession(session: ShoppingSession) {
+    if (this.withheldSession && sameShoppingSession(session, this.withheldSession)) {
+      session = { status: "unavailable", accountKnown: true };
+    }
     if (sameShoppingSession(session, this.getSnapshot().session)) return;
 
     this.controller.abort();
@@ -169,6 +173,25 @@ export class ShoppingListSyncClient {
     } else if (session.status === "authenticated") {
       void this.importAnonymous();
     }
+  }
+
+  // Deletion may commit even without a reply. Hide this session's cloud data
+  // and stop its imports/mutations until a different validated identity arrives.
+  // Never erase/release the anonymous copy, or withhold a newer account.
+  withholdAccountSession(session: ShoppingSession): boolean {
+    if (
+      session.status !== "authenticated" ||
+      !sameShoppingSession(session, this.store.getState().session)
+    ) {
+      return false;
+    }
+    this.withheldSession = session;
+    this.setSession({ status: "unavailable", accountKnown: true });
+    return true;
+  }
+
+  isAccountSessionWithheld(session: ShoppingSession): boolean {
+    return this.withheldSession !== null && sameShoppingSession(session, this.withheldSession);
   }
 
   private readAnonymous() {

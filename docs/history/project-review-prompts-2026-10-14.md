@@ -222,7 +222,7 @@ No añadas infraestructura ni queue: max por defecto: explica primero si se busc
 
 ## Prompt 11 Dar al usuario control sobre sus datos
 
-**11A implementado localmente:** [exportación de la lista sincronizada](account-list-export-2026-10-17.md), con pruebas de sesión/propiedad y cancelación. El bloque original siguiente conserva un alcance mayor: eliminación de cuenta, exportación completa e información general de privacidad no están entregadas por 11A. No se acredita despliegue; 04A sigue aplazado.
+**11A y 11B implementados localmente:** [exportación de la lista sincronizada](account-list-export-2026-10-17.md), con pruebas de sesión/propiedad y cancelación; [eliminación de cuenta propia](account-deletion-2026-10-17.md), con confirmación vinculada a sesión, frescura, Origin, cascadas verificadas y resultados inciertos sin reintento automático. La copia anónima y su propiedad se conservan. El bloque original siguiente conserva un alcance mayor: exportación completa, información general de privacidad y decisiones de retención siguen pendientes. No se acredita despliegue; 04A sigue aplazado.
 
 ```text
 Diseña e implementa una superficie pequeña de gestión de datos de cuenta en CompraFino, siguiendo AGENTS.md y H11 del reporte project-review-2026-10-14.md. Revalida lo que ya exista antes de añadir rutas o componentes.

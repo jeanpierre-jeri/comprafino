@@ -10,6 +10,7 @@ export default defineConfig({
     "testing/shopping-list-client.spec.ts",
     "testing/shopping-import.spec.ts",
     "testing/shopping-account-export.spec.ts",
+    "testing/account-deletion.spec.ts",
     "testing/shopping-query.spec.ts",
     "testing/catalog-http.spec.ts",
     "testing/request-budget.spec.ts",

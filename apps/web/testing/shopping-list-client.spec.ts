@@ -146,6 +146,34 @@ async function idle(h: ReturnType<typeof harness>) {
   await expect.poll(() => h.client.getSnapshot().busy).toBe(false);
 }
 
+test("11B withholds a deletion session without erasing or reassigning the anonymous copy", async () => {
+  const local = { version: 2 as const, items: [item(2)] };
+  const h = harness(local);
+  h.setClaim("other-owner");
+  h.reply(state(1, [item(1)]));
+  const session = { status: "authenticated", userId: "A", sessionId: "s1" } as const;
+  h.client.setSession(session);
+  await idle(h);
+  expect(h.client.getSnapshot().list.items).toEqual([item(1)]);
+  expect(h.client.withholdAccountSession(session)).toBe(true);
+  expect(h.client.getSnapshot().list.items).toEqual([]);
+  expect(h.client.queryClient.getQueryCache().getAll()).toEqual([]);
+  const reads = h.calls.length;
+  h.client.setSession(session);
+  await expect(h.client.change((list) => list)).rejects.toThrow();
+  expect(h.calls).toHaveLength(reads);
+  expect(h.stored()).toEqual(local);
+  expect(h.owner()).toBe("other-owner");
+  expect(h.clears()).toBe(0);
+  h.reply(state(1, [item(3)]));
+  h.client.setSession({ status: "authenticated", userId: "B", sessionId: "s2" });
+  await idle(h);
+  expect(h.client.withholdAccountSession(session)).toBe(false);
+  expect(h.client.getSnapshot().list.items).toEqual([item(3)]);
+  h.client.setSession({ status: "anonymous" });
+  expect(h.client.getSnapshot().list).toEqual(local);
+});
+
 test("first login persists each item before clearing anonymous data; never writes remote into anonymous", async () => {
   const h = harness({ version: 2, items: [item(1), item(2)] });
   h.reply(state());

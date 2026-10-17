@@ -4,7 +4,12 @@ import { betterAuth } from "better-auth";
 import { testUtils } from "better-auth/plugins";
 import { parseSetCookieHeader } from "better-auth/cookies";
 import { symmetricDecrypt } from "better-auth/crypto";
-import { account as accountTable } from "@comprafino/db";
+import {
+  account as accountTable,
+  mutateUserShoppingList,
+  readUserShoppingList,
+} from "@comprafino/db";
+import { shoppingListItemSchema } from "@comprafino/core";
 import { ownedTestDatabase } from "../../../packages/db/src/testing/database.ts";
 import { closeLocalTestConnections } from "../../../packages/db/src/testing/test-query-client.ts";
 import { authOptions } from "../src/server/auth-config.ts";
@@ -48,10 +53,10 @@ test.describe("Better Auth with explicit TEST_DATABASE_URL and an owned schema",
     }
   });
 
-  async function login() {
+  async function login(email = "ana@example.com") {
     const ctx = await auth.$context;
     const user = await ctx.test.saveUser(
-      ctx.test.createUser({ id: randomUUID(), name: "Ana Test", email: "ana@example.com" }),
+      ctx.test.createUser({ id: randomUUID(), name: "Ana Test", email }),
     );
 
     return ctx.test.login({ userId: user.id });
@@ -60,6 +65,182 @@ test.describe("Better Auth with explicit TEST_DATABASE_URL and an owned schema",
   function lookup(headers = new Headers()) {
     return handlers.GET(new Request(`${env.BETTER_AUTH_URL}/api/auth/get-session`, { headers }));
   }
+
+  function deletionHeaders(loggedIn: Awaited<ReturnType<typeof login>>) {
+    const headers = new Headers(loggedIn.headers);
+    headers.set("origin", env.BETTER_AUTH_URL);
+    headers.set("content-type", "application/json");
+    headers.set("x-comprafino-confirm-delete", "delete-own-account");
+    headers.set("x-comprafino-delete-owner", loggedIn.user.id);
+    headers.set("x-comprafino-delete-session", loggedIn.session.id);
+    return headers;
+  }
+
+  function deleteRequest(headers: Headers, body: unknown = {}) {
+    return new Request(`${env.BETTER_AUTH_URL}/api/auth/delete-user`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(body),
+    });
+  }
+
+  const deletionItem = () =>
+    shoppingListItemSchema.parse({
+      id: randomUUID(),
+      intent: "generic",
+      canonicalId: null,
+      label: "Compra protegida",
+      query: "pan",
+      quantity: { amount: 2, unit: "unit" },
+      frequency: "weekly",
+      createdAt: "2026-10-01T00:00:00.000Z",
+      updatedAt: "2026-10-06T00:00:00.000Z",
+    });
+
+  test("11B native deletion removes only its user, all sessions, provider links and saved list", async () => {
+    const first = await login();
+    const second = await login("other@example.com");
+    const ctx = await auth.$context;
+    await ctx.test.login({ userId: first.user.id });
+    expect(ctx.sessionConfig.freshAge).toBe(86400);
+    for (const loggedIn of [first, second]) {
+      await ctx.internalAdapter.createAccount({
+        providerId: "google",
+        accountId: randomUUID(),
+        userId: loggedIn.user.id,
+      });
+      await mutateUserShoppingList(harness.db, loggedIn.user.id, {
+        expectedRevision: 0,
+        operation: { type: "save", item: deletionItem() },
+      });
+    }
+    const untouched = await readUserShoppingList(harness.db, second.user.id);
+    const response = await handlers.POST(deleteRequest(deletionHeaders(first)));
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ success: true, message: "User deleted" });
+    expect(response.headers.get("set-cookie")).toBeNull();
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
+    for (const table of ["session", "account", "user_shopping_lists"]) {
+      expect(await harness.scoped.query(`select user_id from "${table}" order by user_id`)).toEqual(
+        [{ user_id: second.user.id }],
+      );
+    }
+    expect(await harness.scoped.query('select id from "user"')).toEqual([{ id: second.user.id }]);
+    expect(await readUserShoppingList(harness.db, second.user.id)).toEqual(untouched);
+    expect(await (await lookup(first.headers)).json()).toBeNull();
+    expect((await (await lookup(second.headers)).json()).user.id).toBe(second.user.id);
+  });
+
+  test("11B rejects stale confirmation, origin, CSRF, alternate parameters and callback deletion", async () => {
+    const first = await login();
+    const second = await login("other@example.com");
+    for (const field of [
+      "origin",
+      "x-comprafino-confirm-delete",
+      "x-comprafino-delete-owner",
+      "x-comprafino-delete-session",
+    ]) {
+      const headers = deletionHeaders(first);
+      headers.delete(field);
+      expect((await handlers.POST(deleteRequest(headers))).status).toBeGreaterThanOrEqual(400);
+    }
+    const foreign = deletionHeaders(first);
+    foreign.set("origin", "https://attacker.invalid");
+    expect((await handlers.POST(deleteRequest(foreign))).status).toBe(403);
+    const changed = deletionHeaders(first);
+    changed.set("cookie", second.headers.get("cookie")!);
+    expect((await handlers.POST(deleteRequest(changed))).status).toBe(409);
+    const ctx = await auth.$context;
+    const renewed = await ctx.test.login({ userId: first.user.id });
+    const sameAccountNewSession = deletionHeaders(first);
+    sameAccountNewSession.set("cookie", renewed.headers.get("cookie")!);
+    expect((await handlers.POST(deleteRequest(sameAccountNewSession))).status).toBe(409);
+    for (const body of [
+      null,
+      [],
+      { password: "fake" },
+      { token: "fake" },
+      { callbackURL: "/" },
+      { userId: second.user.id },
+      { confirm: true },
+    ]) {
+      expect((await handlers.POST(deleteRequest(deletionHeaders(first), body))).status).toBe(400);
+    }
+    for (const path of ["delete-user/", "/delete-user", "%64elete-user", "delete-user%2F"]) {
+      const response = await handlers.POST(
+        new Request(`${env.BETTER_AUTH_URL}/api/auth/${path}`, {
+          method: "POST",
+          headers: deletionHeaders(first),
+          body: "{}",
+        }),
+      );
+      expect(response.status).toBeGreaterThanOrEqual(400);
+    }
+    // A real persisted verification token must not bypass our explicit flow.
+    await ctx.internalAdapter.createVerificationValue({
+      identifier: "delete-account-fixture-token",
+      value: first.user.id,
+      expiresAt: new Date(Date.now() + 60000),
+    });
+    expect(
+      (
+        await handlers.GET(
+          new Request(`${env.BETTER_AUTH_URL}/api/auth/delete-user/callback?token=fixture-token`, {
+            headers: first.headers,
+          }),
+        )
+      ).status,
+    ).toBe(403);
+    expect(await harness.scoped.query('select id from "user" order by id')).toHaveLength(2);
+    expect((await (await lookup(first.headers)).json()).user.id).toBe(first.user.id);
+    expect((await (await lookup(second.headers)).json()).user.id).toBe(second.user.id);
+  });
+
+  test("11B rejects missing, revoked and old sessions before deletion", async () => {
+    const loggedIn = await login();
+    expect(
+      (await handlers.POST(deleteRequest(new Headers({ "content-type": "application/json" }))))
+        .status,
+    ).toBe(403);
+    const forged = deletionHeaders(loggedIn);
+    forged.set("cookie", "better-auth.session_token=forged.unsigned");
+    expect((await handlers.POST(deleteRequest(forged))).status).toBe(401);
+    const missing = deletionHeaders(loggedIn);
+    missing.delete("cookie");
+    expect((await handlers.POST(deleteRequest(missing))).status).toBe(401);
+    await harness.scoped.query('update "session" set created_at=$1 where id=$2', [
+      new Date(Date.now() - 86400001),
+      loggedIn.session.id,
+    ]);
+    const old = await handlers.POST(deleteRequest(deletionHeaders(loggedIn)));
+    expect(old.status).toBe(400);
+    expect((await old.json()).code).toBe("SESSION_EXPIRED");
+    await auth.api.signOut({ headers: loggedIn.headers });
+    expect((await handlers.POST(deleteRequest(deletionHeaders(loggedIn)))).status).toBe(401);
+    expect(await harness.scoped.query('select id from "user"')).toEqual([{ id: loggedIn.user.id }]);
+  });
+
+  test("11B does not turn a post-commit Better Auth failure into confirmed success", async () => {
+    const loggedIn = await login();
+    const options = authOptions(harness.db, env);
+    const failing = betterAuth({
+      ...options,
+      user: {
+        deleteUser: {
+          enabled: true,
+          afterDelete: async () => {
+            throw new Error("Controlled after-delete failure");
+          },
+        },
+      },
+    });
+    const response = await authHandlers(() => failing).POST(
+      deleteRequest(deletionHeaders(loggedIn)),
+    );
+    expect(response.status).toBeGreaterThanOrEqual(500);
+    expect(response.headers.get("set-cookie")).toBeNull();
+    expect(await harness.scoped.query('select id from "user"')).toEqual([]);
+  });
 
   function post(path: string, headers: Headers, body: unknown = {}) {
     const requestHeaders = new Headers(headers);
