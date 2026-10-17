@@ -1,0 +1,12 @@
+import { hostingIdentity } from "../../../../../../packages/db/src/testing/hosting/identity.ts";
+
+export const dynamic = "force-dynamic";
+export const maxDuration = 10;
+
+export async function GET() {
+  try {
+    return Response.json(await hostingIdentity("__RUN_ID__", "__COMMIT__"), { headers: { "cache-control": "private, no-store" } });
+  } catch {
+    return Response.json({ error: "Test environment unavailable" }, { status: 503 });
+  }
+}

@@ -1,0 +1,20 @@
+# Copy OUTSIDE source/, chmod 600, fill only after approval. Never upload this file.
+# Do not source this file as shell code; use node --env-file=/absolute/path instead.
+HOSTING_TEST_RUN_ID=REPLACE_FROM_PLAN_JSON
+TEST_DATABASE_URL=postgresql://TEST_ROLE:TEST_PASSWORD@TEST_HOST.neon.tech/comprafino_hosting_RUNPREFIX?sslmode=require
+HOSTING_TEST_DB_HOST=TEST_HOST.neon.tech
+# Explicit acknowledgement after creating and verifying a separate empty Neon project.
+HOSTING_TEST_REMOTE_APPROVED=REPLACE_FROM_PLAN_JSON
+HOSTING_TEST_SCHEMA=REPLACE_AFTER_SEED
+HOSTING_TEST_SECRET=REPLACE_WITH_NEW_RANDOM_SECRET_AT_LEAST_32_CHARACTERS
+HOSTING_TEST_EXPIRES_AT=REPLACE_WITH_ISO_UTC_WITHIN_12_HOURS
+BETTER_AUTH_URL=https://REPLACE_WITH_TEST_DEPLOYMENT.vercel.app
+BETTER_AUTH_SECRET=REPLACE_WITH_DIFFERENT_NEW_RANDOM_SECRET_AT_LEAST_32_CHARACTERS
+GOOGLE_CLIENT_ID=hosting-test-unused
+GOOGLE_CLIENT_SECRET=hosting-test-unused
+# Runner only: exact immutable deployment URL, never production or a redirect.
+HOSTING_TEST_ORIGIN=https://comprafino-04a-REPLACE.vercel.app
+# Runner only, optional: project-scoped automation credential, if explicitly approved.
+# VERCEL_AUTOMATION_BYPASS_SECRET=
+# Cleanup only, after stopping requests and the test deployment:
+# HOSTING_TEST_STOPPED=REPLACE_FROM_PLAN_JSON

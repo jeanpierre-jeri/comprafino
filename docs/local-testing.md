@@ -155,3 +155,7 @@ The read-only audit can be repeated with `pnpm --filter @comprafino/db exec node
 ## Selected-product list checks
 
 `packages/core/src/shopping-selection.test.ts` covers independent SKU persistence/account validation, distinct selections, source-store baselines, compatible whole-package alternatives, revoked/null identity safety and withheld source evidence. `shopping-price-history.test.ts` covers Lima 7/30/90-day boundaries, ordinary package minima, latest tied observation, sparse coverage, future/invalid samples and separation from substitutes/generic needs. The shopping SQL suite checks independent product images/prices and intraday minima with real observation coverage in its owned schema. Chromium shopping fixtures exercise independent product selection through reload, historical summaries and alternative cards at mobile/desktop widths. Run the existing integration, build and fixture E2E commands above.
+
+## Isolated hosting preparation
+
+The [04A hosting test kit](hosting-test-environment.md) exports a reviewed commit locally and prepares owned synthetic fixtures for a separate Vercel/Neon environment. Preparation creates no remote resources. Its full local storage rehearsal requires `HOSTING_TEST_FULL_REHEARSAL=1` plus explicit `TEST_DATABASE_URL` and `COMPRAFINO_TEST_DATABASE_MODE=local`; ordinary integration runs use only 2,000 records. The kit documents remote approval boundaries, bounded HTTP checks and owner-checked cleanup.

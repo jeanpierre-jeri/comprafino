@@ -10,7 +10,7 @@ import {
 import { evaluatePairs, persistMatching, readMatchingSample } from "../matching.ts";
 import type { ownedTestDatabase } from "./database.ts";
 
-type Harness = ReturnType<typeof ownedTestDatabase>;
+type Harness = Pick<ReturnType<typeof ownedTestDatabase>, "db" | "scoped">;
 
 // Twenty distinct identity templates, four stores, repeated in complete blocks.
 // Repetition measures reader volume, not ingestion throughput or lexical diversity.

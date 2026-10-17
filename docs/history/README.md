@@ -45,7 +45,7 @@ These reports and the full [original roadmap](engineering-notes-2026-10-05.md#or
 
 - [Rendimiento HTTP de búsquedas y canastas 03E](catalog-http-performance-2026-10-16.md): producción Next local, tres escalas, cuatro solicitudes simultáneas, cancelación, memoria y controles de estabilidad.
 - [Presupuestos públicos, cancelación y recuperación 04](public-request-budgets-2026-10-16.md): límites de operación/transporte/SQL, escrituras inciertas, ajuste del trabajo posterior y estabilidad concurrente a 50.000 registros.
-- [Inspección del hosting 04A](hosting-request-budgets-2026-10-16.md): despliegue registrado anterior al prompt 04, acceso protegido, cancelación optativa de Vercel y requisitos pendientes para aceptación remota.
+- [Inspección del hosting 04A](hosting-request-budgets-2026-10-16.md): inspección de solo lectura, preparación local del entorno aislado y verificación remota aplazada por decisión del responsable del proyecto.
 
 - [Category and text search performance 03B](catalog-category-performance-2026-10-16.md): shared offer read, category/global response equivalence and concurrent basket controls.
 - [Canastas genéricas y estabilidad concurrente, prompt 03D](catalog-generic-performance-2026-10-16.md): filtros y orden con claves nativas, comparación pareada con 03F y repetición de la matriz.

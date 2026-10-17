@@ -1,0 +1,27 @@
+import { timingSafeEqual } from "node:crypto";
+import { NextResponse, type NextRequest } from "next/server";
+import { hostingRuntimeConfig } from "../../../packages/db/src/testing/hosting/config.ts";
+
+// Test artifact only. Never copied into the application checkout.
+export function proxy(request: NextRequest) {
+  try {
+    const config = hostingRuntimeConfig();
+    const expected = Buffer.from(`Bearer ${config.secret}`);
+    const supplied = Buffer.from(request.headers.get("authorization") ?? "");
+    if (config.runId !== "__RUN_ID__" || expected.length !== supplied.length || !timingSafeEqual(expected, supplied)) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+    // Synthetic sessions will be provisioned locally; real OAuth is unnecessary.
+    if (request.nextUrl.pathname.startsWith("/api/auth/")) {
+      return new NextResponse("Disabled in hosting tests", { status: 403 });
+    }
+    const response = NextResponse.next();
+    response.headers.set("x-robots-tag", "noindex, nofollow");
+    response.headers.set("cache-control", "private, no-store");
+    return response;
+  } catch {
+    return new NextResponse("Test environment unavailable", { status: 503 });
+  }
+}
+
+export const config = { matcher: "/:path*" };

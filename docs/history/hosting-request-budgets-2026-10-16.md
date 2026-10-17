@@ -2,7 +2,115 @@
 
 Fecha: **16 de octubre de 2026**. Inspección pública aproximadamente 15:00–15:05 en Lima; comprobación posterior mediante la conexión Vercel aproximadamente 15:09. Continuación del [prompt 04](public-request-budgets-2026-10-16.md).
 
-## Resultado
+## Decisión posterior: verificación remota aplazada
+
+**El 16 de octubre de 2026 el responsable del proyecto decidió aplazar 04A porque actualmente tiene muy pocos usuarios.** La inspección de solo lectura y la preparación local quedan documentadas; la aceptación de carga, cancelación y recuperación en el hosting sigue **sin verificar**. No se crearon recursos remotos ni se desplegó el kit. Esta decisión no cambia presupuestos, reglas de comparación ni las pruebas de regresión existentes.
+
+No se considera necesario crear ahora un proyecto Vercel y una base separados para continuar mejorando el producto. El siguiente esfuerzo se destina a frescura y cobertura útil del catálogo, recorrido de compra y conservación de las listas, según la [priorización actual del proyecto](project-review-2026-10-14.md). La poca concurrencia reduce la urgencia de esta prueba; no demuestra que una petición costosa sea rápida ni que el hosting cancele su SQL.
+
+Se retomará ante errores o esperas recurrentes, crecimiento relevante del catálogo, una campaña que vaya a aumentar las visitas, o cambios en hosting, transporte o cancelación. Antes de ejecutarlo habrá que revisar cuotas y consumo vigentes, seleccionar el commit que se quiera validar y regenerar el kit: la copia conservada corresponde a `969a6f7`, anterior a los cambios de lista de `6172047`. No reutilizar credenciales caducadas ni presentar las mediciones locales como resultados remotos.
+
+El procedimiento y sus estimaciones se conservan para ese momento; no son una instrucción de publicación ni de creación de recursos ahora. La limpieza local previa quedó verificada y no hay recursos remotos de este ensayo que eliminar.
+
+## Continuación: configuración leída y preparación local
+
+La inspección de solo lectura se completó en la sesión autenticada del navegador. No se guardaron ajustes, no se crearon accesos de automatización ni recursos remotos y no se generó carga sobre producción. El 403 del conector no se considera resuelto: se utilizó el panel como vía alternativa autorizada.
+
+| Control                 | Evidencia visible                                                                              | Implicación                                                                                                       |
+| ----------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Functions               | Fluid Compute activado; `iad1`; Standard 1 vCPU / 2 GB                                         | Reproducir estos valores en el entorno aislado                                                                    |
+| Duración predeterminada | Campo vacío, placeholder 300 s                                                                 | No es un valor personalizado guardado; los logs sí confirman los máximos por ruta de 20/30/35 s                   |
+| Cancelación             | No hay control de `supportsCancellation` en esa pantalla; el commit no lo declara              | El valor efectivo del artefacto no está demostrado; tampoco la propagación de desconexión                         |
+| Firewall                | Sin reglas personalizadas, sin bloqueos IP ni system bypass; Bot Protection Off; AI Bots Allow | No hay un limitador personalizado visible para las rutas públicas; la mitigación DDoS administrada sigue presente |
+| Deployment Protection   | Vercel Authentication activada, Standard Protection; sin secretos de automatización            | Conservar protección; cualquier credencial futura debe pertenecer solo al proyecto de pruebas                     |
+| Facturación             | Hobby Active; Spend Management: No team budget; Add Budget deshabilitado y reservado a Pro     | No hay un tope monetario configurado demostrado; las cuotas y límites propios deben revisarse antes de publicar   |
+
+Fuentes de la cuenta: [Functions](https://vercel.com/jeanpierrejeris-projects/comprafino/settings/functions), [Firewall](https://vercel.com/jeanpierrejeris-projects/comprafino/firewall/rules), [Deployment Protection](https://vercel.com/jeanpierrejeris-projects/comprafino/settings/deployment-protection) y [Billing](https://vercel.com/jeanpierrejeris-projects/~/settings/billing). BotID mostraba la invitación a instalar el paquete; no se tomó la opción Basic visible como prueba de una integración activa.
+
+### Consumo observado, no atribuido al nuevo despliegue
+
+La ventana visible fue **16 de septiembre, 2 pm, a 16 de octubre, 2 pm**, Last 30 Days. Acaba antes del despliegue inspeccionado de esa tarde. No representa el coste del prompt 04 ni el saldo contractual exacto del siguiente ensayo.
+
+| Métrica                  | Proyecto comprafino | Todos los proyectos del equipo |
+| ------------------------ | ------------------: | -----------------------------: |
+| Fast Data Transfer       |            59,68 MB |                        74,3 MB |
+| Fast Origin Transfer     |            20,58 MB |                       30,13 MB |
+| CDN Requests             |             6,3 mil |                          8.428 |
+| Function Invocations     |             4,2 mil |                        5,1 mil |
+| Fluid Active CPU         |          7 min 27 s |                     7 min 27 s |
+| Fluid Provisioned Memory |              1 GB-h |                         1 GB-h |
+| Build CPU Minutes        |          3 h 10 min |                     3 h 10 min |
+
+La pantalla del equipo muestra 100 GB de transferencia CDN, 10 GB de transferencia de origen y un millón de solicitudes CDN como asignaciones de referencia. Las cifras redondeadas no sirven para calcular una factura exacta. Fuente: [Usage del proyecto](https://vercel.com/jeanpierrejeris-projects/comprafino/usage) y [Usage del equipo](https://vercel.com/jeanpierrejeris-projects/~/usage). La duración heredada de Functions y la memoria Fluid son métricas distintas; no se sumaron como si fueran el mismo concepto.
+
+### Entrega local y aceptación pendiente
+
+El [procedimiento del entorno aislado](../hosting-test-environment.md) especifica recursos, archivos, variables, estimaciones, límites, publicación y limpieza. Incluye un generador local fijado a un commit, fixtures con marca de propiedad y limpieza selectiva, referencias de resultados y cliente HTTP remoto acotado. Reutiliza la matriz y los validadores de 03E. Los adaptadores de ejecución se aplican únicamente a una copia exportada; no a producción ni al checkout de la aplicación.
+
+Se propone un proyecto Vercel separado, un proyecto Neon vacío con base y rol propios, un Preview inicial y como máximo una variante adicional de cancelación si se aprueba. El ciclo descrito genera **2.000 solicitudes HTTP** incluyendo una smoke, tres matrices, estabilidad y abortos/recuperación. La provisión de datos añade consultas y almacenamiento de histórico; no se confunde con solo 50.000 filas en total.
+
+La preparación no cierra la aceptación remota de 04A. Faltan recursos aprobados y publicados, mediciones reales en Vercel/Neon, observación de SQL tras desconexión, timeout SQL controlado, recuperación de sync tras respuesta perdida y estabilidad con cuatro solicitudes a 50.000. El CLI de aborto informa de la cancelación del cliente y una recuperación posterior; no declara cancelación del servidor verificada. Los controladores remotos de bloqueo SQL y de sesión/escritura incierta todavía necesitan preparación específica, descrita en el procedimiento.
+
+Conservar los presupuestos actuales hasta obtener esas mediciones. Evaluar región efectiva de Neon, arranque en frío, límites agregados y una eventual política de frecuencia del WAF con tráfico real. No aumentar los plazos ni habilitar cancelación global basándose en cinco respuestas normales.
+
+### Medición local de almacenamiento y limpieza
+
+El ensayo completo creó un esquema aleatorio propio, aplicó las migraciones, sembró datos sintéticos y creció de 80 a 2.000, 10.000 y 50.000 registros. Terminó en **272,28 segundos**, validó los fingerprints y comprobó que se rechaza un propietario incorrecto o una limpieza sin declaración de parada. Después eliminó exclusivamente su esquema y verificó que ya no podía abrirlo.
+
+| Productos | Estados de precios | Días de observación | Tamaño de tablas e índices del esquema |
+| --------- | -----------------: | ------------------: | -------------------------------------: |
+| 2.000     |             72.000 |              71.100 |           28.229.632 bytes (26,92 MiB) |
+| 10.000    |            360.000 |             355.500 |         131.620.864 bytes (125,52 MiB) |
+| 50.000    |          1.800.000 |           1.777.500 |         649.789.440 bytes (619,69 MiB) |
+
+La suma usa `pg_total_relation_size` sobre tablas del esquema, incluyendo índices y TOAST sin contar dos veces los índices. No es almacenamiento facturado por Neon. Para la prueba de 50.000 se recomienda disponer de **al menos 1,5 GB de margen total planificado** y revisar consumo remoto antes de ampliarla; el Free anunciado de 1 GB podría quedar corto con sobrecostes de almacenamiento e histórico, aunque el tamaño SQL local sea inferior. No se contrató un plan.
+
+Un primer ensayo venció a los 180 segundos durante la inserción del histórico. Se identificó su esquema mediante la marca de propiedad, se canceló únicamente su SQL local y se eliminó ese esquema antes de repetir. Se amplió el plazo del test de preparación a 900 segundos; **no se cambió ningún presupuesto de petición pública**. El intento siguiente intermedio falló por una firma de callback incompleta, corregida antes del ensayo exitoso. Estas incidencias no son resultados de rendimiento del hosting.
+
+### Comprobaciones del kit
+
+- Formato, lint, comprobación de referencias de documentación y `git diff --check`: correctos.
+- Typecheck: los cinco paquetes correctos; también se comprobó la copia exportada con sus tipos de Next.
+- Base de datos: 98 pruebas unitarias correctas, incluidas ocho comprobaciones nuevas de configuración, aislamiento, caducidad y propiedad. Cinco pruebas del validador HTTP correctas.
+- Ensayo completo de fixtures: correcto en las tres escalas; limpieza verificada.
+- Build de la copia: correcto con **Webpack**, sobre los mismos archivos en una carpeta temporal independiente; compilación en 11,3 s, tipos y generación estática correctos. El build normal con Turbopack quedó bloqueado por `EPERM` al abrir un puerto local. Una compilación previa también detectó un tipo de entorno incompatible con Next, corregido. El recorrido de archivos fue muy lento dentro de `.artifacts` anidado; se verificaron los hashes antes de usar la copia temporal y se trasladó el build exitoso al kit. No se modificó el bundler de producción ni se presenta esto como un build remoto.
+- Smoke Chromium: correcto en el kit final. Sin secreto y con secreto incorrecto: 401; portada autorizada: 200; búsqueda demasiado corta: validación visible; OAuth: 403; marcador sin fixtures: 503. El servidor y navegador tenían la red externa bloqueada. El servidor local terminó al finalizar.
+
+Paquete preparado: `.artifacts/hosting-04a/4a1b5e31c8124ad09600c2970c23c711/`. `plan.json` registra doce archivos adaptados con SHA-256 y `verification.json` conserva resultados y limitaciones. El código del dominio corresponde al commit inspeccionado; los cambios posteriores de la lista de compras no se incorporaron a esta línea base.
+
+## Primera continuación posterior al push: acceso por navegador
+
+**El acceso de lectura al panel y a los logs ya funciona mediante la sesión autenticada del navegador.** No fue necesario reconectar el plugin ni modificar permisos o configuración. Esto proporciona una vía para continuar 04A; no demuestra que el error 403 del conector esté corregido. Las consultas anteriores a logs del conector habían seguido fallando, aunque las lecturas del proyecto, despliegue y alias por identificador, sin selector de equipo, sí funcionaban.
+
+La inspección posterior comprobó en el panel que `comprafino.vercel.app` sirve el despliegue `dpl_2cQKYn9Q2Pvk4yptSJe7K4Q78yxY`, en estado **Ready**, de `main` y commit `969a6f773e673e9093a8796be6bd3f2772b3c64f`. Por tanto, la diferencia de versión descrita en la inspección inicial de abajo ya está resuelta. El usuario confirmó haber aplicado la migración 0014; no se consultó el esquema de producción para comprobarlo de forma independiente.
+
+Se abrieron cinco registros existentes del 16 de octubre, entre las 15:22:39 y las 15:28:38 de Lima. No se generaron estas solicitudes como parte de esta inspección ni se repitió una carga de prueba sobre producción.
+
+| Ruta                      | Estado observado | Ejecución de función | Máximo mostrado por Vercel | Respuesta finalizada según el panel |
+| ------------------------- | ---------------- | -------------------: | -------------------------: | ----------------------------------: |
+| `POST /api/list/evaluate` | 200              |               768 ms |                       20 s |                              906 ms |
+| `GET /search`             | 200              |               915 ms |                       30 s |                              938 ms |
+| `GET /products/[id]`      | 200; prefetch    |               109 ms |                       35 s |                              292 ms |
+| `GET /listings/[id]`      | 200              |                84 ms |                       20 s |                              227 ms |
+| `GET /api/list/sync`      | 200              |                63 ms |                       20 s |                              207 ms |
+
+Los cinco máximos coinciden con las declaraciones del prompt 04. Son **muestras individuales de tráfico existente**, no percentiles, pruebas de capacidad ni verificaciones del contenido completo. La lectura de sync no prueba una escritura ni su recuperación. Los estados 200 de páginas renderizadas por streaming tampoco prueban la finalización correcta de todas sus tareas posteriores.
+
+El panel muestra plan **Hobby**, ejecución **Fluid** y funciones en **Washington, D.C. (`iad1`)**, con recepción en São Paulo (`gru1`). En búsqueda y producto aparecen llamadas al endpoint HTTP de Neon `api.c-6.us-east-2.aws.neon.tech/sql`; esto identifica el endpoint observado, sin demostrar por sí solo la ubicación efectiva del compute de la base. El panel ofrece las métricas detalladas de latencia externa mediante una ampliación de plan; no se realizó ninguna ampliación. Los valores mostrados junto a Fluid fueron de 230 a 269 MB en estas muestras y no equivalen al coste facturado ni a una medición de memoria bajo carga concurrente.
+
+En [Deployments filtrado únicamente por Preview](https://vercel.com/jeanpierrejeris-projects/comprafino/deployments?environment=preview), el panel respondió **No Results / No deployments match the current filters**. No se encontró un despliegue Preview en este proyecto. Eso no descarta un entorno en otro proyecto o cuenta, y tampoco confirma que exista una base de pruebas aislada.
+
+### Pendientes registrados en la primera continuación
+
+- Inspeccionar la configuración efectiva de cancelación, las reglas de frecuencia y las protecciones de gasto; el acceso al panel permite continuar esas lecturas. La ausencia de errores en el intervalo visible no sustituye estos controles.
+- Disponer de una aplicación de pruebas con base explícita y aislada, equivalente al código publicado. Sin ese entorno siguen pendientes la cancelación, el timeout SQL, la recuperación de escrituras con respuesta perdida y cuatro solicitudes simultáneas con 50.000 registros.
+- Adaptar el cliente de benchmark a un destino remoto controlado: el ejecutor actual inicia un servidor local y no admite sustituirlo directamente por una URL de Vercel.
+
+La propuesta para el siguiente trabajo es preparar primero la configuración y el ejecutor revisables para un despliegue de pruebas separado, fijado al commit que se quiera verificar, y una base vacía de pruebas con esquemas aleatorios propios. Debe conservar los límites actuales, usar únicamente datos sintéticos, limitar la concurrencia a cuatro, autenticar el acceso de prueba y excluir las credenciales y los servicios de producción. Los sondeos de fallo deben quedar restringidos a ese entorno. Antes de crear recursos remotos se debe presentar el inventario concreto, el consumo previsto de funciones/base, los límites de ejecución y su limpieza; no se afirma que el coste sea cero. En ese momento la propuesta no estaba implementada; la continuación anterior documenta su preparación local actual. Sigue sin publicarse.
+
+Por ahora se recomienda conservar los presupuestos actuales: cinco ejecuciones normales no justifican cambiarlos. La evidencia resumida de esta continuación está en `.artifacts/hosting-budgets-2026-10-16/browser-access-summary.json`. En esa primera continuación solo se editaron este reporte y su referencia en `docs/request-budgets.md`; no se modificó el código de aplicación ni la configuración remota.
+
+## Resultado de la inspección inicial, anterior al push
 
 **La aceptación remota de los presupuestos queda pendiente.** El último despliegue público registrado en GitHub corresponde a una revisión anterior al prompt 04. Esa revisión no contiene sus cuatro módulos nuevos ni las cinco declaraciones `maxDuration`. La portada pública funciona, pero respondió desde caché y no permite evaluar los nuevos límites.
 
