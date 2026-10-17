@@ -51,16 +51,62 @@ Se inspeccionaron capturas de editor, lista y plan. En el detalle corregido, el 
 
 ## Guion pendiente con 3–5 personas
 
-El responsable puede realizar una sesión breve por persona. Usar productos de ejemplo y dejar que cada participante decida cómo avanzar; no señalar cada botón. No se enviaron invitaciones ni se hicieron sesiones durante esta tarea.
+La validación humana sigue pendiente. Este apartado es un protocolo para que el responsable lo use cuando tenga participantes; no se enviaron invitaciones ni se hicieron sesiones durante esta tarea. Los commits locales de 13A y de las tareas posteriores no demuestran por sí mismos que esos cambios estén publicados.
+
+### Preparación y moderación
+
+- Invitar a 3–5 personas que compren alimentos o productos del hogar. No necesitan ser usuarios actuales. Pedirles que usen un teléfono y aclarar que se evalúa la interfaz, no a la persona. La participación es voluntaria; no recopilar nombres, correos, credenciales ni datos de compra reales.
+- Antes de cada sesión, anotar la versión que se probará y confirmar que el entorno, la cuenta de prueba y el catálogo corresponden a esa versión. Preferir un entorno de prueba con datos de ejemplo. No cambiar producción para preparar una sesión. Si solo está disponible producción, no hacer cambios destructivos ni usar una cuenta o lista con información personal; detenerse si no se puede mantener esa separación.
+- Reservar 10–15 minutos y tener abierta la lista de tareas de abajo. Dejar el teléfono en manos de la persona; observar sin tomarlo ni indicar dónde tocar. Leer cada consigna tal como está escrita, en orden, y dejar que la persona decida qué hacer.
+- Mientras trabaja, guardar silencio unos segundos antes de intervenir. Si se atasca, usar una pregunta neutral: «¿Qué esperabas que pasara?» o «¿Qué te gustaría hacer ahora?». No nombrar botones, explicar conceptos ni corregir una interpretación hasta terminar la tarea. Si la persona pide ayuda, dar solo la mínima necesaria y anotarlo como ayuda requerida.
+- Después de la tarea de importes, preguntar primero «¿Cómo llegaste a esa conclusión?» y registrar sus palabras. Solo al acabar todas las tareas, aclarar cualquier diferencia entre el producto elegido y el plan sugerido.
+- Anotar conductas y frases observadas, no suposiciones sobre lo que la persona pensó. No grabar audio o video ni tomar capturas identificables. Al cerrar, agradecer y eliminar cualquier dato temporal de prueba que se haya creado.
+
+### Tareas para leer en voz alta
 
 1. **Buscar y elegir:** «Encuentra un producto que comprarías y abre la información que usarías para decidir». Observar si distingue su presentación, tienda y disponibilidad.
 2. **Guardar:** «Añádelo a tu lista para comprar dos paquetes cada dos semanas». Observar si entiende preferido frente a estricto y la unidad paquetes.
-3. **Volver:** «Sal de la lista y vuelve a abrirla; cambia la cantidad y comprueba que se conserva al recargar». Registrar dudas o pérdida aparente de estado.
-4. **Explicar los importes:** «Dime cuánto cuesta tu producto guardado y qué comprarías siguiendo el plan sugerido». Pedir que lo explique con sus palabras antes de aclarar conceptos.
+3. **Editar y recargar:** «Sal de la lista y vuelve a abrirla; cambia la cantidad y comprueba que se conserva al recargar». Registrar dudas o pérdida aparente de estado.
+4. **Explicar los importes:** «Dime cuánto cuesta tu producto guardado y qué comprarías siguiendo el plan sugerido». Pedir que lo explique con sus palabras antes de aclarar conceptos. Observar si distingue el precio del producto seleccionado del importe y las tiendas del plan.
 5. **Comparar visitas:** «Revisa una y varias tiendas y elige qué harías». Comprobar si abre el desglose, reconoce alternativas y distingue ahorro en productos del esfuerzo de visitar otra tienda.
 6. **Cerrar y retomar:** «Vuelve a tu lista sin aplicar otra selección». Observar si encuentra el cierre, mantiene el contexto y reconoce su producto original.
 
-Anotar por tarea si la completa, dónde se detiene, qué importe interpreta y qué ayuda necesita. Una confusión repetida orienta la siguiente corrección; no se convierte el guion en una métrica de éxito inventada. Probar errores controlados únicamente en el entorno local; una eventual sesión real no requiere provocar fallos en producción.
+No pedir que provoque errores ni que use una lista real. Si una tarea no puede completarse por falta de datos de ejemplo, un fallo del entorno u otra causa externa, registrarla como bloqueada y describir la causa; no sustituirla por una explicación del moderador.
+
+### Ficha breve por sesión
+
+Completar una copia de esta ficha por persona. Usar un código (P1, P2…) y no incluir datos que la identifiquen. Registrar la versión y el entorno exactos que se observaron; si se desconocen, anotarlo en vez de inferirlos.
+
+```text
+Sesión: P__                 Fecha:
+Versión/build:              Entorno: (prueba / local / otro):
+Dispositivo/navegador:       Cuenta y datos: (prueba / otro, sin identificadores)
+
+Tarea                         Resultado (completa / parcial / bloqueada)
+Buscar y elegir:              Duda o frase observada:
+Guardar:                      Duda o frase observada:
+Editar cantidad y recargar:   ¿Qué esperaba? ¿Qué necesitó?
+Importes y plan sugerido:     ¿Qué importe creyó que era el suyo y por qué?
+Una o varias tiendas:         ¿Qué entendió del desglose o las visitas?
+Volver a la lista:            ¿Conservó el producto elegido?
+
+Ayuda del moderador: (ninguna / mínima; describir exactamente)
+Fricción concreta observada:
+¿Afectó a completar la tarea o entender una decisión? ¿Cómo?
+Notas sin datos personales:
+```
+
+### Elegir una sola corrección
+
+Al terminar las sesiones, agrupar observaciones que describan el mismo problema y conservar ejemplos concretos. Priorizar una única corrección que:
+
+1. se haya observado en al menos dos sesiones independientes, o haya impedido a una persona completar una tarea importante;
+2. afecte buscar, elegir, guardar, editar/recargar o entender qué representan el producto elegido y el plan sugerido; y
+3. tenga una causa visible en la interfaz que pueda corregirse sin alterar selección, precios, disponibilidad, matching, elegibilidad ni reglas de comparación.
+
+Si varias observaciones cumplen el criterio, elegir la que impida más directamente completar el recorrido o interpretar los importes con seguridad. Si ninguna lo cumple, no inventar una corrección: conservar las observaciones como evidencia y dejar el recorrido sin cambios. Antes de implementar, describir el problema observado, las sesiones que lo respaldan y el cambio mínimo propuesto; esta guía no autoriza por sí sola a modificar código.
+
+Una confusión repetida orienta la siguiente corrección; no se convierte el guion en una métrica de éxito inventada ni se presenta una muestra pequeña como representativa de todos los usuarios.
 
 ## Límites y comprobaciones
 
@@ -80,4 +126,4 @@ La primera suite completa registró 88 aprobadas, ocho omitidas y un fallo al qu
 
 Las ocho omisiones requieren un catálogo persistido de aplicación, deliberadamente excluido del entorno controlado: seis de `public-search.spec.ts`, una de navegación de comparación y una de filtros de tema. Las búsquedas, detalles y filtros con fixtures propias sí se ejecutan. No se repiten benchmarks del catálogo o del hosting ni se aplican cambios remotos.
 
-La siguiente tarea recomendada es **08A**, una muestra independiente de comparaciones que incluya Makro, con **GPT-6.1 Sol y razonamiento Alto**. La observación con personas puede realizarse en paralelo por el responsable; permanece pendiente y no cambia el estado aplazado de 04A.
+El protocolo de validación humana queda preparado, pero sus resultados siguen pendientes hasta que el responsable realice sesiones y complete las fichas. La muestra 08A ya se documentó en su propio reporte y commit local; no se asume que esos cambios ni los de 13A estén publicados. Mantener 04A aplazado.
