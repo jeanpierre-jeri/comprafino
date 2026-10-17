@@ -1,5 +1,7 @@
+import type { GenericOfferSort } from "@comprafino/core";
+import type { searchGroupedPublicProducts } from "@comprafino/db";
 import { createHash } from "node:crypto";
-import { shoppingListEvaluationSchema } from "@comprafino/core";
+import { formatPen, unitPriceBases, shoppingListEvaluationSchema } from "@comprafino/core";
 
 export function digest(value: unknown) {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex");
@@ -18,6 +20,7 @@ export type SearchExpectation = {
   ids: string[];
   groups: string[][];
   prices: { id: string; ordinary: string; conditional: string[] }[];
+  totalProducts: number;
   totalOffers: number;
   page: number;
   hasMore: boolean;
@@ -34,7 +37,7 @@ export function validateSearchHtml(html: string, expected: SearchExpectation) {
     throw new Error("Incomplete or failed search HTML");
   }
   const articles = [
-    ...html.matchAll(/<article data-offer-id="([0-9a-f-]{36})"[^>]*>([\s\S]*?)<\/article>/gu),
+    ...html.matchAll(/<article data-product-id="([0-9a-f-]{36})"[^>]*>([\s\S]*?)<\/article>/gu),
   ];
   const ids = articles.map((match) => match[1]!);
   // React can flush sibling groups in separate segments. Wire order is not DOM
@@ -53,7 +56,7 @@ export function validateSearchHtml(html: string, expected: SearchExpectation) {
     // React can place comment boundaries between adjacent text nodes.
     const content = article.replaceAll(/<!--[\s\S]*?-->/gu, "").replaceAll("&nbsp;", "\u00a0");
     if (
-      !content.includes(`class="card-amount">${price.ordinary}`) ||
+      !content.includes(`class="card-amount">Desde ${price.ordinary}`) ||
       price.conditional.some((amount) => !content.includes(`Con CMR: ${amount}`))
     ) {
       throw new Error("HTTP displayed ordinary/conditional price differs from the reader");
@@ -61,7 +64,11 @@ export function validateSearchHtml(html: string, expected: SearchExpectation) {
   }
   if (expected.page > 1 || expected.hasMore) {
     const text = html.replaceAll(/<!--[\s\S]*?-->/gu, "");
-    if (!text.includes(`Página ${expected.page} · ${expected.totalOffers} opciones de tienda`)) {
+    if (
+      !text.includes(
+        `Página ${expected.page} · ${expected.totalProducts} productos · ${expected.totalOffers} ofertas de tienda`,
+      )
+    ) {
       throw new Error("HTTP search pagination differs from the reader");
     }
   }
@@ -82,5 +89,35 @@ export function percentiles(values: number[]) {
     p50: ordered[Math.ceil(ordered.length * 0.5) - 1] ?? null,
     p95: ordered.length >= 20 ? ordered[Math.ceil(ordered.length * 0.95) - 1] : null,
     max: ordered.at(-1) ?? null,
+  };
+}
+
+/** Same grouped public reader contract as the page, including filtered totals. */
+export function searchExpectation(
+  result: Awaited<ReturnType<typeof searchGroupedPublicProducts>>,
+  sort: GenericOfferSort,
+): SearchExpectation {
+  const products = result.products;
+  return {
+    ids: products.map((product) => product.id),
+    groups:
+      sort === "unit-price"
+        ? [...unitPriceBases, "unknown"].map((basis) =>
+            products
+              .filter((product) => (product.unitPrice?.basis ?? "unknown") === basis)
+              .map((product) => product.id),
+          )
+        : [products.map((product) => product.id)],
+    prices: products.map((product) => ({
+      id: product.id,
+      ordinary: formatPen(product.ordinaryOffer.currentPriceCents),
+      conditional: product.lowestBenefit
+        ? [formatPen(product.lowestBenefit.benefit.priceCents)]
+        : [],
+    })),
+    totalProducts: result.totalProducts,
+    totalOffers: result.totalOffers,
+    page: result.page,
+    hasMore: result.hasMore,
   };
 }

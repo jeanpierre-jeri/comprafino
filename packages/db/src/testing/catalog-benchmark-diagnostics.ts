@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { searchFilters, shoppingListSchema } from "@comprafino/core";
 import type { ownedTestDatabase } from "./database.ts";
 import type { catalogBenchmarkObserver } from "./catalog-benchmark-observer.ts";
-import { searchPublicProducts } from "../generic-offers.ts";
+import { searchGroupedPublicProducts } from "../generic-offers.ts";
 import { evaluateCurrentShoppingList } from "../shopping-list.ts";
 
 /** Optional paired SQL diagnostics, after timed workloads, in the same owned fixture. */
@@ -32,22 +32,19 @@ export async function catalogBenchmarkDiagnostics(
       id: "family",
       setting: "enable_nestloop",
       run: () =>
-        searchPublicProducts(observer.db, "arroz", "relevance", now, searchFilters(), 1, {
-          includeComparisons: false,
-        }),
+        searchGroupedPublicProducts(observer.db, "arroz", "relevance", now, searchFilters(), 1),
     },
     {
       id: "category-text",
       setting: "enable_nestloop",
       run: () =>
-        searchPublicProducts(
+        searchGroupedPublicProducts(
           observer.db,
           "benchcatalogo",
           "relevance",
           now,
           searchFilters({ category: "lacteos-huevos" }),
           1,
-          { includeComparisons: false },
         ),
     },
     {

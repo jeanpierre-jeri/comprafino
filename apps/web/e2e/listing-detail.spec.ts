@@ -125,10 +125,7 @@ test.describe("isolated listing details", () => {
     page,
   }) => {
     await page.goto("/search?q=gloria&priceMode=benefits");
-    await page
-      .locator(`[data-offer-id="${fixture("listing-rich-tottus")}"] .product-title-link`)
-      .click();
-    await page.getByRole("link", { name: "Comparar entre supermercados", exact: true }).click();
+    await page.locator(`[data-product-id="${fixture("rich")}"] .product-title-link`).click();
     const back = page.getByRole("link", { name: "Volver a resultados", exact: true });
     const destination = await back.getAttribute("href");
     await page.getByRole("combobox", { name: "Precios", exact: true }).click();
@@ -336,8 +333,8 @@ test.describe("isolated listing details", () => {
   }) => {
     for (const mode of ["standard", "benefits"]) {
       await page.goto(`/search?q=leche+gloria&priceMode=${mode}`);
-      const card = page.locator(`[data-offer-id="${fixture("listing-rich-tottus")}"]`);
-      await expect(card.getByText("S/ 6.77 / L", { exact: true })).toBeVisible();
+      const card = page.locator(`[data-product-id="${fixture("rich")}"]`);
+      await expect(card.getByText("S/ 6.45 / L", { exact: true })).toBeVisible();
       await expect(card.locator(".benefit-surface")).toContainText("S/ 5.71 / L · con CMR");
       await expect(card.locator(".benefit-surface")).toContainText("Requiere tarjeta CMR");
     }

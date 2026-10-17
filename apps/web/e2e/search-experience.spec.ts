@@ -25,8 +25,8 @@ test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
     await page.locator(".search-chip").filter({ hasText: "Lácteos y huevos" }).click();
     await expect(page).toHaveURL(/category=lacteos-huevos/u);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Lácteos y huevos");
-    const cards = page.locator("[data-offer-id]");
-    await expect(cards).toHaveCount(6);
+    const cards = page.locator("[data-product-id]");
+    await expect(cards).toHaveCount(5);
     await expect(page.getByRole("heading", { name: "Compara el mismo producto" })).toHaveCount(0);
     await expect(
       page.getByRole("button", { name: "Agregar como necesidad", exact: true }),
@@ -51,7 +51,7 @@ test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
     ).toBeVisible();
     await page.getByRole("link", { name: "Buscar en todas las categorías" }).click();
     await expect(page).not.toHaveURL(/category=/u);
-    await expect(cards).toHaveCount(5);
+    await expect(cards).toHaveCount(4);
     await page.goBack();
     await expect(page.getByRole("combobox", { name: "Categoría" })).toContainText("Limpieza");
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
@@ -63,7 +63,7 @@ test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
     page,
   }) => {
     await page.goto("/search?category=limpieza&sort=total-price");
-    const cards = page.locator("[data-offer-id]");
+    const cards = page.locator("[data-product-id]");
     await expect(cards).toHaveCount(30);
     await page.getByRole("link", { name: "Siguiente", exact: true }).click();
     await expect(page).toHaveURL(/category=limpieza/u);
@@ -72,7 +72,7 @@ test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
     await page.getByRole("combobox", { name: "Categoría" }).click();
     await page.getByRole("option", { name: "Lácteos y huevos", exact: true }).click();
     await expect(page).not.toHaveURL(/page=/u);
-    await expect(cards).toHaveCount(6);
+    await expect(cards).toHaveCount(5);
     await expect(page.getByRole("combobox", { name: "Ordenar" })).toContainText(
       "Menor precio total",
     );
@@ -82,17 +82,17 @@ test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
     page,
   }) => {
     await page.goto("/search?q=auditpaginacion");
-    const cards = page.locator("[data-offer-id]");
+    const cards = page.locator("[data-product-id]");
     await expect(cards).toHaveCount(30);
     const firstPage = await cards.evaluateAll((elements) =>
-      elements.map((element) => element.getAttribute("data-offer-id")),
+      elements.map((element) => element.getAttribute("data-product-id")),
     );
     const navigation = page.getByRole("navigation", { name: "Páginas de resultados" });
     await navigation.getByRole("link", { name: "Siguiente" }).click();
     await expect(page).toHaveURL(/page=2/u);
     await expect(cards).toHaveCount(7);
     const secondPage = await cards.evaluateAll((elements) =>
-      elements.map((element) => element.getAttribute("data-offer-id")),
+      elements.map((element) => element.getAttribute("data-product-id")),
     );
     expect(new Set([...firstPage, ...secondPage]).size).toBe(37);
     await expect(navigation.getByRole("link", { name: "Siguiente" })).toHaveCount(0);
@@ -111,23 +111,28 @@ test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/search?q=huevos+auditexperiencia&sort=unit-price");
     const offers = page.getByRole("region", { name: "Opciones en supermercados" });
-    const cards = offers.locator("[data-offer-id]");
-    await expect(cards).toHaveCount(5);
+    const cards = offers.locator("[data-product-id]");
+    await expect(cards).toHaveCount(4);
+    await expect(
+      page.getByRole("status").filter({ hasText: "4 productos · 5 ofertas de tienda" }),
+    ).toBeVisible();
     await expect(cards.nth(0)).toContainText("Bandeja 30un");
-    await expect(cards.nth(1)).toContainText("Bandeja 30un");
-    await expect(cards.nth(2)).toContainText("Blancos");
-    const large = page.locator(`[data-offer-id="${fixture("search-tottus")}"]`);
-    await expect(large).toContainText("S/ 60.00");
+    await expect(cards.nth(1)).toContainText("Blancos");
+    const large = page.locator(`[data-product-id="${fixture("search-product")}"]`);
+    await expect(large).toContainText("Desde S/ 60.00");
+    await expect(large).toContainText("2 supermercados · 2 ofertas de tienda");
+    await expect(large).toContainText("Metro, Tottus · Empate");
+    await expect(large.getByRole("link", { name: "Comparar precios", exact: true })).toBeVisible();
     await expect(large.getByText("S/ 2.00 / huevo", { exact: true })).toBeVisible();
     await expect(large.locator(".benefit-surface")).toContainText("S/ 1.80 / huevo · con CMR");
-    const small = page.locator(`[data-offer-id="${fixture("search-15")}"]`);
+    const small = page.locator(`[data-product-id="${fixture("search-15")}"]`);
     await expect(small).toContainText("S/ 45.00");
     await expect(small).toContainText("S/ 3.00 / huevo");
-    await expect(page.locator(`[data-offer-id="${fixture("search-plaza-vea")}"]`)).toHaveCount(0);
-    await expect(page.locator(`[data-offer-id="${fixture("search-makro")}"]`)).toHaveCount(0);
-    const missing = page.locator(`[data-offer-id="${fixture("search-missing")}"]`);
+    await expect(page.locator(`[data-product-id="${fixture("search-plaza-vea")}"]`)).toHaveCount(0);
+    await expect(page.locator(`[data-product-id="${fixture("search-makro")}"]`)).toHaveCount(0);
+    const missing = page.locator(`[data-product-id="${fixture("search-missing")}"]`);
     await expect(missing).toContainText("Sin precio por unidad: la cantidad no está indicada.");
-    await expect(page.locator(`[data-offer-id="${fixture("search-ambiguous")}"]`)).toContainText(
+    await expect(page.locator(`[data-product-id="${fixture("search-ambiguous")}"]`)).toContainText(
       "Sin precio por unidad: la cantidad no es suficientemente clara.",
     );
     await expect(offers).toContainText("Las marcas, variedades y calidades pueden diferir.");
@@ -146,13 +151,14 @@ test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
   }) => {
     await page.goto("/search?q=huevos+auditexperiencia&sort=total-price&retailer=plaza-vea");
     await expect(page.getByText("No hay opciones con estos filtros.")).toBeVisible();
-    await expect(page.locator("[data-offer-id]")).toHaveCount(0);
+    await expect(page.locator("[data-product-id]")).toHaveCount(0);
     await expect(page.locator(".exact-card")).toHaveCount(0);
     await page.getByRole("combobox", { name: "Supermercado" }).click();
     await page.getByRole("option", { name: "Metro", exact: true }).click();
-    const card = page.locator(`[data-offer-id="${fixture("search-metro")}"]`);
+    const card = page.locator(`[data-product-id="${fixture("search-product")}"]`);
     await expect(card).toBeVisible();
-    await card.getByRole("link", { name: "Ver comparación entre supermercados" }).click();
+    await expect(card).toContainText("1 supermercado · 1 oferta de tienda");
+    await card.getByRole("link", { name: "Comparar precios" }).click();
     await expect(page).toHaveURL(new RegExp(`/products/${fixture("search-product")}\\?`));
     const records = page.getByRole("region", { name: "Precios y registros en 4 supermercados" });
     await expect(records).toContainText("2 ofertas vigentes");
@@ -190,15 +196,13 @@ test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
         await page.setViewportSize({ width, height: 844 });
         for (const category of [false, true]) {
           await page.goto(`/search?q=leche${category ? "&category=lacteos-huevos" : ""}`);
-          const first = page.locator("[data-offer-id]").first();
+          const first = page.locator("[data-product-id]").first();
           await expect(first).toBeVisible();
           await expect(page.getByRole("combobox", { name: "Ordenar", exact: true })).toBeVisible();
           await expect(
             page.getByLabel(category ? "Buscar en Lácteos y huevos" : "¿Qué necesitas comprar?"),
           ).toHaveValue("leche");
-          await expect(
-            page.getByRole("status").filter({ hasText: /\d+ resultado/u }),
-          ).toBeVisible();
+          await expect(page.getByRole("status").filter({ hasText: /\d+ producto/u })).toBeVisible();
           if (width < 1024) {
             await expect(page.getByRole("button", { name: /^Filtros/u })).toHaveAttribute(
               "aria-expanded",
@@ -354,7 +358,7 @@ test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
     await expect(
       page.getByRole("heading", { name: "No encontramos ese producto todavía." }),
     ).toBeVisible();
-    await expect(page.getByRole("status").filter({ hasText: "0 resultados" })).toBeVisible();
+    await expect(page.getByRole("status").filter({ hasText: "0 productos" })).toBeVisible();
     await page.screenshot({
       path: new URL("../../../.artifacts/search-ux/empty.png", import.meta.url).pathname,
     });

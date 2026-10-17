@@ -7,14 +7,14 @@ import { after } from "next/server";
 import {
   createDatabase,
   maximumSearchLength,
-  searchPublicProducts,
+  searchGroupedPublicProducts,
   searchFilters,
   usefulSearchQuery,
   discoveryQueryForSearch,
   recordDiscoveryForSearch,
   requestCatalogRefresh,
 } from "@comprafino/db";
-import type { GenericProductOffer } from "@comprafino/db";
+import type { SearchProductResult } from "@comprafino/db";
 import Link from "next/link";
 import { searchFilterQuery } from "@comprafino/core/search-filters";
 import { searchCategory, usefulSearchRequest } from "@comprafino/core";
@@ -70,26 +70,26 @@ async function SearchResults({
   const sort = filters.sort;
   let units: string[] = [];
   let underlyingCount = 0;
-  let offers: GenericProductOffer[] = [];
+  let products: SearchProductResult[] = [];
   let failed = false;
   const rawPage =
     typeof params.page === "string" && /^\d{1,4}$/u.test(params.page) ? Number(params.page) : 1;
   const page = Math.max(1, Math.min(rawPage, 2500));
   let hasMore = false;
   let totalOffers = 0;
+  let totalProducts = 0;
 
   if (validRequest) {
     try {
       const results = await withPublicDatabase((db) =>
-        searchPublicProducts(db, query, sort, observedNow, filters, page, {
-          includeComparisons: false,
-        }),
+        searchGroupedPublicProducts(db, query, sort, observedNow, filters, page),
       );
-      offers = results.offers;
+      products = results.products;
       units = results.availableUnits;
       underlyingCount = results.usefulResultCount;
       hasMore = results.hasMore;
       totalOffers = results.totalOffers;
+      totalProducts = results.totalProducts;
 
       if (
         (usefulSearchQuery(query) &&
@@ -149,7 +149,7 @@ async function SearchResults({
           units={units}
           resultSummary={
             validRequest
-              ? `${totalOffers} ${totalOffers === 1 ? "resultado" : "resultados"}${page > 1 ? ` · Página ${page}` : ""}`
+              ? `${totalProducts} ${totalProducts === 1 ? "producto" : "productos"} · ${totalOffers} ${totalOffers === 1 ? "oferta de tienda" : "ofertas de tienda"}${page > 1 ? ` · Página ${page}` : ""}`
               : "Busca un producto"
           }
         />
@@ -159,7 +159,7 @@ async function SearchResults({
           <SearchResultsContent
             query={query}
             filters={filters}
-            offers={offers}
+            products={products}
             failed={failed}
             underlyingCount={underlyingCount}
             observedNow={observedNow}
@@ -178,7 +178,7 @@ async function SearchResults({
             </Link>
           )}
           <span className="text-sm text-muted-foreground">
-            Página {page} · {totalOffers} opciones de tienda
+            Página {page} · {totalProducts} productos · {totalOffers} ofertas de tienda
           </span>
           {hasMore && (
             <Link
@@ -196,7 +196,10 @@ async function SearchResults({
             label: query,
             query,
             canonicalId: null,
-            quantity: shoppingQuantityForSearch(query, offers),
+            quantity: shoppingQuantityForSearch(
+              query,
+              products.map((product) => product.rankingOffer),
+            ),
           }}
         />
       )}

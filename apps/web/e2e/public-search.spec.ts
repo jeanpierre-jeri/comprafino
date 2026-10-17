@@ -54,7 +54,7 @@ test.describe("persisted public catalog (explicit DATABASE_URL)", () => {
     await page.getByRole("button", { name: "Buscar" }).click();
     await expect(page).toHaveURL(/\/search\?q=gloria\+946$/);
     await page
-      .locator(`[data-offer-id] a.comparison-link[href^="/products/${product!.id}?"]`)
+      .locator(`[data-product-id] a.comparison-link[href^="/products/${product!.id}?"]`)
       .first()
       .click();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(product!.displayName);
@@ -106,11 +106,15 @@ test.describe("generic persisted offers (explicit DATABASE_URL)", () => {
     !process.env.DATABASE_URL || !!process.env.COMPRAFINO_CONTROLLED_E2E,
     "Requires an explicitly supplied persisted database",
   );
-  test("eggs show independent options and unit-price sorting agrees with persisted exact fractions", async ({
+  test("eggs show grouped and independent products and unit-price sorting agrees with persisted exact fractions", async ({
     page,
   }) => {
-    const { searchGenericProductOffers, formatUnitPrice } = await import("@comprafino/db");
-    const offers = await searchGenericProductOffers(createDatabase(), "huevos", "unit-price");
+    const { searchGroupedPublicProducts, formatUnitPrice } = await import("@comprafino/db");
+    const { products: offers } = await searchGroupedPublicProducts(
+      createDatabase(),
+      "huevos",
+      "unit-price",
+    );
     expect(offers.length).toBeGreaterThan(0);
     const countOffers = offers.filter((o) => o.unitPrice?.dimension === "count");
     expect(countOffers.length).toBeGreaterThan(0);
@@ -120,38 +124,33 @@ test.describe("generic persisted offers (explicit DATABASE_URL)", () => {
     await choose(page, "Ordenar", "Menor por unidad");
     await expect(page.getByRole("button", { name: "Aplicar" })).toHaveCount(0);
     await expect(page).toHaveURL(/sort=unit-price/);
-    const first = section.locator("article[data-offer-id]").first();
-    await expect(first).toHaveAttribute("data-offer-id", countOffers[0]!.id);
+    const first = section.locator("article[data-product-id]").first();
+    await expect(first).toHaveAttribute("data-product-id", countOffers[0]!.id);
     await expect(
-      first.getByText(formatUnitPrice(countOffers[0]!.unitPrice!, countOffers[0]!.family.family), {
-        exact: true,
-      }),
+      first.getByText(
+        formatUnitPrice(countOffers[0]!.unitPrice!, countOffers[0]!.ordinaryOffer.family.family),
+        {
+          exact: true,
+        },
+      ),
     ).toBeVisible();
     const independent = offers.find((o) => !o.canonicalId);
     expect(independent).toBeDefined();
-    const independentCard = section.locator(`article[data-offer-id="${independent!.id}"]`);
+    const independentCard = section.locator(`article[data-product-id="${independent!.id}"]`);
     await expect(independentCard).toBeVisible();
     await expect(
-      independentCard.getByRole("link", { name: /Ver comparación entre supermercados/ }),
-    ).toHaveCount(0);
+      independentCard.getByRole("link", { name: "Comparar precios", exact: true }),
+    ).toHaveAttribute("href", new RegExp(`/listings/${independent!.id}`));
     await expect(first.locator("time")).toHaveAttribute(
       "datetime",
-      countOffers[0]!.observedAt.toISOString(),
+      countOffers[0]!.ordinaryOffer.observedAt.toISOString(),
     );
     await expect(first.locator("time")).toHaveText(/^hace /);
     const linked = offers.find((offer) => offer.canonicalId);
     expect(linked).toBeDefined();
-    const linkedCard = section.locator(`article[data-offer-id="${linked!.id}"]`);
-    await expect(linkedCard.getByRole("link", { name: /Ver producto en/ })).toHaveAttribute(
-      "href",
-      linked!.url,
-    );
-    await expect(linkedCard.getByRole("link", { name: /Ver producto en/ })).toHaveAttribute(
-      "target",
-      "_blank",
-    );
-    await linkedCard.click({ position: { x: 12, y: 12 } });
-    await expect(page).toHaveURL(new RegExp(`/listings/${linked!.id}\\?`));
+    const linkedCard = section.locator(`article[data-product-id="${linked!.id}"]`);
+    await linkedCard.getByRole("link", { name: "Comparar precios", exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/products/${linked!.id}\\?`));
   });
 });
 
@@ -164,7 +163,7 @@ test.describe("staple persisted relevance (explicit DATABASE_URL)", () => {
     await page.goto("/search?q=az%C3%BAcar");
     const cards = page
       .getByRole("region", { name: "Opciones en supermercados" })
-      .locator("article[data-offer-id]");
+      .locator("article[data-product-id]");
     await expect(cards.first()).toBeVisible();
     const titles = await cards.getByRole("heading").allTextContents();
     expect(titles.length).toBeGreaterThanOrEqual(10);
@@ -173,7 +172,7 @@ test.describe("staple persisted relevance (explicit DATABASE_URL)", () => {
     await page.goto("/search?q=aceite+primor");
     const oil = page
       .getByRole("region", { name: "Opciones en supermercados" })
-      .locator("article[data-offer-id]");
+      .locator("article[data-product-id]");
     await expect(oil.first()).toBeVisible();
     expect(
       (await oil.getByRole("heading").allTextContents()).every(
@@ -197,15 +196,15 @@ test.describe("immediate filters and CMR (explicit DATABASE_URL)", () => {
     await expect(page).toHaveURL(/sort=unit-price/);
     await choose(page, "Supermercado", "Metro");
     await expect(page).toHaveURL(/retailer=metro/);
-    const { searchPublicProducts, searchFilters } = await import("@comprafino/db");
-    const expected = await searchPublicProducts(
+    const { searchGroupedPublicProducts, searchFilters } = await import("@comprafino/db");
+    const expected = await searchGroupedPublicProducts(
       createDatabase(),
       "huevos",
       "unit-price",
       new Date(),
       searchFilters({ retailer: "metro", sort: "unit-price" }),
     );
-    await expect(page.locator("article[data-offer-id]")).toHaveCount(expected.offers.length);
+    await expect(page.locator("article[data-product-id]")).toHaveCount(expected.products.length);
     await choose(page, "Precios", "Incluir beneficios");
     await expect(page).toHaveURL(/priceMode=benefits/);
     await page.goBack();

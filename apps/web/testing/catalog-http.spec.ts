@@ -12,11 +12,12 @@ const expected = {
   ids: [id],
   groups: [[id]],
   prices: [{ id, ordinary: "S/ 5.00", conditional: ["S/ 4.00"] }],
+  totalProducts: 31,
   totalOffers: 31,
   page: 1,
   hasMore: true,
 };
-const html = `<html><section aria-label="Resultados de búsqueda"><article data-offer-id="${id}" class="product-card"><p class="card-amount">S/ 5.00</p><p>Con CMR: <!-- -->S/ 4.00</p></article>Página <!-- -->1<!-- --> · <!-- -->31<!-- --> opciones de tienda</section></html>`;
+const html = `<html><section aria-label="Resultados de búsqueda"><article data-product-id="${id}" class="product-card"><p class="card-amount">Desde S/ 5.00</p><p>Con CMR: <!-- -->S/ 4.00</p></article>Página <!-- -->1<!-- --> · <!-- -->31<!-- --> productos · 31 ofertas de tienda</section></html>`;
 
 test("HTTP benchmark validates streamed search IDs, prices and pagination", () => {
   expect(validateSearchHtml(html, expected).ids).toEqual([id]);
@@ -46,6 +47,7 @@ test("HTTP benchmark rejects 200 error UI and truncated HTML", () => {
       prices: [],
       page: 1,
       hasMore: false,
+      totalProducts: 0,
       totalOffers: 0,
     }),
   ).toThrow("empty state");
@@ -80,7 +82,7 @@ test("reader and HTTP runners share the original workload sizes and intents", ()
 test("HTTP search validation permits streaming group interleaving but rejects within-group reorder", () => {
   const second = "00000000-0000-4000-8000-000000000002";
   const third = "00000000-0000-4000-8000-000000000003";
-  const article = (key: string) => `<article data-offer-id="${key}"></article>`;
+  const article = (key: string) => `<article data-product-id="${key}"></article>`;
   const stream = `<html><section aria-label="Resultados de búsqueda">${article(id)}${article(third)}${article(second)}</section></html>`;
   const reference = {
     ids: [id, second, third],
@@ -88,6 +90,7 @@ test("HTTP search validation permits streaming group interleaving but rejects wi
     prices: [],
     page: 1,
     hasMore: false,
+    totalProducts: 3,
     totalOffers: 3,
   };
   expect(validateSearchHtml(stream, reference).ids).toEqual([id, third, second]);

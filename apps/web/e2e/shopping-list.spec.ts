@@ -566,7 +566,11 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
             background.y + background.height / 2,
           );
         const href = await title.getAttribute("href");
-        expect(href).toMatch(/^\/listings\/[0-9a-f-]{36}\?returnTo=/u);
+        expect(href).toMatch(
+          linked
+            ? /^\/products\/[0-9a-f-]{36}\?returnTo=/u
+            : /^\/listings\/[0-9a-f-]{36}\?returnTo=/u,
+        );
         await clickBackground();
         await expect(page).toHaveURL(
           (destination) =>

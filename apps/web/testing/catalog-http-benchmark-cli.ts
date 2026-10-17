@@ -1,3 +1,4 @@
+import { searchExpectation } from "./catalog-http-validation.ts";
 import { randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
 import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -9,9 +10,9 @@ import {
   parseBenchmarkEvent,
   parseBenchmarkStatements,
 } from "../../../packages/db/src/testing/http-benchmark-events.ts";
-import { searchFilters, shoppingListEvaluationSchema, unitPriceBases } from "@comprafino/core";
+import { searchFilters, shoppingListEvaluationSchema } from "@comprafino/core";
 import { searchFilterQuery } from "@comprafino/core/search-filters";
-import { searchPublicProducts, evaluateCurrentShoppingList, formatPen } from "@comprafino/db";
+import { searchGroupedPublicProducts, evaluateCurrentShoppingList } from "@comprafino/db";
 import { ownedTestDatabase } from "../../../packages/db/src/testing/database.ts";
 import { closeLocalTestConnections } from "../../../packages/db/src/testing/test-query-client.ts";
 import { fixtureDatabaseUrl } from "../../../packages/db/src/testing/fixture-url.ts";
@@ -242,43 +243,10 @@ async function prepareScenarios(exactIds: string[], size: number) {
 
     const filters = searchFilters(test.params);
     const observed = await observer.observe(() =>
-      searchPublicProducts(observer.db, test.query, filters.sort, now, filters, test.page, {
-        includeComparisons: false,
-      }),
+      searchGroupedPublicProducts(observer.db, test.query, filters.sort, now, filters, test.page),
     );
     const result = observed.result;
-    let offers = [...result.offers];
-    if (filters.sort === "unit-price") {
-      const groups = [...unitPriceBases, "unknown"];
-      offers = offers.sort(
-        (left, right) =>
-          groups.indexOf(left.unitPrice?.basis ?? "unknown") -
-          groups.indexOf(right.unitPrice?.basis ?? "unknown"),
-      );
-    } else if (filters.sort === "total-price") {
-      offers = offers.sort(
-        (left, right) => Number(left.pricingBasis === "kg") - Number(right.pricingBasis === "kg"),
-      );
-    }
-    const expected = {
-      ids: offers.map((offer) => offer.id),
-      groups:
-        filters.sort === "unit-price"
-          ? [...unitPriceBases, "unknown"].map((basis) =>
-              offers
-                .filter((offer) => (offer.unitPrice?.basis ?? "unknown") === basis)
-                .map((offer) => offer.id),
-            )
-          : [offers.map((offer) => offer.id)],
-      prices: offers.map((offer) => ({
-        id: offer.id,
-        ordinary: formatPen(offer.currentPriceCents),
-        conditional: offer.conditionalOffers.map((benefit) => formatPen(benefit.priceCents)),
-      })),
-      totalOffers: result.totalOffers,
-      page: test.page,
-      hasMore: result.hasMore,
-    };
+    const expected = searchExpectation(result, filters.sort);
     references.push({
       id: test.id,
       readerMs: observed.totalMs,

@@ -1,3 +1,4 @@
+import { groupSearchOffers, limitGenericOffers } from "@comprafino/core";
 import { listingRefreshPolicy } from "@comprafino/core";
 import { catalogPolicy } from "@comprafino/core";
 import { usefulSearchRequest } from "@comprafino/core";
@@ -17,13 +18,11 @@ import { z } from "zod";
 import {
   calculateUnitPrice,
   meaningfulReferencePrice,
-  unitPriceBases,
   classifyProductFamily,
   resolveProductFamilyQuery,
   selectFamilyOffers,
   familySearchEvidence,
   missingDiscoveryRetailers,
-  compareUnitPrices,
   genericOfferSort,
   normalizeSearchQuery,
   prioritizeWholeWordSearchResults,
@@ -47,10 +46,12 @@ import {
 } from "./public-products.ts";
 
 export {
+  sortGenericOffers,
+  limitGenericOffers,
+  unitPriceBases,
   calculateUnitPrice,
   formatUnitPrice,
   genericOfferSort,
-  unitPriceBases,
   unitPriceBasisLabel,
 } from "@comprafino/core";
 
@@ -146,67 +147,6 @@ export function genericProductOffer(raw: unknown, now = new Date(), mode: PriceM
 }
 
 export type GenericProductOffer = NonNullable<ReturnType<typeof genericProductOffer>>;
-
-export function sortGenericOffers(offers: readonly GenericProductOffer[], sort: GenericOfferSort) {
-  // Input order is relevance; stable sorting retains it as the tie-breaker.
-  return [...offers].sort((a, b) => {
-    if (sort === "total-price") {
-      // A KG quote is not a package total; keep direct quotes in a separate block.
-      return (
-        Number(a.pricingBasis === "kg") - Number(b.pricingBasis === "kg") ||
-        a.ranking.priceCents - b.ranking.priceCents
-      );
-    }
-
-    if (sort !== "unit-price") return 0;
-
-    if (!a.unitPrice || !b.unitPrice) return Number(!a.unitPrice) - Number(!b.unitPrice);
-
-    return (
-      unitPriceBases.indexOf(a.unitPrice.basis) - unitPriceBases.indexOf(b.unitPrice.basis) ||
-      compareUnitPrices(a.unitPrice, b.unitPrice)
-    );
-  });
-}
-
-/** Reserve room for every present dimension and unknown quantities before filling
- * spare capacity. The global bound must not hide all litres behind mass results. */
-export function limitGenericOffers(
-  offers: readonly GenericProductOffer[],
-  sort: GenericOfferSort,
-  page = 1,
-): GenericProductOffer[] {
-  const sorted = sortGenericOffers(offers, sort);
-
-  if (page > 1) {
-    const first = new Set(limitGenericOffers(offers, sort));
-    return sorted.filter((offer) => !first.has(offer)).slice((page - 2) * 30, (page - 1) * 30);
-  }
-
-  if (sort !== "unit-price" || sorted.length <= 30) return sorted.slice(0, 30);
-
-  const groups = [...new Set(sorted.map((o) => o.unitPrice?.basis ?? "unknown"))];
-  const quota = Math.floor(30 / groups.length);
-  const selected = new Set<GenericProductOffer>();
-
-  for (const group of groups) {
-    for (const offer of sorted
-      .filter((o) => (o.unitPrice?.basis ?? "unknown") === group)
-      .slice(0, quota)) {
-      selected.add(offer);
-    }
-  }
-
-  for (const offer of sorted) {
-    if (selected.size >= 30) {
-      break;
-    }
-
-    selected.add(offer);
-  }
-
-  return sorted.filter((o) => selected.has(o));
-}
 
 export async function searchGenericProductOffers(
   db: ReturnType<typeof createDatabase>,
@@ -357,47 +297,55 @@ export async function searchPublicProducts(
   page = 1,
   options: { includeComparisons?: boolean } = {},
 ) {
-  if (
-    !Number.isSafeInteger(page) ||
-    page < 1 ||
-    page > Math.ceil(catalogPolicy.retainedListingCap / 20)
-  ) {
-    throw new Error("Invalid search page");
-  }
+  validateSearchPage(page);
   const [products, offerScopes, underlyingProducts] = await Promise.all([
     options.includeComparisons === false
       ? []
       : searchCanonicalProducts(db, query, now, page, filters.category),
-    publicSearchOfferScopes(db, query, now, filters),
+    publicSearchCandidates(db, query, sort, now, filters),
     options.includeComparisons !== false && filters.category && usefulSearchQuery(query)
       ? searchCanonicalProducts(db, query, now, page)
       : null,
   ]);
-  const { offers, underlyingOffers } = offerScopes;
   // Exact comparison identity/routes remain unchanged. In a recognized family
   // search, an incidental ingredient in an exact group is not useful coverage.
-  const interpretation = resolveProductFamilyQuery(query);
-  const family = interpretation?.family ?? null;
+  const family = resolveProductFamilyQuery(query)?.family ?? null;
   const relevantProducts = productsInQueryFamily(products, family);
-  const filteredOffers = filterGenericOffers(offers, filters);
-  // Scope this presentation order to public lexical relevance. Shared basket
-  // readers, exact comparisons and refresh/demand candidates keep their order.
-  const orderedOffers =
-    sort === "relevance" && !interpretation
-      ? prioritizeWholeWordSearchResults(filteredOffers, query)
-      : filteredOffers;
-
   return {
+    ...offerScopes,
     products: relevantProducts
       .map((p) => publicProduct(p, now, filters.priceMode))
       .filter(
         (p) =>
           (!filters.retailer || p.offers.some((o) => o.retailerId === filters.retailer)) &&
-          (!filters.unit || filteredOffers.some((o) => o.canonicalId === p.id)),
+          (!filters.unit || offerScopes.offers.some((o) => o.canonicalId === p.id)),
       ),
-    offers: limitGenericOffers(orderedOffers, sort, page),
+    offers: limitGenericOffers(offerScopes.offers, sort, page),
     page,
-    hasMore: filteredOffers.length > page * 30 || products.length === 20,
+    hasMore: offerScopes.totalOffers > page * 30 || products.length === 20,
+    usefulResultCount:
+      productsInQueryFamily(underlyingProducts ?? products, family).length +
+      offerScopes.usefulResultCount,
+  };
+}
+
+async function publicSearchCandidates(
+  db: ReturnType<typeof createDatabase>,
+  query: string,
+  sort: GenericOfferSort,
+  now: Date,
+  filters: SearchFilters,
+) {
+  const { offers, underlyingOffers } = await publicSearchOfferScopes(db, query, now, filters);
+  const filteredOffers = filterGenericOffers(offers, filters);
+  // Scope this presentation order to public lexical relevance. Shared basket
+  // readers, exact comparisons and refresh/demand candidates keep their order.
+  const orderedOffers =
+    sort === "relevance" && !resolveProductFamilyQuery(query)
+      ? prioritizeWholeWordSearchResults(filteredOffers, query)
+      : filteredOffers;
+  return {
+    offers: orderedOffers,
     totalOffers: filteredOffers.length,
     discoveryRetailers: usefulSearchQuery(query)
       ? missingDiscoveryRetailers(
@@ -419,11 +367,46 @@ export async function searchPublicProducts(
           ),
       ),
     ],
-    usefulResultCount:
-      productsInQueryFamily(underlyingProducts ?? products, family).length +
-      (underlyingOffers ?? offers).length,
+    usefulResultCount: (underlyingOffers ?? offers).length,
   };
 }
+
+function validateSearchPage(page: number) {
+  if (
+    !Number.isSafeInteger(page) ||
+    page < 1 ||
+    page > Math.ceil(catalogPolicy.retainedListingCap / 20)
+  ) {
+    throw new Error("Invalid search page");
+  }
+}
+
+/** Public product cards: group the full admitted scope before sorting/pagination.
+ * Identity and current purchase eligibility remain owned by the existing reader.
+ * One aggregate SQL read, including category/global demand scopes; no card reads. */
+export async function searchGroupedPublicProducts(
+  db: ReturnType<typeof createDatabase>,
+  query: string,
+  sort: GenericOfferSort = "relevance",
+  now = new Date(),
+  filters: SearchFilters = searchFilters({ sort }),
+  page = 1,
+) {
+  validateSearchPage(page);
+  const { offers, ...scope } = await publicSearchCandidates(db, query, sort, now, filters);
+  const products = groupSearchOffers(offers);
+  return {
+    ...scope,
+    products: limitGenericOffers(products, sort, page),
+    totalProducts: products.length,
+    page,
+    hasMore: products.length > page * 30,
+  };
+}
+
+export type SearchProductResult = Awaited<
+  ReturnType<typeof searchGroupedPublicProducts>
+>["products"][number];
 
 function productsInQueryFamily(products: ProductComparison[], family: ProductFamily | null) {
   if (!family) return products;

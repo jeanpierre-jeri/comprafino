@@ -7,6 +7,7 @@ const expectationSchema = z.object({
   prices: z.array(
     z.object({ id: z.uuid(), ordinary: z.string(), conditional: z.array(z.string()) }),
   ),
+  totalProducts: z.number().int().nonnegative(),
   totalOffers: z.number().int().nonnegative(),
   page: z.number().int().positive(),
   hasMore: z.boolean(),

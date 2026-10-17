@@ -3,16 +3,16 @@ import { ArrowRight } from "@comprafino/ui";
 import { unitPriceBases, unitPriceBasisLabel } from "@comprafino/core";
 import type { UnitPriceBasis, ShoppingListItem } from "@comprafino/core";
 import { maximumSearchLength, usefulSearchQuery } from "@comprafino/db";
-import type { GenericProductOffer } from "@comprafino/db";
+import type { GenericProductOffer, SearchProductResult } from "@comprafino/db";
 import type { SearchFilters } from "@comprafino/core/search-filters";
 import { usefulSearchRequest } from "@comprafino/core";
 import { PublicDataError } from "./public-shell";
-import { GenericOfferCard } from "./offer-card";
+import { SearchProductCard } from "./offer-card";
 
 type Props = {
   query: string;
   filters: SearchFilters;
-  offers: GenericProductOffer[];
+  products: SearchProductResult[];
   failed: boolean;
   underlyingCount: number;
   observedNow: Date;
@@ -24,7 +24,7 @@ type OfferGroup = UnitPriceBasis | "unknown" | "package" | "direct" | "all";
 export function SearchResultsContent({
   query,
   filters,
-  offers,
+  products,
   failed,
   underlyingCount,
   observedNow,
@@ -40,7 +40,7 @@ export function SearchResultsContent({
     );
   }
 
-  if (!offers.length) {
+  if (!products.length) {
     if (filters.category) {
       return (
         <div className="empty-surface">
@@ -92,19 +92,19 @@ export function SearchResultsContent({
       <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
         Compara cantidades y precios. Las marcas, variedades y calidades pueden diferir.
       </p>
-      {offers.some((offer) => offer.family.family === "toilet_paper") && (
+      {products.some((product) => product.representative.family.family === "toilet_paper") && (
         <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
           El precio por rollo es orientativo: el tamaño y la cantidad de hojas pueden variar.
         </p>
       )}
-      {offers.some((offer) => offer.family.family === "canned_tuna") && (
+      {products.some((product) => product.representative.family.family === "canned_tuna") && (
         <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
           El peso del atún puede incluir líquido. No mostramos precio por kg sin distinguir peso
           neto y escurrido.
         </p>
       )}
       {offerGroups(filters.sort).map((group) => {
-        const members = offers.filter(
+        const members = products.filter(
           (offer) => group === "all" || offerMatchesGroup(offer, group),
         );
 
@@ -118,11 +118,11 @@ export function SearchResultsContent({
             <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {members.map((offer) => (
                 <li key={offer.id}>
-                  <GenericOfferCard
-                    offer={offer}
+                  <SearchProductCard
+                    product={offer}
                     observedNow={observedNow}
                     benefits={filters.priceMode === "benefits"}
-                    eager={offer.id === offers[0]?.id}
+                    eager={offer.id === products[0]?.id}
                     returnTo={returnTo}
                   />
                 </li>
@@ -157,7 +157,10 @@ function offerGroups(sort: SearchFilters["sort"]): OfferGroup[] {
   return ["all"];
 }
 
-function offerMatchesGroup(offer: GenericProductOffer, group: OfferGroup): boolean {
+function offerMatchesGroup(
+  offer: Pick<GenericProductOffer, "unitPrice" | "pricingBasis">,
+  group: OfferGroup,
+): boolean {
   switch (group) {
     case "all":
       return true;

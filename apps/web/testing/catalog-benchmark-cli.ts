@@ -8,7 +8,7 @@ import { dirname, join } from "node:path";
 import { cpus, totalmem } from "node:os";
 import { searchFilters, shoppingListEvaluationSchema } from "@comprafino/core";
 import type { PriceMode } from "@comprafino/core";
-import { searchPublicProducts, evaluateCurrentShoppingList } from "@comprafino/db";
+import { searchGroupedPublicProducts, evaluateCurrentShoppingList } from "@comprafino/db";
 import { ownedTestDatabase } from "../../../packages/db/src/testing/database.ts";
 import { closeLocalTestConnections } from "../../../packages/db/src/testing/test-query-client.ts";
 import {
@@ -121,21 +121,21 @@ function cases(exactIds: string[]): Case[] {
       parameters: { kind: "search-reader", query, filters, page, includeComparisons: false },
       plan,
       run: async () => {
-        const response = await searchPublicProducts(
+        const response = await searchGroupedPublicProducts(
           observer.db,
           query,
           filters.sort,
           now,
           filters,
           page,
-          { includeComparisons: false },
         );
-        if (response.offers.length > 30 || response.products.length) {
+        if (response.products.length > 30) {
           throw new Error("Public search pagination invariant failed");
         }
         return {
           status: 200,
-          offersReturned: response.offers.length,
+          productsReturned: response.products.length,
+          totalProducts: response.totalProducts,
           totalOffers: response.totalOffers,
           hasMore: response.hasMore,
           units: response.availableUnits,
