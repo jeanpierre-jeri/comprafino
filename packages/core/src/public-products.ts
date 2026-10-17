@@ -19,6 +19,28 @@ export function usefulSearchQuery(value: string): boolean {
   return value.length <= maximumSearchLength && query.length >= 2;
 }
 
+/** Public presentation only: preserve partial matches and stable relevance tiers. */
+export function prioritizeWholeWordSearchResults<T extends { title: string }>(
+  results: readonly T[],
+  rawQuery: string,
+): readonly T[] {
+  const query = normalizeSearchQuery(rawQuery);
+  if (!/^\p{L}+$/u.test(query)) return results;
+
+  const wholeWords: T[] = [];
+  const partialWords: T[] = [];
+
+  for (const result of results) {
+    if (normalizeSearchQuery(result.title).split(" ").includes(query)) {
+      wholeWords.push(result);
+    } else {
+      partialWords.push(result);
+    }
+  }
+
+  return [...wholeWords, ...partialWords];
+}
+
 export function formatPen(cents: number): string {
   if (!Number.isSafeInteger(cents) || cents < 0) {
     throw new Error("Invalid PEN cents");

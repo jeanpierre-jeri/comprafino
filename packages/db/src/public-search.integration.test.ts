@@ -56,6 +56,73 @@ describe.skipIf(!testUrl)("PostgreSQL public-search (explicit TEST_DATABASE_URL)
       await closeLocalTestConnections();
     }
   }, 30_000);
+
+  it("prioritizes whole words only in public lexical relevance before pagination", async () => {
+    for (let index = 0; index < 32; index++) {
+      await seedGeneric(`Panela Auditprefix ${index} Bolsa 500g`, 500 + index);
+    }
+    const bread = await seedGeneric("Bolsa Pan Auditwhole 500g", 900);
+    const otherBread = await seedGeneric("Molde Pan Auditwhole 500g", 950);
+    await seedPublicProduct("rankcanonical", "Panela Auditcanonical 500g");
+    const baseline = await searchGenericProductOffers(
+      db,
+      "pan",
+      "relevance",
+      publicNow,
+      searchFilters(),
+      true,
+    );
+    const wholeIds = new Set([bread.id, otherBread.id]);
+    expect(baseline.slice(0, 30).some((offer) => wholeIds.has(offer.id))).toBe(false);
+    const read = (page: number, includeComparisons = false) =>
+      searchPublicProducts(db, "pan", "relevance", publicNow, searchFilters(), page, {
+        includeComparisons,
+      });
+    const first = await read(1);
+    const second = await read(2);
+    const expected = [
+      ...baseline.filter((offer) => wholeIds.has(offer.id)),
+      ...baseline.filter((offer) => !wholeIds.has(offer.id)),
+    ];
+    expect([...first.offers, ...second.offers]).toEqual(expected);
+    expect(first.offers.slice(0, 2).map((offer) => offer.id)).toEqual(
+      expected.slice(0, 2).map((offer) => offer.id),
+    );
+    expect(first.totalOffers).toBe(baseline.length);
+    expect(first.hasMore).toBe(true);
+    expect(second.hasMore).toBe(false);
+    expect(first.refreshListingIds).toEqual(baseline.map((offer) => offer.id));
+    expect(new Set(first.discoveryRetailers)).toEqual(new Set(["metro", "plaza-vea", "makro"]));
+    expect((await read(1, true)).products).toEqual(await searchCanonicalProducts(db, "pan"));
+    expect(
+      await searchGenericProductOffers(db, "pan", "relevance", publicNow, searchFilters(), true),
+    ).toEqual(baseline);
+
+    for (const sort of ["unit-price", "total-price"] as const) {
+      expect((await searchPublicProducts(db, "pan", sort, publicNow)).offers).toEqual(
+        await searchGenericProductOffers(db, "pan", sort, publicNow),
+      );
+    }
+    for (const queryText of ["pane", "pan auditwhole", "pan 500", "pan 50"]) {
+      expect((await searchPublicProducts(db, queryText, "relevance", publicNow)).offers).toEqual(
+        await searchGenericProductOffers(db, queryText, "relevance", publicNow),
+      );
+    }
+    await seedGeneric("Azúcar Blanca Auditrelevance 1kg", 600);
+    await seedGeneric("Azúcar Rubia Auditrelevance 1kg", 700);
+    await seedGeneric("Chocolate Lentejas Bolsa 750g", 800);
+    await seedGeneric("Lentejas Bolsa 1kg", 850);
+    await seedGeneric("Alimento para Perro Pollo Bolsa 1kg", 1000);
+    await seedGeneric("Pollo Entero 1kg", 1200);
+    for (const queryText of ["azúcar", "lentejas", "pollo"]) {
+      const control = await searchGenericProductOffers(db, queryText, "relevance", publicNow);
+      expect(control).toHaveLength(2);
+      expect((await searchPublicProducts(db, queryText, "relevance", publicNow)).offers).toEqual(
+        control,
+      );
+    }
+  });
+
   it("family search excludes properties and mismatches while preserving brand and size tokens", async () => {
     const sugar = await seedGeneric("Azúcar Blanca Auditfamily Bolsa 1kg", 650);
     const large = await seedGeneric("Azúcar Rubia Auditfamily Bolsa 5kg", 2800);

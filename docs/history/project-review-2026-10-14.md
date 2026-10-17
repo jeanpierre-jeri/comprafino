@@ -14,6 +14,8 @@ El [mapa del proyecto](../README.md) reúne ubicaciones de código, herramientas
 
 **Actualización del 17 de octubre:** 07 implementa recuperación local sin reasignar cuentas: respaldo JSON anónimo, retorno a la cuenta original y descarte explícito con guardas de sesión y snapshot. [Pruebas y límites](shopping-import-recovery-2026-10-17.md). No se desplegó; 04A sigue aplazado.
 
+**Búsquedas, actualización local del 17 de octubre:** el diagnóstico distingue prefijos (`pan`/Pantene) de ambigüedad literal (`lentejas`/chocolate, `pollo`/mascotas). Se implementó la prioridad de palabra completa antes de paginar ofertas públicas, solo en relevancia y consultas léxicas de una palabra sin familia reconocida. La regresión aislada lleva dos ofertas con `pan` desde la segunda página al inicio y conserva las otras 34; no cambia canastas, matching, elegibilidad, recuentos ni búsquedas parciales. [Diagnóstico y validación local](catalog-usefulness-2026-10-16.md#implementación-local-de-prioridad-de-palabra-completa--17-de-octubre). No se acredita una mejora de producción ni se resuelve toda la ambigüedad. 04A continúa aplazado.
+
 ### Trabajo ya realizado y alcance pendiente
 
 | Trabajo                      | Estado a esta actualización                                                                                                                                                                                                                                                                                                                                                                 |

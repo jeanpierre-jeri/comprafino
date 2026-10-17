@@ -4,6 +4,7 @@ import {
   formatPen,
   meaningfulReferencePrice,
   normalizeSearchQuery,
+  prioritizeWholeWordSearchResults,
   usefulSearchQuery,
 } from "./public-products.ts";
 
@@ -27,6 +28,33 @@ describe("public search terms", () => {
   it("accepts two characters and the maximum length", () => {
     expect(usefulSearchQuery("ml")).toBe(true);
     expect(usefulSearchQuery("a".repeat(120))).toBe(true);
+  });
+});
+
+describe("public whole-word relevance", () => {
+  const partial = { title: "Shampoo Pantene 400ml" };
+  const whole = { title: "Bolsa PAN Integral 500g" };
+  const prefix = { title: "Panela Bolsa 500g" };
+  const otherWhole = { title: "Pan 5un" };
+  const results = [partial, whole, prefix, otherWhole];
+
+  it("partitions stably without losing partial matches or mutating offers", () => {
+    const ranked = prioritizeWholeWordSearchResults(results, "  ＰＡＮ!  ");
+    expect(ranked).toEqual([whole, otherWhole, partial, prefix]);
+    expect(ranked[0]).toBe(whole);
+    expect(results).toEqual([partial, whole, prefix, otherWhole]);
+  });
+
+  it.each(["pan integral", "500", "pan500", "", "pante"])("preserves the order for %s", (query) =>
+    expect(prioritizeWholeWordSearchResults(results, query)).toEqual(results),
+  );
+
+  it("keeps literal ambiguities and does not fold accents", () => {
+    const ambiguous = [{ title: "Chocolate Lentejas" }, { title: "Lentejas Bolsa 1kg" }];
+    expect(prioritizeWholeWordSearchResults(ambiguous, "lentejas")).toEqual(ambiguous);
+    const accented = [{ title: "Cafe Molido" }, { title: "Café Molido" }];
+    expect(prioritizeWholeWordSearchResults(accented, "café")).toEqual([accented[1], accented[0]]);
+    expect(prioritizeWholeWordSearchResults([], "pan")).toEqual([]);
   });
 });
 

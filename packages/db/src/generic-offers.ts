@@ -26,6 +26,7 @@ import {
   compareUnitPrices,
   genericOfferSort,
   normalizeSearchQuery,
+  prioritizeWholeWordSearchResults,
   normalizeCatalogListing,
   normalizationVersion,
   retailerIdSchema,
@@ -147,7 +148,7 @@ export function genericProductOffer(raw: unknown, now = new Date(), mode: PriceM
 export type GenericProductOffer = NonNullable<ReturnType<typeof genericProductOffer>>;
 
 export function sortGenericOffers(offers: readonly GenericProductOffer[], sort: GenericOfferSort) {
-  // SQL order is relevance; stable sorting retains it as the tie-breaker.
+  // Input order is relevance; stable sorting retains it as the tie-breaker.
   return [...offers].sort((a, b) => {
     if (sort === "total-price") {
       // A KG quote is not a package total; keep direct quotes in a separate block.
@@ -379,6 +380,12 @@ export async function searchPublicProducts(
   const family = interpretation?.family ?? null;
   const relevantProducts = productsInQueryFamily(products, family);
   const filteredOffers = filterGenericOffers(offers, filters);
+  // Scope this presentation order to public lexical relevance. Shared basket
+  // readers, exact comparisons and refresh/demand candidates keep their order.
+  const orderedOffers =
+    sort === "relevance" && !interpretation
+      ? prioritizeWholeWordSearchResults(filteredOffers, query)
+      : filteredOffers;
 
   return {
     products: relevantProducts
@@ -388,7 +395,7 @@ export async function searchPublicProducts(
           (!filters.retailer || p.offers.some((o) => o.retailerId === filters.retailer)) &&
           (!filters.unit || filteredOffers.some((o) => o.canonicalId === p.id)),
       ),
-    offers: limitGenericOffers(filteredOffers, sort, page),
+    offers: limitGenericOffers(orderedOffers, sort, page),
     page,
     hasMore: filteredOffers.length > page * 30 || products.length === 20,
     totalOffers: filteredOffers.length,
