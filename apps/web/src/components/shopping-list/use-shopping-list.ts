@@ -11,6 +11,7 @@ import {
   resolveShoppingSession,
   sameShoppingSession,
 } from "../../lib/shopping-list/session";
+import type { ShoppingImportRecovery } from "../../lib/shopping-list/sync-client";
 import { useShoppingClient } from "./shopping-list-provider";
 
 export function useShoppingList() {
@@ -44,6 +45,25 @@ export function useShoppingList() {
     // Withhold the old account during render, before the bridge invalidates requests.
     list,
     warning,
+    importIssue: current ? snapshot.importIssue : null,
+    prepareImportRecovery: () => client.prepareImportRecovery(session),
+    exportPendingImport: (recovery: ShoppingImportRecovery) => {
+      client.assertImportRecovery(recovery, session);
+      return client.exportPendingImport(recovery);
+    },
+    discardPendingImport: (recovery: ShoppingImportRecovery) => {
+      client.assertImportRecovery(recovery, session);
+      return client.discardPendingImport(recovery);
+    },
+    returnToImportAccount: async (recovery: ShoppingImportRecovery) => {
+      client.assertImportRecovery(recovery, session);
+      const result = await authClient.signOut();
+      if (result.error) {
+        throw new Error(
+          "No pudimos cerrar sesión. Conservamos la copia local; intenta nuevamente.",
+        );
+      }
+    },
     ready: current && snapshot.ready,
     busy: !current || snapshot.busy,
     authenticated: session.status === "authenticated",

@@ -45,6 +45,8 @@ These reports and the full [original roadmap](engineering-notes-2026-10-05.md#or
 
 ## New reports
 
+- [Recuperación de importaciones pendientes 07](shopping-import-recovery-2026-10-17.md): copia JSON local, retorno a la cuenta original, descarte confirmado y protección ante cambios de sesión/pestaña; pruebas aisladas y límites.
+
 - [Comparaciones habituales con Makro 08A](matching-retailer-sample-2026-10-16.md): muestra offline separada, cuatro tiendas, negativos, discrepancias de revisión, ambigüedad de marca y corpus histórico conservado.
 
 - [Recorrido móvil 13A](mobile-shopping-journey-2026-10-16.md): revalidación de 06, scroll del plan, explicación de importes, persistencia del SKU y guion pendiente con personas.

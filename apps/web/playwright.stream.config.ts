@@ -8,6 +8,7 @@ export default defineConfig({
     "testing/auth.spec.ts",
     "testing/shopping-list-sync.spec.ts",
     "testing/shopping-list-client.spec.ts",
+    "testing/shopping-import.spec.ts",
     "testing/shopping-query.spec.ts",
     "testing/catalog-http.spec.ts",
     "testing/request-budget.spec.ts",

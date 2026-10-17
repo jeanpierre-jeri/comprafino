@@ -13,6 +13,10 @@ import {
   shoppingStorageKey,
   claimShoppingImport,
   clearShoppingImport,
+  inspectShoppingImport,
+  discardShoppingImport,
+  withShoppingStorageLock,
+  importOwnerKey,
 } from "../../lib/shopping-list/repository";
 
 const ShoppingContext = createContext<ShoppingListSyncClient | null>(null);
@@ -26,6 +30,9 @@ function createShoppingClient() {
       write: writeShoppingStorage,
       claim: claimShoppingImport,
       clear: clearShoppingImport,
+      inspect: inspectShoppingImport,
+      discard: discardShoppingImport,
+      exclusive: withShoppingStorageLock,
     },
     (...args) => fetch(...args),
     () => {
@@ -45,7 +52,12 @@ function ShoppingListSessionBridge({ client }: { client: ShoppingListSyncClient 
 
   useEffect(() => {
     function storageChanged(event: StorageEvent) {
-      if (event.key === shoppingStorageKey || event.key === syncSignalKey || event.key === null) {
+      if (
+        event.key === shoppingStorageKey ||
+        event.key === importOwnerKey ||
+        event.key === syncSignalKey ||
+        event.key === null
+      ) {
         client.storageChanged();
       }
     }

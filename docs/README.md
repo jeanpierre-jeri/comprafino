@@ -39,7 +39,7 @@ Las pruebas de una función permanecen cerca de su implementación: por ejemplo,
 
 ## Estado del trabajo local
 
-Estado al **16 de octubre de 2026**. Los bloques terminados se guardan en commits separados por tarea. Los documentos generales reúnen el estado y la priorización; 08A ya tiene evaluación local concluida, con pruebas y reporte propios.
+Estado actualizado al **17 de octubre de 2026**. Los bloques terminados se guardan en commits separados por tarea. Los documentos generales reúnen el estado y la priorización; 08A está cerrado en un commit local; 07 se entrega en un commit local dedicado, con implementación verificada, pruebas y reporte propios.
 
 | Bloque | Cambio principal                                              | Estado y entrada                                                                                                                         |
 | ------ | ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
@@ -48,8 +48,9 @@ Estado al **16 de octubre de 2026**. Los bloques terminados se guardan en commit
 | 10B    | Admisión de candidatos antes del límite del refresco          | Corrección local verificada. [Reporte](history/catalog-refresh-selection-2026-10-16.md).                                                 |
 | 13A    | Scroll del diálogo y explicación de importes                  | Corrección local verificada. [Reporte](history/mobile-shopping-journey-2026-10-16.md). Personas y teléfono físico pendientes.            |
 | 08A    | Muestra de comparaciones con Makro y evaluador local          | Evaluación local concluida, sin cambios de reglas ni producción. [Resultados y límites](history/matching-retailer-sample-2026-10-16.md). |
+| 07     | Recuperación de importaciones pendientes                      | Implementación local, sin despliegue ni cambios de comparación. [Flujos y límites](history/shopping-import-recovery-2026-10-17.md).      |
 
-Las correcciones de aplicación terminadas están en [refresco](../packages/db/src/listing-refresh.ts) y [diálogo del plan](../apps/web/src/components/basket-comparison.tsx). El ajuste de [matching-independent.ts](../packages/db/src/matching-independent.ts) permite cuatro tiendas en el validador de auditoría de 08A; no cambia el algoritmo del matcher.
+Las correcciones de aplicación terminadas están en [refresco](../packages/db/src/listing-refresh.ts) y [diálogo del plan](../apps/web/src/components/basket-comparison.tsx). La [recuperación de listas](../apps/web/src/components/shopping-list/shopping-import-recovery.tsx) concentra la nueva interacción; el coordinador conserva las guardas de sesión y propiedad. El ajuste de [matching-independent.ts](../packages/db/src/matching-independent.ts) permite cuatro tiendas en el validador de auditoría de 08A; no cambia el algoritmo del matcher.
 
 ## Leer el kit 04A sin recorrer todos sus archivos
 

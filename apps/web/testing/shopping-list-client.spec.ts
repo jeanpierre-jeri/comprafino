@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import { emptyShoppingList, shoppingListItemSchema } from "@comprafino/core";
 import type { ShoppingList } from "@comprafino/core";
 import { remoteShoppingQueryKey } from "../src/lib/shopping-list/query-client.ts";
+import { ShoppingStorageCoordinationError } from "../src/lib/shopping-list/repository.ts";
 import { ShoppingListSyncClient } from "../src/lib/shopping-list/sync-client.ts";
 
 const item = (n: number) =>
@@ -24,6 +25,11 @@ const state = (revision = 0, items: ShoppingList["items"] = []) => ({
 
 function harness(anonymous: ShoppingList = emptyShoppingList(), budgetMs?: number) {
   let stored = anonymous;
+  let blocked = false,
+    claimBlocked = false,
+    clearBlocked = false,
+    coordination = true;
+  let lockWait: Promise<void> | null = null;
   let claim: string | null = null;
   let clears = 0,
     broadcasts = 0,
@@ -32,7 +38,7 @@ function harness(anonymous: ShoppingList = emptyShoppingList(), budgetMs?: numbe
   const replies: (() => Promise<Response>)[] = [];
   const client = new ShoppingListSyncClient(
     {
-      read: () => ({ list: stored, warning: "" }),
+      read: () => ({ list: stored, warning: blocked ? "Storage blocked" : "" }),
       write: (list) => {
         stored = list;
         writes++;
@@ -40,20 +46,46 @@ function harness(anonymous: ShoppingList = emptyShoppingList(), budgetMs?: numbe
         return "";
       },
       claim: (owner) => {
-        if (claim && claim !== owner) return false;
+        if (claimBlocked) return "unavailable";
+        if (claim && claim !== owner) return "other-account";
 
         claim = owner;
 
-        return true;
+        return "claimed";
       },
       clear: (list, owner) => {
-        if (stored !== list || claim !== owner) return false;
+        if (clearBlocked) return "unavailable";
+        if (stored !== list || claim !== owner) return "changed";
 
         stored = emptyShoppingList();
         claim = null;
         clears++;
 
-        return true;
+        return "cleared";
+      },
+      inspect: () => {
+        if (blocked) return { status: "unavailable" };
+        if (!stored.items.length) return { status: "empty" };
+        return {
+          status: "available",
+          snapshot: { list: stored, raw: JSON.stringify(stored), owner: claim },
+        };
+      },
+      discard: (snapshot) => {
+        if (blocked) return "unavailable";
+        if (snapshot.raw !== JSON.stringify(stored) || snapshot.owner !== claim) return "changed";
+        stored = emptyShoppingList();
+        claim = null;
+        clears++;
+        return "discarded";
+      },
+      exclusive: async (action, signal, required = true) => {
+        if (!coordination && required) {
+          throw new ShoppingStorageCoordinationError();
+        }
+        if (lockWait) await lockWait;
+        signal.throwIfAborted();
+        return action();
       },
     },
     async (url, init) => {
@@ -82,6 +114,25 @@ function harness(anonymous: ShoppingList = emptyShoppingList(), budgetMs?: numbe
     reply: (body: unknown, status = 200) =>
       replies.push(async () => Response.json(body, { status })),
     stored: () => stored,
+    setBlocked: (next: boolean) => {
+      blocked = next;
+    },
+    setClaimBlocked: (next: boolean) => {
+      claimBlocked = next;
+    },
+    setClearBlocked: (next: boolean) => {
+      clearBlocked = next;
+    },
+    setClaim: (next: string) => {
+      claim = next;
+    },
+    owner: () => claim,
+    setCoordination: (next: boolean) => {
+      coordination = next;
+    },
+    setLockWait: (next: Promise<void>) => {
+      lockWait = next;
+    },
     setStored: (list: ShoppingList) => {
       stored = list;
     },
@@ -223,6 +274,9 @@ test("pending import is not copied to another account and concurrent anonymous e
   h.client.setSession({ status: "authenticated", userId: "B", sessionId: "s2" });
   await idle(h);
   expect(h.calls).toHaveLength(3);
+  expect(h.client.getSnapshot().warning).toBe(
+    "La copia de este navegador está pendiente de importación en otra cuenta. Tu lista actual no se modificó.",
+  );
   expect(h.stored()).toEqual(anonymous);
   h.reply(state(1, [item(1)]));
   h.setStored({ version: 2, items: [item(1), item(2)] });
@@ -273,6 +327,22 @@ test("capacity rejection retains anonymous storage while importing updates and i
   expect(h.calls).toHaveLength(1);
   expect(h.clears()).toBe(0);
   expect(h.client.getSnapshot().warning).toContain("50");
+  expect(h.client.getSnapshot().importIssue).toBe("rejected");
+});
+
+test("identity rejection retains the copy without claiming that the account is full", async () => {
+  const original = item(1);
+  const duplicate = item(2);
+  const collision = { ...original, query: duplicate.query, label: duplicate.label };
+  const h = harness({ version: 2, items: [collision] });
+  h.reply(state(1, [{ ...original, updatedAt: "2026-10-05T00:00:00.000Z" }, duplicate]));
+  h.client.setSession({ status: "authenticated", userId: "A", sessionId: "s1" });
+  await idle(h);
+  expect(h.calls).toHaveLength(1);
+  expect(h.clears()).toBe(0);
+  expect(h.stored().items).toEqual([collision]);
+  expect(h.client.getSnapshot().warning).toContain("necesidades repetidas");
+  expect(h.client.getSnapshot().importIssue).toBe("rejected");
 });
 
 test("corrupt responses and infrastructure failures never become authoritative empty; 401 hides expired account", async () => {
@@ -527,4 +597,171 @@ test("slow list reads release busy state and allow later recovery without cleari
   expect(h.calls).toHaveLength(2);
   expect(h.writes()).toBe(0);
   h.client.dispose();
+});
+
+test("recovery exports only the retained local snapshot and discards it without touching another account", async () => {
+  const anonymous: ShoppingList = { version: 2, items: [item(1), item(2)] };
+  const h = harness(anonymous);
+  h.reply(state());
+  h.reply(state(1, [item(1)]));
+  h.reply({}, 503);
+  h.client.setSession({ status: "authenticated", userId: "A", sessionId: "s1" });
+  await idle(h);
+  h.reply(state(9, [item(9)]));
+  h.client.setSession({ status: "authenticated", userId: "B", sessionId: "s2" });
+  await idle(h);
+  expect(h.client.getSnapshot().importIssue).toBe("other-account");
+  const recovery = h.client.prepareImportRecovery();
+  const callsBeforeRecovery = h.calls.length;
+  expect(JSON.parse(await h.client.exportPendingImport(recovery))).toEqual(anonymous);
+  expect(h.owner()).toBe("A");
+  expect(h.clears()).toBe(0);
+  await h.client.discardPendingImport(recovery);
+  expect(h.stored().items).toEqual([]);
+  expect(h.owner()).toBeNull();
+  expect(h.client.getSnapshot().list).toEqual(state(9, [item(9)]).list);
+  expect(h.calls).toHaveLength(callsBeforeRecovery);
+  expect(h.writes()).toBe(0);
+  expect(h.client.getSnapshot().importIssue).toBeNull();
+});
+
+test("changed snapshot or owner invalidates export and confirmed discard without removing data", async () => {
+  const h = harness({ version: 2, items: [item(1)] });
+  h.setClaim("A");
+  h.reply(state(1, [item(9)]));
+  h.client.setSession({ status: "authenticated", userId: "B", sessionId: "s2" });
+  await idle(h);
+  const stale = h.client.prepareImportRecovery();
+  h.setStored({ version: 2, items: [item(1), item(2)] });
+  await expect(h.client.exportPendingImport(stale)).rejects.toThrow("cambió");
+  await expect(h.client.discardPendingImport(stale)).rejects.toThrow("cambió");
+  const updated = h.client.prepareImportRecovery();
+  h.setClaim("C");
+  await expect(h.client.discardPendingImport(updated)).rejects.toThrow("cambió");
+  expect(h.stored().items).toHaveLength(2);
+  expect(h.owner()).toBe("C");
+  expect(h.clears()).toBe(0);
+});
+
+test("logout aborts a queued discard and late recovery tokens cannot affect a new session", async () => {
+  const h = harness({ version: 2, items: [item(1)] });
+  h.setClaim("A");
+  h.reply(state());
+  h.client.setSession({ status: "authenticated", userId: "B", sessionId: "s2" });
+  await idle(h);
+  const recovery = h.client.prepareImportRecovery();
+  let release!: () => void;
+  h.setLockWait(
+    new Promise<void>((resolve) => {
+      release = resolve;
+    }),
+  );
+  const discarded = expect(h.client.discardPendingImport(recovery)).rejects.toThrow();
+  h.client.setSession({ status: "anonymous" });
+  release();
+  await discarded;
+  await expect(h.client.exportPendingImport(recovery)).rejects.toThrow("cuenta cambió");
+  expect(h.stored().items).toHaveLength(1);
+  expect(h.owner()).toBe("A");
+  expect(h.clears()).toBe(0);
+});
+
+test("storage access, claim quota and clear failure are distinct from another account and recover safely", async () => {
+  for (const phase of ["read", "claim", "clear"] as const) {
+    const h = harness({ version: 2, items: [item(1)] });
+    h.reply(state());
+    if (phase === "read") h.setBlocked(true);
+    if (phase === "claim") h.setClaimBlocked(true);
+    if (phase === "clear") {
+      h.setClearBlocked(true);
+      h.reply(state(1, [item(1)]));
+    }
+    h.client.setSession({ status: "authenticated", userId: "A", sessionId: "s1" });
+    await idle(h);
+    expect(h.client.getSnapshot().importIssue).toBe("storage");
+    expect(h.client.getSnapshot().warning).not.toContain("otra cuenta");
+    expect(h.clears()).toBe(0);
+    expect(h.stored().items).toHaveLength(1);
+    h.setBlocked(false);
+    h.setClaimBlocked(false);
+    h.setClearBlocked(false);
+    h.reply(phase === "clear" ? state(1, [item(1)]) : state());
+    if (phase !== "clear") h.reply(state(1, [item(1)]));
+    await h.client.importAnonymous();
+    expect(h.clears()).toBe(1);
+  }
+});
+
+test("missing coordination blocks import and discard but permits a local backup and anonymous edits", async () => {
+  const h = harness({ version: 2, items: [item(1)] });
+  h.setCoordination(false);
+  h.reply(state());
+  h.client.setSession({ status: "authenticated", userId: "A", sessionId: "s1" });
+  await idle(h);
+  expect(h.client.getSnapshot().importIssue).toBe("coordination");
+  const recovery = h.client.prepareImportRecovery();
+  expect(JSON.parse(await h.client.exportPendingImport(recovery)).items).toHaveLength(1);
+  await expect(h.client.discardPendingImport(recovery)).rejects.toThrow("coordinar");
+  expect(h.clears()).toBe(0);
+  expect(h.calls).toHaveLength(1);
+  h.client.setSession({ status: "anonymous" });
+  await h.client.change((list) => ({ ...list, items: [...list.items, item(2)] }));
+  expect(h.stored().items).toHaveLength(2);
+});
+
+test("a recovery handler from a different rendered session cannot switch the coordinator or start an import", async () => {
+  const h = harness({ version: 2, items: [item(1)] });
+  h.setClaim("A");
+  h.reply(state(1, [item(9)]));
+  h.client.setSession({ status: "authenticated", userId: "B", sessionId: "s2" });
+  await idle(h);
+  const recovery = h.client.prepareImportRecovery();
+  const otherSession = { status: "authenticated", userId: "A", sessionId: "s1" } as const;
+  expect(() => h.client.prepareImportRecovery(otherSession)).toThrow("cuenta cambió");
+  expect(() => h.client.assertImportRecovery(recovery, otherSession)).toThrow("cuenta cambió");
+  expect(h.client.getSnapshot().session).toEqual({
+    status: "authenticated",
+    userId: "B",
+    sessionId: "s2",
+  });
+  expect(h.calls).toHaveLength(1);
+  expect(h.owner()).toBe("A");
+});
+
+test("logout after snapshot serialization prevents a late export result without clearing the copy", async () => {
+  const h = harness({ version: 2, items: [item(1)] });
+  h.setClaim("A");
+  h.reply(state(1, [item(9)]));
+  h.client.setSession({ status: "authenticated", userId: "B", sessionId: "s2" });
+  await idle(h);
+  const recovery = h.client.prepareImportRecovery();
+  const exported = expect(h.client.exportPendingImport(recovery)).rejects.toThrow("cuenta cambió");
+  h.client.setSession({ status: "anonymous" });
+  await exported;
+  expect(h.stored().items).toHaveLength(1);
+  expect(h.owner()).toBe("A");
+  expect(h.clears()).toBe(0);
+  expect(h.calls).toHaveLength(1);
+});
+
+test("an uncertain partial import permits a local backup but blocks discard until a successful read", async () => {
+  const local: ShoppingList = { version: 2, items: [item(1), item(2)] };
+  const h = harness(local);
+  h.reply(state());
+  h.reply(state(1, [item(1)]));
+  h.reply({}, 503);
+  h.client.setSession({ status: "authenticated", userId: "A", sessionId: "s1" });
+  await idle(h);
+  expect(h.client.getSnapshot().ready).toBe(false);
+  const recovery = h.client.prepareImportRecovery();
+  expect(JSON.parse(await h.client.exportPendingImport(recovery))).toEqual(local);
+  await expect(h.client.discardPendingImport(recovery)).rejects.toThrow("confirmar si el cambio");
+  expect(h.clears()).toBe(0);
+  expect(h.calls).toHaveLength(3);
+  h.reply(state(1, [item(1)]));
+  await h.client.refreshRemote();
+  await h.client.discardPendingImport(recovery);
+  expect(h.clears()).toBe(1);
+  expect(h.calls).toHaveLength(4);
+  expect(h.client.getSnapshot().list.items).toEqual([item(1)]);
 });

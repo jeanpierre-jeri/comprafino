@@ -12,6 +12,7 @@ import { MarketComparison } from "./market-comparison";
 import { ShoppingSavingsSummary } from "./shopping-savings-notices";
 import { ShoppingItemCard } from "./shopping-item-card";
 import { useShoppingEvaluation } from "./use-shopping-evaluation";
+import { ShoppingImportRecovery } from "./shopping-import-recovery";
 import { ShoppingItemEditor } from "./shopping-item-editor";
 
 export function ShoppingListView() {
@@ -155,7 +156,9 @@ export function ShoppingListView() {
 
   return (
     <>
-      <h1 className="text-2xl font-semibold sm:text-3xl">Mi lista de compras</h1>
+      <h1 id="shopping-list-heading" tabIndex={-1} className="text-2xl font-semibold sm:text-3xl">
+        Mi lista de compras
+      </h1>
       <p className="mt-2 text-sm text-muted-foreground">
         Tus productos, su historial y opciones para ahorrar.{" "}
         {authenticated ? "Sincronizada con tu cuenta." : "Se guarda en este navegador."}
@@ -166,6 +169,9 @@ export function ShoppingListView() {
           Reintentar sincronización
         </button>
       )}
+      <ShoppingImportRecovery
+        key={session.status === "authenticated" ? session.sessionId : session.status}
+      />
       {renderContent()}
       {editing && (
         <ShoppingItemEditor

@@ -15,14 +15,28 @@ import type {
   RemoteShoppingListState,
   ShoppingListSyncOperation,
 } from "@comprafino/core";
+import { serializeShoppingList } from "@comprafino/core";
+import { ShoppingStorageCoordinationError } from "./repository";
+import type { ShoppingImportInspection, ShoppingImportSnapshot } from "./repository";
 import { sameShoppingSession } from "./session";
 import type { ShoppingSession } from "./session";
 import { ShoppingListSyncError, shoppingSyncFailure } from "./sync-errors";
 import { withinRequestBudget } from "../request-budget";
 import { publicRequestPolicy } from "../public-request-policy";
 
+export type ShoppingImportIssue =
+  | "other-account"
+  | "storage"
+  | "rejected"
+  | "snapshot-changed"
+  | "coordination"
+  | "interrupted";
+
+export type ShoppingImportRecovery = { snapshot: ShoppingImportSnapshot; generation: number };
+
 export type ShoppingListClientState = {
   anonymousList: ShoppingList;
+  importIssue: ShoppingImportIssue | null;
   warning: string;
   ready: boolean;
   busy: boolean;
@@ -32,21 +46,29 @@ export type ShoppingListClientState = {
 type ShoppingStorage = {
   read: (fallback: ShoppingList) => { list: ShoppingList; warning: string };
   write: (list: ShoppingList) => string;
-  claim: (owner: string) => boolean;
-  clear: (list: ShoppingList, owner: string) => boolean;
+  claim: (owner: string) => "claimed" | "other-account" | "unavailable";
+  clear: (list: ShoppingList, owner: string) => "cleared" | "changed" | "unavailable";
+  inspect: () => ShoppingImportInspection;
+  discard: (snapshot: ShoppingImportSnapshot) => "discarded" | "changed" | "unavailable";
+  exclusive: <T>(
+    action: () => Promise<T> | T,
+    signal: AbortSignal,
+    required?: boolean,
+  ) => Promise<T>;
 };
 
 type RefreshMode = "read-only" | "import-anonymous";
 
 const pendingImportMessage =
-  "La lista de este navegador tiene una importación pendiente de otra cuenta o el almacenamiento no está disponible.";
+  "La copia de este navegador está pendiente de importación en otra cuenta. Tu lista actual no se modificó.";
 
 const incompleteImportMessage =
-  "Conservamos la lista de este navegador: la importación está incompleta. Revisa el límite de 50 necesidades e intenta nuevamente.";
+  "No pudimos importar todas las necesidades. Revisa el límite de 50 y posibles necesidades repetidas. Conservamos la copia local completa; resuelve el bloqueo y reintenta.";
 
 function initialSnapshot(): ShoppingListClientState {
   return {
     anonymousList: emptyShoppingList(),
+    importIssue: null,
     warning: "",
     ready: false,
     busy: false,
@@ -140,7 +162,7 @@ export class ShoppingListSyncClient {
     this.expired = false;
     this.uncertain = false;
     this.refreshAgain = false;
-    this.update({ session, warning: "", ready: false, busy: false });
+    this.update({ session, warning: "", importIssue: null, ready: false, busy: false });
 
     if (session.status === "anonymous") {
       this.readAnonymous();
@@ -333,15 +355,25 @@ export class ShoppingListSyncClient {
     this.anonymous = stored.list;
 
     if (stored.warning) {
-      this.update({ warning: stored.warning });
+      this.update({ warning: stored.warning, importIssue: "storage" });
 
       return;
     }
 
-    if (!stored.list.items.length) return;
+    if (!stored.list.items.length) {
+      this.update({ importIssue: null });
+      return;
+    }
 
-    if (!this.storage.claim(owner)) {
-      this.update({ warning: pendingImportMessage });
+    const claim = this.storage.claim(owner);
+    if (claim !== "claimed") {
+      this.update({
+        warning:
+          claim === "other-account"
+            ? pendingImportMessage
+            : new ShoppingListSyncError("importStorage").message,
+        importIssue: claim === "other-account" ? "other-account" : "storage",
+      });
 
       return;
     }
@@ -369,13 +401,24 @@ export class ShoppingListSyncClient {
 
     this.assertActive(generation);
 
-    if (incomplete || !this.storage.clear(stored.list, owner)) {
-      this.update({ warning: incompleteImportMessage });
+    if (incomplete) {
+      this.update({ warning: incompleteImportMessage, importIssue: "rejected" });
+      return;
+    }
 
+    const cleared = this.storage.clear(stored.list, owner);
+    if (cleared !== "cleared") {
+      this.update({
+        warning: new ShoppingListSyncError(
+          cleared === "changed" ? "importChanged" : "importStorage",
+        ).message,
+        importIssue: cleared === "changed" ? "snapshot-changed" : "storage",
+      });
       return;
     }
 
     this.anonymous = emptyShoppingList();
+    this.update({ importIssue: null });
   }
 
   private finishSequence(generation: number) {
@@ -404,6 +447,7 @@ export class ShoppingListSyncClient {
       return;
     }
 
+    const owner = snapshot.session.userId;
     const generation = this.generation;
     const reconcileOnly = this.uncertain;
     const warning = mode === "import-anonymous" ? "" : snapshot.warning;
@@ -417,15 +461,141 @@ export class ShoppingListSyncClient {
         this.update({ warning: "" });
       }
 
+      if (
+        mode === "read-only" &&
+        this.store.getState().importIssue &&
+        this.storage.inspect().status === "empty"
+      ) {
+        this.update({ importIssue: null, warning: "" });
+      }
+
       if (mode === "import-anonymous") {
-        await this.persistAnonymous(snapshot.session.userId, generation);
+        const inspection = this.storage.inspect();
+        if (inspection.status === "available") {
+          this.anonymous = inspection.snapshot.list;
+          await this.storage.exclusive(
+            () => this.persistAnonymous(owner, generation),
+            this.controller.signal,
+          );
+        } else if (inspection.status === "empty") {
+          this.update({ importIssue: null });
+        } else {
+          this.update({
+            importIssue: "storage",
+            warning: new ShoppingListSyncError("importStorage").message,
+          });
+        }
       }
     } catch (error) {
       if (this.active(generation)) {
-        this.update({ warning: shoppingSyncFailure(error, this.expired).message });
+        if (error instanceof ShoppingStorageCoordinationError) {
+          this.update({
+            warning: new ShoppingListSyncError("importCoordination").message,
+            importIssue: "coordination",
+          });
+        } else {
+          this.update({
+            warning: shoppingSyncFailure(error, this.expired).message,
+            importIssue:
+              mode === "import-anonymous" && this.anonymous.items.length
+                ? "interrupted"
+                : this.store.getState().importIssue,
+          });
+        }
       }
     } finally {
       this.finishSequence(generation);
+    }
+  }
+
+  prepareImportRecovery(expectedSession?: ShoppingSession): ShoppingImportRecovery {
+    const current = this.getSnapshot();
+    if (expectedSession && !sameShoppingSession(current.session, expectedSession)) {
+      throw new ShoppingListSyncError("accountChanged");
+    }
+    if (current.session.status !== "authenticated") {
+      throw new ShoppingListSyncError("expired");
+    }
+    if (current.busy) {
+      throw new ShoppingListSyncError("busy");
+    }
+
+    const inspection = this.storage.inspect();
+    if (inspection.status === "unavailable" || inspection.status === "invalid") {
+      throw new ShoppingListSyncError("importStorage");
+    }
+    if (inspection.status !== "available") {
+      throw new ShoppingListSyncError("importChanged");
+    }
+
+    return { snapshot: inspection.snapshot, generation: this.generation };
+  }
+
+  assertImportRecovery(recovery: ShoppingImportRecovery, expectedSession?: ShoppingSession) {
+    this.assertActive(recovery.generation, this.controller.signal);
+    const current = this.getSnapshot();
+    if (expectedSession && !sameShoppingSession(current.session, expectedSession)) {
+      throw new ShoppingListSyncError("accountChanged");
+    }
+    if (current.session.status !== "authenticated") {
+      throw new ShoppingListSyncError("expired");
+    }
+    if (current.busy) {
+      throw new ShoppingListSyncError("busy");
+    }
+  }
+
+  async exportPendingImport(recovery: ShoppingImportRecovery) {
+    this.assertImportRecovery(recovery);
+    const signal = this.controller.signal;
+    const serialized = await this.storage.exclusive(
+      () => {
+        this.assertActive(recovery.generation, signal);
+        const inspection = this.storage.inspect();
+        if (inspection.status === "unavailable" || inspection.status === "invalid") {
+          throw new ShoppingListSyncError("importStorage");
+        }
+        if (
+          inspection.status !== "available" ||
+          inspection.snapshot.raw !== recovery.snapshot.raw ||
+          inspection.snapshot.owner !== recovery.snapshot.owner
+        ) {
+          throw new ShoppingListSyncError("importChanged");
+        }
+        return serializeShoppingList(inspection.snapshot.list);
+      },
+      signal,
+      false,
+    );
+    this.assertActive(recovery.generation, signal);
+    return serialized;
+  }
+
+  async discardPendingImport(recovery: ShoppingImportRecovery) {
+    this.assertImportRecovery(recovery);
+    if (!this.getSnapshot().ready || this.expired) {
+      throw new ShoppingListSyncError("uncertain");
+    }
+    const signal = this.controller.signal;
+    this.update({ busy: true });
+    try {
+      await this.storage.exclusive(() => {
+        this.assertActive(recovery.generation, signal);
+        const result = this.storage.discard(recovery.snapshot);
+        if (result !== "discarded") {
+          throw new ShoppingListSyncError(result === "changed" ? "importChanged" : "importStorage");
+        }
+        this.anonymous = emptyShoppingList();
+        this.update({ importIssue: null, warning: "" });
+        this.broadcast();
+      }, signal);
+    } catch (error) {
+      if (error instanceof ShoppingStorageCoordinationError) {
+        throw new ShoppingListSyncError("importCoordination");
+      }
+      throw error;
+    } finally {
+      this.finishSequence(recovery.generation);
     }
   }
 
@@ -437,13 +607,25 @@ export class ShoppingListSyncClient {
     }
 
     if (snapshot.session.status === "anonymous") {
-      const stored = this.storage.read(this.anonymous);
-      this.anonymous = next(stored.list);
-      this.update({
-        anonymousList: this.anonymous,
-        warning: this.storage.write(this.anonymous) || stored.warning,
-      });
-
+      const generation = this.generation;
+      this.update({ busy: true });
+      try {
+        await this.storage.exclusive(
+          () => {
+            this.assertActive(generation, this.controller.signal);
+            const stored = this.storage.read(this.anonymous);
+            this.anonymous = next(stored.list);
+            this.update({
+              anonymousList: this.anonymous,
+              warning: this.storage.write(this.anonymous) || stored.warning,
+            });
+          },
+          this.controller.signal,
+          false,
+        );
+      } finally {
+        this.finishSequence(generation);
+      }
       return;
     }
 

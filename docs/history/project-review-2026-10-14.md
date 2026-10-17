@@ -12,6 +12,8 @@ La primera priorización contrastó el código local en `6172047`, la documentac
 
 El [mapa del proyecto](../README.md) reúne ubicaciones de código, herramientas y estado del trabajo local. 08A concluyó una evaluación local separada: 34 ofertas, 26 pares, cuatro tiendas; 15 equivalencias inferidas aceptadas, ocho negativos sin asociación automática y tres ambiguos excluidos. Cuatro negativos quedan en revisión y Yopi depende de marca reconstruida. No hay un error confirmado que justifique cambiar matching. [Resultados y límites](matching-retailer-sample-2026-10-16.md).
 
+**Actualización del 17 de octubre:** 07 implementa recuperación local sin reasignar cuentas: respaldo JSON anónimo, retorno a la cuenta original y descarte explícito con guardas de sesión y snapshot. [Pruebas y límites](shopping-import-recovery-2026-10-17.md). No se desplegó; 04A sigue aplazado.
+
 ### Trabajo ya realizado y alcance pendiente
 
 | Trabajo                      | Estado a esta actualización                                                                                                                                                                                                                                                                                                                                                                 |
@@ -26,12 +28,13 @@ El [mapa del proyecto](../README.md) reúne ubicaciones de código, herramientas
 | 10B: selector de refresco    | Corrección local implementada y verificada: rutas incompatibles se excluyen antes del pool de 5.000. Regresión 0/4 → 4/4, sin elevar presupuestos ni desplegar. [Causa y validación](catalog-refresh-selection-2026-10-16.md).                                                                                                                                                              |
 | 13A: recorrido móvil         | Revisión local en Chromium a 320/390 px, ambos temas: búsqueda, detalle, guardado, edición, recarga y plan. Corregidos scroll heredado del diálogo y explicación de importes. Conserva SKU, cantidades y reglas. Personas y dispositivos físicos pendientes. [Reporte y guion](mobile-shopping-journey-2026-10-16.md).                                                                      |
 | 08A: comparaciones con Makro | Evaluación offline concluida: grupo de cuatro tiendas, 15 positivos inferidos aceptados y cero enlaces automáticos entre ocho negativos; cuatro discrepancias quedan en revisión. Tres ambiguos excluidos, incluyendo Yopi sensible a marca supuesta. Sin cambios de reglas ni asociaciones reales. [Reporte](matching-retailer-sample-2026-10-16.md).                                      |
+| 07: importación pendiente    | Implementación local verificada en un commit dedicado: causas diferenciadas, descarga local, retorno a la cuenta original y descarte confirmado. Sin cambios de reglas ni producción. [Reporte](shopping-import-recovery-2026-10-17.md).                                                                                                                                                    |
 
 ### Orden recomendado para esta etapa
 
-| Orden | Trabajo acotado                               | Por qué aporta valor ahora                                                                                                                                                                                  | Resultado suficiente para avanzar                                                                                                                                                                        |
-| ----- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1     | **07: recuperación de importación pendiente** | Hay protección contra mezclar cuentas, pero el usuario puede quedar bloqueado sin una salida comprensible. El mensaje aún mezcla otra cuenta y almacenamiento no disponible; la interfaz ofrece reintentar. | Separar causas y ofrecer recuperación explícita que conserve el snapshot local y su propietario. Priorizar antes si algún usuario ya sufre el bloqueo. No reasignar ni borrar automáticamente una lista. |
+| Orden | Trabajo acotado                   | Por qué aporta valor ahora                                                                             | Resultado suficiente para avanzar                                                                           |
+| ----- | --------------------------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| 1     | **05: reconciliar documentación** | Una corrección breve evita seguir instrucciones desactualizadas sobre capacidad, horarios y funciones. | Revalidar README y roadmap contra código y guías actuales; no cambiar configuración ni afirmar despliegues. |
 
 El paso de personas reales es una actividad del responsable del proyecto; esta recomendación no autoriza enviar invitaciones o mensajes. La muestra de catálogo tampoco acredita toda la cobertura ni requiere un rastreo masivo. Si aparece un precio incorrecto, pérdida de datos o fallo que impida completar una compra, corregirlo antes de seguir el orden sugerido.
 
@@ -46,7 +49,7 @@ El paso de personas reales es una actividad del responsable del proyecto; esta r
 
 **10B implementado localmente:** se reprodujo que más de 5.000 identidades sin ruta de actualización compatible podían llenar el pool y dejar fuera cuatro compras habituales. El SQL ahora aplica esa frontera antes del límite, manteniendo presupuestos y reglas. En la regresión, la selección pasa de 0/4 a 4/4 y conserva recuperación tras fallo/cooldown. El [reporte 10B](catalog-refresh-selection-2026-10-16.md) explica los checks y límites; no se cuantificó el efecto real sobre producción ni se desplegó.
 
-**Siguiente tarea recomendada: 07**, recuperar importaciones pendientes sin perder listas, con **GPT-6.1 Sol y razonamiento Alto**. 08A conserva el corpus histórico y no demuestra un fallo que autorice modificar reglas; confirmar la marca fuente de Yopi antes de una futura intervención de matching. La relevancia ambigua de búsquedas queda como tarea separada. Los [prompts adaptados a pocos usuarios](project-review-prompts-2026-10-14.md#prompts-acotados-para-la-etapa-actual) mantienen el trabajo acotado. Antes de cada nueva tarea indicar modelo y razonamiento. 04A sigue aplazado.
+**Siguiente tarea recomendada: 05**, reconciliar README y roadmap en un cambio documental acotado, con **GPT-6.1 Sol y razonamiento Medio**. 07 queda implementado y verificado localmente; no acredita el estado remoto. 08A conserva el corpus histórico y no demuestra un fallo que autorice modificar reglas; confirmar la marca fuente de Yopi antes de una futura intervención de matching. La relevancia ambigua de búsquedas queda como tarea separada. Los [prompts adaptados a pocos usuarios](project-review-prompts-2026-10-14.md#prompts-acotados-para-la-etapa-actual) mantienen el trabajo acotado. Antes de cada nueva tarea indicar modelo y razonamiento. 04A sigue aplazado.
 
 ## Evaluación original del 14 de octubre
 
@@ -211,6 +214,8 @@ En un fixture de tres productos, el resumen presenta **S/ 60,00 en un supermerca
 Evidencia: [fila de producto](../../apps/web/src/components/shopping-list/shopping-item-card.tsx), selección de `result.best`; [vista de lista](../../apps/web/src/components/shopping-list/shopping-list-view.tsx); [canasta](../../apps/web/src/components/basket-comparison.tsx). La captura revisada fue `compact-three-items-1280-light.png`, generada por Chromium en el directorio ignorado de resultados. **Prompt 06.**
 
 ## H07 Recuperación de importaciones pendientes
+
+Actualización del 17 de octubre: [recuperación implementada y verificada localmente](shopping-import-recovery-2026-10-17.md). El texto siguiente conserva el hallazgo original.
 
 La importación conserva la lista anónima si hay errores o falta espacio y la vincula a la primera cuenta mediante `comprafino-shopping-list-import-owner`. Es una protección útil para impedir que otra cuenta reciba esos datos por accidente. Sin embargo, si la primera cuenta ya no puede usarse, repetir el botón de reintento con otra cuenta no resuelve la propiedad del marcador.
 

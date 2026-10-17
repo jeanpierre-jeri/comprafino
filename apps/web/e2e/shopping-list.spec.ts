@@ -344,6 +344,7 @@ test("version-one local items retain all intents, custom labels and original amo
       intent === "generic" ? 0 : 2,
     );
     await page.getByRole("button", { name: "Guardar cambios" }).click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
   }
 
   const saved = shoppingListSchema.parse(
@@ -587,6 +588,7 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
     await page.getByRole("radio", { name: "Solo quiero este producto", exact: true }).check();
     await expect(page.getByLabel("Paquetes", { exact: true })).toHaveValue("1");
     await page.getByRole("button", { name: "Agregar", exact: true }).click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
     const saved = shoppingListSchema.parse(
       JSON.parse(
         (await page.evaluate(() => localStorage.getItem("comprafino-shopping-list"))) ?? "null",
@@ -677,6 +679,7 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       "Huevos de Codorniz Independientes Bandeja 30un",
     );
     await page.getByRole("button", { name: "Agregar", exact: true }).click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
     const saved = shoppingListSchema.parse(
       JSON.parse(
         (await page.evaluate(() => localStorage.getItem("comprafino-shopping-list"))) ?? "null",
