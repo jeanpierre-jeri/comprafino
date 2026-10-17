@@ -161,5 +161,12 @@ export async function seedSearchExperienceFixtures(
   await client.query(`insert into catalog_source_listings(source_id,listing_id)
     select s.id,l.id from catalog_sources s join retailer_listings l on l.retailer_id=s.retailer_id
     where s.source_key='search-experience-cleaning' and l.external_id like 'search-pagination-%'`);
+  // The existing milk fixture also exercises category-scoped mobile search.
+  await client.query(`insert into catalog_sources(retailer_id,source_key,name,url)
+    values('metro','search-experience-milk','Lácteos y Huevos / Leches',
+      'https://www.metro.pe/api/catalog_system/pub/products/search?fq=C%3A%2F1%2F')`);
+  await client.query(`insert into catalog_source_listings(source_id,listing_id)
+    select s.id,l.id from catalog_sources s join retailer_listings l on l.retailer_id=s.retailer_id
+    where s.source_key='search-experience-milk' and l.external_id='rich-metro'`);
   return fixtures;
 }

@@ -21,28 +21,19 @@ function ToolbarSkeleton({ comparison = false }: { comparison?: boolean }) {
 
 export function SearchPageLoading() {
   return (
-    <PublicShell>
-      <output className="mb-4 block text-sm font-medium text-primary">Buscando productos…</output>
+    <PublicShell compact>
+      <output className="mb-3 block text-sm font-medium text-primary">Buscando productos…</output>
       <div aria-busy="true" aria-label="Cargando resultados de búsqueda">
         <div className="search-heading" aria-hidden="true">
-          <div>
-            <p className="eyebrow">Precios con contexto</p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-              Encuentra y compara
-            </h1>
-            <Skeleton className="mt-3 h-4 w-3/4" />
-          </div>
-          <div>
-            <Skeleton className="mb-3 h-4 w-48" />
-            <div className="flex gap-2">
-              <Skeleton className="h-12 min-w-0 flex-1" />
-              <Skeleton className="h-12 w-28" />
-            </div>
-            <Skeleton className="mt-3 h-3 w-3/4" />
-          </div>
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Encuentra y compara</h1>
+          <Skeleton className="h-12 w-full" />
         </div>
-        <ToolbarSkeleton />
-        <Skeleton className="my-6 h-6 w-48" />
+        <div className="search-toolbar flex items-center justify-between gap-3" aria-hidden="true">
+          <Skeleton className="h-5 w-24" />
+          <Skeleton className="h-11 w-40" />
+        </div>
+        <Skeleton className="my-3 h-11 w-full lg:hidden" aria-hidden="true" />
+        <Skeleton className="my-4 h-4 w-3/4" aria-hidden="true" />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-hidden="true">
           {[0, 1, 2, 3, 4, 5].map((i) => (
             <div className="product-card" key={i}>

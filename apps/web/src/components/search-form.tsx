@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@comprafino/ui/lib/utils";
 import Form from "next/form";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useTransition } from "react";
@@ -9,9 +10,11 @@ import { searchCategory, searchFilters, searchFilterQuery } from "@comprafino/co
 import type { SearchFilters } from "@comprafino/core";
 
 export function SearchForm({
+  compact = false,
   query = "",
   filters = searchFilters(),
 }: {
+  compact?: boolean;
   query?: string;
   filters?: SearchFilters;
 }) {
@@ -29,7 +32,7 @@ export function SearchForm({
   }, [pending]);
 
   return (
-    <search className="w-full">
+    <search className="min-w-0 w-full">
       <Form
         action="/search"
         aria-busy={pending}
@@ -51,7 +54,10 @@ export function SearchForm({
         {preservedParams.map(([key, value]) => (
           <input key={key} type="hidden" name={key} value={value} />
         ))}
-        <label htmlFor="product-search" className="mb-3 block text-sm font-medium">
+        <label
+          htmlFor="product-search"
+          className={cn("mb-3 block text-sm font-medium", compact && "sr-only")}
+        >
           {category ? `Buscar en ${category.label}` : "¿Qué necesitas comprar?"}
         </label>
         <div className="flex gap-2">
@@ -78,7 +84,10 @@ export function SearchForm({
       </Form>
       <output
         id="search-status"
-        className="mt-3 block text-xs leading-relaxed text-muted-foreground"
+        className={cn(
+          "mt-3 block text-xs leading-relaxed text-muted-foreground",
+          compact && "sr-only",
+        )}
       >
         {pending
           ? "Buscando productos…"

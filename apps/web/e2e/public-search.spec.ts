@@ -7,7 +7,11 @@ import {
 } from "@comprafino/db";
 
 async function choose(page: Page, label: string, option: string) {
-  await page.getByRole("combobox", { name: label, exact: true }).click();
+  const control = page.getByRole("combobox", { name: label, exact: true });
+  if (!(await control.isVisible())) {
+    await page.getByRole("button", { name: /^Filtros/u }).click();
+  }
+  await control.click();
   await page.getByRole("option", { name: option, exact: true }).click();
 }
 

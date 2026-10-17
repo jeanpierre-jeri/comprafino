@@ -2,14 +2,26 @@ import { NavigationLink } from "./navigation-link";
 import { ThemeControl } from "./theme-control";
 import { AuthControl } from "./auth-control";
 import Link from "next/link";
+import { cn } from "@comprafino/ui/lib/utils";
 
-export function PublicShell({ children }: { children: React.ReactNode }) {
+export function PublicShell({
+  children,
+  compact = false,
+}: {
+  children: React.ReactNode;
+  compact?: boolean;
+}) {
   return (
     <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 sm:px-8">
       <a href="#main-content" className="skip-link">
         Saltar al contenido
       </a>
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b py-5 sm:py-6">
+      <header
+        className={cn(
+          "flex flex-wrap items-center justify-between gap-3 border-b py-5 sm:py-6",
+          compact && "py-3 sm:py-4",
+        )}
+      >
         <Link href="/" className="wordmark" aria-label="CompraFino, inicio">
           <span>Compra</span>
           <span className="text-primary">
@@ -30,7 +42,10 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
           <AuthControl />
         </div>
       </header>
-      <main id="main-content" className="min-w-0 flex-1 py-7 sm:py-10">
+      <main
+        id="main-content"
+        className={cn("min-w-0 flex-1 py-7 sm:py-10", compact && "py-4 sm:py-6")}
+      >
         {children}
       </main>
       <footer className="border-t py-6 text-xs text-muted-foreground">

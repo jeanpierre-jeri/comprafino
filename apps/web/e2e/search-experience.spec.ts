@@ -1,3 +1,5 @@
+import { searchCategories } from "@comprafino/core";
+import { mkdir } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 
 const raw: unknown = process.env.PRICE_HISTORY_FIXTURE_IDS
@@ -24,14 +26,18 @@ test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
     await expect(page).toHaveURL(/category=lacteos-huevos/u);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Lácteos y huevos");
     const cards = page.locator("[data-offer-id]");
-    await expect(cards).toHaveCount(5);
+    await expect(cards).toHaveCount(6);
     await expect(page.getByRole("heading", { name: "Compara el mismo producto" })).toHaveCount(0);
     await expect(
       page.getByRole("button", { name: "Agregar como necesidad", exact: true }),
     ).toHaveCount(0);
+    const filterToggle = page.getByRole("button", { name: /^Filtros/u });
+    if (await filterToggle.isVisible()) {
+      await filterToggle.click();
+    }
     await page.getByRole("combobox", { name: "Supermercado" }).click();
     await page.getByRole("option", { name: "Metro", exact: true }).click();
-    await expect(cards).toHaveCount(4);
+    await expect(cards).toHaveCount(5);
     await page.getByLabel("Buscar en Lácteos y huevos").fill("auditexperiencia");
     await page.getByRole("button", { name: "Buscar", exact: true }).click();
     await expect(page).toHaveURL(/q=auditexperiencia/u);
@@ -66,7 +72,7 @@ test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
     await page.getByRole("combobox", { name: "Categoría" }).click();
     await page.getByRole("option", { name: "Lácteos y huevos", exact: true }).click();
     await expect(page).not.toHaveURL(/page=/u);
-    await expect(cards).toHaveCount(5);
+    await expect(cards).toHaveCount(6);
     await expect(page.getByRole("combobox", { name: "Ordenar" })).toContainText(
       "Menor precio total",
     );
@@ -168,5 +174,193 @@ test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
     await expect(page.locator(".detail-best-price")).toContainText(
       "Estamos actualizando este producto.",
     );
+  });
+  test("compact search shows the first milk title and price in both themes and widths", async ({
+    page,
+  }, testInfo) => {
+    const screenshotDirectory = new URL("../../../.artifacts/search-ux/", import.meta.url);
+    await mkdir(screenshotDirectory, { recursive: true });
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.route("https://**/*", (route) => route.abort());
+
+    for (const theme of ["light", "dark"] as const) {
+      await page.emulateMedia({ colorScheme: theme });
+      for (const width of [390, 320, 1280]) {
+        await page.setViewportSize({ width, height: 844 });
+        for (const category of [false, true]) {
+          await page.goto(`/search?q=leche${category ? "&category=lacteos-huevos" : ""}`);
+          const first = page.locator("[data-offer-id]").first();
+          await expect(first).toBeVisible();
+          await expect(page.getByRole("combobox", { name: "Ordenar", exact: true })).toBeVisible();
+          await expect(
+            page.getByLabel(category ? "Buscar en Lácteos y huevos" : "¿Qué necesitas comprar?"),
+          ).toHaveValue("leche");
+          await expect(
+            page.getByRole("status").filter({ hasText: /\d+ resultado/u }),
+          ).toBeVisible();
+          if (width < 1024) {
+            await expect(page.getByRole("button", { name: /^Filtros/u })).toHaveAttribute(
+              "aria-expanded",
+              "false",
+            );
+            await expect(page.getByRole("combobox", { name: "Supermercado" })).toBeHidden();
+          } else {
+            await expect(page.getByRole("combobox", { name: "Supermercado" })).toBeVisible();
+          }
+          const title = await first.getByRole("heading").boundingBox();
+          const price = await first.locator(".card-amount").boundingBox();
+          expect(title).not.toBeNull();
+          expect(price).not.toBeNull();
+          expect(title!.y + title!.height).toBeLessThan(844);
+          expect(price!.y + price!.height).toBeLessThan(844);
+          expect(await page.evaluate(() => scrollY)).toBe(0);
+          expect(
+            await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+          ).toBe(true);
+          const filename = `${width}-${theme}${category ? "-category" : ""}.png`;
+          const path = new URL(filename, screenshotDirectory).pathname;
+          await page.screenshot({ path });
+          await testInfo.attach(filename, { path, contentType: "image/png" });
+          if (width < 1024) {
+            const toggle = page.getByRole("button", { name: /^Filtros/u });
+            await toggle.press("Space");
+            await expect(toggle).toHaveAttribute("aria-expanded", "true");
+            await expect(page.getByRole("combobox", { name: "Categoría" })).toBeVisible();
+            expect(
+              await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+            ).toBe(true);
+            await toggle.press("Space");
+            await expect(toggle).toHaveAttribute("aria-expanded", "false");
+          }
+          console.log(
+            JSON.stringify({
+              width,
+              theme,
+              category,
+              titleBottom: title!.y + title!.height,
+              priceBottom: price!.y + price!.height,
+            }),
+          );
+        }
+      }
+    }
+    expect(errors).toEqual([]);
+  });
+
+  test("all category variants retain search tools without overflow at 320px", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 844 });
+    for (const theme of ["light", "dark"] as const) {
+      await page.emulateMedia({ colorScheme: theme });
+      for (const category of searchCategories) {
+        await page.goto(`/search?category=${category.id}`);
+        await expect(page.getByRole("heading", { level: 1 })).toHaveText(category.label);
+        await expect(page.getByLabel(`Buscar en ${category.label}`)).toBeVisible();
+        await expect(page.getByRole("combobox", { name: "Ordenar", exact: true })).toBeVisible();
+        await expect(
+          page.getByRole("button", { name: "Filtros (1 activo)", exact: true }),
+        ).toHaveAttribute("aria-expanded", "false");
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+          true,
+        );
+      }
+    }
+  });
+
+  test("mobile disclosure, removable filters, reset, reload and history keep URL state", async ({
+    page,
+  }, testInfo) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(
+      "/search?q=auditexperiencia&category=lacteos-huevos&sort=total-price&retailer=metro&unit=unit&priceMode=benefits&page=2",
+    );
+    const toggle = page.getByRole("button", { name: /^Filtros/u });
+    await expect(toggle).toHaveText("Filtros (4 activos)");
+    await page.setViewportSize({ width: 320, height: 844 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    await page.setViewportSize({ width: 390, height: 844 });
+    await toggle.focus();
+    await toggle.press("Enter");
+    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+    const retailer = page.getByRole("combobox", { name: "Supermercado", exact: true });
+    await expect(retailer).toHaveText("Metro");
+    await mkdir(new URL("../../../.artifacts/search-ux/", import.meta.url), { recursive: true });
+    let releaseNavigation = () => {};
+    const navigationGate = new Promise<void>((resolve) => {
+      releaseNavigation = resolve;
+    });
+    await page.route("**/search?**", async (route) => {
+      await navigationGate;
+      await route.continue();
+    });
+    try {
+      await retailer.click();
+      await page.getByRole("option", { name: "Tottus", exact: true }).click();
+      await expect(page.getByText("Actualizando resultados…", { exact: true })).toBeVisible();
+      await expect(page.getByRole("combobox", { name: "Ordenar", exact: true })).toBeDisabled();
+      await expect(page.getByRole("listbox", { includeHidden: true })).toBeHidden();
+      await page.screenshot({
+        path: new URL("../../../.artifacts/search-ux/loading.png", import.meta.url).pathname,
+        fullPage: true,
+      });
+    } finally {
+      releaseNavigation();
+      await page.unrouteAll({ behavior: "wait" });
+    }
+    await expect(page).not.toHaveURL(/page=/u);
+    await expect(
+      page.getByRole("button", { name: "Quitar filtro: Tottus", exact: true }),
+    ).toBeVisible();
+    await expect(retailer).toBeFocused();
+    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+    await toggle.click();
+    await page.getByRole("button", { name: "Quitar filtro: Tottus", exact: true }).click();
+    await expect(page).not.toHaveURL(/retailer=/u);
+    await expect(toggle).toHaveText("Filtros (3 activos)");
+    await page.goBack();
+    await expect(
+      page.getByRole("button", { name: "Quitar filtro: Tottus", exact: true }),
+    ).toBeVisible();
+    await page.goForward();
+    await expect(toggle).toHaveText("Filtros (3 activos)");
+    await page.reload();
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+    await expect(toggle).toHaveText("Filtros (3 activos)");
+    await toggle.click();
+    await expect(page.getByRole("combobox", { name: "Comparar por" })).toHaveText("unidad");
+    await expect(page.getByRole("combobox", { name: "Precios", exact: true })).toHaveText(
+      "Incluir beneficios",
+    );
+    await expect(page.locator('[data-slot="collapsible-content"]:visible')).toHaveCSS(
+      "opacity",
+      "1",
+    );
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.screenshot({
+      path: new URL("../../../.artifacts/search-ux/filters-open.png", import.meta.url).pathname,
+    });
+    await toggle.click();
+    await page.getByRole("button", { name: "Limpiar filtros", exact: true }).click();
+    await expect(page).toHaveURL("/search?q=auditexperiencia&sort=total-price");
+    await expect(toggle).toHaveText("Filtros");
+    await page.goBack();
+    await expect(toggle).toHaveText("Filtros (3 activos)");
+    await page.goForward();
+    await expect(toggle).toHaveText("Filtros");
+    await page.getByLabel("¿Qué necesitas comprar?").fill("zzzzproductoausentezzzz");
+    await page.getByRole("button", { name: "Buscar", exact: true }).click();
+    await expect(
+      page.getByRole("heading", { name: "No encontramos ese producto todavía." }),
+    ).toBeVisible();
+    await expect(page.getByRole("status").filter({ hasText: "0 resultados" })).toBeVisible();
+    await page.screenshot({
+      path: new URL("../../../.artifacts/search-ux/empty.png", import.meta.url).pathname,
+    });
+    await testInfo.attach("empty", {
+      path: new URL("../../../.artifacts/search-ux/empty.png", import.meta.url).pathname,
+      contentType: "image/png",
+    });
   });
 });

@@ -33,11 +33,19 @@ Validated strong egg counts use “/ huevo” for ordinary and CMR unit prices o
 
 Controlled `apps/web/e2e/search-experience.spec.ts` cases run with `pnpm test:e2e:fixtures:local` after a production build, in the existing owned random schema. Fixtures exercise 15/30 eggs, differing variants, unknown stock, ordinary ties, CMR, missing/ambiguous quantities, stale/unavailable exclusions and product-card links opening comparisons with all retained stores after a retailer filter. DB tests cover one/zero current offers separately from retained store counts. No application catalog, retailer requests, schema changes or additional infrastructure are required.
 
-## Milestone 12 visual refinement
+## Compact search layout
+
+Search uses a compact header and labelled search input, followed by the total result count and the existing sort control. At widths below 1024px, secondary category, retailer, optional unit and price-mode controls sit in an accessible “Filtros” disclosure, closed initially. Enter/Space toggles it; controls remain keyboard accessible when expanded. Desktop displays those controls directly. Opening the disclosure is local interaction state; filter values always come from the validated URL.
+
+Active category, retailer, unit and benefits filters have individually removable labels and an active count. “Limpiar filtros” removes those four filters while retaining query and sort. Changing or removing filters resets pagination. Search submission retains the current filters. Back/forward and reload restore URL values; no saved browser preference or results cache is added. Filter navigation retains the mounted toolbar so keyboard focus and the open disclosure survive an update. Pending search/filter navigation announces progress; the initial Suspense skeleton uses the compact layout. Empty results retain search, count, sorting and filter removal controls.
+
+The generic shopping-need action follows results so it does not push the first product below the initial mobile viewport. Price, promotion, availability, identity and grouped sorting rules are unchanged. Controlled Chromium regressions in `search-experience.spec.ts` check milk search and category variants at 320/390/1280×844 in both themes, including first-title/ordinary-price visibility at scroll zero, overflow, keyboard disclosure, filter removal/reset, reload and back/forward. Screenshots are written to ignored `.artifacts/search-ux/`. Build first and run `pnpm test:e2e:fixtures:local` with the explicit owned-schema harness.
+
+## Milestone 12 visual refinement (previous layout)
 
 The URL/state behavior above is unchanged. The heading is borderless, with compact sage controls, a single product grid on the warm page background. The toolbar uses 44px custom controls in two columns from 380px (one below that), four/five on desktop according to available bases; an odd final control spans the mobile row. Product cards use compact images beside complete titles on desktop and mobile, larger ordinary prices, stronger unit prices and small retailer labels. Result dates use relative “Observado hace …” wording with exact ISO/tooltip timestamps; detail keeps full Peru dates. Generic title links extend across the card and now open `/listings/[id]`, with external source links kept separate. Ordinary prices remain primary even in benefits mode; calculated conditional unit prices keep “con CMR”, and CMR totals/requirements have a separate warm surface. Detail groups ordinary minima and lower conditional benefits in its product hero, with distinct compact retailer rows. Empty states provide a same-query filter reset or starter search. See [UI polish](ui-polish.md) for the manual audit, visual system and validation.
 
-No history chart, aggregation, filter preference persistence, client caching or filter modal is included.
+No history chart, aggregation, filter preference persistence, client caching or filter modal is included; mobile uses an inline disclosure.
 
 ## Category navigation
 

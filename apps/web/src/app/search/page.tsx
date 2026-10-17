@@ -49,7 +49,7 @@ export default async function SearchPage({
   const { params, observedNow } = await loadSearchContext(searchParams);
 
   return (
-    <Suspense key={JSON.stringify(params)} fallback={<SearchPageLoading />}>
+    <Suspense fallback={<SearchPageLoading />}>
       <SearchResults params={params} observedNow={observedNow} />
     </Suspense>
   );
@@ -134,31 +134,26 @@ async function SearchResults({
   }
 
   return (
-    <PublicShell>
+    <PublicShell compact>
       <div className="search-heading">
-        <div>
-          <p className="eyebrow">Precios con contexto</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-            {category?.label ?? "Encuentra y compara"}
-          </h1>
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            Compara opciones para tu próxima compra.
-          </p>
-        </div>
-        <SearchForm query={query.slice(0, maximumSearchLength)} filters={filters} />
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          {category?.label ?? "Encuentra y compara"}
+        </h1>
+        <SearchForm compact query={query.slice(0, maximumSearchLength)} filters={filters} />
       </div>
-      {!failed && <SearchControls query={query} filters={filters} units={units} />}
-      {usefulSearchQuery(query) && (
-        <AddShoppingItem
-          seed={{
-            label: query,
-            query,
-            canonicalId: null,
-            quantity: shoppingQuantityForSearch(query, offers),
-          }}
+      {!failed && (
+        <SearchControls
+          query={query}
+          filters={filters}
+          units={units}
+          resultSummary={
+            validRequest
+              ? `${totalOffers} ${totalOffers === 1 ? "resultado" : "resultados"}${page > 1 ? ` · Página ${page}` : ""}`
+              : "Busca un producto"
+          }
         />
       )}
-      <section className="mt-6" aria-label="Resultados de búsqueda">
+      <section className="mt-4" aria-label="Resultados de búsqueda">
         {
           <SearchResultsContent
             query={query}
@@ -192,6 +187,16 @@ async function SearchResults({
             </Link>
           )}
         </nav>
+      )}
+      {usefulSearchQuery(query) && (
+        <AddShoppingItem
+          seed={{
+            label: query,
+            query,
+            canonicalId: null,
+            quantity: shoppingQuantityForSearch(query, offers),
+          }}
+        />
       )}
       <PriceNotice />
     </PublicShell>

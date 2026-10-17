@@ -86,25 +86,21 @@ export function SearchResultsContent({
 
   return (
     <section aria-label="Opciones en supermercados">
-      <h2 className="text-2xl font-semibold tracking-tight">Productos</h2>
-      <p className="mt-2 text-sm text-muted-foreground">
+      <h2 className="sr-only">Productos</h2>
+      <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
         Compara cantidades y precios. Las marcas, variedades y calidades pueden diferir.
       </p>
       {offers.some((offer) => offer.family.family === "toilet_paper") && (
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
           El precio por rollo es orientativo: el tamaño y la cantidad de hojas pueden variar.
         </p>
       )}
       {offers.some((offer) => offer.family.family === "canned_tuna") && (
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
           El peso del atún puede incluir líquido. No mostramos precio por kg sin distinguir peso
           neto y escurrido.
         </p>
       )}
-      <p className="mt-2 mb-4 text-xs text-muted-foreground">
-        {offers.length} productos en esta página
-        {usefulSearchQuery(query) ? ` para «${query}»` : ""}
-      </p>
       {offerGroups(filters.sort).map((group) => {
         const members = offers.filter(
           (offer) => group === "all" || offerMatchesGroup(offer, group),
