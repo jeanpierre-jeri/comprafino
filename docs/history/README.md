@@ -43,6 +43,7 @@ These reports and the full [original roadmap](engineering-notes-2026-10-05.md#or
 
 ## New reports
 
+- [Frescura y cobertura de compras habituales 10A](catalog-usefulness-2026-10-16.md): dieciséis búsquedas, edad de precios, utilidad de resultados, comparaciones admitidas, fallos parciales y frecuencia efectiva; una corrección inicial recomendada, sin cambios operativos.
 - [Rendimiento HTTP de búsquedas y canastas 03E](catalog-http-performance-2026-10-16.md): producción Next local, tres escalas, cuatro solicitudes simultáneas, cancelación, memoria y controles de estabilidad.
 - [Presupuestos públicos, cancelación y recuperación 04](public-request-budgets-2026-10-16.md): límites de operación/transporte/SQL, escrituras inciertas, ajuste del trabajo posterior y estabilidad concurrente a 50.000 registros.
 - [Inspección del hosting 04A](hosting-request-budgets-2026-10-16.md): inspección de solo lectura, preparación local del entorno aislado y verificación remota aplazada por decisión del responsable del proyecto.
