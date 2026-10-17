@@ -29,18 +29,19 @@ El [mapa del proyecto](../README.md) reúne ubicaciones de código, herramientas
 | 13A: recorrido móvil         | Revisión local en Chromium a 320/390 px, ambos temas: búsqueda, detalle, guardado, edición, recarga y plan. Corregidos scroll heredado del diálogo y explicación de importes. Conserva SKU, cantidades y reglas. Personas y dispositivos físicos pendientes. [Reporte y guion](mobile-shopping-journey-2026-10-16.md).                                                                      |
 | 08A: comparaciones con Makro | Evaluación offline concluida: grupo de cuatro tiendas, 15 positivos inferidos aceptados y cero enlaces automáticos entre ocho negativos; cuatro discrepancias quedan en revisión. Tres ambiguos excluidos, incluyendo Yopi sensible a marca supuesta. Sin cambios de reglas ni asociaciones reales. [Reporte](matching-retailer-sample-2026-10-16.md).                                      |
 | 07: importación pendiente    | Implementación local verificada en un commit dedicado: causas diferenciadas, descarga local, retorno a la cuenta original y descarte confirmado. Sin cambios de reglas ni producción. [Reporte](shopping-import-recovery-2026-10-17.md).                                                                                                                                                    |
+| 05: documentación            | README, roadmap y referencias reconciliados contra código local `e7aa576`; capacidad, horarios, Makro, advice semanal, auth y recuperación distinguen implementación de evidencia remota. Solo documentación, en un commit local dedicado. [Alcance y límites](../README.md#reconciliación-documental-05).                                                                                  |
 
 ### Orden recomendado para esta etapa
 
-| Orden | Trabajo acotado                   | Por qué aporta valor ahora                                                                             | Resultado suficiente para avanzar                                                                           |
-| ----- | --------------------------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| 1     | **05: reconciliar documentación** | Una corrección breve evita seguir instrucciones desactualizadas sobre capacidad, horarios y funciones. | Revalidar README y roadmap contra código y guías actuales; no cambiar configuración ni afirmar despliegues. |
+| Orden | Trabajo acotado                            | Por qué aporta valor ahora                                                                            | Resultado suficiente para avanzar                                                                                      |
+| ----- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 1     | **09: revalidar el aviso de dependencias** | El aviso histórico no demuestra un problema vigente; conviene conocer su alcance antes de actualizar. | Auditoría actual de solo lectura y evaluación de exposición; corregir por separado solo si hay un problema demostrado. |
 
 El paso de personas reales es una actividad del responsable del proyecto; esta recomendación no autoriza enviar invitaciones o mensajes. La muestra de catálogo tampoco acredita toda la cobertura ni requiere un rastreo masivo. Si aparece un precio incorrecto, pérdida de datos o fallo que impida completar una compra, corregirlo antes de seguir el orden sugerido.
 
 ### Mantenimiento breve y trabajo condicionado
 
-- **05, documentación:** sigue vigente y es una tarea pequeña conveniente al cerrar el próximo cambio. README aún dice 2.000 registros y horarios antiguos; roadmap omite Makro y trata la recomendación semanal como futura. La política y guías actuales ya describen 50.000, adquisición cada dos horas y recomendación con evidencia suficiente. Corregir las contradicciones sin confundir implementación con despliegue ni capacidad con cobertura. Esta actualización del reporte no completa 05.
+- **05, documentación:** reconciliada localmente el 17 de octubre. [Alcance, fuentes y límites](../README.md#reconciliación-documental-05). La evidencia histórica conserva sus fechas; esta tarea no verifica despliegues, migraciones remotas ni cobertura real.
 - **09, dependencias:** revalidar el aviso moderado histórico antes de decidir una corrección. No se ejecutó un nuevo `pnpm audit` aquí y no se afirma que el estado siga igual. Un aviso relevante para producción cambia la prioridad; no hacer actualizaciones masivas por rutina.
 - **11, control de datos de cuenta:** exportación, eliminación y explicación de datos siguen como tarea acotada antes de ampliar la captación de cuentas; atender antes una solicitud real. No requiere un panel general de cuenta. Las pruebas de aislamiento de sesiones existentes se conservan.
 - **12, indexación y enlaces:** abordar cuando se elija la captación por buscadores o compartir enlaces como siguiente objetivo. Primero verificar que las búsquedas y comparaciones que llegarán a esas personas sean útiles.
@@ -49,7 +50,7 @@ El paso de personas reales es una actividad del responsable del proyecto; esta r
 
 **10B implementado localmente:** se reprodujo que más de 5.000 identidades sin ruta de actualización compatible podían llenar el pool y dejar fuera cuatro compras habituales. El SQL ahora aplica esa frontera antes del límite, manteniendo presupuestos y reglas. En la regresión, la selección pasa de 0/4 a 4/4 y conserva recuperación tras fallo/cooldown. El [reporte 10B](catalog-refresh-selection-2026-10-16.md) explica los checks y límites; no se cuantificó el efecto real sobre producción ni se desplegó.
 
-**Siguiente tarea recomendada: 05**, reconciliar README y roadmap en un cambio documental acotado, con **GPT-6.1 Sol y razonamiento Medio**. 07 queda implementado y verificado localmente; no acredita el estado remoto. 08A conserva el corpus histórico y no demuestra un fallo que autorice modificar reglas; confirmar la marca fuente de Yopi antes de una futura intervención de matching. La relevancia ambigua de búsquedas queda como tarea separada. Los [prompts adaptados a pocos usuarios](project-review-prompts-2026-10-14.md#prompts-acotados-para-la-etapa-actual) mantienen el trabajo acotado. Antes de cada nueva tarea indicar modelo y razonamiento. 04A sigue aplazado.
+**Siguiente tarea recomendada: revalidación acotada de 09**, comprobar primero si el aviso de dependencias sigue vigente y afecta al uso real, sin actualizaciones masivas. 05 queda concluido localmente como corrección documental, con formato y referencias verificados. 07 queda implementado y verificado localmente; no acredita el estado remoto. 08A conserva el corpus histórico y no demuestra un fallo que autorice modificar reglas; confirmar la marca fuente de Yopi antes de una futura intervención de matching. La relevancia ambigua de búsquedas queda como tarea separada. Los [prompts adaptados a pocos usuarios](project-review-prompts-2026-10-14.md#prompts-acotados-para-la-etapa-actual) mantienen el trabajo acotado. Antes de cada nueva tarea indicar modelo y razonamiento. 04A sigue aplazado.
 
 ## Evaluación original del 14 de octubre
 
@@ -187,6 +188,8 @@ Además, una lista visible solicita evaluación cada 60 segundos y al recuperar 
 Evidencia: [body reader](../../apps/web/src/server/request-body.ts), [handler de evaluación](../../apps/web/src/server/shopping-list-handler.ts), [cliente DB](../../packages/db/src/client.ts) y [query de evaluación](../../apps/web/src/lib/shopping-list/evaluation-query.ts). **Prompt 04.**
 
 ## H05 Documentación vigente contradictoria
+
+Actualización del 17 de octubre: [reconciliación documental concluida localmente](../README.md#reconciliación-documental-05). El texto siguiente conserva el hallazgo original del 14 de octubre.
 
 La documentación conserva mucho razonamiento útil, pero mezcla estado actual con frases de hitos anteriores:
 

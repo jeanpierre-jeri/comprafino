@@ -2,19 +2,19 @@
 
 ## Refresh coverage and ownership
 
-`pnpm acquire:catalog` is the scheduled resumable category processor. It discovers public grocery/household category paths, advances durable page cursors, refreshes eligible known listings, then runs incremental normalization/matching. The retained admission guard is 50,000 retailer listings. Work budgets apply per invocation and pending pages/derivation continue later. See [catalog expansion](catalog-expansion.md) for leases, scope, failure isolation, capacity skips and coordinated rollout.
+`pnpm acquire:catalog` is the scheduled resumable category processor. It discovers public grocery/household category paths, advances durable page cursors, refreshes eligible known listings, then runs incremental normalization/matching. The retained admission guard comes from [catalogPolicy](../packages/core/src/catalog-policy.ts); retained offers are not necessarily distinct comparable products. Work budgets apply per invocation and pending pages/derivation continue later. See [catalog expansion](catalog-expansion.md) for leases, scope, failure isolation, capacity skips and coordinated rollout.
 
 `pnpm refresh:catalog` remains the legacy fixed-category manual command. Its `refreshCoverage` configuration and sample request budget are not the scheduled acquisition scope. All category/discovery/targeted writes share the existing retailer locks and preserve ordinary prices, tri-state availability and derived-identity safety.
 
 ## Scheduling and concurrency
 
-The `Catalog refresh` workflow runs resumable acquisition at `17 1,3,5,7,9,11,13,15,17,19,21,23 * * *` (every two hours; minute 17 of even Peru hours). Discovery runs at `43 0,2,4,6,8,10,12,14,16,18,20,22 * * *` (minute 43 of odd Peru hours), twenty queries per run and 240 per UTC day. Both share `comprafino-catalog-refresh` with `cancel-in-progress: false`. This serializes workflow runs; timing is not guaranteed, and arbitrary local processes remain separately guarded by database locks/leases.
+The checked-in [Catalog refresh workflow](../.github/workflows/refresh-catalog.yml) schedules resumable acquisition at `17 1,3,5,7,9,11,13,15,17,19,21,23 * * *` (every two hours; minute 17 of even Peru hours). [Discovery](../.github/workflows/discover-catalog.yml) is scheduled at `43 0,2,4,6,8,10,12,14,16,18,20,22 * * *` (minute 43 of odd Peru hours), twenty queries per run and 240 per UTC day. Both share `comprafino-catalog-refresh` with `cancel-in-progress: false`. This serializes workflow runs; timing is not guaranteed, and arbitrary local processes remain separately guarded by database locks/leases.
 
 Retailer ingestion workflows are manual. Operational workflows require a `DATABASE_URL` repository secret, use Node 24/pinned pnpm/frozen installation, and never apply migrations automatically. Refresh/discovery timeouts are 120/60 minutes respectively. Cron is intended cadence, not an exact freshness guarantee; verify actual Actions outcomes when diagnosing missed observations.
 
 ## Failure and observation behavior
 
-Retailer failures preserve previous committed data and allow other retailers to proceed; the overall command exits nonzero. Targeted refresh can still supply accepted observations after category failures. If no acquisition succeeds, derivation is skipped unless a partially failed stage may have committed writes. Normalization failure/stale rows prevents matching. Stages are individually transactional, not one transaction spanning the whole pipeline.
+The scheduled processor preserves accepted pages and continues other retailers after a source failure; targeted refresh and incremental derivation follow category work. Useful partial source results can warn without failing the command. Access restrictions, no useful acquisition for a failed retailer, persistence/derivation failures and capacity skips remain errors. See the [current warning policy](catalog-expansion.md#operational-warning-policy). These are different outcomes from a complete successful traversal; stages are not one transaction spanning the whole pipeline.
 
 Run creation/finish is separate from listing commits; interruption may leave `running`. A database outage cannot reliably record its own failure. Safe structured summaries and CLI/Actions status are the fallback; no credentials/raw connection errors are printed. Explicit unavailable/absence/failure outcomes do not advance price freshness or usable coverage. See [availability](availability.md) and [listing refresh](listing-refresh.md).
 
@@ -26,7 +26,7 @@ Run creation/finish is separate from listing commits; interruption may leave `ru
 
 ## Catalog health monitoring
 
-`pnpm health:catalog` reports per-retailer successful refresh age, latest failures, fresh searchable offer counts and retained capacity without writes or retailer requests. A new six-hour scheduled workflow and post-acquisition refresh/discovery steps expose failures through Actions annotations and summaries. Capacity skips come only from explicit acquisition markers; standalone runs report them as unmeasured. See [monitoring policy and notification setup](catalog-health.md) and [dated account rollout observations](history/account-rollout-2026-10-06.md). Publication and account notification delivery are not implied by local implementation.
+`pnpm health:catalog` reports per-retailer successful refresh age, latest failures, fresh searchable offer counts and retained capacity without writes or retailer requests. The [six-hour health workflow](../.github/workflows/catalog-health.yml) and post-acquisition refresh/discovery steps expose failures through Actions annotations and summaries. Capacity skips come only from explicit acquisition markers; standalone runs report them as unmeasured. See [monitoring policy and notification setup](catalog-health.md) and [dated account rollout observations](history/account-rollout-2026-10-06.md). Publication and account notification delivery are not implied by local implementation.
 
 ## Commands and repair
 
@@ -54,7 +54,7 @@ Retailer commands support bounded allowlisted `--category`, `--limit` and databa
 
 ## Migration and rollout
 
-Makro requires `0011_real_quasar.sql` before updated refresh/discovery code runs; it expands the retailer constraint and seeds the fourth store. No application database is migrated by this implementation. Makro adds seven sources and up to 220 observations; current budgets derive from configuration, and prior timing evidence is no longer comparable. See [Makro](retailers/makro.md).
+Makro requires `0011_real_quasar.sql` before updated refresh/discovery code runs; it expands the retailer constraint and seeds the fourth store. Migrations never run automatically. The fixed manual sample includes seven Makro sources and up to 220 observations; these are not the resumable category registry or current store inventory. Current budgets derive from configuration, and prior sample timing evidence does not establish acquisition throughput. See [Makro](retailers/makro.md).
 
 Fresh environments apply the full existing journal using `pnpm db:migrate`. Generate migrations only for reviewed schema changes. Deploy category/discovery/targeted ingestion and every raw/derived identity writer together with corresponding readers. Older writers do not gain evidence preservation, capacity locking, current-benefit verification or automatic identity invalidation merely from additive columns. Reconcile normalization and matching after raw identity changes; normalization alone cannot reauthorize an exact association.
 

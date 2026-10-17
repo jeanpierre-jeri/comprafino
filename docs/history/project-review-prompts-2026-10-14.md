@@ -8,7 +8,7 @@ Todos los cambios deben respetar `AGENTS.md`, preservar cambios locales ajenos y
 
 ## Prompts acotados para la etapa actual
 
-Estos bloques son propuestas para tareas futuras, no autorización de ejecución automática. **10A concluyó su revisión acotada**: ver [reporte y limitaciones](catalog-usefulness-2026-10-16.md). 10B tiene una corrección local verificada del pool de candidatos, documentada en su [reporte](catalog-refresh-selection-2026-10-16.md); el efecto remoto sigue sin medir. 13A completó la revisión local y corrigió dos problemas de presentación; ver [reporte y guion pendiente con personas](mobile-shopping-journey-2026-10-16.md). 08A concluyó su evaluación offline separada, con [discrepancias y límites](matching-retailer-sample-2026-10-16.md). 07 tiene [recuperación local verificada](shopping-import-recovery-2026-10-17.md), sin despliegue. Con pocos usuarios, la siguiente tarea recomendada es 05. La relevancia ambigua de búsquedas queda como una tarea separada. Reservar 05 para una corrección documental breve y revisar 09 antes de asumir que su aviso histórico sigue vigente. 11 y 12 dependen del siguiente paso de captación. No crear el entorno remoto de 04A ahora. Antes de cada nuevo prompt indicar el modelo y el nivel de razonamiento recomendados.
+Estos bloques son propuestas para tareas futuras, no autorización de ejecución automática. **10A concluyó su revisión acotada**: ver [reporte y limitaciones](catalog-usefulness-2026-10-16.md). 10B tiene una corrección local verificada del pool de candidatos, documentada en su [reporte](catalog-refresh-selection-2026-10-16.md); el efecto remoto sigue sin medir. 13A completó la revisión local y corrigió dos problemas de presentación; ver [reporte y guion pendiente con personas](mobile-shopping-journey-2026-10-16.md). 08A concluyó su evaluación offline separada, con [discrepancias y límites](matching-retailer-sample-2026-10-16.md). 07 tiene [recuperación local verificada](shopping-import-recovery-2026-10-17.md), sin despliegue. 05 tiene [reconciliación documental local concluida](../README.md#reconciliación-documental-05). Con pocos usuarios, conviene revalidar el aviso histórico de 09 antes de decidir cualquier actualización. La relevancia ambigua de búsquedas queda como una tarea separada. No asumir que el aviso histórico de 09 sigue vigente; comenzar con una revisión acotada de solo lectura. 11 y 12 dependen del siguiente paso de captación. No crear el entorno remoto de 04A ahora. Antes de cada nuevo prompt indicar el modelo y el nivel de razonamiento recomendados.
 
 ### Prompt 10A Comprobar que el catálogo sirve para una compra habitual
 
@@ -132,7 +132,7 @@ Añade pruebas de dependencia lenta, timeout, abort y recuperación. No introduz
 
 ## Prompt 05 Reconciliar README y roadmap
 
-**Siguiente tarea recomendada tras 07. Modelo: GPT-6.1 Sol. Razonamiento: Medio.** Revalidar las contradicciones actuales; no ejecutar operaciones remotas.
+**Concluido localmente el 17 de octubre; entrega en un commit dedicado.** [Contradicciones corregidas, fuentes y límites](../README.md#reconciliación-documental-05). El bloque siguiente conserva el alcance original. Modelo recomendado para esta tarea: GPT-6.1 Sol, razonamiento Medio. 04A sigue aplazado.
 
 ```text
 Actualiza únicamente la documentación vigente de CompraFino, respetando AGENTS.md. Usa H05 de docs/history/project-review-2026-10-14.md como punto de partida y revalida cada afirmación contra el código actual.

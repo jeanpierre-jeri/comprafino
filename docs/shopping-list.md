@@ -50,7 +50,7 @@ A recommendation requires the **same unique minimum weekday in all four weeks**,
 
 The compact row shows a brief historical suggestion only when supported. The conservative fallback and “Fundamento del día sugerido” section live inside the same product detail panel, where dates, coverage, supermarket-specific suggestions, criterion and limitations are shown without a second disclosure. Pending/failed evaluations withhold advice along with prices. Multiple supermarkets can have different suggested days; the first displayed series follows current candidate order and is not a claim about the best store. No storage change, dependency, migration, cache or background collection was added.
 
-The October 7 read-only audit found coverage from October 4–7, at most four covered dates per SKU; current data still cannot pass this gate. See [the dated audit](history/weekday-coverage-2026-10-07.md) and [coverage semantics](price-history.md#observation-coverage-and-chart-choice).
+The October 7 read-only audit found coverage from October 4–7, at most four covered dates per SKU; that dated sample could not pass this gate. Present-day eligibility needs current evidence and was not queried for the October 17 documentation reconciliation. See [the dated audit](history/weekday-coverage-2026-10-07.md) and [coverage semantics](price-history.md#observation-coverage-and-chart-choice).
 
 ## Desired quantity and sale-package counts
 

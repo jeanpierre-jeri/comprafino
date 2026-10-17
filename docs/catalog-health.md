@@ -1,6 +1,6 @@
 # Catalog health monitoring
 
-`pnpm health:catalog` is read-only: it makes database queries, no retailer requests or catalog/account writes. It reuses the existing complete bounded coverage audit and per-retailer operation inspection. Output contains source names, counts, timestamps and fixed reasons, never product titles, search demand, account data, credentials or driver messages.
+`pnpm health:catalog` is read-only: it makes database queries, no retailer requests or catalog/account writes. It uses paginated eligible-offer counting and per-retailer operation inspection; it does not run the complete, heavier coverage audit just to count searchable offers. See [query and failure policy](catalog-expansion.md#operational-warning-policy). Output contains source names, counts, timestamps and fixed reasons, never product titles, search demand, account data, credentials or driver messages.
 
 ## Policy and failures
 
@@ -13,7 +13,7 @@
 
 Individual stale offers and partial coverage remain reported by the detailed audits; this first monitor does not invent a percentage threshold or persist multi-run state. Zero current offers reflects the existing freshness window, rather than an instantaneous source request failure. Health timestamps and offer queries are separate reads; an acquisition in progress can be visible between them.
 
-The CLI exits 1 for attention or an unavailable/invalid report and 0 for a healthy report (possibly with a capacity warning). A DB outage, corrupt boundary or exceeded catalog bound cannot become healthy. Failure diagnostics remain fixed and safe.
+The CLI exits 1 for `attention` or an unavailable/invalid report and 0 for `healthy` or `warning`. Useful explicitly marked partial source progress and overdue complete cycles with current offers can warn; access, persistence and capacity failures remain errors. See [warning policy](catalog-expansion.md#operational-warning-policy) for conditions and historical unclassified runs. A DB outage, corrupt boundary or exceeded catalog bound cannot become healthy. Failure diagnostics remain fixed and safe.
 
 ## Capacity evidence
 

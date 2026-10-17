@@ -39,7 +39,7 @@ Las pruebas de una función permanecen cerca de su implementación: por ejemplo,
 
 ## Estado del trabajo local
 
-Estado actualizado al **17 de octubre de 2026**. Los bloques terminados se guardan en commits separados por tarea. Los documentos generales reúnen el estado y la priorización; 08A está cerrado en un commit local; 07 se entrega en un commit local dedicado, con implementación verificada, pruebas y reporte propios.
+Estado actualizado al **17 de octubre de 2026**. Los bloques terminados se guardan en commits separados por tarea. Los documentos generales reúnen el estado y la priorización; 08A está cerrado en un commit local; 07 está en `e7aa576`; 05 reúne la reconciliación documental en un commit local dedicado.
 
 | Bloque | Cambio principal                                              | Estado y entrada                                                                                                                         |
 | ------ | ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
@@ -49,8 +49,28 @@ Estado actualizado al **17 de octubre de 2026**. Los bloques terminados se guard
 | 13A    | Scroll del diálogo y explicación de importes                  | Corrección local verificada. [Reporte](history/mobile-shopping-journey-2026-10-16.md). Personas y teléfono físico pendientes.            |
 | 08A    | Muestra de comparaciones con Makro y evaluador local          | Evaluación local concluida, sin cambios de reglas ni producción. [Resultados y límites](history/matching-retailer-sample-2026-10-16.md). |
 | 07     | Recuperación de importaciones pendientes                      | Implementación local, sin despliegue ni cambios de comparación. [Flujos y límites](history/shopping-import-recovery-2026-10-17.md).      |
+| 05     | README, roadmap y guías operativas coherentes con el código   | Reconciliación local documental, sin operaciones remotas. [Alcance y límites](#reconciliación-documental-05).                            |
 
 Las correcciones de aplicación terminadas están en [refresco](../packages/db/src/listing-refresh.ts) y [diálogo del plan](../apps/web/src/components/basket-comparison.tsx). La [recuperación de listas](../apps/web/src/components/shopping-list/shopping-import-recovery.tsx) concentra la nueva interacción; el coordinador conserva las guardas de sesión y propiedad. El ajuste de [matching-independent.ts](../packages/db/src/matching-independent.ts) permite cuatro tiendas en el validador de auditoría de 08A; no cambia el algoritmo del matcher.
+
+## Reconciliación documental 05
+
+Revisada el **17 de octubre de 2026** sobre `e7aa576`. Se corrigieron README, roadmap y sus guías enlazadas; no se añadieron archivos de reporte ni se cambió código, dependencias, migraciones o configuración.
+
+| Contradicción corregida                                           | Fuente contrastada y lectura correcta                                                                                                                                                                                                                                                                                                    |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Límite de 2.000 presentado como vigente                           | [catalogPolicy](../packages/core/src/catalog-policy.ts): 50.000 ofertas retenidas; la revisión a 2.000 queda identificada como histórica en [presupuesto](catalog-budget.md#reviewed-expansion-to-2000-listings). Capacidad no es catálogo adquirido, productos distintos ni comparaciones válidas.                                      |
+| Horarios antiguos y refresh manual confundido con el programado   | [Operaciones](operations.md#scheduling-and-concurrency) reúne crons y enlaces a los workflows. Adquisición reanudable y discovery están programados cada dos horas; no significa que cada oferta se actualice con esa frecuencia.                                                                                                        |
+| Ejemplos y parámetros de refresco anteriores                      | [Política de refresco](../packages/core/src/listing-refresh.ts), [CLI reanudable](../packages/scrapers/src/catalog-acquisition-cli.ts) y [CLI de derivación](../packages/db/src/catalog-derive-cli.ts). Se separan presupuesto por ejecución, límites globales, dry-run con llamadas públicas y previsualización de solo lectura.        |
+| Makro omitido y canastas descritas sobre tres tiendas registradas | [Retailers registrados](../packages/core/src/listing.ts) y [optimizador](../packages/core/src/basket-optimization.ts): cuatro retailers, con planes de hasta tres tiendas. No implica que toda búsqueda tenga cobertura útil en cuatro.                                                                                                  |
+| Recomendación semanal descrita como futura                        | [Regla implementada](../packages/core/src/weekday-recommendation.ts), [evaluación DB](../packages/db/src/shopping-list.ts) y [presentación](../apps/web/src/components/shopping-list/shopping-item-card.tsx). Hay abstención por evidencia insuficiente o patrón no claro; no se comprobó cuántos productos reales cumplen el requisito. |
+| Auth, recuperación y despliegue mezclados                         | [Auth](auth.md) y [persistencia](shopping-list-persistence.md) distinguen implementación, pruebas locales y observaciones remotas fechadas. La recuperación local de 07 ya existe; no equivale a exportar datos de la cuenta.                                                                                                            |
+
+También se corrigieron referencias operativas que aún trataban todo fallo parcial como fatal o los saltos por capacidad como éxito. La [política actual](catalog-expansion.md#operational-warning-policy) distingue avance parcial útil, fallo y salud; esto documenta el código existente, sin modificar sus reglas.
+
+Verificación: formato Oxfmt, `pnpm docs:check` y revisión del diff. El comprobador valida rutas, anclas y comandos registrados; la coherencia semántica se contrastó con los archivos anteriores. No se ejecutaron comandos de aplicación, adquisición, migración, auditorías DB ni pruebas de runtime para este cambio de texto. Los reportes JSON y mediciones fechadas permanecen intactos.
+
+No se verificaron el HEAD desplegado, las migraciones remotas actuales, OAuth/secrets, el tamaño/cobertura/vigencia actual del catálogo, duraciones reales de Actions, entrega de notificaciones ni cuotas/costes. Los crons son intención configurada; los resultados locales previos no acreditan rendimiento remoto. **04A sigue aplazado**, con su kit local y criterios de reanudación conservados.
 
 ## Leer el kit 04A sin recorrer todos sus archivos
 
