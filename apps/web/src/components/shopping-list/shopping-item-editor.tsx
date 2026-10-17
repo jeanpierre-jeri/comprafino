@@ -277,25 +277,35 @@ export function AddShoppingItem({
   seed,
   compact = false,
   buttonLabel,
+  primary = false,
+  inline = false,
 }: {
   seed: ShoppingSeed;
   compact?: boolean;
   buttonLabel?: string;
+  primary?: boolean;
+  inline?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [saved, setSaved] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
   const { ready, warning, busy } = useShoppingList();
 
+  let buttonClass = "shopping-button secondary";
+
+  if (compact) {
+    buttonClass = "card-link inline-flex min-h-11 items-center text-sm";
+  } else if (primary) {
+    buttonClass = "shopping-button";
+  }
+
+  const containerClass = inline ? "" : "mt-4";
+
   return (
-    <div className={compact ? "mt-2" : "mt-4"}>
+    <div className={compact ? "mt-2" : containerClass}>
       <button
         ref={trigger}
-        className={
-          compact
-            ? "card-link inline-flex min-h-11 items-center text-sm"
-            : "shopping-button secondary"
-        }
+        className={buttonClass}
         disabled={!ready || busy}
         onClick={() => {
           setOpen(true);

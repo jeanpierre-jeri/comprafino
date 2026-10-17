@@ -28,6 +28,7 @@ import {
 import { withPublicDatabase } from "../../server/public-database.ts";
 import { withinRequestBudget } from "../../lib/request-budget.ts";
 import { publicRequestPolicy } from "../../lib/public-request-policy.ts";
+import { SearchScrollRestoration } from "../../components/search-scroll-restoration";
 
 export const maxDuration = 30;
 
@@ -162,6 +163,7 @@ async function SearchResults({
             failed={failed}
             underlyingCount={underlyingCount}
             observedNow={observedNow}
+            returnTo={`/search?${searchFilterQuery(query, filters)}&page=${page}`}
           />
         }
       </section>
@@ -199,6 +201,7 @@ async function SearchResults({
         />
       )}
       <PriceNotice />
+      <SearchScrollRestoration />
     </PublicShell>
   );
 }

@@ -566,9 +566,14 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
             background.y + background.height / 2,
           );
         const href = await title.getAttribute("href");
-        expect(href).toMatch(/^\/listings\/[0-9a-f-]{36}$/u);
+        expect(href).toMatch(/^\/listings\/[0-9a-f-]{36}\?returnTo=/u);
         await clickBackground();
-        await expect(page).toHaveURL(new RegExp(`${href}$`));
+        await expect(page).toHaveURL(
+          (destination) =>
+            destination.pathname === new URL(href!, "http://localhost").pathname &&
+            destination.searchParams.get("returnTo")?.startsWith("/search?q=huevos#scroll=") ===
+              true,
+        );
         await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
       }
     }
@@ -1022,7 +1027,7 @@ test.describe("mobile shopping journey 13A", () => {
         await page.goto("/search?q=huevos");
         const source = page.locator(`[data-offer-id="${fixture("independent")}"]`);
         await source.getByRole("link", { name: label, exact: true }).tap();
-        await expect(page).toHaveURL(new RegExp(`/listings/${fixture("independent")}$`));
+        await expect(page).toHaveURL(new RegExp(`/listings/${fixture("independent")}\\?`));
         await expect(page.getByRole("heading", { level: 1 })).toHaveText(label);
         await page.getByRole("button", { name: "Agregar a mi lista", exact: true }).tap();
         const dialog = page.getByRole("dialog");

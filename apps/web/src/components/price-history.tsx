@@ -6,6 +6,7 @@ import { getCanonicalProductPriceHistory } from "@comprafino/db";
 import { withPublicDatabase } from "../server/public-database.ts";
 import { RetailerBadge, ObservedAt } from "./product-info";
 import { PriceHistoryChart } from "./price-history-chart";
+import { withSearchReturn } from "../lib/search-return";
 
 const date = (at: Date) =>
   new Intl.DateTimeFormat("es-PE", {
@@ -21,10 +22,12 @@ export async function PriceHistory({
   productId,
   range,
   benefits,
+  returnTo,
 }: {
   productId: string;
   range: HistoryRange;
   benefits: boolean;
+  returnTo?: string | null;
 }) {
   let history;
 
@@ -42,6 +45,7 @@ export async function PriceHistory({
       range={range}
       path={`/products/${productId}`}
       benefits={benefits}
+      returnTo={returnTo}
     />
   );
 }
@@ -51,11 +55,13 @@ export function PriceHistoryPresentation({
   range,
   path,
   benefits = false,
+  returnTo,
 }: {
   history: import("@comprafino/db").CanonicalProductPriceHistory | null;
   range: HistoryRange;
   path: string;
   benefits?: boolean;
+  returnTo?: string | null;
 }) {
   return (
     <section
@@ -73,7 +79,10 @@ export function PriceHistoryPresentation({
               scroll={false}
               aria-current={range === r ? "page" : undefined}
               className={`inline-flex min-h-11 items-center rounded-lg border px-3 text-sm ${range === r ? "bg-primary text-primary-foreground" : "hover:bg-secondary"}`}
-              href={`${path}?range=${r}${benefits ? "&priceMode=benefits" : ""}`}
+              href={withSearchReturn(
+                `${path}?range=${r}${benefits ? "&priceMode=benefits" : ""}`,
+                returnTo,
+              )}
             >
               {Number.parseInt(r, 10)} días
             </Link>

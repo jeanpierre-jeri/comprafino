@@ -54,7 +54,7 @@ test.describe("persisted public catalog (explicit DATABASE_URL)", () => {
     await page.getByRole("button", { name: "Buscar" }).click();
     await expect(page).toHaveURL(/\/search\?q=gloria\+946$/);
     await page
-      .locator(`[data-offer-id] a.comparison-link[href="/products/${product!.id}"]`)
+      .locator(`[data-offer-id] a.comparison-link[href^="/products/${product!.id}?"]`)
       .first()
       .click();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(product!.displayName);
@@ -77,7 +77,9 @@ test.describe("persisted public catalog (explicit DATABASE_URL)", () => {
       ).toBeVisible();
       await expect(row.locator("time")).toHaveAttribute("datetime", offer.observedAt.toISOString());
       await expect(
-        row.getByRole("link", { name: `Ver producto en ${offer.retailerName}`, exact: false }),
+        page
+          .getByRole("group", { name: "Acciones de compra" })
+          .getByRole("link", { name: `Ver producto en ${offer.retailerName}`, exact: false }),
       ).toHaveAttribute("href", offer.url);
       await expect(row.locator("s")).toHaveCount(offer.regularPriceCents === null ? 0 : 1);
     }
@@ -149,7 +151,7 @@ test.describe("generic persisted offers (explicit DATABASE_URL)", () => {
       "_blank",
     );
     await linkedCard.click({ position: { x: 12, y: 12 } });
-    await expect(page).toHaveURL(new RegExp(`/listings/${linked!.id}$`));
+    await expect(page).toHaveURL(new RegExp(`/listings/${linked!.id}\\?`));
   });
 });
 

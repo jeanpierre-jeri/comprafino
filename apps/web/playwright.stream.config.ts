@@ -14,6 +14,7 @@ export default defineConfig({
     "testing/shopping-query.spec.ts",
     "testing/catalog-http.spec.ts",
     "testing/request-budget.spec.ts",
+    "testing/search-return.spec.ts",
   ],
   workers: 1,
   reporter: "list",

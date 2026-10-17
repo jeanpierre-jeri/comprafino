@@ -6,11 +6,12 @@ import type { Metadata } from "next";
 import { cache } from "react";
 import { connection } from "next/server";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { parseHistoryRange, shoppingSeedForRetailerOffer } from "@comprafino/core";
 import type { HistoryRange } from "@comprafino/core";
 import { formatPen, getPublicRetailerListingDetail, isPublicProductId } from "@comprafino/db";
-import { AddShoppingItem } from "../../../components/shopping-list/shopping-item-editor";
+import { PurchaseActions } from "../../../components/purchase-actions";
+import { DetailReturnLink } from "../../../components/detail-return-link";
+import { validatedSearchReturn, withSearchReturn } from "../../../lib/search-return";
 import { PriceHistoryPresentation } from "../../../components/price-history";
 import { ProductImage } from "../../../components/product-image";
 import { ObservedAt, packageSummary, RetailerBadge } from "../../../components/product-info";
@@ -56,12 +57,15 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 }
 
 export default async function ListingPage({ params, searchParams }: Props) {
-  const range = parseHistoryRange((await searchParams).range);
+  const query = await searchParams;
+  const range = parseHistoryRange(query.range);
+  const returnTo = validatedSearchReturn(query.returnTo);
   const { listing, failed } = await loadListing((await params).id, range);
 
   if (failed) {
     return (
       <PublicShell>
+        <DetailReturnLink returnTo={returnTo} />
         <h1 className="mb-6 text-3xl font-semibold">Detalle del producto</h1>
         <PublicDataError />
       </PublicShell>
@@ -74,12 +78,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
 
   return (
     <PublicShell>
-      <Link
-        href="/search"
-        className="text-sm font-medium text-primary underline underline-offset-4"
-      >
-        Buscar otro producto
-      </Link>
+      <DetailReturnLink returnTo={returnTo} />
       <div className="detail-hero">
         <ProductImage src={listing.imageUrl} name={listing.title} loading="eager" />
         <div>
@@ -146,30 +145,23 @@ export default async function ListingPage({ params, searchParams }: Props) {
               <p className="text-xs text-muted-foreground">{benefit.conditionLabel}</p>
             </aside>
           ))}
+          <PurchaseActions
+            comparisonHref={
+              listing.canonicalId
+                ? withSearchReturn(`/products/${listing.canonicalId}`, returnTo)
+                : undefined
+            }
+            seed={shoppingSeedForRetailerOffer(listing)}
+            stores={[{ name: listing.retailerName, url: listing.url }]}
+          />
         </div>
       </div>
-      <AddShoppingItem
-        buttonLabel="Agregar a mi lista"
-        seed={shoppingSeedForRetailerOffer(listing)}
-      />
       <PriceHistoryPresentation
         history={listing.history}
         range={range}
         path={`/listings/${listing.id}`}
+        returnTo={returnTo}
       />
-      {listing.canonicalId && (
-        <p className="mt-6">
-          <Link className="card-link" href={`/products/${listing.canonicalId}`}>
-            Comparar este producto entre supermercados
-          </Link>
-        </p>
-      )}
-      <p className="mt-6">
-        <a className="card-link" href={listing.url} target="_blank" rel="noopener noreferrer">
-          Ver producto en {listing.retailerName}
-          <span className="sr-only"> (abre una nueva pestaña)</span>
-        </a>
-      </p>
       <PriceNotice />
     </PublicShell>
   );

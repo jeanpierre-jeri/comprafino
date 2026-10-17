@@ -153,7 +153,7 @@ test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
     const card = page.locator(`[data-offer-id="${fixture("search-metro")}"]`);
     await expect(card).toBeVisible();
     await card.getByRole("link", { name: "Ver comparación entre supermercados" }).click();
-    await expect(page).toHaveURL(`/products/${fixture("search-product")}`);
+    await expect(page).toHaveURL(new RegExp(`/products/${fixture("search-product")}\\?`));
     const records = page.getByRole("region", { name: "Precios y registros en 4 supermercados" });
     await expect(records).toContainText("2 ofertas vigentes");
     await expect(page.locator(".detail-best-price")).toContainText(

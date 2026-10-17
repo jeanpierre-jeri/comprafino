@@ -16,6 +16,7 @@ type Props = {
   failed: boolean;
   underlyingCount: number;
   observedNow: Date;
+  returnTo?: string;
 };
 
 type OfferGroup = UnitPriceBasis | "unknown" | "package" | "direct" | "all";
@@ -27,6 +28,7 @@ export function SearchResultsContent({
   failed,
   underlyingCount,
   observedNow,
+  returnTo,
 }: Props) {
   if (failed) return <PublicDataError />;
 
@@ -121,6 +123,7 @@ export function SearchResultsContent({
                     observedNow={observedNow}
                     benefits={filters.priceMode === "benefits"}
                     eager={offer.id === offers[0]?.id}
+                    returnTo={returnTo}
                   />
                 </li>
               ))}

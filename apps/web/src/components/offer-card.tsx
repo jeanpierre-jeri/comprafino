@@ -9,17 +9,20 @@ import { formatPen } from "@comprafino/db";
 import type { GenericProductOffer } from "@comprafino/db";
 import { ProductImage } from "./product-image";
 import { ObservedAt, packageSummary, RetailerBadge } from "./product-info";
+import { withSearchReturn } from "../lib/search-return";
 
 export function GenericOfferCard({
   offer,
   benefits,
   observedNow,
   eager = false,
+  returnTo,
 }: {
   observedNow: Date;
   offer: GenericProductOffer;
   benefits: boolean;
   eager?: boolean;
+  returnTo?: string;
 }) {
   const ordinaryUnitPrice = repriceUnitPrice(
     offer.unitPrice,
@@ -38,7 +41,11 @@ export function GenericOfferCard({
         />
         <div className="min-w-0">
           <h3 className="product-title">
-            <NavigationLink className="product-title-link" href={`/listings/${offer.id}`}>
+            <NavigationLink
+              className="product-title-link"
+              href={withSearchReturn(`/listings/${offer.id}`, returnTo)}
+              captureSearchReturn={Boolean(returnTo)}
+            >
               {offer.title}
             </NavigationLink>
           </h3>
@@ -111,7 +118,11 @@ export function GenericOfferCard({
         </a>
         {offer.canonicalId && (
           <NavigationLink
-            href={`/products/${offer.canonicalId}${benefits ? "?priceMode=benefits" : ""}`}
+            href={withSearchReturn(
+              `/products/${offer.canonicalId}${benefits ? "?priceMode=benefits" : ""}`,
+              returnTo,
+            )}
+            captureSearchReturn={Boolean(returnTo)}
             className="comparison-link"
           >
             Ver comparación entre supermercados

@@ -27,6 +27,163 @@ for (const id of ["invalid", "00000000-0000-4000-8000-000000000000"]) {
 
 test.describe("isolated listing details", () => {
   test.skip(!raw, "Run pnpm test:e2e:history:local --listings after build");
+  test("buying actions sit beside the price, precede history, and have no duplicate or empty links", async ({
+    page,
+  }, testInfo) => {
+    for (const width of [390, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const [kind, id, comparison] of [
+        ["listing", fixture("listing-rich-tottus"), true],
+        ["independent", fixture("independent"), false],
+        ["product", fixture("rich"), true],
+      ] as const) {
+        await page.goto(`/${kind === "product" ? "products" : "listings"}/${id}`);
+        const actions = page.getByRole("group", { name: "Acciones de compra", exact: true });
+        await expect(
+          page.locator(".detail-hero").getByRole("group", { name: "Acciones de compra" }),
+        ).toBeVisible();
+        const add = actions.getByRole("button", { name: "Agregar a mi lista", exact: true });
+        await expect(add).toHaveCount(1);
+        await expect(add).toBeEnabled();
+        const compare = actions.getByRole("link", {
+          name: "Comparar entre supermercados",
+          exact: true,
+        });
+        await expect(compare).toHaveCount(comparison ? 1 : 0);
+        if (comparison) {
+          expect(
+            await compare.evaluate((element) => getComputedStyle(element).backgroundColor),
+          ).not.toBe(await add.evaluate((element) => getComputedStyle(element).backgroundColor));
+        }
+        const external = actions.getByRole("link", { name: /^Ver producto en/ });
+        await expect(external).toHaveCount(kind === "product" ? 4 : 1);
+        for (const link of await external.all()) {
+          await expect(link).toHaveAttribute("target", "_blank");
+          await expect(link).toHaveAttribute("rel", "noopener noreferrer");
+          await expect(link).toContainText("nueva pestaña");
+        }
+        const links = await page
+          .locator('main a[target="_blank"]')
+          .evaluateAll((elements) => elements.map((element) => element.getAttribute("href")));
+        expect(links.every(Boolean)).toBe(true);
+        expect(new Set(links).size).toBe(links.length);
+        expect(
+          await actions.evaluate((element) => {
+            const history = document.querySelector('[aria-labelledby="history-title"]');
+            return (
+              !!history &&
+              Boolean(element.compareDocumentPosition(history) & Node.DOCUMENT_POSITION_FOLLOWING)
+            );
+          }),
+        ).toBe(true);
+        await expect(
+          page.getByRole("link", { name: "Buscar otro producto", exact: true }),
+        ).toHaveAttribute("href", "/search");
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+          true,
+        );
+        await page
+          .locator(".detail-hero")
+          .screenshot({ path: testInfo.outputPath(`actions-${kind}-${width}.png`) });
+        await add.click();
+        await expect(page.getByRole("dialog")).toBeVisible();
+        await page.keyboard.press("Escape");
+      }
+    }
+  });
+
+  test("return preserves query, filters, page and scroll through a reload and history range", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const search =
+      "/search?q=auditpaginacion&retailer=metro&sort=total-price&priceMode=benefits&page=2";
+    await page.goto(search);
+    const card = page.locator("[data-offer-id]").last();
+    const title = card.locator(".product-title-link");
+    await title.scrollIntoViewIfNeeded();
+    const position = await page.evaluate(() => Math.round(scrollY));
+    expect(position).toBeGreaterThan(100);
+    await title.click();
+    await expect(page).toHaveURL(/\/listings\//);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    const returnTo = new URL(page.url()).searchParams.get("returnTo");
+    expect(returnTo).toBe(`${search}#scroll=${position}`);
+    await page.reload();
+    await page.getByRole("link", { name: "7 días", exact: true }).click();
+    await expect(page).toHaveURL(/range=7d/);
+    const back = page.getByRole("link", { name: "Volver a resultados", exact: true });
+    await expect(back).toHaveAttribute("href", returnTo!);
+    await back.click();
+    await expect(page).toHaveURL(`${search}#scroll=${position}`);
+    await expect.poll(() => page.evaluate(() => Math.round(scrollY))).toBe(position);
+    await expect(page.getByLabel("¿Qué necesitas comprar?")).toHaveValue("auditpaginacion");
+    await expect(page.getByText(/Página 2 ·/)).toBeVisible();
+  });
+
+  test("comparison and price controls keep the search return; external return destinations are rejected", async ({
+    page,
+  }) => {
+    await page.goto("/search?q=gloria&priceMode=benefits");
+    await page
+      .locator(`[data-offer-id="${fixture("listing-rich-tottus")}"] .product-title-link`)
+      .click();
+    await page.getByRole("link", { name: "Comparar entre supermercados", exact: true }).click();
+    const back = page.getByRole("link", { name: "Volver a resultados", exact: true });
+    const destination = await back.getAttribute("href");
+    await page.getByRole("combobox", { name: "Precios", exact: true }).click();
+    await page.getByRole("option", { name: "Incluir beneficios", exact: true }).click();
+    await expect(page).toHaveURL(/priceMode=benefits/);
+    await page.getByRole("link", { name: "7 días", exact: true }).click();
+    await expect(page).toHaveURL(/range=7d/);
+    await expect(back).toHaveAttribute("href", destination!);
+    await back.click();
+    await expect(page).toHaveURL(new RegExp("/search\\?q=gloria&priceMode=benefits"));
+
+    for (const path of [`/listings/${fixture("independent")}`, `/products/${fixture("rich")}`]) {
+      for (const unsafe of [
+        "https://evil.example/search",
+        "//evil.example/search",
+        "/list",
+        "/search/../list",
+      ]) {
+        await page.goto(`${path}?returnTo=${encodeURIComponent(unsafe)}`);
+        await expect(
+          page.getByRole("link", { name: "Buscar otro producto", exact: true }),
+        ).toHaveAttribute("href", "/search");
+        await expect(
+          page.getByRole("link", { name: "Volver a resultados", exact: true }),
+        ).toHaveCount(0);
+      }
+    }
+  });
+
+  test("modified clicks preserve the results and scroll in a new detail tab", async ({
+    page,
+    context,
+  }) => {
+    await page.goto("/search?q=gloria&priceMode=benefits");
+    await expect(
+      page.getByRole("button", { name: "Agregar a mi lista", exact: true }).first(),
+    ).toBeEnabled();
+    for (const selector of [".product-title-link", "a.comparison-link"]) {
+      const link = page.locator(selector).last();
+      await link.scrollIntoViewIfNeeded();
+      const position = await page.evaluate(() => Math.round(scrollY));
+      const newTab = context.waitForEvent("page");
+      await link.click({ modifiers: ["ControlOrMeta"] });
+      const detail = await newTab;
+      await detail.waitForLoadState();
+      const back = detail.getByRole("link", { name: "Volver a resultados", exact: true });
+      await expect(back).toHaveAttribute(
+        "href",
+        `/search?q=gloria&priceMode=benefits#scroll=${position}`,
+      );
+      await expect(page).toHaveURL(/\/search\?q=gloria&priceMode=benefits$/);
+      await detail.close();
+    }
+  });
+
   test("independent card, add control, separate source and delayed internal navigation", async ({
     page,
   }) => {
@@ -45,7 +202,7 @@ test.describe("isolated listing details", () => {
     const card = page.locator(`[data-offer-id="${fixture("independent")}"]`);
     await expect(
       card.getByRole("link").filter({ hasText: "Huevos Pardos Tottus Bandeja 30un" }),
-    ).toHaveAttribute("href", `/listings/${fixture("independent")}`);
+    ).toHaveAttribute("href", new RegExp(`^/listings/${fixture("independent")}\\?returnTo=`));
     await expect(card.getByText("Disponibilidad no confirmada.", { exact: true })).toBeVisible();
     await expect(card.getByRole("link", { name: "Ver producto en Tottus" })).toHaveAttribute(
       "target",
@@ -87,13 +244,13 @@ test.describe("isolated listing details", () => {
       release();
     }
 
-    await expect(page).toHaveURL(`/listings/${fixture("independent")}`);
+    await expect(page).toHaveURL(new RegExp(`/listings/${fixture("independent")}\\?returnTo=`));
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       "Huevos Pardos Tottus Bandeja 30un",
     );
     await expect(page.getByText("Precio online para todos", { exact: true })).toBeVisible();
     await expect(page.getByText("S/ 49.90", { exact: true }).first()).toBeVisible();
-    await expect(page.getByRole("link", { name: /Comparar este producto entre/ })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /Comparar entre/ })).toHaveCount(0);
     await expect(page.getByRole("link", { name: /Ver producto en Tottus/ })).toHaveAttribute(
       "href",
       "https://www.tottus.com.pe/tottus-pe/articulo/1/test",
@@ -116,7 +273,7 @@ test.describe("isolated listing details", () => {
     await page.goto(`/listings/${fixture("listing-rich-tottus")}`);
     await expect(page.locator(".detail-best-price")).toContainText("Disponibilidad no confirmada.");
     await expect(
-      page.getByRole("link", { name: "Comparar este producto entre supermercados", exact: true }),
+      page.getByRole("link", { name: "Comparar entre supermercados", exact: true }),
     ).toHaveAttribute("href", `/products/${fixture("rich")}`);
     await expect(page.getByText("S/ 5.40 con CMR", { exact: true })).toBeVisible();
     const history = page.getByRole("region", { name: "Historial del precio para todos" });

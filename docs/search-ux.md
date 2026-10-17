@@ -62,3 +62,7 @@ Category membership is applied to the raw `retailer_listings.id` UUID inside the
 The public search route sets a 12-second HTTP deadline per database request. Each executed request gets a fresh abort signal, including later refresh-demand batches on the same client. Failed/timed-out reads use the existing public error state instead of leaving the loading skeleton waiting indefinitely. Auth, ingestion and other database callers retain their existing transport defaults; this deadline does not retry requests or guarantee that PostgreSQL cancels server-side work immediately on an HTTP disconnect.
 
 Public appearance supports System/Light/Dark independently of filter URLs. An explicit light/dark preference is stored locally; System removes that override. See [UI polish](ui-polish.md) for initialization and token details.
+
+## Returning from details
+
+Listing and comparison links retain query, filters, page and vertical position in a validated local search return URL. Both detail routes show “Volver a resultados” when this context exists, and “Buscar otro producto” otherwise. Changing history range or comparison price mode keeps the return context. Price, comparison, list and external-store actions precede history; external links visibly announce a new tab. Isolated listing Chromium tests cover direct entry, unsafe destinations, comparison/no comparison, unknown stock, pagination, reload, mobile/desktop layout and scroll restoration.

@@ -5,7 +5,9 @@ import { canonicalUnitPrice, classifyProductFamily } from "@comprafino/core";
 import { AvailabilityNotice } from "../../../components/availability-notice";
 import { catalogQuantityToShoppingUnit } from "@comprafino/core";
 import { logDiagnostic } from "../../../server/diagnostics.ts";
-import { AddShoppingItem } from "../../../components/shopping-list/shopping-item-editor";
+import { PurchaseActions } from "../../../components/purchase-actions";
+import { DetailReturnLink } from "../../../components/detail-return-link";
+import { validatedSearchReturn } from "../../../lib/search-return";
 import { shoppingQueryForTitle } from "@comprafino/core";
 import type { Metadata } from "next";
 import { parseHistoryRange } from "@comprafino/core";
@@ -13,7 +15,6 @@ import { PriceHistory } from "../../../components/price-history";
 import { cache } from "react";
 import { connection } from "next/server";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import {
   formatPen,
   getCanonicalProductComparison,
@@ -72,6 +73,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 
 export default async function ProductPage({ params, searchParams }: Props) {
   const query = await searchParams;
+  const returnTo = validatedSearchReturn(query.returnTo);
   const filters = searchFilters(query);
   const range = parseHistoryRange(query.range);
   const { product, failed, observedNow } = await loadProduct((await params).id, filters.priceMode);
@@ -79,6 +81,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
   if (failed) {
     return (
       <PublicShell>
+        <DetailReturnLink returnTo={returnTo} />
         <h1 className="mb-6 text-3xl font-semibold">Comparar precios</h1>
         <PublicDataError />
       </PublicShell>
@@ -116,12 +119,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
 
   return (
     <PublicShell>
-      <Link
-        href="/search"
-        className="text-sm font-medium text-primary underline underline-offset-4"
-      >
-        Buscar otro producto
-      </Link>
+      <DetailReturnLink returnTo={returnTo} />
       <div className="detail-hero">
         <ProductImage
           key={product.imageUrl ?? product.id}
@@ -178,24 +176,30 @@ export default async function ProductPage({ params, searchParams }: Props) {
                 </p>
               </aside>
             )}
+          <PurchaseActions
+            comparisonHref={product.retailerCount >= 2 ? "#offers-title" : undefined}
+            stores={product.offers.flatMap((offer) => {
+              const url = retailerProductUrl(offer);
+
+              return url ? [{ name: offer.retailerName, url }] : [];
+            })}
+            seed={{
+              label: product.displayName,
+              query: shoppingQueryForTitle(product.displayName),
+              canonicalId: product.id,
+              quantity: {
+                amount:
+                  (product.quantityValue * product.packageCount) /
+                  (product.quantityUnit === "unit" ? 1 : 1000),
+                unit: catalogQuantityToShoppingUnit(product.quantityUnit),
+              },
+            }}
+          />
         </div>
       </div>
-      <AddShoppingItem
-        seed={{
-          label: product.displayName,
-          query: shoppingQueryForTitle(product.displayName),
-          canonicalId: product.id,
-          quantity: {
-            amount:
-              (product.quantityValue * product.packageCount) /
-              (product.quantityUnit === "unit" ? 1 : 1000),
-            unit: catalogQuantityToShoppingUnit(product.quantityUnit),
-          },
-        }}
-      />
       <SearchControls query="" filters={filters} comparisonPath={`/products/${product.id}`} />
       <section className="mt-8" aria-labelledby="offers-title">
-        <h2 id="offers-title" className="text-2xl font-semibold tracking-tight">
+        <h2 id="offers-title" tabIndex={-1} className="text-2xl font-semibold tracking-tight">
           Precios y registros en {product.retailerCount} supermercados
         </h2>
         <ComparisonCoverage product={product} />
@@ -203,7 +207,6 @@ export default async function ProductPage({ params, searchParams }: Props) {
           {product.offers.map((offer) => {
             const current = offer.freshness === "fresh" && offer.available !== false;
             const best = current && offer.currentPriceCents === product.lowestPriceCents;
-            const url = retailerProductUrl(offer);
 
             return (
               <li key={offer.retailerId}>
@@ -248,12 +251,6 @@ export default async function ProductPage({ params, searchParams }: Props) {
                         <p className="text-xs">{benefit.conditionLabel}</p>
                       </div>
                     ))}
-                    {url && (
-                      <a href={url} target="_blank" rel="noopener noreferrer" className="card-link">
-                        Ver producto en {offer.retailerName}
-                        <span className="sr-only"> (abre una nueva pestaña)</span>
-                      </a>
-                    )}
                   </div>
                 </article>
               </li>
@@ -265,6 +262,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
         productId={product.id}
         range={range}
         benefits={filters.priceMode === "benefits"}
+        returnTo={returnTo}
       />
       <PriceNotice />
     </PublicShell>

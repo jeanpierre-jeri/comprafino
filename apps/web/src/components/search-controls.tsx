@@ -12,6 +12,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { searchFilters, searchFilterQuery } from "@comprafino/core/search-filters";
 import type { SearchFilters } from "@comprafino/core/search-filters";
 import { searchCategories, searchCategory } from "@comprafino/core";
+import { withSearchReturn } from "../lib/search-return";
 
 export function SearchControls({
   query,
@@ -59,8 +60,12 @@ export function SearchControls({
       suffix = `?${searchFilterQuery(query, next)}`;
     }
 
+    const destination = `${comparisonPath ?? "/search"}${suffix}`;
     startTransition(() =>
-      router.push(`${comparisonPath ?? "/search"}${suffix}`, { scroll: false }),
+      router.push(
+        comparisonPath ? withSearchReturn(destination, currentParams.get("returnTo")) : destination,
+        { scroll: false },
+      ),
     );
   }
 
