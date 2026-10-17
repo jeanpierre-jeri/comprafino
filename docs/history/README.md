@@ -45,6 +45,8 @@ These reports and the full [original roadmap](engineering-notes-2026-10-05.md#or
 
 ## New reports
 
+- [Comparaciones habituales con Makro 08A](matching-retailer-sample-2026-10-16.md): muestra offline separada, cuatro tiendas, negativos, discrepancias de revisión, ambigüedad de marca y corpus histórico conservado.
+
 - [Recorrido móvil 13A](mobile-shopping-journey-2026-10-16.md): revalidación de 06, scroll del plan, explicación de importes, persistencia del SKU y guion pendiente con personas.
 
 - [Refresco de productos habituales 10B](catalog-refresh-selection-2026-10-16.md): bloqueo reproducido por rutas incompatibles dentro del pool de 5.000, admisión previa al límite y regresiones aisladas sin aumento de presupuestos.

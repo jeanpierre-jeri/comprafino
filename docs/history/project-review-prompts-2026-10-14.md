@@ -2,13 +2,13 @@
 
 Estos prompts convierten los hallazgos de la [evaluación técnica y de producto](project-review-2026-10-14.md) en tareas acotadas. La base analizada fue `6567774`. Cada tarea debe comprobar el estado actual antes de modificarlo: un hallazgo puede haberse resuelto después de esa revisión.
 
-Puedes copiar un bloque completo a una conversación de trabajo. No hace falta ejecutar todos ni hacerlo en orden numérico. La [priorización actual del 16 de octubre](project-review-2026-10-14.md#priorización-actual--16-de-octubre-de-2026) reemplaza el orden recomendado inicialmente: 01–04 tienen implementación y evidencia posterior, 04A queda aplazado por decisión del usuario y 06 necesita revalidación tras el rediseño de la lista. No ejecutes en paralelo cambios sobre matching, migraciones o sincronización que dependan unos de otros.
+Puedes copiar un bloque completo a una conversación de trabajo. No hace falta ejecutar todos ni hacerlo en orden numérico. La [priorización actual del 16 de octubre](project-review-2026-10-14.md#priorización-actual--16-de-octubre-de-2026) reemplaza el orden recomendado inicialmente: 01–04 tienen implementación y evidencia posterior, 04A queda aplazado por decisión del usuario y 06 fue revalidado en 13A sin sustituir productos elegidos. No ejecutes en paralelo cambios sobre matching, migraciones o sincronización que dependan unos de otros.
 
 Todos los cambios deben respetar `AGENTS.md`, preservar cambios locales ajenos y mantenerse dentro del alcance elegido. Una migración revisable en el repositorio no equivale a permiso para aplicarla a la base de aplicación.
 
 ## Prompts acotados para la etapa actual
 
-Estos bloques son propuestas para tareas futuras, no autorización de ejecución automática. **10A concluyó su revisión acotada**: ver [reporte y limitaciones](catalog-usefulness-2026-10-16.md). 10B tiene una corrección local verificada del pool de candidatos, documentada en su [reporte](catalog-refresh-selection-2026-10-16.md); el efecto remoto sigue sin medir. 13A completó la revisión local y corrigió dos problemas de presentación; ver [reporte y guion pendiente con personas](mobile-shopping-journey-2026-10-16.md). Con pocos usuarios, la siguiente tarea recomendada es 08A. La relevancia ambigua de búsquedas queda como una tarea separada. El prompt 07 conserva valor para recuperar listas; adelantarlo si hay personas afectadas. Reservar 05 para una corrección documental breve y revisar 09 antes de asumir que su aviso histórico sigue vigente. 11 y 12 dependen del siguiente paso de captación. No crear el entorno remoto de 04A ahora. Antes de cada nuevo prompt indicar el modelo y el nivel de razonamiento recomendados.
+Estos bloques son propuestas para tareas futuras, no autorización de ejecución automática. **10A concluyó su revisión acotada**: ver [reporte y limitaciones](catalog-usefulness-2026-10-16.md). 10B tiene una corrección local verificada del pool de candidatos, documentada en su [reporte](catalog-refresh-selection-2026-10-16.md); el efecto remoto sigue sin medir. 13A completó la revisión local y corrigió dos problemas de presentación; ver [reporte y guion pendiente con personas](mobile-shopping-journey-2026-10-16.md). 08A concluyó su evaluación offline separada, con [discrepancias y límites](matching-retailer-sample-2026-10-16.md). Con pocos usuarios, la siguiente tarea recomendada es 07. La relevancia ambigua de búsquedas queda como una tarea separada. El prompt 07 conserva valor para recuperar listas; adelantarlo si hay personas afectadas. Reservar 05 para una corrección documental breve y revisar 09 antes de asumir que su aviso histórico sigue vigente. 11 y 12 dependen del siguiente paso de captación. No crear el entorno remoto de 04A ahora. Antes de cada nuevo prompt indicar el modelo y el nivel de razonamiento recomendados.
 
 ### Prompt 10A Comprobar que el catálogo sirve para una compra habitual
 
@@ -60,9 +60,9 @@ Prepara además un guion breve para que el responsable observe a 3–5 personas 
 
 ### Prompt 08A Revisar comparaciones habituales incluyendo Makro
 
-**En preparación, pausado para organizar el trabajo local.** Retomar la muestra y el evaluador desde `packages/db/src/testing/matching/`; no hay resultados verificados de esta muestra todavía. El [mapa del proyecto](../README.md) distingue trabajo terminado y borradores.
+**Evaluación local concluida.** [Resultados 08A](matching-retailer-sample-2026-10-16.md): 34 ofertas, 26 pares, cuatro tiendas; corpus histórico intacto, discrepancias de revisión y ambigüedad de marca documentadas. Entradas, evaluador y pruebas en `packages/db/src/testing/matching/`. No se cambiaron reglas ni producción; 04A sigue aplazado.
 
-**Siguiente tarea recomendada. Modelo: GPT-6.1 Sol. Razonamiento: Alto.** Mantener una muestra acotada y trazable sin relajar las reglas para mejorar métricas.
+**Modelo recomendado para este alcance: GPT-6.1 Sol. Razonamiento: Alto.** Mantener una muestra acotada y trazable sin relajar las reglas para mejorar métricas.
 
 ```text
 Revisa CompraFino siguiendo AGENTS.md. Prepara una muestra pequeña, fechada y trazable de equivalencias y no equivalencias entre tiendas, incluyendo Makro, orientada a compras habituales. Reutiliza evidencia disponible y limita cualquier consulta pública; no eludas controles ni ejecutes ingestas o matching sobre producción.
@@ -159,6 +159,8 @@ Añade una regresión E2E que cambie el máximo de tiendas y compruebe la relaci
 ```
 
 ## Prompt 07 Recuperar una importación pendiente sin perder datos
+
+**Siguiente tarea recomendada tras 08A. Modelo: GPT-6.1 Sol. Razonamiento: Alto.** Revalidar el bloqueo actual y conservar propiedad de cuentas y snapshots; mantener 04A aplazado.
 
 ```text
 Implementa una recuperación guiada de importaciones pendientes en CompraFino, respetando AGENTS.md y H07 del reporte project-review-2026-10-14.md. Revisa repository.ts, sync-client.ts y las pruebas de importación antes de cambiar el flujo.

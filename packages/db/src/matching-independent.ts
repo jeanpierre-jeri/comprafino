@@ -18,7 +18,7 @@ const independentFixtureSchema = z.object({
   ),
   canonicalGroups: z.array(
     z.object({
-      members: z.array(z.string()).min(2).max(3),
+      members: z.array(z.string()).min(2).max(4),
       reviewed: z.literal(true),
       outcome: z.literal("consistent_variant"),
     }),
@@ -26,7 +26,7 @@ const independentFixtureSchema = z.object({
 });
 
 export function readIndependentAudit() {
-  const f = independentFixtureSchema.parse(
+  return parseIndependentAudit(
     JSON.parse(
       readFileSync(
         new URL("../../core/src/fixtures/matching-independent.json", import.meta.url),
@@ -34,6 +34,11 @@ export function readIndependentAudit() {
       ),
     ) as unknown,
   );
+}
+
+/** Four retailer groups are audit inputs; this does not relax canonical matching. */
+export function parseIndependentAudit(value: unknown) {
+  const f = independentFixtureSchema.parse(value);
   const seen = new Set<string>();
 
   for (const p of f.pairs) {

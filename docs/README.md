@@ -28,7 +28,7 @@ packages/core/src/                Reglas de precios, cantidades e identidad
 packages/db/src/                  Lectores y escritores de PostgreSQL
   testing/                       Soporte compartido de pruebas aisladas
     hosting/                     Configuración, datos sintéticos y limpieza 04A
-    matching/                    Muestra 08A y evaluador, todavía incompletos
+    matching/                    Muestra fechada 08A, evaluador y pruebas
 packages/scrapers/src/            Adaptadores y adquisición por tienda
 packages/ui/src/                  Componentes visuales compartidos
 scripts/hosting/                  Preparación de la copia aislada y sus plantillas
@@ -39,17 +39,17 @@ Las pruebas de una función permanecen cerca de su implementación: por ejemplo,
 
 ## Estado del trabajo local
 
-Estado al **16 de octubre de 2026**. Los bloques terminados se guardan en commits separados por tarea. Los documentos generales reúnen el estado y la priorización; 08A permanece como borrador local sin commit.
+Estado al **16 de octubre de 2026**. Los bloques terminados se guardan en commits separados por tarea. Los documentos generales reúnen el estado y la priorización; 08A ya tiene evaluación local concluida, con pruebas y reporte propios.
 
-| Bloque | Cambio principal                                              | Estado y entrada                                                                                                                                                                                                            |
-| ------ | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 04A    | Kit para un entorno separado, herramientas y procedimiento    | **Aplazado.** [Manual](hosting-test-environment.md). No crea recursos ni se ejecuta al arrancar la aplicación.                                                                                                              |
-| 10A    | Reporte de frescura y cobertura, sin corrección de aplicación | Concluido. [Reporte](history/catalog-usefulness-2026-10-16.md).                                                                                                                                                             |
-| 10B    | Admisión de candidatos antes del límite del refresco          | Corrección local verificada. [Reporte](history/catalog-refresh-selection-2026-10-16.md).                                                                                                                                    |
-| 13A    | Scroll del diálogo y explicación de importes                  | Corrección local verificada. [Reporte](history/mobile-shopping-journey-2026-10-16.md). Personas y teléfono físico pendientes.                                                                                               |
-| 08A    | Muestra de comparaciones con Makro y evaluador local          | **En preparación, pausado para organizar.** Muestra y evaluador en `packages/db/src/testing/matching/`, todavía sin commit. No se han evaluado sus resultados ni completado sus pruebas; no incluirlo como tarea terminada. |
+| Bloque | Cambio principal                                              | Estado y entrada                                                                                                                         |
+| ------ | ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 04A    | Kit para un entorno separado, herramientas y procedimiento    | **Aplazado.** [Manual](hosting-test-environment.md). No crea recursos ni se ejecuta al arrancar la aplicación.                           |
+| 10A    | Reporte de frescura y cobertura, sin corrección de aplicación | Concluido. [Reporte](history/catalog-usefulness-2026-10-16.md).                                                                          |
+| 10B    | Admisión de candidatos antes del límite del refresco          | Corrección local verificada. [Reporte](history/catalog-refresh-selection-2026-10-16.md).                                                 |
+| 13A    | Scroll del diálogo y explicación de importes                  | Corrección local verificada. [Reporte](history/mobile-shopping-journey-2026-10-16.md). Personas y teléfono físico pendientes.            |
+| 08A    | Muestra de comparaciones con Makro y evaluador local          | Evaluación local concluida, sin cambios de reglas ni producción. [Resultados y límites](history/matching-retailer-sample-2026-10-16.md). |
 
-Las correcciones de aplicación terminadas están en [refresco](../packages/db/src/listing-refresh.ts) y [diálogo del plan](../apps/web/src/components/basket-comparison.tsx). El ajuste de [matching-independent.ts](../packages/db/src/matching-independent.ts) pertenece al validador de auditoría de 08A; no cambia el algoritmo del matcher.
+Las correcciones de aplicación terminadas están en [refresco](../packages/db/src/listing-refresh.ts) y [diálogo del plan](../apps/web/src/components/basket-comparison.tsx). El ajuste de [matching-independent.ts](../packages/db/src/matching-independent.ts) permite cuatro tiendas en el validador de auditoría de 08A; no cambia el algoritmo del matcher.
 
 ## Leer el kit 04A sin recorrer todos sus archivos
 
@@ -71,6 +71,6 @@ Los prefijos repetidos `hosting-` se sustituyeron por la carpeta `hosting/`. Se 
 
 ## Verificación de esta organización
 
-El 16 de octubre de 2026 pasaron formato, referencias, lint, tipos, build, 931 unitarias/contratos (una tarea con caché), 14 pruebas PostgreSQL y tres casos Chromium de navegación/lista/plan después del build. PostgreSQL usa esquemas propios y configuración local explícita. Esto verifica las rutas reorganizadas y las regresiones existentes; no concluye la evaluación nueva de 08A.
+El 16 de octubre de 2026 pasaron formato, referencias, lint, tipos, build, 931 unitarias/contratos (una tarea con caché), 14 pruebas PostgreSQL y tres casos Chromium de navegación/lista/plan después del build. PostgreSQL usa esquemas propios y configuración local explícita. Estos resultados corresponden a la organización previa. La evaluación posterior de 08A tiene sus propios [resultados y checks](history/matching-retailer-sample-2026-10-16.md#verificación-y-reproducción).
 
 El preparador se ejecutó solo localmente sobre el commit revisado de 04A: doce archivos exportados con hashes verificados y 29 imports relativos resueltos. No se repitió la aceptación completa de ejecución de la copia exportada ni se creó un despliegue remoto. Las copias anteriores, el manifiesto de movimientos y los logs están en `.artifacts/workspace-organization-2026-10-16/`.

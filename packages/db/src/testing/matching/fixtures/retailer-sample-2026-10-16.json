@@ -1,0 +1,806 @@
+{
+  "reviewedOn": "2026-10-16",
+  "matchingVersion": 1,
+  "reviewer": "development-agent",
+  "method": "Purposive dated offline sample, labels fixed before evaluation; not human-independent or statistically representative. Confirmed means explicit negative evidence, inferred means plausible positive without barcode/manufacturer verification, ambiguous has no truth label. No thresholds calibrated.",
+  "sources": {
+    "snapshot": {
+      "path": "packages/db/.artifacts/catalog-usefulness-2026-10-16/listing-snapshot.json",
+      "sha256": "4e4533e1a614e98d73ac9eeb39ef4c419aae0ec1ce3c2998673942bece577cda",
+      "capturedAt": "2026-10-16T23:53:52.416Z"
+    },
+    "searches": {
+      "path": "packages/db/.artifacts/catalog-usefulness-2026-10-16/searches.json",
+      "sha256": "f12774900cce3ab684dd40a6e52512783159e3c7e2bd2abbcb5ffe20c3d422db",
+      "capturedAt": "2026-10-16T23:53:16.678Z"
+    },
+    "makro": {
+      "path": "packages/scrapers/src/fixtures/makro.json",
+      "sha256": "cc4b8b3a69086e3c966892aa6933d175aae9795dc0bdfa5475a50b6ce0fa54c9",
+      "capturedAt": "2026-10-08"
+    }
+  },
+  "listings": {
+    "oats-plaza-vea": {
+      "retailer": "plaza-vea",
+      "input": {
+        "title": "Avena QUAKER Con Quinua Bolsa 850g",
+        "priceUnit": "UN",
+        "sourceBrand": "Quaker"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/36952",
+        "listingId": "e411b1f3-46dc-41b6-a2c8-f8e6b0424bbe",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "oats-tottus": {
+      "retailer": "tottus",
+      "input": {
+        "title": "Avena Quaker con Quinua Bolsa 850 g",
+        "priceUnit": "UN",
+        "sourceBrand": "Quaker"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/29908",
+        "listingId": "b8ba2833-0982-476d-98da-686935e7adad",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "oats-makro": {
+      "retailer": "makro",
+      "input": {
+        "title": "Avena QUAKER Con Quinua Bolsa 850g",
+        "priceUnit": "UN",
+        "sourceBrand": "Quaker"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/35214",
+        "listingId": "d939efe3-eb66-4883-8c9c-742bc7804cb7",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "oats-metro": {
+      "retailer": "metro",
+      "input": {
+        "title": "Avena con Quinua Quaker 850g",
+        "priceUnit": "UN",
+        "sourceBrand": "Quaker"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/17231",
+        "listingId": "6a7a5335-23ef-4279-be3d-f87d3d0e6445",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "rice-makro": {
+      "retailer": "makro",
+      "input": {
+        "title": "Arroz Extra COSTEÑO Bolsa 5Kg",
+        "priceUnit": "UN",
+        "sourceBrand": "Costeño"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/9345",
+        "listingId": "39e991d1-b6c3-45b3-9a44-42f56db95ea6",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "rice-metro": {
+      "retailer": "metro",
+      "input": {
+        "title": "Arroz Extra Costeño 5kg",
+        "priceUnit": "UN",
+        "sourceBrand": "Costeño"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/16255",
+        "listingId": "6482624a-6529-43fc-b452-e4722d2bc0b4",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "rice-plaza-vea": {
+      "retailer": "plaza-vea",
+      "input": {
+        "title": "Arroz Extra COSTEÑO Bolsa 5Kg",
+        "priceUnit": "UN",
+        "sourceBrand": "Costeño"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/37664",
+        "listingId": "e8a5e13f-0e99-4fa4-a443-38e9552d5df8",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "oil-plaza-vea": {
+      "retailer": "plaza-vea",
+      "input": {
+        "title": "Aceite Vegetal COCINERO Botella 900ml",
+        "priceUnit": "UN",
+        "sourceBrand": "Cocinero"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/39003",
+        "listingId": "f0fd44c8-b453-401d-8e45-52a150da9c07",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "oil-makro": {
+      "retailer": "makro",
+      "input": {
+        "title": "Aceite Vegetal COCINERO Botella 900ml",
+        "priceUnit": "UN",
+        "sourceBrand": "Cocinero"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/16267",
+        "listingId": "64902467-b1ab-421a-aae5-336039233454",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "oil-metro": {
+      "retailer": "metro",
+      "input": {
+        "title": "Aceite Vegetal Cocinero 900ml",
+        "priceUnit": "UN",
+        "sourceBrand": "Cocinero"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/41120",
+        "listingId": "fe8f5567-7d25-4095-9d86-f2feaf513e09",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "flour-metro": {
+      "retailer": "metro",
+      "input": {
+        "title": "Harina Sin Preparar Favorita 1kg",
+        "priceUnit": "UN",
+        "sourceBrand": "Favorita"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/16427",
+        "listingId": "65806fa4-de26-403a-a9f2-bbe7e151ceef",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "flour-plaza-vea": {
+      "retailer": "plaza-vea",
+      "input": {
+        "title": "Harina Sin Preparar FAVORITA Paquete 1kg",
+        "priceUnit": "UN",
+        "sourceBrand": "Favorita"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/7946",
+        "listingId": "3171eda0-a760-4389-9c97-999a4d618d6b",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "flour-makro": {
+      "retailer": "makro",
+      "input": {
+        "title": "Harina Sin Preparar FAVORITA Paquete 1kg",
+        "priceUnit": "UN",
+        "sourceBrand": "Favorita"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/29667",
+        "listingId": "b734b64d-5bc7-4359-b4ac-238aaf23d1a3",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "milk-light-makro": {
+      "retailer": "makro",
+      "input": {
+        "title": "Leche Light GLORIA Lata 390g Paquete 6un",
+        "priceUnit": "UN",
+        "sourceBrand": "GLORIA",
+        "sourceUnitMultiplier": 1.0,
+        "packageText": "Paquete 6un"
+      },
+      "evidence": {
+        "source": "makro",
+        "selector": "/0/items/0",
+        "externalId": "11390020",
+        "url": "https://www.makro.plazavea.com.pe/leche-light-gloria-lata-390g-paquete-6un-20402667/p",
+        "assumptions": [
+          "Sanitized captured fixture; date from existing adapter tests, not a fresh observation."
+        ]
+      }
+    },
+    "milk-whole-makro": {
+      "retailer": "makro",
+      "input": {
+        "title": "Leche Reconstituida Entera GLORIA Lata 390g Paquete 6un",
+        "priceUnit": "UN",
+        "sourceBrand": "GLORIA",
+        "sourceUnitMultiplier": 1.0,
+        "packageText": "Paquete 6un"
+      },
+      "evidence": {
+        "source": "makro",
+        "selector": "/1/items/0",
+        "externalId": "11359692",
+        "url": "https://www.makro.plazavea.com.pe/leche-reconstituida-entera-gloria-lata-390g-paquete-6un-20402655/p",
+        "assumptions": [
+          "Sanitized captured fixture; date from existing adapter tests, not a fresh observation."
+        ]
+      }
+    },
+    "chicken-makro": {
+      "retailer": "makro",
+      "input": {
+        "title": "Pollo Sin Menudencia SAN FERNANDO x kg",
+        "priceUnit": "KG",
+        "sourceBrand": "SAN FERNANDO",
+        "sourceUnitMultiplier": 1.9,
+        "packageText": null
+      },
+      "evidence": {
+        "source": "makro",
+        "selector": "/8/items/0",
+        "externalId": "11566118",
+        "url": "https://www.makro.plazavea.com.pe/pollo-sin-menudencia-san-fernando-x-kg-20216175/p",
+        "assumptions": [
+          "Sanitized captured fixture; date from existing adapter tests, not a fresh observation."
+        ]
+      }
+    },
+    "milk-light-plaza": {
+      "retailer": "plaza-vea",
+      "input": {
+        "title": "Leche Light GLORIA Lata 390g Paquete 6un",
+        "priceUnit": "UN",
+        "sourceBrand": "Gloria"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/23074",
+        "listingId": "8e0e38a2-22d9-465d-853f-00cbd5d9767f",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "milk-light-tottus": {
+      "retailer": "tottus",
+      "input": {
+        "title": "Leche Gloria Light Sixpack Lata 390 g",
+        "priceUnit": "UN",
+        "sourceBrand": "Gloria"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/32678",
+        "listingId": "c97c3bac-4f13-45ab-b7be-c06bc0ac7809",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "sugar-size-makro": {
+      "retailer": "makro",
+      "input": {
+        "title": "Azúcar Rubia CARTAVIO Bolsa 5Kg",
+        "priceUnit": "UN",
+        "sourceBrand": "Cartavio"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/24833",
+        "listingId": "98e49390-323a-49f2-9a3f-dbfa472dd925",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "sugar-size-plaza": {
+      "retailer": "plaza-vea",
+      "input": {
+        "title": "Azúcar Rubia CARTAVIO Bolsa 1Kg",
+        "priceUnit": "UN",
+        "sourceBrand": "Cartavio"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/19327",
+        "listingId": "7750deb4-32c6-45e3-9798-bdc13c921e32",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "sugar-variant-makro": {
+      "retailer": "makro",
+      "input": {
+        "title": "Azúcar Blanca DULFINA Bolsa 1Kg",
+        "priceUnit": "UN",
+        "sourceBrand": "Dulfina"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/39976",
+        "listingId": "f701c06f-2c61-4c64-a1ea-ee38cb8877fa",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "sugar-variant-plaza": {
+      "retailer": "plaza-vea",
+      "input": {
+        "title": "Azúcar Rubia DULFINA Bolsa 1Kg",
+        "priceUnit": "UN",
+        "sourceBrand": "Dulfina"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/1788",
+        "listingId": "0af3ada6-14a2-4084-a674-8bda39edd2d7",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "pasta-makro": {
+      "retailer": "makro",
+      "input": {
+        "title": "Fideos NICOLINI Arito Bolsa 250g",
+        "priceUnit": "UN",
+        "sourceBrand": "Nicolini"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/12142",
+        "listingId": "4b6743fa-2007-494a-be30-ccb931ebccc2",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "pasta-plaza": {
+      "retailer": "plaza-vea",
+      "input": {
+        "title": "Fideos NICOLINI Tornillo Bolsa 250g",
+        "priceUnit": "UN",
+        "sourceBrand": "Nicolini"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/38620",
+        "listingId": "ee9b04b6-32ed-437d-9a7b-aeab916c7b2a",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "flour-prepared-makro": {
+      "retailer": "makro",
+      "input": {
+        "title": "Harina de Trigo NICOLINI Preparada Bolsa 1Kg",
+        "priceUnit": "UN",
+        "sourceBrand": "Nicolini"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/5201",
+        "listingId": "205d45c6-b2e9-4399-8f53-fc603c0ec795",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "flour-unprepared-plaza": {
+      "retailer": "plaza-vea",
+      "input": {
+        "title": "Harina de Trigo NICOLINI Sin Preparar Bolsa 1Kg",
+        "priceUnit": "UN",
+        "sourceBrand": "Nicolini"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/35248",
+        "listingId": "d96de105-b900-4782-bd97-6a6ed495a6f9",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "oats-maca-makro": {
+      "retailer": "makro",
+      "input": {
+        "title": "Avena QUAKER Con Maca Bolsa 330g",
+        "priceUnit": "UN",
+        "sourceBrand": "Quaker"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/28104",
+        "listingId": "ad84ef95-4457-4904-a3ef-028e716be27f",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "oats-quinua-plaza": {
+      "retailer": "plaza-vea",
+      "input": {
+        "title": "Avena QUAKER Con Quinua Bolsa 330g",
+        "priceUnit": "UN",
+        "sourceBrand": "Quaker"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/37270",
+        "listingId": "e6186140-b0b8-44c3-98b7-99b5463bab23",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "milk-single-plaza": {
+      "retailer": "plaza-vea",
+      "input": {
+        "title": "Leche Light GLORIA Lata 390g",
+        "priceUnit": "UN",
+        "sourceBrand": "Gloria"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/32468",
+        "listingId": "c833c0c2-7636-4109-8ea7-44b626256726",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "milk-typo-makro": {
+      "retailer": "makro",
+      "input": {
+        "title": "Leche Ligh UHT GLORIA UHT Caja 946ml",
+        "priceUnit": "UN",
+        "sourceBrand": "Gloria"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/522",
+        "listingId": "0333f2a1-0ffc-436e-b113-8b21ba54d2ca",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "milk-uht-tottus": {
+      "retailer": "tottus",
+      "input": {
+        "title": "Leche Light UHT Gloria Caja 946 mL",
+        "priceUnit": "UN",
+        "sourceBrand": "Gloria"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/12223",
+        "listingId": "4bdb7499-ba1c-431a-aa7c-26138838a7ea",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "yopi-makro": {
+      "retailer": "makro",
+      "input": {
+        "title": "Yogurt YOPI Fresa Vaso 80g",
+        "priceUnit": "UN",
+        "sourceBrand": "Laive"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/35052",
+        "listingId": "d83a4154-2b06-4c9d-a323-58daa2d59358",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed.",
+          "Laive brand borrowed from saved search group 15cded5f-07fb-8c6e-b89d-b8115958b451, not present in this title; actual source brand was not captured."
+        ]
+      }
+    },
+    "yopi-metro": {
+      "retailer": "metro",
+      "input": {
+        "title": "Yogurt Yopi Laive Fresa Vaso 80 g",
+        "priceUnit": "UN",
+        "sourceBrand": "Laive"
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/22109",
+        "listingId": "8824e510-3866-43c2-a64e-36a7d43e7c44",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    },
+    "chicken-plaza": {
+      "retailer": "plaza-vea",
+      "input": {
+        "title": "Pollo Trozado en 8 Piezas x kg",
+        "priceUnit": "KG",
+        "sourceBrand": null
+      },
+      "evidence": {
+        "source": "snapshot",
+        "selector": "/listings/5095",
+        "listingId": "1fab6f83-292d-4fb4-8866-7dae1f44bf9c",
+        "assumptions": [
+          "Raw priceUnit/packageText/sourceBrand were not captured; priceUnit inferred from title and brand transcribed by reviewer.",
+          "No source package hints reconstructed."
+        ]
+      }
+    }
+  },
+  "pairs": [
+    {
+      "a": "oats-plaza-vea",
+      "b": "oats-tottus",
+      "expected": "match",
+      "assurance": "inferred",
+      "rationale": "Explicit brand/variant/content agree; no barcode or manufacturer confirmation. Selection from existing canonical group is correlated."
+    },
+    {
+      "a": "oats-plaza-vea",
+      "b": "oats-makro",
+      "expected": "match",
+      "assurance": "inferred",
+      "rationale": "Explicit brand/variant/content agree; no barcode or manufacturer confirmation. Selection from existing canonical group is correlated."
+    },
+    {
+      "a": "oats-plaza-vea",
+      "b": "oats-metro",
+      "expected": "match",
+      "assurance": "inferred",
+      "rationale": "Explicit brand/variant/content agree; no barcode or manufacturer confirmation. Selection from existing canonical group is correlated."
+    },
+    {
+      "a": "oats-tottus",
+      "b": "oats-makro",
+      "expected": "match",
+      "assurance": "inferred",
+      "rationale": "Explicit brand/variant/content agree; no barcode or manufacturer confirmation. Selection from existing canonical group is correlated."
+    },
+    {
+      "a": "oats-tottus",
+      "b": "oats-metro",
+      "expected": "match",
+      "assurance": "inferred",
+      "rationale": "Explicit brand/variant/content agree; no barcode or manufacturer confirmation. Selection from existing canonical group is correlated."
+    },
+    {
+      "a": "oats-makro",
+      "b": "oats-metro",
+      "expected": "match",
+      "assurance": "inferred",
+      "rationale": "Explicit brand/variant/content agree; no barcode or manufacturer confirmation. Selection from existing canonical group is correlated."
+    },
+    {
+      "a": "rice-makro",
+      "b": "rice-metro",
+      "expected": "match",
+      "assurance": "inferred",
+      "rationale": "Explicit brand/variant/content agree; no barcode or manufacturer confirmation. Selection from existing canonical group is correlated."
+    },
+    {
+      "a": "rice-makro",
+      "b": "rice-plaza-vea",
+      "expected": "match",
+      "assurance": "inferred",
+      "rationale": "Explicit brand/variant/content agree; no barcode or manufacturer confirmation. Selection from existing canonical group is correlated."
+    },
+    {
+      "a": "rice-metro",
+      "b": "rice-plaza-vea",
+      "expected": "match",
+      "assurance": "inferred",
+      "rationale": "Explicit brand/variant/content agree; no barcode or manufacturer confirmation. Selection from existing canonical group is correlated."
+    },
+    {
+      "a": "oil-makro",
+      "b": "oil-plaza-vea",
+      "expected": "match",
+      "assurance": "inferred",
+      "rationale": "Explicit brand/variant/content agree; sampled from an existing canonical group, without independent SKU confirmation."
+    },
+    {
+      "a": "oil-makro",
+      "b": "oil-metro",
+      "expected": "match",
+      "assurance": "inferred",
+      "rationale": "Explicit brand/variant/content agree; sampled from an existing canonical group, without independent SKU confirmation."
+    },
+    {
+      "a": "flour-makro",
+      "b": "flour-metro",
+      "expected": "match",
+      "assurance": "inferred",
+      "rationale": "Explicit brand/variant/content agree; sampled from an existing canonical group, without independent SKU confirmation."
+    },
+    {
+      "a": "flour-makro",
+      "b": "flour-plaza-vea",
+      "expected": "match",
+      "assurance": "inferred",
+      "rationale": "Explicit brand/variant/content agree; sampled from an existing canonical group, without independent SKU confirmation."
+    },
+    {
+      "a": "milk-light-makro",
+      "b": "milk-light-plaza",
+      "expected": "match",
+      "assurance": "inferred",
+      "rationale": "Same explicit Light Gloria 390g six-pack; no barcode confirmation. Makro comes from sanitized raw evidence."
+    },
+    {
+      "a": "milk-light-makro",
+      "b": "milk-light-tottus",
+      "expected": "match",
+      "assurance": "inferred",
+      "rationale": "Same explicit Light Gloria 390g six-pack; no barcode confirmation. Makro comes from sanitized raw evidence."
+    },
+    {
+      "a": "sugar-size-makro",
+      "b": "sugar-size-plaza",
+      "expected": "no_match",
+      "assurance": "confirmed",
+      "rationale": "Different fixed package sizes: 5kg and 1kg. Confirmed only as a textual package/variant distinction in dated evidence."
+    },
+    {
+      "a": "sugar-variant-makro",
+      "b": "sugar-variant-plaza",
+      "expected": "no_match",
+      "assurance": "confirmed",
+      "rationale": "White versus brown sugar with the same brand and size. Confirmed only as a textual package/variant distinction in dated evidence."
+    },
+    {
+      "a": "pasta-makro",
+      "b": "pasta-plaza",
+      "expected": "no_match",
+      "assurance": "confirmed",
+      "rationale": "Arito and Tornillo are different shapes despite same brand and size. Confirmed only as a textual package/variant distinction in dated evidence."
+    },
+    {
+      "a": "flour-prepared-makro",
+      "b": "flour-unprepared-plaza",
+      "expected": "no_match",
+      "assurance": "confirmed",
+      "rationale": "Prepared flour versus unprepared flour. Confirmed only as a textual package/variant distinction in dated evidence."
+    },
+    {
+      "a": "oats-maca-makro",
+      "b": "oats-quinua-plaza",
+      "expected": "no_match",
+      "assurance": "confirmed",
+      "rationale": "Maca and quinua variants differ at the same size. Confirmed only as a textual package/variant distinction in dated evidence."
+    },
+    {
+      "a": "milk-light-makro",
+      "b": "milk-single-plaza",
+      "expected": "no_match",
+      "assurance": "confirmed",
+      "rationale": "Six-pack and single can are different offers despite identical per-can content."
+    },
+    {
+      "a": "milk-whole-makro",
+      "b": "milk-light-plaza",
+      "expected": "no_match",
+      "assurance": "confirmed",
+      "rationale": "Whole/reconstituted versus Light. Absence of Light does not prove equivalence."
+    },
+    {
+      "a": "oats-makro",
+      "b": "oats-quinua-plaza",
+      "expected": "no_match",
+      "assurance": "confirmed",
+      "rationale": "850g and 330g are different package sizes with the same brand and variant."
+    },
+    {
+      "a": "milk-typo-makro",
+      "b": "milk-uht-tottus",
+      "expected": null,
+      "assurance": "ambiguous",
+      "rationale": "Ligh might be a typo for Light, but source formulation is unconfirmed; do not label by matcher output."
+    },
+    {
+      "a": "yopi-makro",
+      "b": "yopi-metro",
+      "expected": null,
+      "assurance": "ambiguous",
+      "rationale": "Yopi/Laive brand hierarchy and source brand unverified; saved group cannot serve as its own truth label."
+    },
+    {
+      "a": "chicken-makro",
+      "b": "chicken-plaza",
+      "expected": null,
+      "assurance": "ambiguous",
+      "rationale": "Both are KG quotes but whole without giblets versus eight pieces, missing Plaza brand and actual sale weight; cannot infer exact SKU or payable whole-package total."
+    }
+  ],
+  "canonicalGroups": [
+    {
+      "members": ["oats-plaza-vea", "oats-tottus", "oats-makro", "oats-metro"],
+      "assurance": "inferred",
+      "rationale": "Same explicit brand, variant and package size. Selection reused a canonical search group; not a blinded independent manufacturer review."
+    },
+    {
+      "members": ["rice-makro", "rice-metro", "rice-plaza-vea"],
+      "assurance": "inferred",
+      "rationale": "Same explicit brand, variant and package size. Selection reused a canonical search group; not a blinded independent manufacturer review."
+    }
+  ]
+}

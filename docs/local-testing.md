@@ -163,3 +163,13 @@ The [13A mobile journey](history/mobile-shopping-journey-2026-10-16.md) adds a t
 ## Isolated hosting preparation
 
 The [04A hosting test kit](hosting-test-environment.md) exports a reviewed commit locally and prepares owned synthetic fixtures for a separate Vercel/Neon environment. Preparation creates no remote resources. Its full local storage rehearsal requires `HOSTING_TEST_FULL_REHEARSAL=1` plus explicit `TEST_DATABASE_URL` and `COMPRAFINO_TEST_DATABASE_MODE=local`; ordinary integration runs use only 2,000 records. The kit documents remote approval boundaries, bounded HTTP checks and owner-checked cleanup.
+
+## Matching sample checks
+
+The [08A four-retailer evaluation](history/matching-retailer-sample-2026-10-16.md) keeps inputs, evaluator, boundary tests and integration together in `packages/db/src/testing/matching/`. Pure boundary tests run in `pnpm test`; the sample accepts four distinct retailers while rejecting duplicate/reversed pairs, missing references, oversized/same-store groups and ambiguous truth labels. Integration uses real `public.similarity()` in an owned random schema, evaluates the historical 105 pairs separately, checks six-edge complete-link for four stores, records the sensitivity to reconstructed brand evidence and verifies zero catalog writes and schema cleanup. It never falls back to application `DATABASE_URL` or fetches retailers.
+
+```sh
+TEST_DATABASE_URL=postgresql://comprafino_test@127.0.0.1:55432/comprafino_test COMPRAFINO_TEST_DATABASE_MODE=local pnpm --filter @comprafino/db exec vitest run src/testing/matching/retailer-sample.integration.test.ts
+```
+
+This file also runs in `pnpm test:integration:local`. Its `08A_EVALUATION` / `08A_CLEANUP` output records the dataset hash, decisions, separate historical/sample metrics and owned-schema removal. Snapshots used as provenance remain ignored local artifacts; the checked-in extract is sufficient for isolated repetition. A new result does not establish fresh prices, manufacturer identity or production matching accuracy.
