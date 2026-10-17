@@ -1,5 +1,7 @@
 # CompraFino
 
+Para orientarte en el código, las herramientas y el trabajo pendiente, empieza por la [guía del proyecto](docs/README.md).
+
 Milestones 19B–19C provide authenticated list persistence and client synchronization, with safe anonymous import and account transitions. Signed-out lists remain browser-local. The reviewed migration is not applied to application databases by this implementation. See [persistence and synchronization](docs/shopping-list-persistence.md).
 
 CompraFino compares observed grocery and household prices from Tottus, Plaza Vea, Metro and Makro in Peru. It provides exact product comparisons, independent retailer search options, ordinary price history with observation gaps, and anonymous browser-local and authenticated synchronized recurring shopping lists with current basket comparisons across up to three supermarkets. Concrete Tottus CMR benefits are shown separately from ordinary prices. Prices are observations, not checkout guarantees.

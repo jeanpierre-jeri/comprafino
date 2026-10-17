@@ -1,6 +1,6 @@
 # Frescura y cobertura de compras habituales — prompt 10A
 
-Fecha: **16 de octubre de 2026, America/Lima**. Lecturas de catálogo y operaciones entre **18:49 y 18:53**; historial de GitHub capturado a las 18:50. Esta entrega analiza esos archivos locales, sin nuevas consultas remotas. La revisión acotada de 10A queda concluida con las limitaciones descritas abajo. Continúa la [priorización del proyecto](project-review-2026-10-14.md).
+Fecha: **16 de octubre de 2026, America/Lima**. Lecturas de catálogo y operaciones entre **18:49 y 18:53**; historial de GitHub capturado a las 18:50. Esta entrega analiza esos archivos locales, sin nuevas consultas remotas. La revisión acotada de 10A queda concluida con las limitaciones descritas abajo. Continúa la [priorización del proyecto](project-review-2026-10-14.md#priorización-actual--16-de-octubre-de-2026).
 
 ## Resultado y decisión
 
@@ -14,7 +14,7 @@ Las tres carencias que más pesan en esta etapa son:
 2. **Cobertura aparente en búsquedas ambiguas.** Los contadores incluyen coincidencias que no sirven para la intención habitual. «Lentejas» es el caso más claro de la muestra; merece una tarea posterior de relevancia, manteniendo separados búsqueda e identidad.
 3. **Avance parcial difícil de interpretar a partir de un workflow verde.** Las ejecuciones terminan correctamente mientras algunas categorías fallan o siguen pendientes y la frecuencia efectiva resulta menor que la configurada. Hay que evaluar resultados por fuente y edad del producto, no usar el éxito del job como garantía de cobertura completa.
 
-Para pocos usuarios, la corrección inicial debe ser pequeña: **diagnosticar y corregir la postergación del refresco de productos habituales vencidos dentro de los presupuestos existentes**. Antes de modificar el selector, comprobar si el problema viene del reparto de candidatos, de errores de las fuentes o de la frecuencia efectiva. La evidencia justifica investigar ese mantenimiento; todavía no demuestra un único defecto del algoritmo de selección. El [prompt 10B propuesto](project-review-prompts-2026-10-14.md) acota esa continuación.
+Para pocos usuarios, la corrección inicial debe ser pequeña: **diagnosticar y corregir la postergación del refresco de productos habituales vencidos dentro de los presupuestos existentes**. Antes de modificar el selector, comprobar si el problema viene del reparto de candidatos, de errores de las fuentes o de la frecuencia efectiva. La evidencia justifica investigar ese mantenimiento; todavía no demuestra un único defecto del algoritmo de selección. El [prompt 10B propuesto](project-review-prompts-2026-10-14.md#prompt-10b-mejorar-el-refresco-de-productos-habituales-vencidos) acota esa continuación.
 
 ## Qué se midió y qué significa cada cifra
 

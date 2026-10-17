@@ -6,6 +6,8 @@ Los pasos de publicación y limpieza siguientes se conservan como referencia fut
 
 ## Qué contiene la preparación
 
+Las herramientas se agrupan por propósito: `scripts/hosting/` prepara la copia, `packages/db/src/testing/hosting/` gestiona configuración y datos sintéticos, y `apps/web/testing/hosting/` contiene el cliente HTTP. Ver el [mapa y orden de lectura](README.md#leer-el-kit-04a-sin-recorrer-todos-sus-archivos). Las copias exportadas antes de esta organización conservan sus rutas originales.
+
 `pnpm exec node scripts/hosting/prepare.mjs COMMIT_COMPLETO` exporta exclusivamente un commit revisado con `git archive`, en `.artifacts/hosting-04a/RUN_ID/source`. No copia `.env`, credenciales, archivos sin seguimiento ni cambios sin commit. Produce `plan.json` con el commit, identificador aleatorio, nombres propuestos y hashes SHA-256 de cada archivo añadido o adaptado. No invoca Vercel ni Neon.
 
 Se preparó el commit `969a6f773e673e9093a8796be6bd3f2772b3c64f`, que corresponde al despliegue inspeccionado. Durante el trabajo apareció el commit local posterior `6172047`; no se incluyó silenciosamente. Para validar otra revisión debe generarse otro kit y revisar los adaptadores.

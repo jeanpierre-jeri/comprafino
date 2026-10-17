@@ -1,5 +1,7 @@
 # Engineering history and artifact classification
 
+For current code locations and task status, start with the [project guide](../README.md). This index retains dated evidence.
+
 Captured/indexed October 5, 2026 during Cleanup B, starting at `15cb5c2`. Historical measurements are not current operating limits, deployment proof or commit authorization. Unknown provenance remains unknown. Full original guidance, rationale and session acceptance narratives are preserved in [engineering notes](engineering-notes-2026-10-05.md), including the original README, roadmap and domain guides. Embedded measurement dates/baselines retain their meaning; the capture date is not a measurement date.
 
 The [October 5 audit](../engineering-audit.md) retains its original `9ab4575` baseline and evidence, followed by remediation status. Audit file tables intentionally retain original paths as historical observations; current locations are listed here.
@@ -44,6 +46,7 @@ These reports and the full [original roadmap](engineering-notes-2026-10-05.md#or
 ## New reports
 
 - [Recorrido móvil 13A](mobile-shopping-journey-2026-10-16.md): revalidación de 06, scroll del plan, explicación de importes, persistencia del SKU y guion pendiente con personas.
+
 - [Refresco de productos habituales 10B](catalog-refresh-selection-2026-10-16.md): bloqueo reproducido por rutas incompatibles dentro del pool de 5.000, admisión previa al límite y regresiones aisladas sin aumento de presupuestos.
 - [Frescura y cobertura de compras habituales 10A](catalog-usefulness-2026-10-16.md): dieciséis búsquedas, edad de precios, utilidad de resultados, comparaciones admitidas, fallos parciales y frecuencia efectiva; una corrección inicial recomendada, sin cambios operativos.
 - [Rendimiento HTTP de búsquedas y canastas 03E](catalog-http-performance-2026-10-16.md): producción Next local, tres escalas, cuatro solicitudes simultáneas, cancelación, memoria y controles de estabilidad.
