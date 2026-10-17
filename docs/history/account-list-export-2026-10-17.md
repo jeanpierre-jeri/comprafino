@@ -1,0 +1,42 @@
+# Exportación de la lista de cuenta — prompt 11A
+
+Fecha: **17 de octubre de 2026, America/Lima**. Base local `734acfa`. Implementación y validación locales; no acreditan publicación. **04A sigue aplazado.**
+
+## Resultado y uso
+
+El menú de cuenta ofrece **Descargar lista de cuenta**. Obtiene una lectura nueva de la lista sincronizada y descarga `comprafino-lista-cuenta.json`, con el formato de lista versión 2 ya utilizado por el respaldo anónimo del prompt 07. Conserva selección, identidad de producto, cantidades, frecuencia y fechas de los ítems. El archivo contiene únicamente `version` e `items`; no incluye sesión, token, credenciales, correo, perfil, ID de propietario ni revisión interna.
+
+El menú explica que solo incluye la lista guardada en la cuenta, sin cambios pendientes. Una lista vacía produce un aviso y ningún archivo. Un fallo permite reintentar; una sesión expirada/cerrada pide iniciar sesión nuevamente; una sesión reemplazada produce un mensaje distinto. La descarga no escribe la lista ni modifica la copia anónima o su propiedad.
+
+Se reutilizan [serializeShoppingList](../../packages/core/src/shopping-list.ts) y las validaciones estrictas de [shopping-list-sync](../../packages/core/src/shopping-list-sync.ts). El pequeño mecanismo de Blob/enlace de [downloadShoppingList](../../apps/web/src/lib/shopping-list/download.ts) se comparte con la recuperación anónima, que conserva su propio nombre de archivo y comportamiento. No se añaden dependencias, restauración de archivos, eliminación de cuenta ni un panel general.
+
+## Fronteras de sesión y recuperación
+
+- [GET /api/list/export](../../apps/web/src/app/api/list/export/route.ts) resuelve la sesión mediante Better Auth 1.7.7 con `disableCookieCache: true`. El [handler](../../apps/web/src/server/shopping-list-export-handler.ts) toma el propietario exclusivamente de esa sesión validada. Los parámetros de URL no eligen una cuenta. Un header con el ID de sesión esperado sirve para rechazar una interfaz obsoleta con 409; no sustituye la autenticación de la cookie firmada. Una sesión ausente, inválida, revocada o expirada devuelve 401; los errores y datos guardados inválidos devuelven 503 sin revelar contenido.
+- La respuesta valida el documento guardado y devuelve solo la lista, con `Cache-Control: private, no-store` y `X-Content-Type-Options: nosniff`. Es una lectura sin permisos CORS adicionales ni mutaciones de lista. Los presupuestos existentes se conservan: 15 s por operación de servidor, transporte 12 s, statement 10 s y `maxDuration` de 20 s. No se toca configuración remota ni schema.
+- [exportAccountList](../../apps/web/src/lib/shopping-list/account-export.ts) usa el QueryClient existente, con clave por usuario/sesión, sin reintentos y sin retener la consulta al terminar. No exporta una copia anterior de caché. Valida otra vez la respuesta y vuelve a consultar la sesión antes de entregar el documento a la descarga; una cookie reemplazada mientras llegaba la lista bloquea el archivo anterior. Ambas solicitudes y sus cuerpos comparten el presupuesto del navegador de 20 s.
+- [AuthControl](../../apps/web/src/components/auth-control.tsx) cancela al cambiar identidad, perder la disponibilidad de sesión o desmontarse. Cerrar sesión cancela la exportación antes de esperar a Better Auth. Una referencia de identidad y el signal se comprueban justo antes del enlace de descarga, sin otro `await`. Los errores tardíos de una acción cancelada no producen avisos de éxito ni descargas. El botón evita acciones duplicadas y permite cancelar mediante el cierre de sesión.
+
+Las comprobaciones detectan cambios observados hasta el momento de liberar el archivo. No ofrecen una transacción global entre pestañas/dispositivos ni retiran un archivo cuya descarga ya se inició. El JSON refleja el snapshot guardado al leer, no ediciones posteriores ni cambios aún pendientes de sincronización. Es un respaldo de la lista, no una exportación completa de todos los datos de cuenta ni una garantía de cumplimiento legal.
+
+## Verificación local
+
+Las pruebas de frontera en [shopping-account-export.spec.ts](../../apps/web/testing/shopping-account-export.spec.ts) cubren validación estricta, descarte de campos de autenticación de la comprobación de sesión, lista vacía, lectura nueva al reintentar, HTTP 401/409/503, cambio de usuario o sesión, fallo de red, JSON inválido, cuerpos tardíos, cancelación y presupuesto con transporte que ignora abort. Comprueban que no se descarga ni retiene caché al fallar.
+
+Tres casos nuevos de [integración HTTP con Better Auth real](../../apps/web/testing/shopping-list-sync.integration.spec.ts) usan dos cuentas sintéticas, sesiones firmadas, revocadas y expiradas, lista vacía y datos guardados corruptos. Verifican contenido exacto, guardas y ausencia de escrituras de lista; emplean `TEST_DATABASE_URL` explícita y esquema aleatorio propio, sin fallback a `DATABASE_URL`.
+
+Cuatro casos nuevos de [Chromium](../../apps/web/e2e/shopping-import.spec.ts) verifican descarga real y JSON desde el menú por teclado en móvil, conservación de ambas listas y de la copia anónima, mensajes de vacío/red/sesión con recuperación, cookie reemplazada durante una respuesta detenida y logout con descarga pendiente. Se conserva la suite de recuperación 07 y el recorrido existente.
+
+Se consultaron los docs de Next 16.3.8 instalados para Route Handlers y `use client`, la API instalada de Better Auth para sesión sin caché de cookie y las guías de [Dropdown Menu](https://ui.shadcn.com/docs/components/base/dropdown-menu) y [Toast](https://ui.shadcn.com/docs/components/base/toast). La revisión React mantiene estado local de interacción, dependencias primitivas del efecto de cancelación, acción accesible en componentes existentes y estado remoto en TanStack Query.
+
+Los logs y capturas son artefactos ignorados en `.artifacts/account-export-2026-10-17/` y `apps/web/test-results/`. El primer build encontró un bloqueo de puertos del sandbox en Turbopack; una repetición conservaba el mismo error en caché. Se preservaron ambos diagnósticos y la caché generada, y el build con permisos locales y caché nueva pasó. No se cambió la configuración de compilación para eludirlo.
+
+| Comprobación                             | Resultado final                                                                                                                                              |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Formato, referencias, lint, tipos y diff | Pasan.                                                                                                                                                       |
+| `pnpm test`                              | 966 casos: 565 core, 106 db, 200 scrapers y 95 web; una tarea reutilizó caché. Incluye seis nuevos casos de frontera de exportación.                         |
+| `pnpm test:integration:local`            | 152 casos PostgreSQL y 15 HTTP/auth aprobados, incluidos los tres nuevos de exportación.                                                                     |
+| `pnpm build`                             | Build nuevo aprobado antes de Chromium.                                                                                                                      |
+| `pnpm test:e2e:fixtures:local`           | 99 aprobados y ocho omisiones esperadas de catálogo persistido; incluye los cuatro casos 11A, recuperación 07, cuenta, búsqueda, canastas y recorrido móvil. |
+
+La primera suite Chromium registró 95 aprobados, ocho omitidos y cuatro fallos: dos expectativas de que cerrar sesión era la primera opción del menú y dos casos de recuperación cuyo rastro de red muestra 429 en `get-session`. El menú ahora comprueba por teclado la exportación primero y luego el logout. El fixture de cuentas sintéticas asigna una IP de documentación RFC 3849 distinta por contexto para no agrupar todos los participantes de la suite en una misma cuota; conserva los límites del servidor y no cambia auth/configuración de aplicación. La repetición enfocada pasó 12/12 y la repetición completa pasó 99/99 ejecutados. Los resultados iniciales y trazas se conservan en `chromium-initial-results/` dentro del directorio de artefactos. No se atribuyen esos 429 a producción ni se desactivan límites para ocultarlos.

@@ -226,6 +226,8 @@ for (const width of [390, 1280]) {
       const menu = page.getByRole("menu");
       await expect(menu).toContainText("Jean Pierre");
       await expect(menu).toContainText(session.user.email);
+      await expect(page.getByRole("menuitem", { name: "Descargar lista de cuenta" })).toBeFocused();
+      await page.keyboard.press("ArrowDown");
       await expect(page.getByRole("menuitem", { name: "Cerrar sesión" })).toBeFocused();
       const bounds = await menu.boundingBox();
       expect(bounds && bounds.x >= 0 && bounds.x + bounds.width <= width).toBeTruthy();

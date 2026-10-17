@@ -51,6 +51,10 @@ async function fixture(
       email: `${randomUUID()}@example.com`,
     }),
   );
+  // Separate synthetic browser clients without disabling the server's rate
+  // limits. All fixture traffic goes to the owned local server; use RFC 3849 IPs.
+  const address = current.id.replaceAll("-", "").slice(0, 24).match(/.{4}/gu)!.join(":");
+  await context.setExtraHTTPHeaders({ "x-forwarded-for": `2001:db8:${address}` });
   const local = shoppingListSchema.parse({ version: 2, items: [item(1), item(2)] });
   await mutateUserShoppingList(db, owner.id, {
     expectedRevision: 0,
@@ -97,6 +101,163 @@ async function stored(page: Page) {
     owner: localStorage.getItem("comprafino-shopping-list-import-owner"),
   }));
 }
+
+test("11A downloads only the account list from the keyboard on mobile", async ({
+  page,
+  context,
+}, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 740 });
+  const f = await fixture(context, page);
+  try {
+    await page.goto("/list");
+    await expect(page.getByRole("article", { name: "Compra local 99", exact: true })).toBeVisible();
+    const before = await readUserShoppingList(f.db, f.current.id);
+    await page.getByRole("button", { name: "Cuenta de Cuenta Actual" }).press("Enter");
+    const action = page.getByRole("menuitem", { name: "Descargar lista de cuenta", exact: true });
+    await expect(action).toBeVisible();
+    await action.focus();
+    await expect(action).toBeFocused();
+    const downloaded = page.waitForEvent("download");
+    await action.press("Enter");
+    const download = await downloaded;
+    expect(download.suggestedFilename()).toBe("comprafino-lista-cuenta.json");
+    expect(JSON.parse(await readFile(await download.path(), "utf8"))).toEqual(before.list);
+    expect(await stored(page)).toEqual({ raw: JSON.stringify(f.local), owner: f.owner.id });
+    expect(await readUserShoppingList(f.db, f.current.id)).toEqual(before);
+    expect((await readUserShoppingList(f.db, f.owner.id)).list.items).toEqual([item(1)]);
+    await expect(page.getByText("Lista de cuenta descargada.", { exact: true })).toBeVisible();
+    await expect(action).toBeEnabled();
+    await page.screenshot({
+      path: testInfo.outputPath("account-export-mobile.png"),
+      animations: "disabled",
+    });
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("button", { name: "Cuenta de Cuenta Actual" })).toBeFocused();
+  } finally {
+    await f.dispose();
+  }
+});
+
+test("11A distinguishes empty, expired and failed downloads and allows recovery", async ({
+  page,
+  context,
+}) => {
+  const f = await fixture(context, page);
+  const downloads: string[] = [];
+  page.on("download", (download) => downloads.push(download.suggestedFilename()));
+  try {
+    await page.goto("/list");
+    await expect(page.getByRole("article", { name: "Compra local 99", exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "Cuenta de Cuenta Actual" }).click();
+    const action = page.getByRole("menuitem", { name: "Descargar lista de cuenta", exact: true });
+    for (const scenario of ["network", "empty", "expired"] as const) {
+      await page.route("**/api/list/export", (route) => {
+        if (scenario === "network") return route.abort("failed");
+        if (scenario === "expired") {
+          return route.fulfill({ status: 401, json: { error: "unauthenticated" } });
+        }
+        return route.fulfill({ json: { version: 2, items: [] } });
+      });
+      await action.click();
+      let message = "No pudimos descargar tu lista. Intenta nuevamente.";
+      if (scenario === "empty") {
+        message = "Tu lista sincronizada está vacía. No se descargó ningún archivo.";
+      }
+      if (scenario === "expired") {
+        message =
+          "Tu sesión venció o fue cerrada. Inicia sesión nuevamente para descargar tu lista.";
+      }
+      await expect(page.getByText(message, { exact: true })).toBeVisible();
+      await expect(action).toBeEnabled();
+      expect(downloads).toEqual([]);
+      await page.unroute("**/api/list/export");
+    }
+    const downloaded = page.waitForEvent("download");
+    await action.click();
+    await downloaded;
+    expect(downloads).toEqual(["comprafino-lista-cuenta.json"]);
+    expect((await readUserShoppingList(f.db, f.current.id)).list.items).toEqual([item(99)]);
+  } finally {
+    await f.dispose();
+  }
+});
+
+test("11A rejects a delayed response after another account replaces the cookie", async ({
+  page,
+  context,
+}) => {
+  const f = await fixture(context, page);
+  let release!: () => void;
+  let entered!: () => void;
+  const waiting = new Promise<void>((resolve) => {
+    entered = resolve;
+  });
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const downloads: string[] = [];
+  page.on("download", (download) => downloads.push(download.suggestedFilename()));
+  try {
+    await page.goto("/list");
+    await expect(page.getByRole("article", { name: "Compra local 99", exact: true })).toBeVisible();
+    await page.route("**/api/list/export", async (route) => {
+      const response = await route.fetch();
+      entered();
+      await gate;
+      await route.fulfill({ response });
+    });
+    await page.getByRole("button", { name: "Cuenta de Cuenta Actual" }).click();
+    await page.getByRole("menuitem", { name: "Descargar lista de cuenta", exact: true }).click();
+    await waiting;
+    await f.login(f.owner.id);
+    release();
+    await expect(
+      page.getByText("La cuenta o sesión cambió. Vuelve a descargar desde tu cuenta actual.", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    expect(downloads).toEqual([]);
+    expect((await readUserShoppingList(f.db, f.current.id)).list.items).toEqual([item(99)]);
+  } finally {
+    release();
+    await f.dispose();
+  }
+});
+
+test("11A cancels an in-flight download before logout completes", async ({ page, context }) => {
+  const f = await fixture(context, page);
+  let release!: () => void;
+  let entered!: () => void;
+  const waiting = new Promise<void>((resolve) => {
+    entered = resolve;
+  });
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const downloads: string[] = [];
+  page.on("download", (download) => downloads.push(download.suggestedFilename()));
+  try {
+    await page.goto("/list");
+    await expect(page.getByRole("article", { name: "Compra local 99", exact: true })).toBeVisible();
+    await page.route("**/api/list/export", async (route) => {
+      const response = await route.fetch();
+      entered();
+      await gate;
+      await route.fulfill({ response }).catch(() => {});
+    });
+    await page.getByRole("button", { name: "Cuenta de Cuenta Actual" }).click();
+    await page.getByRole("menuitem", { name: "Descargar lista de cuenta", exact: true }).click();
+    await waiting;
+    await page.getByRole("menuitem", { name: "Cerrar sesión", exact: true }).click();
+    await expect(page.getByRole("button", { name: "Iniciar sesión", exact: true })).toBeEnabled();
+    release();
+    expect(downloads).toEqual([]);
+    expect((await readUserShoppingList(f.db, f.current.id)).list.items).toEqual([item(99)]);
+  } finally {
+    release();
+    await f.dispose();
+  }
+});
 
 test("07 recovery exports the anonymous copy, rejects another tab's edits and discards only after confirmation", async ({
   page,

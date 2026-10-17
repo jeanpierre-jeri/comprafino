@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import { Button, ChevronDown, LoaderCircle, LogOut } from "@comprafino/ui";
 import { Avatar, AvatarImage, AvatarFallback } from "@comprafino/ui/components/avatar";
 import {
@@ -22,6 +22,9 @@ import { Skeleton } from "@comprafino/ui/components/skeleton";
 import { toast } from "@comprafino/ui/components/toast";
 import { accountInitials, avatarUrl } from "../lib/account-identity";
 import { authClient } from "../lib/auth-client";
+import { AccountListExportError, exportAccountList } from "../lib/shopping-list/account-export";
+import { downloadShoppingList } from "../lib/shopping-list/download";
+import { useShoppingClient } from "./shopping-list/shopping-list-provider";
 import { GoogleMark } from "./google-mark";
 
 type SessionUser = NonNullable<ReturnType<typeof authClient.useSession>["data"]>["user"];
@@ -111,6 +114,10 @@ function LoginDialog({ onClose }: { onClose: () => void }) {
 
 export function AuthControl() {
   const { data, isPending, error: sessionError } = authClient.useSession();
+  const shopping = useShoppingClient();
+  const [exporting, setExporting] = useState(false);
+  const exportController = useRef<AbortController | null>(null);
+  const exportIdentity = useRef<string | null>(null);
   const [loginOpen, setLoginOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -118,10 +125,68 @@ export function AuthControl() {
   const inFlight = useRef(false);
   const trigger = useRef<HTMLButtonElement>(null);
   const user = retainedUser ?? data?.user;
+  const sessionId = data?.session.id;
+  const userId = data?.user.id;
+  const sessionUnavailable = isPending || Boolean(sessionError);
+
+  useLayoutEffect(() => {
+    exportIdentity.current = null;
+    if (!sessionUnavailable && sessionId && userId) {
+      exportIdentity.current = `${userId}/${sessionId}`;
+    }
+    return () => {
+      exportIdentity.current = null;
+      exportController.current?.abort();
+    };
+  }, [sessionId, userId, sessionUnavailable]);
+
+  async function downloadAccount() {
+    if (!data || sessionUnavailable || inFlight.current || exportController.current) return;
+    const controller = new AbortController();
+    exportController.current = controller;
+    setExporting(true);
+    try {
+      const result = await exportAccountList({
+        queryClient: shopping.queryClient,
+        session: { status: "authenticated", userId: data.user.id, sessionId: data.session.id },
+        signal: controller.signal,
+        download: (document) => {
+          if (exportIdentity.current !== `${data.user.id}/${data.session.id}`) {
+            throw new AccountListExportError("changed");
+          }
+          downloadShoppingList(document, "comprafino-lista-cuenta.json");
+        },
+      });
+      if (!controller.signal.aborted) {
+        toast.add({
+          type: "success",
+          title:
+            result === "empty"
+              ? "Tu lista sincronizada está vacía. No se descargó ningún archivo."
+              : "Lista de cuenta descargada.",
+        });
+      }
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        toast.add({
+          type: "error",
+          title:
+            error instanceof AccountListExportError
+              ? error.message
+              : "No pudimos descargar tu lista. Intenta nuevamente.",
+        });
+      }
+    } finally {
+      exportController.current = null;
+      setExporting(false);
+    }
+  }
 
   async function signOut() {
     if (inFlight.current || !user) return;
 
+    // Invalidate the download synchronously, before Better Auth finishes logout.
+    exportController.current?.abort();
     inFlight.current = true;
     setRetainedUser(user);
     setLoggingOut(true);
@@ -190,6 +255,18 @@ export function AuthControl() {
                 <p className="mt-1 text-xs text-muted-foreground wrap-anywhere">{user.email}</p>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
+              <DropdownMenuLabel className="px-3 text-xs text-muted-foreground">
+                La descarga incluye solo la lista guardada en tu cuenta, sin cambios pendientes.
+              </DropdownMenuLabel>
+              <DropdownMenuItem
+                closeOnClick={false}
+                disabled={loggingOut || exporting || sessionUnavailable || !data}
+                aria-busy={exporting}
+                onClick={() => void downloadAccount()}
+                className="min-h-11 px-3"
+              >
+                {exporting ? "Preparando descarga…" : "Descargar lista de cuenta"}
+              </DropdownMenuItem>
               <DropdownMenuItem
                 closeOnClick={false}
                 disabled={loggingOut}

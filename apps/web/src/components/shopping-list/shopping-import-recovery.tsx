@@ -11,6 +11,7 @@ import {
 } from "@comprafino/ui/components/dialog";
 import type { ShoppingImportRecovery as Recovery } from "../../lib/shopping-list/sync-client";
 import { ShoppingListSyncError } from "../../lib/shopping-list/sync-errors";
+import { downloadShoppingList } from "../../lib/shopping-list/download";
 import { useShoppingList } from "./use-shopping-list";
 
 export function ShoppingImportRecovery() {
@@ -47,15 +48,7 @@ export function ShoppingImportRecovery() {
   async function download() {
     if (!recovery) return;
     const document = await shopping.exportPendingImport(recovery);
-    const url = URL.createObjectURL(new Blob([document], { type: "application/json" }));
-    try {
-      const anchor = window.document.createElement("a");
-      anchor.href = url;
-      anchor.download = "comprafino-lista-local.json";
-      anchor.click();
-    } finally {
-      URL.revokeObjectURL(url);
-    }
+    downloadShoppingList(document, "comprafino-lista-local.json");
   }
 
   if (!shopping.importIssue && !recovery) return null;

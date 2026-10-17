@@ -105,6 +105,12 @@ Core merge tests cover normalization/identity, order, timestamps, capacity and c
 
 Sync has a 15 s handler budget including scoped session resolution, 12 s database fetches, 10 s SQL statements and 5 s body reads. Browser reads/mutation sequences have a 20 s budget including body parsing. See [public request budgets](request-budgets.md) for cancellation, uncertain outcomes and hosting limits.
 
+## Account-list export
+
+The account menu offers **Descargar lista de cuenta**. `GET /api/list/export` reads only the owner established by a freshly validated signed session, requires the initiating session ID as a stale-interface guard and returns validated version-two list JSON with private/no-store headers. It uses the existing public operation/DB budgets. The client performs a fresh session check after reading the document, cancels on logout/identity change/unmount, validates the list and removes its session-scoped export query when done. The file contains no profile, session, credentials or internal revision.
+
+Only the saved list is exported; pending edits and anonymous recovery data are excluded. Empty lists produce a distinct message without a file, while expired/changed sessions and unavailable downloads remain distinguishable. Export does not mutate either list and adds no restore, deletion or general account-management flow. Already initiated downloads cannot be recalled. See [11A verification and limits](history/account-list-export-2026-10-17.md).
+
 ## Guided pending-import recovery
 
 The list distinguishes another account, unavailable storage, capacity, changed snapshots, interrupted requests and unavailable cross-tab coordination. Recovery can preserve the snapshot, download validated anonymous JSON, sign out to return to the original account, or explicitly discard only the browser copy after confirmation. It never exports a cloud account document or automatically transfers ownership. The JSON download is a backup; file restoration is not implemented.

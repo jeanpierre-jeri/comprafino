@@ -29,7 +29,7 @@ The bounded [catalog review 10A](history/catalog-usefulness-2026-10-16.md), [ref
 
 Follow the [current project priorities](history/project-review-2026-10-14.md#priorización-actual--16-de-octubre-de-2026) and [bounded prompts](history/project-review-prompts-2026-10-14.md). Address reproduced wrong prices, lost data and blocked user journeys first. Observe a small real-user journey before adding product scope; do not infer usability from automated browser tests.
 
-Revalidate the historical dependency warning before deciding on an update. Additional account export/deletion controls remain separate work; downloading a pending anonymous copy is not an account-data export. Indexing/share-link work depends on the chosen acquisition channel. New alerts, source/category expansion or infrastructure need a current requirement and evidence.
+The historical dependency warning was revalidated and fixed locally under prompt 09. [11A](history/account-list-export-2026-10-17.md) implements local account-list JSON export with session guards; it does not establish deployment, provide full account-data export or implement account deletion. Downloading a pending anonymous copy remains separate. Indexing/share-link work depends on the chosen acquisition channel. New alerts, source/category expansion or infrastructure need a current requirement and evidence.
 
 **04A remains deferred by the user.** The [hosting kit](hosting-test-environment.md) is local preparation only. Remote load, server-side cancellation and recovery are not verified. Resume under the [recorded criteria](history/hosting-request-budgets-2026-10-16.md#decisión-posterior-verificación-remota-aplazada); do not provision resources or deploy as part of this roadmap.
 

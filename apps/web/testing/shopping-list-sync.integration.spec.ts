@@ -8,6 +8,7 @@ import { closeLocalTestConnections } from "../../../packages/db/src/testing/test
 import { authOptions } from "../src/server/auth-config.ts";
 import { authTestEnv as env } from "./auth-env.ts";
 import { shoppingListSyncHandlers } from "../src/server/shopping-list-sync-handler.ts";
+import { shoppingListExportHandler } from "../src/server/shopping-list-export-handler.ts";
 import { shoppingListPost } from "../src/server/shopping-list-handler.ts";
 import { shoppingListBodyBytes } from "../src/server/request-body.ts";
 
@@ -23,6 +24,10 @@ test.describe("sync HTTP with real Better Auth and explicit owned TEST_DATABASE_
   const handlers = shoppingListSyncHandlers({
     session: (headers) => auth.api.getSession({ headers }),
     origin: () => env.BETTER_AUTH_URL,
+    database: () => harness.db,
+  });
+  const exportList = shoppingListExportHandler({
+    session: (headers) => auth.api.getSession({ headers, query: { disableCookieCache: true } }),
     database: () => harness.db,
   });
   const originalFetch = globalThis.fetch;
@@ -106,6 +111,94 @@ test.describe("sync HTTP with real Better Auth and explicit owned TEST_DATABASE_
   const remove = (expectedRevision: number, id: string = randomUUID()) => ({
     expectedRevision,
     operation: { type: "remove", id },
+  });
+
+  function exportRequest(headers: Headers, sessionId: string) {
+    const expected = new Headers(headers);
+    expected.set("x-comprafino-export-session", sessionId);
+    return new Request(`${env.BETTER_AUTH_URL}/api/list/export?userId=${randomUUID()}`, {
+      headers: expected,
+    });
+  }
+
+  test("11A exports only the signed account list with no authentication fields or writes", async () => {
+    const first = await login();
+    const second = await login();
+    const value = item();
+    const other = { ...item(), label: "Lista de otra cuenta" };
+    expect(
+      (await post(first.headers, { expectedRevision: 0, operation: { type: "save", item: value } }))
+        .status,
+    ).toBe(200);
+    expect(
+      (
+        await post(second.headers, {
+          expectedRevision: 0,
+          operation: { type: "save", item: other },
+        })
+      ).status,
+    ).toBe(200);
+    const before = await harness.scoped.query("select * from user_shopping_lists order by user_id");
+    for (const [loggedIn, expected] of [
+      [first, value],
+      [second, other],
+    ] as const) {
+      const response = await exportList(exportRequest(loggedIn.headers, loggedIn.session.id));
+      expect(response.status).toBe(200);
+      expect(response.headers.get("cache-control")).toBe("private, no-store");
+      expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+      expect(await response.json()).toEqual({ version: 2, items: [expected] });
+    }
+    expect((await exportList(exportRequest(second.headers, first.session.id))).status).toBe(409);
+    expect(
+      await harness.scoped.query("select * from user_shopping_lists order by user_id"),
+    ).toEqual(before);
+  });
+
+  test("11A distinguishes empty lists, missing session guards and invalid/revoked/expired sessions", async () => {
+    const loggedIn = await login();
+    const empty = await exportList(exportRequest(loggedIn.headers, loggedIn.session.id));
+    expect(empty.status).toBe(200);
+    expect(await empty.json()).toEqual({ version: 2, items: [] });
+    expect(
+      (
+        await exportList(
+          new Request(`${env.BETTER_AUTH_URL}/api/list/export`, { headers: loggedIn.headers }),
+        )
+      ).status,
+    ).toBe(409);
+    const tampered = new Headers(loggedIn.headers);
+    tampered.set("cookie", `${loggedIn.headers.get("cookie")}x`);
+    for (const headers of [new Headers(), tampered]) {
+      expect((await exportList(exportRequest(headers, loggedIn.session.id))).status).toBe(401);
+    }
+    await auth.api.signOut({ headers: loggedIn.headers });
+    expect((await exportList(exportRequest(loggedIn.headers, loggedIn.session.id))).status).toBe(
+      401,
+    );
+    const expired = await login();
+    await harness.scoped.query('update "session" set expires_at=$1 where id=$2', [
+      new Date(0),
+      expired.session.id,
+    ]);
+    expect((await exportList(exportRequest(expired.headers, expired.session.id))).status).toBe(401);
+    expect(await harness.scoped.query("select * from user_shopping_lists")).toEqual([]);
+  });
+
+  test("11A rejects a corrupt saved list without exposing or modifying the row", async () => {
+    const loggedIn = await login();
+    await post(loggedIn.headers, {
+      expectedRevision: 0,
+      operation: { type: "save", item: item() },
+    });
+    await harness.scoped.query("update user_shopping_lists set data=$1::jsonb", [
+      JSON.stringify({ version: 3, items: [] }),
+    ]);
+    const before = await harness.scoped.query("select * from user_shopping_lists");
+    const response = await exportList(exportRequest(loggedIn.headers, loggedIn.session.id));
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({ error: "list_unavailable" });
+    expect(await harness.scoped.query("select * from user_shopping_lists")).toEqual(before);
   });
   test("anonymous, forged, revoked and expired cookies cannot read/write remote lists", async () => {
     const loggedIn = await login();

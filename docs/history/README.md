@@ -46,6 +46,7 @@ These reports and the full [original roadmap](engineering-notes-2026-10-05.md#or
 ## New reports
 
 - [Recuperación de importaciones pendientes 07](shopping-import-recovery-2026-10-17.md): copia JSON local, retorno a la cuenta original, descarte confirmado y protección ante cambios de sesión/pestaña; pruebas aisladas y límites.
+- [Exportación de lista de cuenta 11A](account-list-export-2026-10-17.md): JSON de la lista sincronizada, guardas de sesión, cancelación y pruebas aisladas; implementación local sin publicación.
 
 - [Comparaciones habituales con Makro 08A](matching-retailer-sample-2026-10-16.md): muestra offline separada, cuatro tiendas, negativos, discrepancias de revisión, ambigüedad de marca y corpus histórico conservado.
 
