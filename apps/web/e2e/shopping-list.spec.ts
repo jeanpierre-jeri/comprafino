@@ -94,6 +94,116 @@ test("local generic need persists, edits, deduplicates and removes", async ({ pa
   await expect(page.getByText("Todavía no tienes productos en tu lista.")).toBeVisible();
 });
 
+test("first use explains both choices and preserves the reviewed generic preferences", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto("/list");
+  await expect(page.getByRole("heading", { name: "Una necesidad sin marca" })).toBeVisible();
+  await expect(page.getByText(/escribe «leche»/)).toBeVisible();
+  const firstAction = page.getByRole("link", { name: "Buscar mi primer producto" });
+  await expect(firstAction).toBeInViewport({ ratio: 1 });
+  await page.screenshot({
+    path: testInfo.outputPath("empty-list-320.png"),
+    animations: "disabled",
+  });
+  await firstAction.focus();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/search/);
+  await openGeneric(page);
+  const dialog = page.getByRole("dialog");
+  const quantity = dialog.getByLabel("Cantidad", { exact: true });
+  const summary = dialog.getByRole("region", { name: "Resumen de preferencias" });
+  const settings = dialog.getByRole("button", { name: "Ajustar frecuencia", exact: true });
+  await expect(quantity).toBeFocused();
+  await expect(settings).toHaveAttribute("aria-expanded", "false");
+  await expect(summary).toContainText("Cada semana");
+  await expect(summary).toContainText("Sin marca elegida");
+
+  for (const invalid of ["", "0", "1.5", "10001"]) {
+    await quantity.fill(invalid);
+    await dialog.getByRole("button", { name: "Agregar", exact: true }).click();
+    await expect(quantity).toHaveAttribute("aria-invalid", "true");
+    expect(await page.evaluate(() => localStorage.getItem("comprafino-shopping-list"))).toBeNull();
+  }
+  await quantity.fill("1.5");
+  await dialog.getByRole("button", { name: "Agregar", exact: true }).click();
+  await expect(quantity).toHaveAttribute("aria-invalid", "true");
+  await dialog.getByLabel("Medida", { exact: true }).selectOption("kg");
+  await expect(quantity).not.toHaveAttribute("aria-invalid");
+  await expect(summary).toContainText("1.5 kg");
+  await dialog.getByLabel("Medida", { exact: true }).selectOption("unit");
+  await quantity.fill("6");
+  await settings.focus();
+  await page.keyboard.press("Enter");
+  await dialog.getByLabel("Frecuencia", { exact: true }).selectOption("monthly");
+  await settings.focus();
+  await page.keyboard.press("Space");
+  await expect(settings).toHaveAttribute("aria-expanded", "false");
+  await expect(summary).toContainText("6 unidades · Cada mes");
+  await page.screenshot({
+    path: testInfo.outputPath("first-use-generic-320.png"),
+    animations: "disabled",
+  });
+  await quantity.focus();
+  await page.keyboard.press("Enter");
+  await expect(dialog).toHaveCount(0);
+  const confirmation = page.getByRole("note", { name: "Confirmación de guardado" });
+  await expect(confirmation).toBeVisible();
+  await confirmation.getByRole("button", { name: "Seguir comprando" }).click();
+  await expect(page.getByRole("button", { name: "Agregar como necesidad" })).toBeFocused();
+  await expect(confirmation).toHaveCount(0);
+  await page.getByRole("link", { name: "Mi lista", exact: true }).click();
+  const card = page.getByRole("article", { name: "Huevos", exact: true });
+  await card.getByRole("button", { name: "Editar Huevos" }).click();
+  await expect(quantity).toHaveValue("6");
+  await expect(dialog.getByLabel("Frecuencia", { exact: true })).toHaveValue("monthly");
+  await quantity.fill("12");
+  await dialog.getByLabel("Frecuencia", { exact: true }).selectOption("biweekly");
+  await dialog.getByRole("button", { name: "Guardar cambios" }).click();
+  await expect(dialog).toHaveCount(0);
+  await page.reload();
+  await expect(card).toContainText("12 unidades");
+  await expect(page.getByRole("region", { name: "Cada 2 semanas", exact: true })).toContainText(
+    "Huevos",
+  );
+  await card.getByRole("button", { name: "Editar Huevos" }).click();
+  await expect(summary).toContainText("12 unidades · Cada 2 semanas");
+  const saved = await page.evaluate(() => localStorage.getItem("comprafino-shopping-list"));
+  await quantity.fill("18");
+  await page.keyboard.press("Escape");
+  expect(await page.evaluate(() => localStorage.getItem("comprafino-shopping-list"))).toBe(saved);
+  await openGeneric(page);
+  await expect(dialog.getByRole("note", { name: "Necesidad existente" })).toContainText(
+    "Ahora: 12 unidades · Cada 2 semanas",
+  );
+  await expect(summary).toContainText("Cada semana");
+  await page.keyboard.press("Escape");
+  expect(await page.evaluate(() => localStorage.getItem("comprafino-shopping-list"))).toBe(saved);
+});
+
+test("a saved confirmation stays with the need that was added", async ({ page }) => {
+  await openGeneric(page);
+  await page.getByRole("button", { name: "Agregar", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.getByRole("note", { name: "Confirmación de guardado" })).toBeVisible();
+  await page.getByLabel("¿Qué necesitas comprar?", { exact: true }).fill("leche");
+  await page.getByRole("button", { name: "Buscar", exact: true }).click();
+  await expect(page).toHaveURL(/q=leche/);
+  await expect(page.getByRole("note", { name: "Confirmación de guardado" })).toHaveCount(0);
+});
+
+test("unsupported generic need explains why alternatives are withheld", async ({ page }) => {
+  await openGeneric(page, "leche");
+  await expect(page.getByRole("region", { name: "Resumen de preferencias" })).toContainText(
+    "sin alternativas automáticas por ahora",
+  );
+  await page.getByRole("button", { name: "Agregar", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await page.getByRole("link", { name: "Ver mi lista", exact: true }).click();
+  await expect(page.getByRole("article").filter({ hasText: /leche/i })).toHaveCount(1);
+});
+
 test("quantity input supports whole units and fractional kg/L without a native step mismatch", async ({
   page,
 }) => {
@@ -101,6 +211,7 @@ test("quantity input supports whole units and fractional kg/L without a native s
   const quantity = page.getByLabel("Cantidad", { exact: true });
   const unit = page.getByLabel("Medida", { exact: true });
   await expect(unit).toHaveAccessibleName("Medida");
+  await page.getByRole("button", { name: "Ajustar frecuencia", exact: true }).click();
   await expect(page.getByLabel("Frecuencia", { exact: true })).toHaveAccessibleName("Frecuencia");
 
   for (const measure of ["kg", "L"]) {
@@ -285,7 +396,7 @@ test("dialogs animate, close with X/outside/Escape, and respect reduced motion",
       await trigger.click();
       await expect(dialog).toBeVisible();
       // A click inside the content must not dismiss it.
-      await dialog.getByRole("heading").click();
+      await dialog.getByRole("heading", { level: 2 }).click();
       await expect(dialog).toBeVisible();
       const bounds = await dialog.boundingBox();
 
@@ -392,7 +503,10 @@ test("keyboard dialog cancels and returns focus; list and editor fit both themes
       await openGeneric(page);
       await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
       await expect(page.getByLabel("Cantidad", { exact: true })).toBeFocused();
-      await page.screenshot({ path: testInfo.outputPath(`add-${width}-${theme}.png`) });
+      await page.screenshot({
+        path: testInfo.outputPath(`add-${width}-${theme}.png`),
+        animations: "disabled",
+      });
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
         true,
       );
@@ -442,6 +556,7 @@ function fixture(name: string): string {
 async function addSpecific(page: Page, intent: "preferred" | "strict") {
   await page.goto(`/products/${fixture("preferred")}`);
   await page.getByRole("button", { name: "Agregar a mi lista", exact: true }).click();
+  await page.getByRole("button", { name: "Ajustar sustituciones y frecuencia" }).click();
   await expect(page.getByRole("dialog").getByRole("radio")).toHaveCount(2);
   await expect(page.getByLabel("Búsqueda de productos")).toHaveCount(0);
   await expect(page.getByLabel("Nombre en tu lista")).toHaveCount(0);
@@ -593,6 +708,7 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       .first();
     await card.getByRole("button", { name: "Agregar a mi lista", exact: true }).click();
     await expect(page.getByRole("dialog")).toContainText("Huevos Bell's Bandeja 30un");
+    await page.getByRole("button", { name: "Ajustar sustituciones y frecuencia" }).click();
     await expect(page.getByRole("dialog").getByRole("radio")).toHaveCount(2);
     await page.getByRole("radio", { name: "Solo quiero este producto", exact: true }).check();
     await expect(page.getByLabel("Paquetes", { exact: true })).toHaveValue("1");
@@ -621,6 +737,7 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
     await page.goto("/search?q=huevos");
     const source = page.locator(`[data-offer-id="${fixture("independent")}"]`);
     await source.getByRole("button", { name: "Agregar a mi lista", exact: true }).click();
+    await page.getByRole("button", { name: "Ajustar sustituciones y frecuencia" }).click();
     await expect(page.getByRole("dialog").getByRole("radio")).toHaveCount(2);
     await expect(page.getByLabel("Paquetes", { exact: true })).toHaveValue("1");
     await page.getByRole("button", { name: "Agregar", exact: true }).click();
@@ -683,6 +800,7 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
     await page.goto("/search?q=huevos");
     const card = page.locator(`[data-offer-id="${fixture("unsupported")}"]`);
     await card.getByRole("button", { name: "Agregar a mi lista", exact: true }).click();
+    await page.getByRole("button", { name: "Ajustar sustituciones y frecuencia" }).click();
     await expect(page.getByRole("dialog").getByRole("radio")).toHaveCount(2);
     await expect(page.getByRole("dialog")).toContainText(
       "Huevos de Codorniz Independientes Bandeja 30un",
@@ -906,6 +1024,7 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
           await page.evaluate(() => localStorage.removeItem("comprafino-shopping-list"));
           await page.goto(`/products/${fixture("preferred")}`);
           await page.getByRole("button", { name: "Agregar a mi lista", exact: true }).click();
+          await page.getByRole("button", { name: "Ajustar sustituciones y frecuencia" }).click();
           await page
             .getByRole("radio", {
               name: intent === "preferred" ? "Prefiero este producto" : "Solo quiero este producto",
@@ -937,6 +1056,89 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
       }
     }
   });
+  test("exact preferences remain explicit through mobile keyboard save, edit and reload", async ({
+    page,
+  }, testInfo) => {
+    await page.setViewportSize({ width: 320, height: 568 });
+    await page.goto(`/products/${fixture("preferred")}`);
+    const trigger = page.getByRole("button", { name: "Agregar a mi lista", exact: true });
+    await expect(trigger).toBeEnabled();
+    await trigger.focus();
+    await page.keyboard.press("Enter");
+    const dialog = page.getByRole("dialog");
+    const summary = dialog.getByRole("region", { name: "Resumen de preferencias" });
+    const settings = dialog.getByRole("button", { name: "Ajustar sustituciones y frecuencia" });
+    await expect(dialog.getByLabel("Paquetes", { exact: true })).toBeFocused();
+    await expect(summary).toContainText("1 paquete · Cada semana");
+    await expect(summary).toContainText("Prefieres este producto");
+    for (const theme of ["light", "dark"] as const) {
+      await page.emulateMedia({ colorScheme: theme });
+      await page.screenshot({
+        path: testInfo.outputPath(`first-use-exact-320-${theme}.png`),
+        animations: "disabled",
+      });
+    }
+    await settings.focus();
+    await page.keyboard.press("Enter");
+    await dialog.getByRole("radio", { name: "Solo quiero este producto", exact: true }).focus();
+    await page.keyboard.press("Space");
+    await dialog.getByLabel("Frecuencia", { exact: true }).selectOption("monthly");
+    await dialog.getByLabel("Paquetes", { exact: true }).fill("2");
+    await settings.focus();
+    await page.keyboard.press("Enter");
+    await expect(summary).toContainText("2 paquetes · Cada mes");
+    await expect(summary).toContainText("Sin sustituciones");
+    const add = dialog.getByRole("button", { name: "Agregar", exact: true });
+    await expect(add).toBeInViewport({ ratio: 1 });
+    // Repeated Tab/Shift+Tab must remain inside the dialog, including when settings are closed.
+    for (const key of ["Tab", "Shift+Tab"]) {
+      for (let index = 0; index < 10; index++) {
+        await page.keyboard.press(key);
+        await expect
+          .poll(() => dialog.evaluate((element) => element.contains(document.activeElement)))
+          .toBe(true);
+      }
+    }
+    await add.focus();
+    await page.keyboard.press("Enter");
+    await expect(dialog).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+    await page.getByRole("link", { name: "Ver mi lista", exact: true }).click();
+    const card = page.getByRole("article").first();
+    await card.getByRole("button", { name: /^Editar/ }).click();
+    await expect(dialog.getByLabel("Paquetes", { exact: true })).toHaveValue("2");
+    await expect(
+      dialog.getByRole("radio", { name: "Solo quiero este producto", exact: true }),
+    ).toBeChecked();
+    await expect(dialog.getByLabel("Frecuencia", { exact: true })).toHaveValue("monthly");
+    const before = shoppingListSchema.parse(
+      JSON.parse(
+        (await page.evaluate(() => localStorage.getItem("comprafino-shopping-list"))) ?? "null",
+      ) as unknown,
+    );
+    await dialog.getByLabel("Paquetes", { exact: true }).fill("3");
+    await dialog.getByRole("button", { name: "Guardar cambios" }).click();
+    await expect(dialog).toHaveCount(0);
+    await page.reload();
+    await card.getByRole("button", { name: /^Editar/ }).click();
+    await expect(summary).toContainText("3 paquetes · Cada mes");
+    await expect(summary).toContainText("Sin sustituciones");
+    const after = shoppingListSchema.parse(
+      JSON.parse(
+        (await page.evaluate(() => localStorage.getItem("comprafino-shopping-list"))) ?? "null",
+      ) as unknown,
+    );
+    expect(after.items[0]).toMatchObject({
+      id: before.items[0]?.id,
+      canonicalId: fixture("preferred"),
+      createdAt: before.items[0]?.createdAt,
+      frequency: "monthly",
+      intent: "strict",
+      quantityMode: "packages",
+      quantity: { amount: 3, unit: "unit" },
+    });
+  });
+
   test("specific edits use package counts and retain preferred/strict choices", async ({
     page,
   }) => {

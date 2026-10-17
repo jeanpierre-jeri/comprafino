@@ -510,6 +510,17 @@
   font-size: 0.875rem;
   font-weight: 500;
 }
+.shopping-editor-actions {
+  position: sticky;
+  bottom: -1.5rem;
+  margin-inline: -1.5rem;
+  padding: 0.75rem 1.5rem;
+  border-top: 1px solid var(--border);
+  background: var(--background);
+}
+.shopping-editor-actions > button:first-child {
+  flex: 1;
+}
 .shopping-field input,
 .shopping-field select {
   min-width: 0;

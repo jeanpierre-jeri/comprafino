@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { buttonVariants } from "@comprafino/ui/components/button";
 import { ChoiceSelect } from "@comprafino/ui/components/select";
+import { Empty, EmptyTitle, EmptyDescription } from "@comprafino/ui/components/empty";
 import { useLayoutEffect, useRef, useState } from "react";
 import { removeShoppingItem, shoppingFrequencyLabels } from "@comprafino/core";
 import type { PriceMode, ShoppingListItem } from "@comprafino/core";
@@ -41,15 +42,32 @@ export function ShoppingListView() {
 
     if (!list.items.length) {
       return (
-        <div className="empty-surface mt-6">
-          <h2 className="text-xl font-semibold">Todavía no tienes productos en tu lista.</h2>
-          <p className="mt-3">
-            Busca huevos, arroz o cualquier producto que compres seguido y agrégalo aquí.
-          </p>
-          <Link className="card-link" href="/search">
-            Buscar productos
+        <Empty className="mt-6">
+          <EmptyTitle>Todavía no tienes productos en tu lista.</EmptyTitle>
+          <EmptyDescription>
+            Empieza por algo que compras seguido. Puedes guardar un producto concreto o una
+            necesidad sin elegir marca.
+          </EmptyDescription>
+          <Link className={buttonVariants({ className: "min-h-11 self-start" })} href="/search">
+            Buscar mi primer producto
           </Link>
-        </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <h3 className="font-semibold">Un producto que ya conoces</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Por ejemplo, leche de una marca concreta de 1 L. Elige su tarjeta y pulsa «Agregar a
+                mi lista». Podrás preferirlo o pedir solo ese producto.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold">Una necesidad sin marca</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Por ejemplo, escribe «leche» y pulsa «Agregar como necesidad» sin elegir un
+                producto. Solo mostraremos alternativas cuando podamos comprobar su equivalencia.
+              </p>
+            </div>
+          </div>
+        </Empty>
       );
     }
 

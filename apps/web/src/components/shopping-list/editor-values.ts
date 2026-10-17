@@ -48,3 +48,31 @@ export function editorSaveLabel(editing: boolean, duplicate: boolean): string {
 
   return "Agregar";
 }
+
+export function editorQuantityLabel(item: ShoppingListItem): string {
+  const { amount, unit } = item.quantity;
+
+  if (item.quantityMode === "packages") return `${amount} ${amount === 1 ? "paquete" : "paquetes"}`;
+
+  if (unit === "unit") return `${amount} ${amount === 1 ? "unidad" : "unidades"}`;
+
+  return `${amount} ${unit}`;
+}
+
+export function editorSubstitutionSummary(
+  intent: ShoppingListItem["intent"],
+  hasProfile: boolean,
+): string {
+  switch (intent) {
+    case "strict":
+      return "Solo este producto. Sin sustituciones de marca ni presentación.";
+    case "preferred":
+      return "Prefieres este producto. Alternativas solo con equivalencia comprobada y las condiciones de ahorro o disponibilidad.";
+    case "generic":
+      return hasProfile
+        ? "Sin marca elegida. Compararemos opciones equivalentes entre marcas y supermercados."
+        : "Sin marca elegida. Guardaremos la necesidad, sin alternativas automáticas por ahora: falta equivalencia comprobada.";
+    default:
+      return intent satisfies never;
+  }
+}

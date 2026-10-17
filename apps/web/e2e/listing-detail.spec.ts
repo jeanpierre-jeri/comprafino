@@ -219,6 +219,7 @@ test.describe("isolated listing details", () => {
     await popup.close();
     await card.getByRole("button", { name: "Agregar a mi lista", exact: true }).click();
     await expect(page.getByRole("dialog")).toBeVisible();
+    await page.getByRole("button", { name: "Ajustar sustituciones y frecuencia" }).click();
     await expect(page.getByRole("dialog").getByRole("radio")).toHaveCount(2);
     await expect(
       page.getByRole("radio", { name: "Prefiero este producto", exact: true }),
@@ -278,7 +279,9 @@ test.describe("isolated listing details", () => {
     await expect(history.getByRole("article")).toHaveCount(1);
     await page.getByRole("button", { name: "Agregar a mi lista", exact: true }).click();
     await expect(page.getByRole("dialog")).toBeVisible();
-    await expect(page.getByRole("dialog")).toContainText("Prefiero este producto");
+    await expect(page.getByRole("region", { name: "Resumen de preferencias" })).toContainText(
+      "Prefieres este producto",
+    );
   });
   test("search shows one product grid without a comparison section in both themes", async ({
     page,
