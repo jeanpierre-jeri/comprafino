@@ -18,7 +18,7 @@ export function PublicShell({
       </a>
       <header
         className={cn(
-          "flex flex-wrap items-center justify-between gap-3 border-b py-5 sm:py-6",
+          "grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-2 border-b py-3 sm:grid-cols-[auto_1fr_auto] sm:gap-6 sm:py-5",
           compact && "py-3 sm:py-4",
         )}
       >
@@ -28,16 +28,15 @@ export function PublicShell({
             Fino<span className="wordmark-dot">.</span>
           </span>
         </Link>
-        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-          <span className="hidden text-sm text-muted-foreground lg:inline">
-            Hecho para comprar en Perú
-          </span>
-          <NavigationLink
-            href="/list"
-            className="inline-flex min-h-11 items-center text-sm font-medium text-primary"
-          >
+        <nav aria-label="Navegación principal" className="primary-navigation">
+          <NavigationLink href="/search" className="primary-navigation-link">
+            Productos
+          </NavigationLink>
+          <NavigationLink href="/list" className="primary-navigation-link bg-secondary">
             Mi lista
           </NavigationLink>
+        </nav>
+        <div className="col-start-2 row-start-1 flex min-w-0 items-center justify-end gap-2 sm:col-start-3 sm:gap-3">
           <ThemeControl />
           <AuthControl />
         </div>

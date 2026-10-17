@@ -134,12 +134,36 @@
     @apply text-xs font-semibold tracking-widest text-primary;
   }
   .home-hero {
-    @apply grid items-center gap-5 rounded-3xl p-5 sm:gap-8 sm:p-8 lg:grid-cols-[1fr_1.05fr] lg:gap-10 lg:p-10;
+    @apply grid items-center gap-5 rounded-3xl p-4 sm:gap-8 sm:p-8 lg:grid-cols-[1fr_1.3fr] lg:gap-10 lg:p-10;
     background:
       radial-gradient(ellipse at top right, var(--hero-glow), transparent 65%), var(--surface-tint);
   }
   .search-surface {
-    @apply min-w-0 rounded-2xl bg-surface p-5 shadow-soft sm:p-6;
+    @apply min-w-0 rounded-2xl bg-surface p-4 shadow-soft sm:p-6;
+  }
+  .primary-navigation {
+    @apply col-span-2 row-start-2 grid grid-cols-2 gap-2 sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:flex sm:justify-center;
+  }
+  .primary-navigation-link {
+    @apply inline-flex min-h-11 items-center justify-center rounded-lg px-4 text-sm font-semibold text-primary hover:bg-secondary;
+  }
+  .home-list-link {
+    @apply mt-3 flex min-h-11 items-center justify-between gap-2 border-t pt-3 text-sm font-semibold text-primary;
+  }
+  .home-comparison {
+    @apply mt-6 grid min-w-0 gap-4 rounded-2xl border bg-surface p-4 sm:mt-8 sm:p-5 lg:grid-cols-[1fr_1.3fr] lg:gap-8;
+  }
+  .home-comparison-offers {
+    @apply grid min-w-0 gap-3;
+  }
+  .home-comparison-offers > li {
+    @apply grid min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1.2fr)] items-center gap-3;
+  }
+  .home-comparison-offers > li > p {
+    @apply mt-0;
+  }
+  .home-comparison-offers .retailer-badge {
+    @apply justify-self-start;
   }
   .search-chip {
     @apply inline-flex min-h-10 items-center gap-2 rounded-full border bg-background px-4 text-sm font-medium transition-colors hover:border-primary/40 hover:bg-secondary;
@@ -204,7 +228,13 @@
     cursor: wait;
   }
   .theme-trigger {
-    @apply mt-0 w-28 border-transparent bg-transparent px-2 text-xs;
+    @apply mt-0 w-11 justify-center border-transparent bg-transparent px-2 text-xs sm:w-28 sm:justify-between;
+  }
+  .theme-trigger > span:first-child > span {
+    @apply sr-only sm:not-sr-only;
+  }
+  .theme-trigger .choice-icon {
+    @apply hidden sm:block;
   }
   .choice-positioner {
     z-index: 60;
@@ -309,7 +339,7 @@
     @apply fixed top-2 left-4 z-50 -translate-y-20 rounded-xl bg-surface px-4 py-3 font-medium shadow-soft focus:translate-y-0;
   }
   .wordmark {
-    @apply inline-flex items-baseline text-2xl font-semibold tracking-[-0.055em];
+    @apply inline-flex items-baseline text-xl font-semibold tracking-[-0.055em] sm:text-2xl;
   }
   .wordmark-dot {
     @apply ml-0.5 font-bold;

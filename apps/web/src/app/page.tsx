@@ -1,4 +1,6 @@
-import { ArrowRight, ArrowUpRight } from "@comprafino/ui";
+import { Suspense } from "react";
+import { ArrowRight } from "@comprafino/ui";
+import { HomeComparison, HomeComparisonFallback } from "../components/home-comparison";
 import { NavigationLink } from "../components/navigation-link";
 import { SearchForm } from "../components/search-form";
 import { PublicShell } from "../components/public-shell";
@@ -9,47 +11,33 @@ export default function Home() {
     <PublicShell>
       <section className="home-hero" aria-labelledby="home-title">
         <div>
-          <p className="eyebrow">Tu compra de cada día, mejor pensada</p>
+          <p className="eyebrow">Compara supermercados en Perú</p>
           <h1
             id="home-title"
-            className="mt-5 text-[2.5rem] font-semibold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl"
+            className="mt-3 text-[clamp(2rem,9vw,2.5rem)] font-semibold leading-[1.05] tracking-tight sm:mt-5 sm:text-5xl lg:text-6xl"
           >
             Compra mejor.
             <br />
             <span className="text-primary">Paga menos.</span>
           </h1>
-          <p className="mt-4 max-w-md text-base leading-relaxed sm:mt-6 sm:text-lg text-muted-foreground">
-            Compara productos, tamaños y precios entre supermercados. Elige dónde te conviene
-            comprar.
+          <p className="mt-3 max-w-md text-base leading-relaxed sm:mt-6 sm:text-lg text-muted-foreground">
+            Encuentra lo que necesitas y compara el mismo producto entre tiendas.
           </p>
-          <p className="mt-4 text-xs font-medium sm:mt-6 sm:text-sm text-primary">
+          <p className="mt-3 text-xs font-medium sm:mt-6 sm:text-sm text-primary">
             Sin cuenta · Precios observados en línea
           </p>
         </div>
         <div className="search-surface">
-          <p className="mb-5 text-xl font-semibold tracking-tight">¿Qué hay en tu lista?</p>
-          <SearchForm />
-          <div className="mt-4 pt-3">
-            <p className="mb-2 text-xs font-medium text-muted-foreground">
-              Empieza por una categoría
-            </p>
-            <ul className="flex flex-wrap gap-2">
-              {searchCategories.slice(0, 3).map((category) => (
-                <li key={category.id}>
-                  <NavigationLink className="search-chip" href={`/search?category=${category.id}`}>
-                    {category.label}
-                    <ArrowUpRight
-                      aria-hidden="true"
-                      size={14}
-                      className="ml-1 inline-block shrink-0 align-middle"
-                    />
-                  </NavigationLink>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <SearchForm prominent />
+          <NavigationLink href="/list" className="home-list-link">
+            Consultar mi lista
+            <ArrowRight aria-hidden="true" size={16} />
+          </NavigationLink>
         </div>
       </section>
+      <Suspense fallback={<HomeComparisonFallback loading />}>
+        <HomeComparison />
+      </Suspense>
       <section className="browse-section" aria-labelledby="browse-title">
         <div className="mb-5 flex flex-wrap items-end justify-between gap-2">
           <div>

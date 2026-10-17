@@ -123,7 +123,7 @@ for (const theme of ["light", "dark"] as const) {
     const held = await holdNavigation(page, "/search", undefined, true);
     await page.goto("/");
     await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
-    const chip = page.locator('.search-chip[href="/search?category=lacteos-huevos"]');
+    const chip = page.locator('.browse-link[href="/search?category=lacteos-huevos"]');
 
     try {
       await chip.focus();
@@ -133,13 +133,13 @@ for (const theme of ["light", "dark"] as const) {
       await chip.press("Enter");
       await expect(
         page
-          .locator('.search-chip[aria-busy="true"], [aria-label="Cargando resultados de búsqueda"]')
+          .locator('.browse-link[aria-busy="true"], [aria-label="Cargando resultados de búsqueda"]')
           .first(),
       ).toBeVisible({ timeout: 1000 });
       // The loading boundary may replace the homepage between Playwright calls.
       // Inspect and exercise an attached chip in one browser task.
       const pendingState = await page.evaluate(() => {
-        const link = document.querySelector('.search-chip[href="/search?category=lacteos-huevos"]');
+        const link = document.querySelector('.browse-link[href="/search?category=lacteos-huevos"]');
         const attributes =
           link instanceof HTMLAnchorElement
             ? { busy: link.getAttribute("aria-busy"), disabled: link.getAttribute("aria-disabled") }

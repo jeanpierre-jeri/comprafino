@@ -11,10 +11,12 @@ import type { SearchFilters } from "@comprafino/core";
 
 export function SearchForm({
   compact = false,
+  prominent = false,
   query = "",
   filters = searchFilters(),
 }: {
   compact?: boolean;
+  prominent?: boolean;
   query?: string;
   filters?: SearchFilters;
 }) {
@@ -60,7 +62,7 @@ export function SearchForm({
         >
           {category ? `Buscar en ${category.label}` : "¿Qué necesitas comprar?"}
         </label>
-        <div className="flex gap-2">
+        <div className={cn("flex gap-2", prominent && "flex-col sm:flex-row")}>
           <input
             key={query}
             id="product-search"
@@ -70,13 +72,16 @@ export function SearchForm({
             maxLength={maximumSearchLength}
             placeholder="Huevos, arroz, leche Gloria…"
             aria-describedby="search-status"
-            className="h-12 min-w-0 flex-1 rounded-xl border bg-surface px-3 sm:px-4 text-base placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            className={cn(
+              "h-12 min-w-0 flex-1 rounded-xl border bg-surface px-3 sm:px-4 text-base placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+              prominent && "h-14 w-full flex-none sm:w-auto sm:flex-1",
+            )}
           />
           <Button
             type="submit"
             disabled={pending}
             aria-busy={pending}
-            className="h-12 min-w-28 rounded-xl px-4 sm:px-6"
+            className={cn("h-12 min-w-28 rounded-xl px-4 sm:px-6", prominent && "sm:h-14")}
           >
             {pending ? "Buscando…" : "Buscar"}
           </Button>

@@ -22,7 +22,7 @@ test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
-    await page.locator(".search-chip").filter({ hasText: "Lácteos y huevos" }).click();
+    await page.locator(".browse-link").filter({ hasText: "Lácteos y huevos" }).click();
     await expect(page).toHaveURL(/category=lacteos-huevos/u);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Lácteos y huevos");
     const cards = page.locator("[data-product-id]");

@@ -1,4 +1,4 @@
-import { matchingThresholds } from "@comprafino/core";
+import { listingRefreshPolicy, matchingThresholds } from "@comprafino/core";
 import { usefulSearchRequest } from "@comprafino/core";
 import type { SearchCategoryId } from "@comprafino/core";
 import { categoryListingPredicate } from "./search-categories.ts";
@@ -281,6 +281,30 @@ export const eligibleProducts = sql`with offers as (
 )`;
 
 const publicColumns = sql`id,"displayName",brand,"quantityValue","quantityUnit","packageCount",offers`;
+
+/** A single real example, using the exact comparison identity/ordinary-price gates.
+ * Unknown stock is admitted as price evidence, never as confirmed availability. */
+export async function getHomeProductComparison(
+  db: Database,
+  now = new Date(),
+): Promise<ProductComparison | null> {
+  const oldest = new Date(now.getTime() - listingRefreshPolicy.freshHours * 3_600_000);
+  const [result] = await db.batch([
+    db.execute(sql`${eligibleProducts}
+      select ${publicColumns} from products
+      where (select count(distinct offer->>'retailerId') from jsonb_array_elements(offers) offer
+        where (offer->>'observedAt')::timestamptz between ${oldest.toISOString()}::timestamptz and ${now.toISOString()}::timestamptz
+          and (offer->>'available')::boolean is distinct from false) >= 2
+      order by "displayName" collate "C", id limit 1`),
+  ]);
+  const rows = z.array(z.unknown()).parse(result.rows);
+
+  if (!rows.length) return null;
+
+  const product = publicProduct(rows[0], now);
+
+  return product.currentOfferCount >= 2 ? product : null;
+}
 
 export async function searchCanonicalProducts(
   db: Database,
