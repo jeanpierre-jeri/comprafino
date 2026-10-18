@@ -16,6 +16,7 @@ export function ThemeControl() {
   return (
     <ChoiceSelect
       compact
+      iconOnlyOnMobile
       label="Tema"
       value={choice}
       options={[

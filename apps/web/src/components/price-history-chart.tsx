@@ -145,7 +145,7 @@ export function PriceHistoryChart({
             key={s.retailerId}
             type="button"
             aria-pressed={!hidden.includes(s.retailerId)}
-            className="min-h-11 rounded-lg border px-3 text-sm hover:bg-secondary aria-[pressed=false]:opacity-50"
+            className="selection-control"
             onClick={() =>
               setHidden((old) =>
                 old.includes(s.retailerId)

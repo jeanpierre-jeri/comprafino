@@ -100,10 +100,7 @@ function LoginDialog({ onClose }: { onClose: () => void }) {
           {pending ? "Conectando con Google…" : "Continuar con Google"}
         </Button>
         {failed && (
-          <p
-            role="alert"
-            className="mt-3 rounded-lg border border-destructive/25 bg-destructive/5 p-3 text-sm leading-relaxed text-destructive"
-          >
+          <p role="alert" className="feedback-error mt-3">
             No pudimos iniciar sesión con Google. Intenta nuevamente.
           </p>
         )}

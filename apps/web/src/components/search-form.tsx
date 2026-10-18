@@ -73,7 +73,7 @@ export function SearchForm({
             placeholder="Huevos, arroz, leche Gloria…"
             aria-describedby="search-status"
             className={cn(
-              "h-12 min-w-0 flex-1 rounded-xl border bg-surface px-3 sm:px-4 text-base placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+              "h-12 min-w-0 flex-1 rounded-xl border border-input bg-surface px-3 sm:px-4 text-base placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
               prominent && "h-14 w-full flex-none sm:w-auto sm:flex-1",
             )}
           />

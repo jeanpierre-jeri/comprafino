@@ -65,20 +65,20 @@ export function PriceHistoryPresentation({
 }) {
   return (
     <section
-      className="mt-8 min-w-0 rounded-2xl bg-surface p-4 sm:p-6"
+      className="mt-8 min-w-0 rounded-2xl border bg-surface p-4 sm:p-6"
       aria-labelledby="history-title"
     >
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h2 id="history-title" className="text-2xl font-semibold tracking-tight">
           Historial de precios sin tarjeta ni membresía
         </h2>
-        <nav className="flex gap-2" aria-label="Rango del historial">
+        <nav className="flex flex-wrap gap-2" aria-label="Rango del historial">
           {historyRanges.map((r) => (
             <Link
               key={r}
               scroll={false}
               aria-current={range === r ? "page" : undefined}
-              className={`inline-flex min-h-11 items-center rounded-lg border px-3 text-sm ${range === r ? "bg-primary text-primary-foreground" : "hover:bg-secondary"}`}
+              className="selection-control"
               href={withSearchReturn(
                 `${path}?range=${r}${benefits ? "&priceMode=benefits" : ""}`,
                 returnTo,
@@ -104,7 +104,7 @@ export function PriceHistoryPresentation({
             {date(history.start)} – {date(history.end)} · Hora de Perú
           </p>
           <div
-            className={`mt-5 grid gap-4 ${history.retailers.length > 1 ? "lg:grid-cols-3" : ""}`}
+            className={`mt-5 grid gap-4 ${history.retailers.length > 1 ? "lg:grid-cols-2 xl:grid-cols-4" : ""}`}
           >
             {history.retailers.map((r) => {
               const s = r.summary;
@@ -121,7 +121,7 @@ export function PriceHistoryPresentation({
                   <p className="mt-3 text-xs text-muted-foreground">
                     Último precio consultado en el período
                   </p>
-                  <p className="mt-1 text-2xl font-semibold tabular-nums">
+                  <p className="price-value mt-1 text-2xl">
                     {s.currentPriceCents === null
                       ? "Sin consulta en el período"
                       : formatPen(s.currentPriceCents)}
@@ -137,13 +137,13 @@ export function PriceHistoryPresentation({
                   <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
                     <div>
                       <dt className="text-xs text-muted-foreground">Mínimo registrado</dt>
-                      <dd className="mt-1 font-semibold">
+                      <dd className="price-value mt-1">
                         {s.minimumPriceCents === null ? "—" : formatPen(s.minimumPriceCents)}
                       </dd>
                     </div>
                     <div>
                       <dt className="text-xs text-muted-foreground">Máximo registrado</dt>
-                      <dd className="mt-1 font-semibold">
+                      <dd className="price-value mt-1">
                         {s.maximumPriceCents === null ? "—" : formatPen(s.maximumPriceCents)}
                       </dd>
                     </div>
@@ -162,7 +162,7 @@ export function PriceHistoryPresentation({
                     {r.coverage.length} días con consultas en este período.
                   </p>
                   <details className="mt-3 text-xs text-muted-foreground">
-                    <summary className="min-h-10 cursor-pointer py-2">
+                    <summary className="min-h-11 cursor-pointer py-2">
                       Ver registros de precio ({s.states.length})
                     </summary>
                     <p className="mb-3 leading-relaxed">

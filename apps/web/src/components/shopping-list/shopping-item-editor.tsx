@@ -317,9 +317,13 @@ function ShoppingItemForm({
           </AlertDescription>
         </Alert>
       )}
-      {accountChanged && <p role="alert">La cuenta cambió. Cierra el editor y vuelve a abrirlo.</p>}
+      {accountChanged && (
+        <p role="alert" className="feedback-error mt-3">
+          La cuenta cambió. Cierra el editor y vuelve a abrirlo.
+        </p>
+      )}
       {error && (
-        <p role="alert" className="mt-3">
+        <p role="alert" className="feedback-error mt-3">
           {error}
         </p>
       )}
@@ -327,6 +331,7 @@ function ShoppingItemForm({
         <button
           className="shopping-button"
           type="submit"
+          aria-busy={saving}
           disabled={closing || saving || !ready || busy || accountChanged}
         >
           {saving ? "Guardando…" : editorSaveLabel(Boolean(item), Boolean(duplicate))}

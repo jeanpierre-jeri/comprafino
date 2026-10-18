@@ -187,7 +187,7 @@ export function BasketComparison({
                   {names.length > 0 && <p>{names.join(" + ")}</p>}
                   {p.status === "complete" ? (
                     <>
-                      <p className="mt-3 text-2xl font-semibold text-primary">
+                      <p className="mt-3 price-value text-2xl text-primary">
                         {formatPen(p.totalCostCents)}
                       </p>
                       <p className="text-sm">

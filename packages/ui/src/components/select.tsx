@@ -18,6 +18,7 @@ export function ChoiceSelect({
   onValueChange,
   disabled = false,
   compact = false,
+  iconOnlyOnMobile = false,
   className,
 }: {
   label: string;
@@ -26,10 +27,11 @@ export function ChoiceSelect({
   onValueChange: (value: string) => void;
   disabled?: boolean;
   compact?: boolean;
+  iconOnlyOnMobile?: boolean;
   className?: string;
 }) {
   return (
-    <div className={cn("min-w-0", className)}>
+    <div className={cn("max-w-full min-w-0", className)}>
       <Select.Root<string>
         items={options}
         value={value}
@@ -43,11 +45,15 @@ export function ChoiceSelect({
         <Select.Label className={compact ? "sr-only" : "filter-label"}>{label}</Select.Label>
         <Select.Trigger
           aria-label={label}
-          className={cn("choice-trigger", compact && "theme-trigger")}
+          className={cn(
+            "choice-trigger",
+            compact && "choice-compact",
+            iconOnlyOnMobile && "theme-trigger",
+          )}
         >
-          <span className="inline-flex items-center gap-1.5">
+          <span className="inline-flex min-w-0 items-center gap-1.5">
             {options.find((option) => option.value === value)?.icon}
-            <Select.Value className="whitespace-nowrap" />
+            <Select.Value className="whitespace-normal" />
           </span>
           <Select.Icon className="choice-icon">
             <ChevronDown aria-hidden="true" size={16} strokeWidth={1.5} />
