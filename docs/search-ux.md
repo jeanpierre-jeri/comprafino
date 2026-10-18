@@ -21,6 +21,8 @@ The optional basis select appears only when multiple comparable bases exist, or 
 
 Retailer and unit selection filter the single product list. Only current eligible offers contribute. Confirmed equivalents share a card with name, presentation, ordinary “Desde” price, valid unit price, filtered supermarket count and “Comparar precios”. Its title and comparison action open the shared comparison; unconfirmed SKUs open their independent listing detail and retain source links. Both support adding to a shopping list. Exact product identity and detail associations remain unchanged.
 
+Unconfirmed cards label their internal action “Ver producto”; they do not promise a comparison between equivalent products. If a requested page is empty while the filtered product count is positive, the page explains that pagination is out of range and offers “Volver a la primera página”, retaining query, category, sort, retailer, unit and price mode. This differs from genuinely empty searches or filters and does not change grouping or discovery.
+
 Default prices rank ordinary quotes. “Incluir beneficios” uses lower fresh CMR potential prices with adjacent required-card text; it does not assert user eligibility. Generic cards keep ordinary totals visible even when benefit unit prices determine sorting. See [conditional pricing](conditional-pricing.md).
 
 Discovery uses the successful **unfiltered** useful-query count. A retailer/unit filter returning zero existing candidates displays “No hay opciones con estos filtros” and suggests clearing filters; it creates no new missing-catalog demand. True underlying empty searches retain existing discovery handling. Public navigation never calls retailers.
@@ -38,6 +40,8 @@ Controlled `apps/web/e2e/search-experience.spec.ts` cases run with `pnpm test:e2
 Search uses a compact header and labelled search input, followed by the total result count and the existing sort control. At widths below 1024px, secondary category, retailer, optional unit and price-mode controls sit in an accessible “Filtros” disclosure, closed initially. Enter/Space toggles it; controls remain keyboard accessible when expanded. Desktop displays those controls directly. Opening the disclosure is local interaction state; filter values always come from the validated URL.
 
 Active category, retailer, unit and benefits filters have individually removable labels and an active count. “Limpiar filtros” removes those four filters while retaining query and sort. Changing or removing filters resets pagination. Search submission retains the current filters. Back/forward and reload restore URL values; no saved browser preference or results cache is added. Filter navigation retains the mounted toolbar so keyboard focus and the open disclosure survive an update. Pending search/filter navigation announces progress; the initial Suspense skeleton uses the compact layout. Empty results retain search, count, sorting and filter removal controls.
+
+Removing an active filter or clearing all filters returns keyboard focus to the visible “Ordenar” control when disabling/removing the initiating button would otherwise leave focus on the document body. Select changes retain their initiating select. Focus is not moved if the user has already moved to another element.
 
 The generic shopping-need action follows results so it does not push the first product below the initial mobile viewport. Price, promotion, availability, identity and grouped sorting rules are unchanged. Controlled Chromium regressions in `search-experience.spec.ts` check milk search and category variants at 320/390/1280×844 in both themes, including first-title/ordinary-price visibility at scroll zero, overflow, keyboard disclosure, filter removal/reset, reload and back/forward. Screenshots are written to ignored `.artifacts/search-ux/`. Build first and run `pnpm test:e2e:fixtures:local` with the explicit owned-schema harness.
 
@@ -76,6 +80,8 @@ Public appearance supports System/Light/Dark independently of filter URLs. An ex
 ## Returning from details
 
 Listing and comparison links retain query, filters, page and vertical position in a validated local search return URL. Both detail routes show “Volver a resultados” when this context exists, and “Buscar otro producto” otherwise. Changing history range or comparison price mode keeps the return context. Price, comparison, list and external-store actions precede history; external links visibly announce a new tab. Isolated listing Chromium tests cover direct entry, unsafe destinations, comparison/no comparison, unknown stock, pagination, reload, mobile/desktop layout and scroll restoration.
+
+`apps/web/e2e/ux-review.spec.ts` adds regressions for unconfirmed destinations, out-of-range pages and keyboard filter removal. Its full home → search → filter → comparison → add → list edit → browser back → results journey checks light/dark at 390/1280px and validates the persisted canonical identity, strict intent and package quantity after reload. Run it through `pnpm test:e2e:fixtures:local` after building, so discovery, account and catalog writes remain inside the harness's owned random schema.
 
 ## Buyer-facing wording
 

@@ -143,7 +143,7 @@ export function SearchProductCard({
           captureSearchReturn={Boolean(returnTo)}
           className="comparison-link"
         >
-          Comparar precios
+          {product.canonicalId ? "Comparar precios" : "Ver producto"}
         </NavigationLink>
         {!product.canonicalId && (
           <a href={offer.url} target="_blank" rel="noopener noreferrer" className="source-link">

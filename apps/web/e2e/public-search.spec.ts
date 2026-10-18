@@ -32,6 +32,34 @@ test("malformed product IDs show public not-found behavior", async ({ page }) =>
   await expect(page.getByRole("link", { name: "Buscar productos" })).toBeVisible();
 });
 
+test("unconfigured data shows recoverable errors instead of empty search results", async ({
+  page,
+}) => {
+  test.skip(Boolean(process.env.DATABASE_URL), "Run with an explicitly empty DATABASE_URL");
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/search?q=huevos&retailer=metro");
+  await expect(page.getByRole("heading", { name: "No pudimos cargar los precios." })).toBeVisible();
+  await expect(page.getByLabel("¿Qué necesitas comprar?")).toHaveValue("huevos");
+  await expect(page.getByText("No encontramos productos para esta búsqueda.")).toHaveCount(0);
+  await expect(page.locator("[data-product-id]")).toHaveCount(0);
+
+  for (const route of ["products", "listings"]) {
+    await page.goto(
+      `/${route}/00000000-0000-4000-8000-000000000000?returnTo=${encodeURIComponent("/search?q=huevos&retailer=metro")}`,
+    );
+    await expect(
+      page.getByRole("heading", { name: "No pudimos cargar los precios." }),
+    ).toBeVisible();
+    await page.getByRole("link", { name: "Volver a resultados", exact: true }).click();
+    await expect(page).toHaveURL("/search?q=huevos&retailer=metro");
+    await expect(
+      page.getByRole("heading", { name: "No pudimos cargar los precios." }),
+    ).toBeVisible();
+  }
+  expect(errors).toEqual([]);
+});
+
 // The credential-free CI smoke tests above need no database. The existing E2E
 // harness has no database fixture lifecycle. Opt in explicitly with DATABASE_URL;
 // expected values come from persistence, never retailer requests or invented data.
@@ -139,7 +167,7 @@ test.describe("generic persisted offers (explicit DATABASE_URL)", () => {
     const independentCard = section.locator(`article[data-product-id="${independent!.id}"]`);
     await expect(independentCard).toBeVisible();
     await expect(
-      independentCard.getByRole("link", { name: "Comparar precios", exact: true }),
+      independentCard.getByRole("link", { name: "Ver producto", exact: true }),
     ).toHaveAttribute("href", new RegExp(`/listings/${independent!.id}`));
     await expect(first.locator("time")).toHaveAttribute(
       "datetime",

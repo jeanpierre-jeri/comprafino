@@ -44,7 +44,13 @@ export function SearchControls({
     changedControl.current = null;
   }, [pending]);
 
-  function navigate(next: SearchFilters) {
+  function navigate(next: SearchFilters, focusControl: keyof SearchFilters) {
+    changedControl.current =
+      [...(toolbar.current?.querySelectorAll<HTMLElement>('[role="combobox"]') ?? [])].find(
+        (control) =>
+          control.getAttribute("aria-label") === controlLabels[focusControl] &&
+          control.getClientRects().length > 0,
+      ) ?? null;
     const historyRange = currentParams.get("range");
     let suffix;
 
@@ -70,13 +76,7 @@ export function SearchControls({
   }
 
   function change(key: keyof SearchFilters, value: string) {
-    changedControl.current =
-      [...(toolbar.current?.querySelectorAll<HTMLElement>('[role="combobox"]') ?? [])].find(
-        (control) =>
-          control.getAttribute("aria-label") === controlLabels[key] &&
-          control.getClientRects().length > 0,
-      ) ?? null;
-    navigate(searchFilters({ ...filters, [key]: value }));
+    navigate(searchFilters({ ...filters, [key]: value }), key);
   }
 
   const priceControl = (
@@ -165,7 +165,9 @@ export function SearchControls({
               className="min-h-11 max-w-full whitespace-normal text-left"
               disabled={pending}
               aria-label={`Quitar filtro: ${filter.label}`}
-              onClick={() => change(filter.key, filter.reset)}
+              onClick={() =>
+                navigate(searchFilters({ ...filters, [filter.key]: filter.reset }), "sort")
+              }
             >
               {filter.label} <span aria-hidden="true">×</span>
             </Button>
@@ -174,7 +176,7 @@ export function SearchControls({
             variant="link"
             className="min-h-11"
             disabled={pending}
-            onClick={() => navigate(searchFilters({ sort: filters.sort }))}
+            onClick={() => navigate(searchFilters({ sort: filters.sort }), "sort")}
           >
             Limpiar filtros
           </Button>

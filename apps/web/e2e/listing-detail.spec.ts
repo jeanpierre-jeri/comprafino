@@ -164,6 +164,9 @@ test.describe("isolated listing details", () => {
       page.getByRole("button", { name: "Agregar a mi lista", exact: true }).first(),
     ).toBeEnabled();
     for (const selector of [".product-title-link", "a.comparison-link"]) {
+      // Native tab closure can leave the opener inactive in headless Chromium.
+      // Activate it as a user would before the next modified pointer click.
+      await page.bringToFront();
       const link = page.locator(selector).last();
       await link.scrollIntoViewIfNeeded();
       const position = await page.evaluate(() => Math.round(scrollY));

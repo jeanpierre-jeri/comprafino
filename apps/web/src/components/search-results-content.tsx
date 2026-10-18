@@ -14,6 +14,7 @@ type Props = {
   products: SearchProductResult[];
   failed: boolean;
   underlyingCount: number;
+  totalProducts: number;
   observedNow: Date;
   returnTo?: string;
 };
@@ -26,6 +27,7 @@ export function SearchResultsContent({
   products,
   failed,
   underlyingCount,
+  totalProducts,
   observedNow,
   returnTo,
 }: Props) {
@@ -40,6 +42,22 @@ export function SearchResultsContent({
   }
 
   if (!products.length) {
+    if (totalProducts > 0) {
+      return (
+        <div className="empty-surface">
+          <h2 className="text-xl font-semibold">Esta página ya no tiene productos.</h2>
+          <p className="mt-2 text-muted-foreground">
+            Hay productos para tu búsqueda. Vuelve a la primera página conservando tus filtros.
+          </p>
+          <Link
+            href={`/search?${searchFilterQuery(query, filters)}`}
+            className="card-link mt-3 inline-block"
+          >
+            Volver a la primera página
+          </Link>
+        </div>
+      );
+    }
     if (filters.category) {
       return (
         <div className="empty-surface">

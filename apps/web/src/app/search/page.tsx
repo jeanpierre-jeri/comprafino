@@ -162,6 +162,7 @@ async function SearchResults({
             products={products}
             failed={failed}
             underlyingCount={underlyingCount}
+            totalProducts={totalProducts}
             observedNow={observedNow}
             returnTo={`/search?${searchFilterQuery(query, filters)}&page=${page}`}
           />
