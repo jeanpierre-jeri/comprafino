@@ -57,9 +57,10 @@ export function PublicShell({
 export function PriceNotice() {
   return (
     <p className="price-notice">
-      Precios ordinarios observados en línea, sin tarjeta o membresía. Los beneficios requieren la
-      condición indicada. Verifica el precio y la disponibilidad en el supermercado: pueden variar
-      según ubicación, canal y actualización.
+      Precios consultados en las webs de los supermercados. El precio principal no requiere tarjeta
+      ni membresía; los otros precios indican sus condiciones. Confirma el precio y el stock antes
+      de comprar: pueden variar según tu ubicación, si compras por web o en tienda y la fecha de
+      consulta.
     </p>
   );
 }

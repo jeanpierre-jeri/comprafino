@@ -116,8 +116,8 @@ export function BasketComparison({
                 ].join(" · ")}
                 {" · "}
                 {plan.status === "complete"
-                  ? "Para todos, esta selección"
-                  : "Subtotal para todos, productos disponibles"}
+                  ? "Sin tarjeta ni membresía, esta selección"
+                  : "Subtotal sin tarjeta ni membresía, productos disponibles"}
                 : {formatPen(plan.ordinarySubtotalCents)}
               </p>
             )}
@@ -219,8 +219,8 @@ export function BasketComparison({
                       <p>Precio potencial · {conditions.join(" · ")}</p>
                       <p>
                         {p.status === "complete"
-                          ? "Para todos, esta selección"
-                          : "Subtotal para todos, productos disponibles"}
+                          ? "Sin tarjeta ni membresía, esta selección"
+                          : "Subtotal sin tarjeta ni membresía, productos disponibles"}
                         : {formatPen(p.ordinarySubtotalCents)}
                       </p>
                     </div>

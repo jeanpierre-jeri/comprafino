@@ -25,7 +25,7 @@ export function UnitPriceReference({
   return (
     <p className="mt-1 text-sm font-semibold">
       {formatUnitPrice(price, family)}
-      {conditional ? " · con CMR" : ""}
+      {conditional ? " · con tarjeta CMR" : ""}
       {price.quality === "approximate" ? " · orientativo" : ""}
     </p>
   );

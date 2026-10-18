@@ -18,20 +18,21 @@ export function ShoppingHistory({
 }) {
   const minimum = history?.periods.find((period) => period.days === 90);
   const current = option ? option.ordinaryTotalCents / option.packages : null;
-  let comparison = "Aún no tenemos observaciones suficientes para comparar este precio.";
+  let comparison = "Aún no tenemos suficientes registros para comparar este precio.";
   if (minimum?.minimumCents && current) {
     const difference = current - minimum.minimumCents;
     if (difference <= 0) {
-      comparison = "Hoy está al menor precio que hemos observado en este período.";
+      comparison =
+        "El último precio consultado es igual o menor al mínimo registrado en los últimos 90 días.";
     } else {
-      comparison = `Hoy cuesta ${formatPen(difference)} más por paquete que el mínimo observado.`;
+      comparison = `El último precio consultado es ${formatPen(difference)} mayor por paquete que el mínimo registrado en los últimos 90 días.`;
     }
   }
 
   return (
     <section aria-label="Historial de tu producto" className="flex flex-col gap-3">
       <div>
-        <h4 className="font-semibold">¿Cómo está el precio de hoy?</h4>
+        <h4 className="font-semibold">¿Cómo está el último precio consultado?</h4>
         <p className="mt-1 text-sm text-muted-foreground">{comparison}</p>
       </div>
       {history && (
@@ -58,15 +59,15 @@ export function ShoppingHistory({
                     </>
                   )}
                   <span className="mt-1 block">
-                    {period.coveredDays} de {period.days} días con observaciones
+                    {period.coveredDays} de {period.days} días con consultas
                   </span>
                 </dd>
               </div>
             ))}
           </dl>
           <p className="text-xs text-muted-foreground">
-            Por paquete · {history.retailerName} · Precio para todos, sin tarjeta ni beneficios. Los
-            días sin observaciones quedan sin datos; estos mínimos no predicen futuras ofertas.
+            Por paquete · {history.retailerName} · Sin tarjeta ni membresía. No tenemos datos de los
+            días sin consultas. Estos mínimos no garantizan futuras ofertas.
           </p>
           <Link className="card-link text-sm" href={`/listings/${history.listingId}`}>
             Ver historial completo

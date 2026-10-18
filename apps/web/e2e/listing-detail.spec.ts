@@ -246,7 +246,9 @@ test.describe("isolated listing details", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       "Huevos Pardos Tottus Bandeja 30un",
     );
-    await expect(page.getByText("Precio online para todos", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("Precio online sin tarjeta ni membresía", { exact: true }),
+    ).toBeVisible();
     await expect(page.getByText("S/ 49.90", { exact: true }).first()).toBeVisible();
     await expect(page.getByRole("link", { name: /Comparar entre/ })).toHaveCount(0);
     await expect(page.getByRole("link", { name: /Ver producto en Tottus/ })).toHaveAttribute(
@@ -273,8 +275,10 @@ test.describe("isolated listing details", () => {
     await expect(
       page.getByRole("link", { name: "Comparar entre supermercados", exact: true }),
     ).toHaveAttribute("href", `/products/${fixture("rich")}`);
-    await expect(page.getByText("S/ 5.40 con CMR", { exact: true })).toBeVisible();
-    const history = page.getByRole("region", { name: "Historial del precio para todos" });
+    await expect(page.getByText("S/ 5.40 con tarjeta CMR", { exact: true })).toBeVisible();
+    const history = page.getByRole("region", {
+      name: "Historial de precios sin tarjeta ni membresía",
+    });
     await expect(history).not.toContainText("S/ 5.40");
     await expect(history.getByRole("article")).toHaveCount(1);
     await page.getByRole("button", { name: "Agregar a mi lista", exact: true }).click();
@@ -320,7 +324,7 @@ test.describe("isolated listing details", () => {
       .getByRole("region", { name: /^Precios y registros en/ })
       .getByRole("article");
     await expect(offers.first()).toContainText("Disponibilidad no confirmada.");
-    await expect(offers.first()).toContainText("Precio online para todos");
+    await expect(offers.first()).toContainText("Precio online sin tarjeta ni membresía");
     await page.goto(`/products/${fixture("old")}`);
     const historicalOffer = page
       .getByRole("region", { name: /^Precios y registros en/ })
@@ -338,26 +342,28 @@ test.describe("isolated listing details", () => {
       await page.goto(`/search?q=leche+gloria&priceMode=${mode}`);
       const card = page.locator(`[data-product-id="${fixture("rich")}"]`);
       await expect(card.getByText("S/ 6.45 / L", { exact: true })).toBeVisible();
-      await expect(card.locator(".benefit-surface")).toContainText("S/ 5.71 / L · con CMR");
+      await expect(card.locator(".benefit-surface")).toContainText("S/ 5.71 / L · con tarjeta CMR");
       await expect(card.locator(".benefit-surface")).toContainText("Requiere tarjeta CMR");
     }
     await page.goto(`/listings/${fixture("listing-rich-tottus")}`);
     await expect(page.locator(".detail-hero .benefit-surface")).toContainText(
-      "S/ 5.71 / L · con CMR",
+      "S/ 5.71 / L · con tarjeta CMR",
     );
     await page.goto(`/products/${fixture("rich")}`);
     await expect(page.locator(".detail-hero .benefit-surface")).toContainText(
-      "S/ 5.71 / L · con CMR",
+      "S/ 5.71 / L · con tarjeta CMR",
     );
     const tottus = page
       .getByRole("region", { name: /^Precios y registros en/ })
       .getByRole("article")
       .filter({ has: page.getByRole("heading", { name: "Tottus", exact: true }) });
-    await expect(tottus.locator(".benefit-surface")).toContainText("S/ 5.71 / L · con CMR");
+    await expect(tottus.locator(".benefit-surface")).toContainText("S/ 5.71 / L · con tarjeta CMR");
   });
   test("URL ranges clip multi-state history and retain browser navigation", async ({ page }) => {
     await page.goto(`/listings/${fixture("listing-rich-metro")}`);
-    const history = page.getByRole("region", { name: "Historial del precio para todos" });
+    const history = page.getByRole("region", {
+      name: "Historial de precios sin tarjeta ni membresía",
+    });
 
     for (const [days, maximum] of [
       [7, "6.10"],
@@ -391,7 +397,7 @@ test.describe("isolated listing details", () => {
       await expect(boundaries).toHaveCount(segments * 2);
       await boundaries.nth(1).dispatchEvent("mouseover");
       await expect(page.getByRole("tooltip")).toContainText(
-        "Extremo del tramo con cobertura verificada",
+        "Inicio o fin de un tramo con consultas",
       );
       await expect(page.getByRole("tooltip")).toContainText("Metro · S/ 6.50");
       const tickPrices = await page
@@ -454,10 +460,16 @@ test("explicit unavailable offer retains its listing history and recovery restor
       exact: true,
     }),
   ).toBeVisible();
-  await expect(page.getByText("Precio online para todos", { exact: true })).toHaveCount(0);
-  await expect(page.getByRole("region", { name: "Historial del precio para todos" })).toBeVisible();
+  await expect(
+    page.getByText("Precio online sin tarjeta ni membresía", { exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("region", { name: "Historial de precios sin tarjeta ni membresía" }),
+  ).toBeVisible();
   await page.goto(`/listings/${fixture("listing-recovered")}`);
-  await expect(page.getByText("Precio online para todos", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Precio online sin tarjeta ni membresía", { exact: true }),
+  ).toBeVisible();
   await expect(page.getByText("No disponible en la última consulta.", { exact: true })).toHaveCount(
     0,
   );

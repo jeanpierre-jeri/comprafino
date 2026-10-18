@@ -73,7 +73,7 @@ function CoverageBoundary({
 
 function tooltipDescription(raw: object): string {
   if ("kind" in raw && raw.kind === "coverage-boundary") {
-    return "Extremo del tramo con cobertura verificada";
+    return "Inicio o fin de un tramo con consultas";
   }
 
   if ("kind" in raw && raw.kind === "latest-observation") {
@@ -164,7 +164,7 @@ export function PriceHistoryChart({
       <ChartContainer
         config={config}
         className="h-64 w-full min-w-0 aspect-auto"
-        aria-label="Eventos observados de precio para todos"
+        aria-label="Registros de precios sin tarjeta ni membresía"
       >
         <ScatterChart accessibilityLayer margin={{ top: 16, right: 20, bottom: 8, left: 0 }}>
           <CartesianGrid vertical={false} stroke="var(--border)" />
@@ -234,8 +234,8 @@ export function PriceHistoryChart({
         </ScatterChart>
       </ChartContainer>
       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-        Línea con extremos huecos: tramo verificado. Puntos sólidos: registros de precio. Los cortes
-        indican falta de cobertura, no un cambio de precio.
+        Líneas: días consecutivos con consultas. Puntos sólidos: precios registrados. Los espacios
+        sin línea indican que faltan datos.
       </p>
       {hidden.length === series.length && (
         <p className="text-sm text-muted-foreground">

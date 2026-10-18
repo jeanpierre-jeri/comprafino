@@ -1,11 +1,10 @@
 import Link from "next/link";
-import { ArrowRight } from "@comprafino/ui";
 import { unitPriceBases, unitPriceBasisLabel } from "@comprafino/core";
 import type { UnitPriceBasis, ShoppingListItem } from "@comprafino/core";
 import { maximumSearchLength, usefulSearchQuery } from "@comprafino/db";
 import type { GenericProductOffer, SearchProductResult } from "@comprafino/db";
 import type { SearchFilters } from "@comprafino/core/search-filters";
-import { usefulSearchRequest } from "@comprafino/core";
+import { searchFilters, searchFilterQuery, usefulSearchRequest } from "@comprafino/core";
 import { PublicDataError } from "./public-shell";
 import { SearchProductCard } from "./offer-card";
 
@@ -48,14 +47,26 @@ export function SearchResultsContent({
             No hay opciones con esta categoría y estos filtros.
           </h2>
           <p className="mt-2 text-muted-foreground">
-            Nuestra cobertura sigue creciendo. Prueba otra categoría o busca en todas.
+            {filters.retailer || filters.unit
+              ? "Prueba sin los filtros de supermercado y medida, o busca en otras categorías."
+              : "Prueba con menos palabras o revisa otras categorías."}
           </p>
-          <Link
-            href={usefulSearchQuery(query) ? `/search?q=${encodeURIComponent(query)}` : "/"}
-            className="card-link"
-          >
-            {usefulSearchQuery(query) ? "Buscar en todas las categorías" : "Ver otras categorías"}
-          </Link>
+          <div className="mt-3 flex flex-wrap gap-4">
+            {(filters.retailer || filters.unit) && (
+              <Link
+                href={`/search?${searchFilterQuery(query, searchFilters({ category: filters.category, sort: filters.sort, priceMode: filters.priceMode }))}`}
+                className="card-link"
+              >
+                Quitar filtros de supermercado y medida
+              </Link>
+            )}
+            <Link
+              href={usefulSearchQuery(query) ? `/search?q=${encodeURIComponent(query)}` : "/"}
+              className="card-link"
+            >
+              {usefulSearchQuery(query) ? "Buscar en todas las categorías" : "Ver otras categorías"}
+            </Link>
+          </div>
         </div>
       );
     }
@@ -64,24 +75,29 @@ export function SearchResultsContent({
         <h2 className="text-xl font-semibold">
           {underlyingCount
             ? "No hay opciones con estos filtros."
-            : "No encontramos ese producto todavía."}
+            : "No encontramos productos para esta búsqueda."}
         </h2>
         <p className="mt-2 text-muted-foreground">
           {underlyingCount
-            ? "Prueba otro supermercado o selecciona todas las medidas."
-            : "Tomamos en cuenta las búsquedas sin resultados para ampliar el catálogo. Prueba con otra marca o producto."}
+            ? "Quita los filtros para ver las opciones que encontramos para tu búsqueda."
+            : "Revisa cómo lo escribiste o prueba con menos palabras, sin la marca o el tamaño."}
         </p>
-        <Link
-          href={underlyingCount ? `/search?q=${encodeURIComponent(query)}` : "/search?q=leche"}
-          className="card-link"
-        >
-          {underlyingCount ? "Quitar filtros" : "Explorar leche"}
-          <ArrowRight
-            aria-hidden="true"
-            size={14}
-            className="ml-1 inline-block shrink-0 align-middle"
-          />
-        </Link>
+        <div className="mt-3 flex flex-wrap gap-4">
+          {underlyingCount ? (
+            <Link href={`/search?q=${encodeURIComponent(query)}`} className="card-link">
+              Quitar filtros
+            </Link>
+          ) : (
+            <>
+              <a href="#product-search" className="card-link">
+                Cambiar búsqueda
+              </a>
+              <Link href="/" className="card-link">
+                Ver categorías
+              </Link>
+            </>
+          )}
+        </div>
       </div>
     );
   }

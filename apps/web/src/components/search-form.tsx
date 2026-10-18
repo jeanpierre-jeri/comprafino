@@ -94,9 +94,7 @@ export function SearchForm({
           compact && "sr-only",
         )}
       >
-        {pending
-          ? "Buscando productos…"
-          : "Nuestra cobertura sigue creciendo. Compara las opciones disponibles."}
+        {pending ? "Buscando productos…" : "Busca por producto, marca o presentación."}
       </output>
     </search>
   );

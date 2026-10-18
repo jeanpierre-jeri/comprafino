@@ -88,13 +88,13 @@ test.describe("persisted public catalog (explicit DATABASE_URL)", () => {
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
     ).toBe(true);
     await expect(
-      page.getByText("Precios ordinarios observados en línea", { exact: false }),
+      page.getByText("Precios consultados en las webs de los supermercados", { exact: false }),
     ).toBeVisible();
   });
   test("no results and nonexistent products give honest empty states", async ({ page }) => {
     await page.goto("/search?q=zzzzproductoausentezzzz");
     await expect(
-      page.getByRole("heading", { name: "No encontramos ese producto todavía." }),
+      page.getByRole("heading", { name: "No encontramos productos para esta búsqueda." }),
     ).toBeVisible();
     await page.goto("/products/00000000-0000-4000-8000-000000000000");
     await expect(page.getByRole("heading", { name: "No encontramos ese producto." })).toBeVisible();
@@ -209,7 +209,7 @@ test.describe("immediate filters and CMR (explicit DATABASE_URL)", () => {
     await expect(page).toHaveURL(/priceMode=benefits/);
     await page.goBack();
     await expect(page.getByRole("combobox", { name: "Precios", exact: true })).toHaveText(
-      "Para todos",
+      "Sin tarjeta ni membresía",
     );
     await page.goBack();
     await expect(page.getByRole("combobox", { name: "Supermercado", exact: true })).toHaveText(
@@ -246,13 +246,15 @@ test.describe("immediate filters and CMR (explicit DATABASE_URL)", () => {
     }
 
     await expect(
-      row.getByText(`${formatPen(offer.conditionalOffers[0]!.priceCents)} con CMR`, {
+      row.getByText(`${formatPen(offer.conditionalOffers[0]!.priceCents)} con tarjeta CMR`, {
         exact: true,
       }),
     ).toBeVisible();
     await expect(row.getByText("Requiere tarjeta CMR", { exact: true })).toBeVisible();
     await choose(page, "Precios", "Incluir beneficios");
     await expect(page).toHaveURL(/priceMode=benefits/);
-    await expect(row.getByText("Precio online para todos", { exact: true })).toBeVisible();
+    await expect(
+      row.getByText("Precio online sin tarjeta ni membresía", { exact: true }),
+    ).toBeVisible();
   });
 });

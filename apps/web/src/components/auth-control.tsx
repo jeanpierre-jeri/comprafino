@@ -77,11 +77,12 @@ function LoginDialog({ onClose }: { onClose: () => void }) {
           Inicia sesión en CompraFino
         </DialogTitle>
         <p className="mt-1 text-base leading-relaxed">
-          Guarda tu lista y tenla disponible en tus dispositivos.
+          Inicia sesión para guardar tu lista en tu cuenta y abrirla en otros dispositivos.
         </p>
         <DialogDescription className="mt-2 leading-relaxed">
-          Al iniciar sesión, combinaremos la lista de este navegador con la de tu cuenta.
-          Conservaremos la versión más reciente de cada necesidad.
+          Al iniciar sesión, intentaremos combinar la lista de este navegador con la de tu cuenta.
+          Si un mismo artículo aparece en ambas, se conserva la versión editada más recientemente.
+          Tu lista te avisará si quedan cambios pendientes de guardar en tu cuenta.
         </DialogDescription>
         <Button
           variant="outline"

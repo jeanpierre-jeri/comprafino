@@ -29,7 +29,7 @@ test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
     await expect(cards).toHaveCount(5);
     await expect(page.getByRole("heading", { name: "Compara el mismo producto" })).toHaveCount(0);
     await expect(
-      page.getByRole("button", { name: "Agregar como necesidad", exact: true }),
+      page.getByRole("button", { name: "Agregar sin elegir producto", exact: true }),
     ).toHaveCount(0);
     const filterToggle = page.getByRole("button", { name: /^Filtros/u });
     if (await filterToggle.isVisible()) {
@@ -49,6 +49,11 @@ test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
     await expect(
       page.getByText("No hay opciones con esta categoría y estos filtros."),
     ).toBeVisible();
+    const categoryReset = page.getByRole("link", {
+      name: "Quitar filtros de supermercado y medida",
+    });
+    await expect(categoryReset).toHaveAttribute("href", /category=limpieza/u);
+    await expect(categoryReset).not.toHaveAttribute("href", /retailer=/u);
     await page.getByRole("link", { name: "Buscar en todas las categorías" }).click();
     await expect(page).not.toHaveURL(/category=/u);
     await expect(cards).toHaveCount(4);
@@ -124,7 +129,9 @@ test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
     await expect(large).toContainText("Metro, Tottus · Empate");
     await expect(large.getByRole("link", { name: "Comparar precios", exact: true })).toBeVisible();
     await expect(large.getByText("S/ 2.00 / huevo", { exact: true })).toBeVisible();
-    await expect(large.locator(".benefit-surface")).toContainText("S/ 1.80 / huevo · con CMR");
+    await expect(large.locator(".benefit-surface")).toContainText(
+      "S/ 1.80 / huevo · con tarjeta CMR",
+    );
     const small = page.locator(`[data-product-id="${fixture("search-15")}"]`);
     await expect(small).toContainText("S/ 45.00");
     await expect(small).toContainText("S/ 3.00 / huevo");
@@ -163,14 +170,14 @@ test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
     const records = page.getByRole("region", { name: "Precios y registros en 4 supermercados" });
     await expect(records).toContainText("2 ofertas vigentes");
     await expect(page.locator(".detail-best-price")).toContainText(
-      "Mejor precio para todos · Empate",
+      "Menor precio sin tarjeta ni membresía · Empate",
     );
     await expect(page.locator(".detail-best-price")).toContainText("S/ 60.00");
     for (const retailer of ["Makro", "Plaza Vea"]) {
       const historical = records
         .getByRole("article")
         .filter({ has: page.getByRole("heading", { name: retailer, exact: true }) });
-      await expect(historical).toContainText("Último precio registrado para todos");
+      await expect(historical).toContainText("Último precio registrado sin tarjeta ni membresía");
       await expect(historical).not.toContainText("Mejor precio");
     }
     await page.goto(`/products/${fixture("old")}`);
@@ -356,9 +363,20 @@ test.describe("search comparison scope (owned PostgreSQL fixtures)", () => {
     await page.getByLabel("¿Qué necesitas comprar?").fill("zzzzproductoausentezzzz");
     await page.getByRole("button", { name: "Buscar", exact: true }).click();
     await expect(
-      page.getByRole("heading", { name: "No encontramos ese producto todavía." }),
+      page.getByRole("heading", { name: "No encontramos productos para esta búsqueda." }),
     ).toBeVisible();
     await expect(page.getByRole("status").filter({ hasText: "0 productos" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Explorar leche" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Ver categorías", exact: true })).toHaveAttribute(
+      "href",
+      "/",
+    );
+    await page.getByRole("link", { name: "Cambiar búsqueda", exact: true }).click();
+    await expect(page.getByLabel("¿Qué necesitas comprar?")).toBeFocused();
+    await expect(page.getByLabel("¿Qué necesitas comprar?")).toHaveValue("zzzzproductoausentezzzz");
+    await page.getByRole("button", { name: "Agregar sin elegir producto", exact: true }).click();
+    await expect(page.getByRole("dialog")).toContainText("sin elegir un producto específico");
+    await page.getByRole("button", { name: "Cancelar", exact: true }).click();
     await page.screenshot({
       path: new URL("../../../.artifacts/search-ux/empty.png", import.meta.url).pathname,
     });

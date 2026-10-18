@@ -86,7 +86,7 @@ export function SearchControls({
       disabled={pending}
       onValueChange={(value) => change("priceMode", value)}
       options={[
-        { value: "standard", label: "Para todos" },
+        { value: "standard", label: "Sin tarjeta ni membresía" },
         { value: "benefits", label: "Incluir beneficios" },
       ]}
     />
@@ -277,5 +277,5 @@ function filterStatusMessage(pending: boolean, priceMode: SearchFilters["priceMo
 
   return priceMode === "benefits"
     ? "Incluye ofertas que requieren tarjeta CMR. Verifica la condición antes de comprar."
-    : "Beneficios separados del precio para todos.";
+    : "El precio principal no requiere tarjeta ni membresía. Los beneficios se muestran aparte.";
 }

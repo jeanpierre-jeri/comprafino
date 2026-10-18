@@ -51,7 +51,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   return {
     title: listing ? `${listing.title} - precio e historial | CompraFino` : "Producto | CompraFino",
     description: listing
-      ? `Precio e historial observado de ${listing.title} en ${listing.retailerName}. Precios para todos y beneficios separados.`
+      ? `Precio e historial observado de ${listing.title} en ${listing.retailerName}. Precios sin tarjeta ni membresía y ofertas con condiciones por separado.`
       : undefined,
   };
 }
@@ -128,7 +128,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
           {listing.conditionalOffers.map((benefit) => (
             <aside key={benefit.programKey} className="benefit-surface">
               <p className="font-semibold">
-                {formatPen(benefit.priceCents)} con CMR
+                {formatPen(benefit.priceCents)} con tarjeta CMR
                 {listing.pricingBasis === "kg" ? " / kg" : ""}
               </p>
               {listing.pricingBasis !== "kg" && (
@@ -168,7 +168,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
 }
 
 function listingPriceLabel(current: boolean, historicalOnly: boolean): string {
-  if (current) return "Precio online para todos";
+  if (current) return "Precio online sin tarjeta ni membresía";
 
   return historicalOnly
     ? "Último precio histórico registrado"

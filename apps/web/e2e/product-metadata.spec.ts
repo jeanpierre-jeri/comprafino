@@ -17,11 +17,23 @@ test.describe("product metadata and page request deduplication", () => {
   test.afterAll(() => closeLocalTestConnections());
 
   for (const [query, statusText] of [
-    ["", "Beneficios separados del precio para todos."],
-    ["?priceMode=standard", "Beneficios separados del precio para todos."],
+    [
+      "",
+      "El precio principal no requiere tarjeta ni membresía. Los beneficios se muestran aparte.",
+    ],
+    [
+      "?priceMode=standard",
+      "El precio principal no requiere tarjeta ni membresía. Los beneficios se muestran aparte.",
+    ],
     ["?priceMode=benefits", "Incluye ofertas que requieren tarjeta CMR."],
-    ["?priceMode=unexpected", "Beneficios separados del precio para todos."],
-    ["?priceMode=benefits&priceMode=standard", "Beneficios separados del precio para todos."],
+    [
+      "?priceMode=unexpected",
+      "El precio principal no requiere tarjeta ni membresía. Los beneficios se muestran aparte.",
+    ],
+    [
+      "?priceMode=benefits&priceMode=standard",
+      "El precio principal no requiere tarjeta ni membresía. Los beneficios se muestran aparte.",
+    ],
   ]) {
     test(`shares one comparison read for ${query || "the default mode"}`, async ({ request }) => {
       // Full HTTP responses finish both the page and streamed metadata. No mocked cache.
@@ -32,7 +44,7 @@ test.describe("product metadata and page request deduplication", () => {
         // A second request must read again; there is no process-wide cache.
         expect(await productReadFixture(productId).attempts()).toBe(requestNumber);
         expect(html).toContain(`<title>${productTitle} – precios | CompraFino</title>`);
-        expect(html).toContain("Mejor precio para todos");
+        expect(html).toContain("Menor precio sin tarjeta ni membresía");
         expect(html).toContain("S/ 5.40");
         expect(html).toContain("Con tarjeta CMR");
         expect(html).toContain(statusText);

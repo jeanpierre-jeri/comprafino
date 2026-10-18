@@ -166,7 +166,7 @@ function ShoppingItemForm({
       </DialogTitle>
       <DialogDescription className="mt-2">
         {generic
-          ? "Guardas “leche” sin elegir marca. Solo compararemos opciones con equivalencia comprobada."
+          ? "Guardarás lo que buscas sin elegir un producto específico. Solo compararemos opciones si podemos comprobar que son equivalentes."
           : "Conserva la marca y presentación que elegiste. Ejemplo: leche de una marca concreta de 1 L."}
       </DialogDescription>
       {!generic && !packages && (
@@ -310,7 +310,7 @@ function ShoppingItemForm({
       </Collapsible>
       {duplicate && (
         <Alert role="note" aria-label="Necesidad existente" className="mt-3">
-          <AlertTitle>Ya tienes esta necesidad</AlertTitle>
+          <AlertTitle>Ya está en tu lista</AlertTitle>
           <AlertDescription>
             Ahora: {editorQuantityLabel(duplicate)} · {shoppingFrequencyLabels[duplicate.frequency]}
             . Al guardar, su cantidad y frecuencia se reemplazarán por las del resumen.
@@ -379,7 +379,9 @@ export function AddShoppingItem({
         }}
       >
         {buttonLabel ??
-          (seed.canonicalId || seed.listingId ? "Agregar a mi lista" : "Agregar como necesidad")}
+          (seed.canonicalId || seed.listingId
+            ? "Agregar a mi lista"
+            : "Agregar sin elegir producto")}
       </button>
       {saved &&
         sameShoppingSession(saved.session, session) &&

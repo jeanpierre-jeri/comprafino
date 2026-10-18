@@ -37,12 +37,12 @@ export function CurrentOption({
       </p>
       <p className="text-sm text-muted-foreground">
         {formatPen(Math.round(option.effectiveUnitCents))} / {measure} ·{" "}
-        {option.condition ?? "Precio para todos"}
+        {option.condition ?? "Precio sin tarjeta ni membresía"}
       </p>
 
       {option.condition && (
         <p className="text-sm">
-          Para todos: {formatPen(option.ordinaryTotalCents)} por esta compra.
+          Sin tarjeta ni membresía: {formatPen(option.ordinaryTotalCents)} por esta compra.
         </p>
       )}
       <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
@@ -85,7 +85,7 @@ export function CurrentOption({
       )}
       {option.condition && compact && (
         <p className="mt-1 text-sm text-muted-foreground">
-          Para todos: {formatPen(option.ordinaryTotalCents)}
+          Sin tarjeta ni membresía: {formatPen(option.ordinaryTotalCents)}
         </p>
       )}
       <AvailabilityNotice available={option.available} />

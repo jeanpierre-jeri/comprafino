@@ -20,7 +20,7 @@ test("homepage offers an accessible product search", async ({ page }) => {
   await expect(page.getByLabel("¿Qué necesitas comprar?")).toBeEnabled();
   await expect(page.getByRole("button", { name: "Buscar" })).toBeEnabled();
   await expect(
-    page.getByText("Nuestra cobertura sigue creciendo.", { exact: false }),
+    page.getByText("Busca por producto, marca o presentación.", { exact: false }),
   ).toBeVisible();
   await page.getByLabel("¿Qué necesitas comprar?").fill("g");
   await page.getByRole("button", { name: "Buscar" }).click();

@@ -14,6 +14,12 @@ test("anonymous visitors retain public navigation and a minimal sign-in control"
 }) => {
   await page.goto("/");
   await expect(page.getByRole("button", { name: "Iniciar sesión", exact: true })).toBeEnabled();
+  await page.getByRole("button", { name: "Iniciar sesión", exact: true }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toContainText("Si un mismo artículo aparece en ambas");
+  await expect(dialog).toContainText("cambios pendientes de guardar en tu cuenta");
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
   await page.getByRole("link", { name: "Mi lista", exact: true }).click();
   await expect(page).toHaveURL(/\/list$/u);
   expect(await (await request.get("/api/auth/get-session")).json()).toBeNull();
@@ -174,9 +180,11 @@ for (const width of [390, 1280]) {
     await trigger.click();
     const dialog = page.getByRole("dialog", { name: "Inicia sesión en CompraFino" });
     await expect(dialog).toBeVisible();
-    await expect(dialog).toContainText("Guarda tu lista y tenla disponible en tus dispositivos.");
     await expect(dialog).toContainText(
-      "Al iniciar sesión, combinaremos la lista de este navegador con la de tu cuenta.",
+      "Inicia sesión para guardar tu lista en tu cuenta y abrirla en otros dispositivos.",
+    );
+    await expect(dialog).toContainText(
+      "Al iniciar sesión, intentaremos combinar la lista de este navegador con la de tu cuenta.",
     );
     await expect(dialog).toContainText("También puedes seguir usando CompraFino sin una cuenta.");
     const google = dialog.getByRole("button", { name: "Continuar con Google" });

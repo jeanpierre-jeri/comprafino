@@ -36,7 +36,7 @@ async function openBasketComparison(page: Page) {
 
 async function openGeneric(page: Page, query = "huevos") {
   await page.goto(`/search?q=${query}`);
-  await page.getByRole("button", { name: "Agregar como necesidad" }).click();
+  await page.getByRole("button", { name: "Agregar sin elegir producto" }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await expect(page.getByRole("dialog").getByRole("radio")).toHaveCount(0);
   await expect(page.getByLabel("Búsqueda de productos")).toHaveCount(0);
@@ -99,8 +99,8 @@ test("first use explains both choices and preserves the reviewed generic prefere
 }, testInfo) => {
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto("/list");
-  await expect(page.getByRole("heading", { name: "Una necesidad sin marca" })).toBeVisible();
-  await expect(page.getByText(/escribe «leche»/)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sin elegir un producto todavía" })).toBeVisible();
+  await expect(page.getByText(/busca «leche»/)).toBeVisible();
   const firstAction = page.getByRole("link", { name: "Buscar mi primer producto" });
   await expect(firstAction).toBeInViewport({ ratio: 1 });
   await page.screenshot({
@@ -151,7 +151,7 @@ test("first use explains both choices and preserves the reviewed generic prefere
   const confirmation = page.getByRole("note", { name: "Confirmación de guardado" });
   await expect(confirmation).toBeVisible();
   await confirmation.getByRole("button", { name: "Seguir comprando" }).click();
-  await expect(page.getByRole("button", { name: "Agregar como necesidad" })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Agregar sin elegir producto" })).toBeFocused();
   await expect(confirmation).toHaveCount(0);
   await page.getByRole("link", { name: "Mi lista", exact: true }).click();
   const card = page.getByRole("article", { name: "Huevos", exact: true });
@@ -304,7 +304,7 @@ for (const operation of ["add", "edit", "remove"] as const) {
       await page.locator('.browse-link[href="/search?category=abarrotes"]').click();
       await page.getByLabel("Buscar en Abarrotes").fill("aceite");
       await page.getByRole("button", { name: "Buscar", exact: true }).click();
-      await page.getByRole("button", { name: "Agregar como necesidad" }).click();
+      await page.getByRole("button", { name: "Agregar sin elegir producto" }).click();
       await expect(page.getByRole("dialog")).toBeVisible();
       expect(
         await page.evaluate(() => {
@@ -385,7 +385,10 @@ test("dialogs animate, close with X/outside/Escape, and respect reduced motion",
       await page.emulateMedia({ reducedMotion });
       await openGeneric(page);
       const dialog = page.getByRole("dialog");
-      const trigger = page.getByRole("button", { name: "Agregar como necesidad", exact: true });
+      const trigger = page.getByRole("button", {
+        name: "Agregar sin elegir producto",
+        exact: true,
+      });
       expect(await dialog.evaluate((element) => getComputedStyle(element).animationDuration)).toBe(
         reducedMotion === "reduce" ? "0s" : "0.18s",
       );
@@ -512,7 +515,7 @@ test("keyboard dialog cancels and returns focus; list and editor fit both themes
       );
       await page.keyboard.press("Escape");
       await expect(page.getByRole("dialog")).toHaveCount(0);
-      await expect(page.getByRole("button", { name: "Agregar como necesidad" })).toBeFocused();
+      await expect(page.getByRole("button", { name: "Agregar sin elegir producto" })).toBeFocused();
     }
   }
 
@@ -910,9 +913,9 @@ test.describe("shopping market fixtures (isolated PostgreSQL)", () => {
     await expect(
       page.getByRole("region", { name: "Hay una oportunidad de ahorro hoy" }),
     ).toContainText("Requiere tarjeta CMR");
-    await expect(card).toContainText("Para todos: S/ 19.90");
+    await expect(card).toContainText("Sin tarjeta ni membresía: S/ 19.90");
     await prices.click();
-    await page.getByRole("option", { name: "Para todos", exact: true }).click();
+    await page.getByRole("option", { name: "Sin tarjeta ni membresía", exact: true }).click();
     await expect(card).toContainText("Huevos Tottus");
     await expect(card).toContainText("S/ 14.90");
   });
@@ -1643,7 +1646,7 @@ test.describe("current basket optimization fixtures", () => {
     await page.getByRole("combobox", { name: "Precios", exact: true }).click();
     await page.getByRole("option", { name: "Incluir beneficios", exact: true }).click();
     await expect(comparison).toContainText("Requiere tarjeta CMR");
-    await expect(comparison).toContainText("Para todos, esta selección");
+    await expect(comparison).toContainText("Sin tarjeta ni membresía, esta selección");
     // Base UI can retain a hidden portal after the closing animation. Wait for
     // visual dismissal before resizing to measure the settled mobile layout.
     await expect(page.getByRole("listbox", { includeHidden: true })).toBeHidden();

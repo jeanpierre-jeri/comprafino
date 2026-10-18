@@ -45,8 +45,8 @@ export function ShoppingListView() {
         <Empty className="mt-6">
           <EmptyTitle>Todavía no tienes productos en tu lista.</EmptyTitle>
           <EmptyDescription>
-            Empieza por algo que compras seguido. Puedes guardar un producto concreto o una
-            necesidad sin elegir marca.
+            Empieza por algo que compras seguido. Puedes guardar un producto concreto o lo que
+            necesitas sin elegir un producto todavía.
           </EmptyDescription>
           <Link className={buttonVariants({ className: "min-h-11 self-start" })} href="/search">
             Buscar mi primer producto
@@ -55,15 +55,15 @@ export function ShoppingListView() {
             <div>
               <h3 className="font-semibold">Un producto que ya conoces</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                Por ejemplo, leche de una marca concreta de 1 L. Elige su tarjeta y pulsa «Agregar a
-                mi lista». Podrás preferirlo o pedir solo ese producto.
+                Por ejemplo, leche de una marca concreta de 1 L. Pulsa «Agregar a mi lista» en ese
+                producto. Podrás preferirlo o pedir solo ese producto.
               </p>
             </div>
             <div>
-              <h3 className="font-semibold">Una necesidad sin marca</h3>
+              <h3 className="font-semibold">Sin elegir un producto todavía</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                Por ejemplo, escribe «leche» y pulsa «Agregar como necesidad» sin elegir un
-                producto. Solo mostraremos alternativas cuando podamos comprobar su equivalencia.
+                Por ejemplo, busca «leche» y pulsa «Agregar sin elegir producto». Solo mostraremos
+                alternativas cuando podamos comprobar su equivalencia.
               </p>
             </div>
           </div>
@@ -90,7 +90,7 @@ export function ShoppingListView() {
             label="Precios"
             value={mode}
             options={[
-              { value: "standard", label: "Para todos" },
+              { value: "standard", label: "Sin tarjeta ni membresía" },
               { value: "benefits", label: "Incluir beneficios" },
             ]}
             onValueChange={(value) => {

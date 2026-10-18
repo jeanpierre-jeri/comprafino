@@ -140,7 +140,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
             ) : (
               <>
                 <p className="text-sm font-medium">
-                  Mejor precio para todos
+                  Menor precio sin tarjeta ni membresía
                   {product.cheapestRetailers.length > 1 ? " · Empate" : ""}
                 </p>
                 <p className="mt-2 text-4xl font-semibold tracking-tight text-primary tabular-nums">
@@ -155,7 +155,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
               <aside className="benefit-surface">
                 <p className="text-sm font-medium">Con tarjeta CMR</p>
                 <p className="mt-1 text-lg font-semibold">
-                  {formatPen(product.lowestBenefit.priceCents)} con CMR
+                  {formatPen(product.lowestBenefit.priceCents)} con tarjeta CMR
                 </p>
                 <UnitPriceReference
                   conditional
@@ -218,8 +218,8 @@ export default async function ProductPage({ params, searchParams }: Props) {
                     {best && (
                       <p className="mt-1 text-sm font-medium text-primary">
                         {product.cheapestRetailers.length > 1
-                          ? "Mejor precio compartido"
-                          : "Mejor precio para todos"}
+                          ? "Menor precio en varias tiendas"
+                          : "Menor precio sin tarjeta ni membresía"}
                       </p>
                     )}
                     <ObservedAt date={offer.observedAt} />
@@ -233,16 +233,20 @@ export default async function ProductPage({ params, searchParams }: Props) {
                       {formatPen(offer.currentPriceCents)}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {current ? "Precio online para todos" : "Último precio registrado para todos"}
+                      {current
+                        ? "Precio online sin tarjeta ni membresía"
+                        : "Último precio registrado sin tarjeta ni membresía"}
                     </p>
                     {offer.regularPriceCents !== null && (
                       <p className="mt-1 text-sm text-muted-foreground">
-                        Antes <s>{formatPen(offer.regularPriceCents)}</s>
+                        Precio de referencia <s>{formatPen(offer.regularPriceCents)}</s>
                       </p>
                     )}
                     {offer.conditionalOffers.map((benefit) => (
                       <div key={benefit.programKey} className="benefit-surface">
-                        <p className="font-semibold">{formatPen(benefit.priceCents)} con CMR</p>
+                        <p className="font-semibold">
+                          {formatPen(benefit.priceCents)} con tarjeta CMR
+                        </p>
                         <UnitPriceReference
                           conditional
                           family={classifyProductFamily({ title: offer.title }).family}

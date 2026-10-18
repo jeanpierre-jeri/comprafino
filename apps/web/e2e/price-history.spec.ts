@@ -24,14 +24,29 @@ test.describe("isolated ordinary-history fixtures", () => {
     page,
   }) => {
     await page.goto(`/products/${fixture("rich")}`);
-    const section = page.getByRole("region", { name: "Historial del precio para todos" });
+    const section = page.getByRole("region", {
+      name: "Historial de precios sin tarjeta ni membresía",
+    });
     await expect(section).toBeVisible();
+    await expect(
+      section.getByText("No conocemos el precio entre consultas", { exact: false }),
+    ).toBeVisible();
+    const explanation = section.getByText("Los mínimos y máximos usan los registros", {
+      exact: false,
+    });
+    await expect(explanation).toBeHidden();
+    const disclosure = section.getByText("Cómo leer este historial", { exact: true });
+    await disclosure.focus();
+    await page.keyboard.press("Enter");
+    await expect(explanation).toBeVisible();
+    await page.keyboard.press("Space");
+    await expect(explanation).toBeHidden();
     const metro = section.getByRole("article", { name: "Historial de Metro", exact: true });
     await expect(metro).toContainText("S/ 6.10");
     await expect(metro).toContainText("Mínimo registradoS/ 5.90");
     await expect(metro).toContainText("Máximo registradoS/ 6.10");
     await expect(metro).toContainText("subió de S/ 5.90 a S/ 6.10");
-    await expect(page.getByText("S/ 5.40 con CMR").first()).toBeVisible();
+    await expect(page.getByText("S/ 5.40 con tarjeta CMR").first()).toBeVisible();
     await expect(section).not.toContainText("S/ 5.40");
     await expect(section.locator("[data-slot=chart] svg")).toBeVisible();
     expect(
@@ -68,7 +83,9 @@ test.describe("isolated ordinary-history fixtures", () => {
   });
   test("URL range changes metrics and preserves benefits in both directions", async ({ page }) => {
     await page.goto(`/products/${fixture("rich")}?range=7d&priceMode=benefits`);
-    const section = page.getByRole("region", { name: "Historial del precio para todos" });
+    const section = page.getByRole("region", {
+      name: "Historial de precios sin tarjeta ni membresía",
+    });
     const metro = section.getByRole("article", { name: "Historial de Metro", exact: true });
     await section.getByRole("link", { name: "30 días", exact: true }).click();
     await expect(page).toHaveURL(/range=30d&priceMode=benefits/);
@@ -77,7 +94,7 @@ test.describe("isolated ordinary-history fixtures", () => {
     await expect(page).toHaveURL(/range=90d/);
     await expect(metro).toContainText("Máximo registradoS/ 7.00");
     await page.getByRole("combobox", { name: "Precios", exact: true }).click();
-    await page.getByRole("option", { name: "Para todos", exact: true }).click();
+    await page.getByRole("option", { name: "Sin tarjeta ni membresía", exact: true }).click();
     await expect(page).toHaveURL(/range=90d/);
     await section.getByRole("link", { name: "7 días", exact: true }).click();
     await expect(metro).toContainText("Máximo registradoS/ 6.10");
@@ -96,6 +113,10 @@ test.describe("isolated ordinary-history fixtures", () => {
     ).toBeVisible();
     await expect(page.locator("[data-slot=chart]")).toHaveCount(0);
     await expect(
+      page.getByText("No registramos cambios de precio en este período.").first(),
+    ).toBeVisible();
+    await expect(page.getByText("el precio no cambió", { exact: false })).toHaveCount(0);
+    await expect(
       page.getByRole("heading", { name: "Precios y registros en 4 supermercados" }),
     ).toBeVisible();
     await page.goto(`/products/${fixture("old")}`);
@@ -113,20 +134,20 @@ test.describe("isolated ordinary-history fixtures", () => {
     ).toHaveCount(1);
     const metro = page.getByRole("article", { name: "Historial de Metro", exact: true });
     await expect(metro.getByTestId("unchanged-insight")).toHaveText(
-      "Sin cambios observados durante 6 días.",
+      "Consultas con el mismo precio en 6 días consecutivos.",
     );
     await page.goto(`/products/${fixture("gap")}`);
     await expect(
       page.locator(".verified-segment-metro .recharts-scatter-line .recharts-curve"),
     ).toHaveCount(2);
     await expect(metro.getByTestId("unchanged-insight")).toHaveText(
-      "Sin cambios observados durante 2 días.",
+      "Consultas con el mismo precio en 2 días consecutivos.",
     );
     await page.goto(`/products/${fixture("decrease")}`);
     await expect(metro.getByTestId("price-change-insight")).toContainText("Bajó S/ 1.50");
     await expect(metro.getByTestId("price-change-insight")).toContainText("20%");
     await expect(
-      page.getByRole("region", { name: "Historial del precio para todos" }),
+      page.getByRole("region", { name: "Historial de precios sin tarjeta ni membresía" }),
     ).not.toContainText("S/ 5.40");
   });
   test("coverage charts fit desktop and mobile in light and dark themes", async ({
@@ -141,7 +162,9 @@ test.describe("isolated ordinary-history fixtures", () => {
         for (const kind of ["continuous", "gap", "decrease"]) {
           await page.goto(`/products/${fixture(kind)}`);
           await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
-          const section = page.getByRole("region", { name: "Historial del precio para todos" });
+          const section = page.getByRole("region", {
+            name: "Historial de precios sin tarjeta ni membresía",
+          });
           await section.scrollIntoViewIfNeeded();
           await expect(section.locator("[data-slot=chart]")).toBeVisible();
           // A flat SVG path has zero height, so Playwright's box-based visibility

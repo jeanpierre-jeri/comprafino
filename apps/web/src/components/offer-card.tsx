@@ -75,13 +75,13 @@ export function SearchProductCard({
           {offer.pricingBasis === "kg" ? " / kg" : ""}
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
-          Precio para todos ·{" "}
+          Precio sin tarjeta ni membresía ·{" "}
           {product.cheapestOffers.map((member) => member.retailerName).join(", ")}
           {product.cheapestOffers.length > 1 ? " · Empate" : ""}
         </p>
         {!product.canonicalId && ordinary.regularPriceCents !== null && (
           <p className="text-xs text-muted-foreground">
-            Antes <s>{formatPen(ordinary.regularPriceCents)}</s>
+            Precio de referencia <s>{formatPen(ordinary.regularPriceCents)}</s>
           </p>
         )}
         {offer.pricingBasis !== "kg" && (
@@ -94,7 +94,7 @@ export function SearchProductCard({
         {condition && (
           <div className="benefit-surface">
             <p className="text-sm font-semibold">
-              Con CMR: {formatPen(condition.priceCents)}
+              Con tarjeta CMR: {formatPen(condition.priceCents)}
               {offer.pricingBasis === "kg" ? " / kg" : ""}
             </p>
             {offer.pricingBasis !== "kg" && (

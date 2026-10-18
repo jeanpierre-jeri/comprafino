@@ -181,7 +181,7 @@ export function ShoppingItemCard({
         )}
         {option?.condition && (
           <p className="mt-1 text-sm text-primary">
-            Precio potencial · {option.condition} · Para todos:{" "}
+            Precio potencial · {option.condition} · Sin tarjeta ni membresía:{" "}
             {formatPen(option.ordinaryTotalCents)}
           </p>
         )}
@@ -330,8 +330,8 @@ function WeekdayAdvice({ recommendation }: { recommendation?: ShoppingWeekday })
     <section aria-label="Fundamento del día sugerido" className="text-sm">
       <h4 className="font-semibold">Fundamento del día sugerido</h4>
       <p className="mt-2">
-        {weekdayLabels[first.pattern.weekday]} en {first.retailerName}: el menor precio para todos
-        observado en las cuatro semanas completas.
+        {weekdayLabels[first.pattern.weekday]} en {first.retailerName}: el menor precio sin tarjeta
+        ni membresía registrado en las cuatro semanas completas.
       </p>
       {supported.map((series) => (
         <p className="mt-2" key={series.listingId}>
