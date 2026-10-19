@@ -2,7 +2,7 @@ import { UnitPriceReference } from "./unit-price-reference";
 import { repriceUnitPrice, shoppingSeedForRetailerOffer } from "@comprafino/core";
 import { AvailabilityNotice } from "./availability-notice";
 import { AddShoppingItem } from "./shopping-list/shopping-item-editor";
-import { ArrowUpRight } from "@comprafino/ui";
+import { ArrowRight, ArrowUpRight } from "@comprafino/ui";
 import { NavigationLink } from "./navigation-link";
 import { formatPen } from "@comprafino/db";
 import type { SearchProductResult } from "@comprafino/db";
@@ -119,13 +119,13 @@ export function SearchProductCard({
           </div>
         )}
       </div>
-      <div className="card-footer">
+      <div className="card-retailers">
         <p className="text-sm font-semibold">
           {product.retailerCount} {product.retailerCount === 1 ? "supermercado" : "supermercados"} ·{" "}
           {product.offers.length}{" "}
           {product.offers.length === 1 ? "oferta de tienda" : "ofertas de tienda"}
         </p>
-        <div className="flex flex-wrap gap-2">
+        <div className="card-retailer-badges">
           {product.offers.map((member) => (
             <RetailerBadge
               key={member.retailerId}
@@ -134,16 +134,21 @@ export function SearchProductCard({
             />
           ))}
         </div>
-        <ObservedAt date={ordinary.observedAt} relativeTo={observedNow} />
-        <AvailabilityNotice
-          available={product.offers.every((member) => member.available === true) ? true : null}
-        />
+        <div className="card-observation">
+          <ObservedAt date={ordinary.observedAt} relativeTo={observedNow} />
+          <AvailabilityNotice
+            available={product.offers.every((member) => member.available === true) ? true : null}
+          />
+        </div>
+      </div>
+      <div className="card-actions">
         <NavigationLink
           href={href}
           captureSearchReturn={Boolean(returnTo)}
           className="comparison-link"
         >
           {product.canonicalId ? "Comparar precios" : "Ver producto"}
+          <ArrowRight aria-hidden="true" size={16} />
         </NavigationLink>
         {!product.canonicalId && (
           <a href={offer.url} target="_blank" rel="noopener noreferrer" className="source-link">

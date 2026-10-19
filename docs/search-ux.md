@@ -43,6 +43,8 @@ Active category, retailer, unit and benefits filters have individually removable
 
 Removing an active filter or clearing all filters returns keyboard focus to the visible “Ordenar” control when disabling/removing the initiating button would otherwise leave focus on the document body. Select changes retain their initiating select. Focus is not moved if the user has already moved to another element.
 
+The toolbar uses a bordered neutral surface, with counts and inline sorting in its header. A separated field row distinguishes filter choices from sorting; on desktop it fills three columns, or four when the unit selector is present. Active filters use rounded outline buttons with a visible removal mark. Mobile retains the inline disclosure and 44px control targets. Product cards keep a consistent gap between store counts, wrapping retailer badges and observation/availability text; comparison and list actions occupy a separate footer. Extra row height is absorbed before the actions, rather than between the price and store information.
+
 The generic shopping-need action follows results so it does not push the first product below the initial mobile viewport. Price, promotion, availability, identity and grouped sorting rules are unchanged. Controlled Chromium regressions in `search-experience.spec.ts` check milk search and category variants at 320/390/1280×844 in both themes, including first-title/ordinary-price visibility at scroll zero, overflow, keyboard disclosure, filter removal/reset, reload and back/forward. Screenshots are written to ignored `.artifacts/search-ux/`. Build first and run `pnpm test:e2e:fixtures:local` with the explicit owned-schema harness.
 
 ## Milestone 12 visual refinement (previous layout)

@@ -215,7 +215,28 @@
     @apply grid grid-cols-1 items-center gap-3 lg:grid-cols-[1fr_1.1fr] lg:gap-8;
   }
   .search-toolbar {
-    @apply mt-4 rounded-xl bg-secondary/80 p-3 sm:p-4;
+    @apply mt-4 rounded-xl border bg-surface p-3 sm:p-4;
+  }
+  .search-toolbar-heading {
+    @apply flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between;
+  }
+  .search-sort {
+    @apply flex min-w-0 items-center gap-3 sm:w-72;
+  }
+  .search-sort .choice-trigger {
+    @apply w-full;
+  }
+  .search-filter-fields {
+    @apply mt-4 border-t pt-4;
+  }
+  .search-filter-fields .choice-trigger {
+    @apply mt-2 bg-background;
+  }
+  .search-active-filters {
+    @apply mt-4 flex flex-wrap items-center gap-2;
+  }
+  .filter-remove {
+    @apply inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground;
   }
   .filter-surface {
     @apply my-5 rounded-xl bg-secondary/80 p-3 sm:p-4;
@@ -344,8 +365,35 @@
     color: var(--benefit-text);
     background: var(--benefit);
   }
-  .card-footer {
-    @apply mt-auto pt-3;
+  .card-retailers {
+    @apply my-5 flex flex-col gap-3;
+  }
+  .card-retailer-badges {
+    @apply flex flex-wrap gap-2;
+  }
+  .card-retailer-badges .retailer-badge {
+    @apply rounded-lg px-3 py-1.5;
+  }
+  .card-observation {
+    @apply flex flex-col gap-1;
+  }
+  .card-observation > p {
+    @apply mt-0;
+  }
+  .card-actions {
+    @apply mt-auto flex flex-col gap-2 border-t pt-3;
+  }
+  .card-actions > div,
+  .card-actions .card-link,
+  .card-actions .source-link,
+  .card-actions .comparison-link {
+    @apply mt-0;
+  }
+  .card-actions .card-link {
+    @apply w-full;
+  }
+  .card-actions .comparison-link {
+    @apply w-full justify-between gap-3;
   }
   .card-link {
     @apply mt-4 inline-flex min-h-11 items-center justify-center gap-1 rounded-lg border border-input bg-surface px-4 py-2 text-sm font-semibold text-primary transition-colors hover:border-primary hover:bg-secondary;

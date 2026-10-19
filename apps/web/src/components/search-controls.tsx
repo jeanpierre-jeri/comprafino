@@ -7,6 +7,7 @@ import {
   CollapsibleTrigger,
 } from "@comprafino/ui/components/collapsible";
 import { ChoiceSelect } from "@comprafino/ui/components/select";
+import { cn } from "@comprafino/ui/lib/utils";
 import { useEffect, useRef, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { searchFilters, searchFilterQuery } from "@comprafino/core/search-filters";
@@ -130,10 +131,15 @@ export function SearchControls({
 
   return (
     <div ref={toolbar} className="search-toolbar" aria-busy={pending}>
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <output className="min-w-0 text-sm font-medium">{resultSummary}</output>
-        <div className="min-w-40 flex-1 sm:max-w-56">
+      <div className="search-toolbar-heading">
+        <output className="min-w-0 text-sm font-semibold">{resultSummary}</output>
+        <div className="search-sort">
+          <span aria-hidden="true" className="text-xs font-medium text-muted-foreground">
+            Ordenar
+          </span>
           <ChoiceSelect
+            compact
+            className="min-w-0 flex-1"
             label="Ordenar"
             value={filters.sort}
             disabled={pending}
@@ -146,34 +152,39 @@ export function SearchControls({
           />
         </div>
       </div>
-      <div className="mt-3 hidden lg:block">{secondaryControls}</div>
+      <div className="search-filter-fields hidden lg:block">{secondaryControls}</div>
       <Collapsible className="mt-3 lg:hidden">
-        <CollapsibleTrigger render={<Button variant="outline" className="h-11 w-full" />}>
+        <CollapsibleTrigger
+          render={<Button variant="outline" className="h-11 w-full justify-between" />}
+        >
           Filtros{selected.length > 0 ? ` (${activeCountLabel})` : ""}
           <ChevronDown data-icon="inline-end" aria-hidden="true" />
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div className="pt-3">{secondaryControls}</div>
+          <div className="search-filter-fields">{secondaryControls}</div>
         </CollapsibleContent>
       </Collapsible>
       {selected.length > 0 && (
-        <div className="mt-2 flex flex-wrap items-center gap-2" aria-label="Filtros activos">
+        <div className="search-active-filters" aria-label="Filtros activos">
           {selected.map((filter) => (
             <Button
               key={filter.key}
-              variant="secondary"
-              className="min-h-11 max-w-full whitespace-normal text-left"
+              variant="outline"
+              className="min-h-11 max-w-full rounded-full whitespace-normal text-left"
               disabled={pending}
               aria-label={`Quitar filtro: ${filter.label}`}
               onClick={() =>
                 navigate(searchFilters({ ...filters, [filter.key]: filter.reset }), "sort")
               }
             >
-              {filter.label} <span aria-hidden="true">×</span>
+              {filter.label}{" "}
+              <span aria-hidden="true" className="filter-remove">
+                ×
+              </span>
             </Button>
           ))}
           <Button
-            variant="link"
+            variant="ghost"
             className="min-h-11"
             disabled={pending}
             onClick={() => navigate(searchFilters({ sort: filters.sort }), "sort")}
@@ -228,7 +239,13 @@ function SecondarySearchFilters({
   );
 
   return (
-    <fieldset disabled={pending} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <fieldset
+      disabled={pending}
+      className={cn(
+        "grid gap-4 sm:grid-cols-2",
+        units.length > 1 || filters.unit ? "lg:grid-cols-4" : "lg:grid-cols-3",
+      )}
+    >
       <legend className="sr-only">Filtros de búsqueda</legend>
       <ChoiceSelect
         label="Categoría"
