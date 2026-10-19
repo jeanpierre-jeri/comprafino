@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import type { BrowserContext, Page } from "@playwright/test";
 import { betterAuth } from "better-auth";
 import { testUtils } from "better-auth/plugins";

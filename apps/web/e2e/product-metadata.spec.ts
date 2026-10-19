@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { productReadFixture } from "../../../packages/db/src/testing/product-read-fixture.ts";
 import { closeLocalTestConnections } from "../../../packages/db/src/testing/test-query-client.ts";
 

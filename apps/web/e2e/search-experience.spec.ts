@@ -1,6 +1,6 @@
 import { searchCategories } from "@comprafino/core";
 import { mkdir } from "node:fs/promises";
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 const raw: unknown = process.env.PRICE_HISTORY_FIXTURE_IDS
   ? JSON.parse(process.env.PRICE_HISTORY_FIXTURE_IDS)

@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 
 const raw: unknown = process.env.PRICE_HISTORY_FIXTURE_IDS
   ? JSON.parse(process.env.PRICE_HISTORY_FIXTURE_IDS)

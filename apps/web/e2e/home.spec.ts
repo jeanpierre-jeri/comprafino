@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("developer discovery tooling is blocked in production", async ({ page }) => {
   const response = await page.goto("/dev/discovery");

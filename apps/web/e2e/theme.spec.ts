@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("theme follows system changes and persists an explicit choice across reload", async ({
   page,

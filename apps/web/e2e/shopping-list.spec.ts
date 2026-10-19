@@ -1,6 +1,6 @@
 import { fixtureDatabase } from "../../../packages/db/src/testing/fixture-client.ts";
 import { closeLocalTestConnections } from "../../../packages/db/src/testing/test-query-client.ts";
-import { expect, test, type Page, type Locator } from "@playwright/test";
+import { expect, test, type Page, type Locator } from "./fixtures";
 import { shoppingListSchema, shoppingListEvaluationSchema } from "@comprafino/core";
 import { restrictBasketFixtureRetailers } from "@comprafino/db/basket-fixtures";
 import { persistListings } from "@comprafino/db";

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { shoppingListSchema } from "@comprafino/core";
 
 test.describe("UX review with owned catalog fixtures", () => {

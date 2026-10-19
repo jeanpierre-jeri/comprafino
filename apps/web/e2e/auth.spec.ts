@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { betterAuth } from "better-auth";
 import { testUtils } from "better-auth/plugins";
 import { fixtureDatabase } from "../../../packages/db/src/testing/fixture-client.ts";
