@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { listingSchema, normalizeWhitespace, parsePenCents } from "@comprafino/core";
+import {
+  listingSchema,
+  normalizeWhitespace,
+  parsePenCents,
+  SourceResponseError,
+} from "@comprafino/core";
 
 const sourcePrice = z.object({
   type: z.string(),
@@ -73,6 +78,20 @@ export function parseTottusPage(html: string, observedAt: Date) {
     discovered: page.results.length,
     skippedMissingPriceUnit: page.results.length - eligible.length,
   };
+}
+
+/** Native pages have at most 48 slots, plus bounded sponsored rows/duplicates. */
+export function assertTottusPageBounds(
+  page: ReturnType<typeof parseTottusPage>,
+  expectedPage: number,
+) {
+  if (
+    page.pagination.currentPage !== expectedPage ||
+    page.pagination.perPage > 48 ||
+    page.discovered > 64
+  ) {
+    throw new SourceResponseError("pagination_mismatch");
+  }
 }
 
 /** Shared price/unit mapping for category, search and an exact PDP variant. */

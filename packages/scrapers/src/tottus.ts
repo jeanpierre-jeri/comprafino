@@ -1,5 +1,5 @@
 import { assertPublicAccess } from "./public-access.ts";
-import { parseTottusPage } from "./tottus-parser.ts";
+import { assertTottusPageBounds, parseTottusPage } from "./tottus-parser.ts";
 import { publicResponse } from "./catalog-sources.ts";
 import { parseTottusCatalogProduct } from "./targeted.ts";
 
@@ -44,9 +44,7 @@ export function createTottusAdapter(
 
       const parsed = parseTottusPage(await response.text(), new Date());
 
-      if (parsed.pagination.currentPage !== 1 || parsed.discovered > 48) {
-        throw new Error("Unexpected Tottus search page size");
-      }
+      assertTottusPageBounds(parsed, 1);
 
       return {
         listings: boundedSearchListings(parsed.listings, limit, query),

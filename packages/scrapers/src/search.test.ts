@@ -85,7 +85,7 @@ describe("public retailer search adapters", () => {
     expect(fake).toHaveBeenCalledOnce();
     expect(requestUrl(fake.mock.calls[0]?.[0]).searchParams.get("Ntt")).toBe("arroz costeño");
   });
-  it("Tottus accepts an explicit empty page and rejects unexpected page sizes", async () => {
+  it("Tottus accepts an explicit empty page", async () => {
     const data = structuredClone(tottus);
     data.props.pageProps.results = [];
     data.props.pageProps.pagination.count = 0;
@@ -96,6 +96,63 @@ describe("public retailer search adapters", () => {
       listings: [],
       discovered: 0,
     });
+  });
+  it.each([51, 64])(
+    "Tottus accepts %i source rows including sponsored duplicates within one native page",
+    async (sourceCount) => {
+      const data = structuredClone(tottus);
+      const template = data.props.pageProps.results[0]!;
+      const products = Array.from({ length: 48 }, (_, index) => ({
+        ...template,
+        productId: String(1000 + index),
+        skuId: String(2000 + index),
+        url: `https://www.tottus.com.pe/tottus-pe/articulo/${1000 + index}/detergente`,
+        displayName: index === 47 ? "Detergente líquido Tottus" : "Detergente líquido Otra",
+      }));
+      data.props.pageProps.results = [...products, ...products.slice(0, sourceCount - 48)];
+      data.props.pageProps.pagination = { count: 1000, perPage: 48, currentPage: 1 };
+      const fake = vi.fn<typeof fetch>(
+        async () => new Response(`<script id="__NEXT_DATA__">${JSON.stringify(data)}</script>`),
+      );
+
+      const result = await createTottusAdapter(fake).searchProducts(
+        "detergente líquido tottus",
+        20,
+      );
+
+      expect(result.discovered).toBe(sourceCount);
+      expect(result.listings).toHaveLength(20);
+      expect(new Set(result.listings.map((listing) => listing.externalId)).size).toBe(20);
+      expect(result.listings[0]?.externalId).toBe("2047");
+      expect(fake).toHaveBeenCalledOnce();
+      expect(requestUrl(fake.mock.calls[0]?.[0]).searchParams.get("page")).toBe("1");
+    },
+  );
+  it.each([
+    { sourceCount: 65, perPage: 48, currentPage: 1 },
+    { sourceCount: 1, perPage: 49, currentPage: 1 },
+    { sourceCount: 1, perPage: 48, currentPage: 2 },
+  ])("Tottus classifies invalid search page bounds without retry: %j", async (bounds) => {
+    const data = structuredClone(tottus);
+    data.props.pageProps.results = Array.from(
+      { length: bounds.sourceCount },
+      () => data.props.pageProps.results[0]!,
+    );
+    data.props.pageProps.pagination = {
+      count: 1000,
+      perPage: bounds.perPage,
+      currentPage: bounds.currentPage,
+    };
+    const fake = vi.fn<typeof fetch>(
+      async () => new Response(`<script id="__NEXT_DATA__">${JSON.stringify(data)}</script>`),
+    );
+
+    await expect(
+      createTottusAdapter(fake).searchProducts("detergente líquido", 20),
+    ).rejects.toMatchObject({
+      sourceResponseCode: "pagination_mismatch",
+    });
+    expect(fake).toHaveBeenCalledOnce();
   });
   it("rejects invalid input before retailer requests", async () => {
     const fake = vi.fn<typeof fetch>();

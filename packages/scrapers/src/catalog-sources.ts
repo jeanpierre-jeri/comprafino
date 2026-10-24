@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { catalogSourceSchema, SourceResponseError } from "@comprafino/core";
 import type { CatalogSource, CatalogSourceClaim, RetailerId } from "@comprafino/core";
-import { parseTottusPage } from "./tottus-parser.ts";
+import { assertTottusPageBounds, parseTottusPage } from "./tottus-parser.ts";
 import { parseTottusCatalogProduct } from "./targeted.ts";
 import { parsePlazaVeaPage, plazaVeaCatalogUrl } from "./plaza-vea.ts";
 import { parseMetroPage, metroCatalogUrl } from "./metro.ts";
@@ -264,14 +264,7 @@ export async function fetchCatalogPage(
       return parseTottusCatalogProduct(await response.text(), productUrl, new Date());
     }
     const parsed = parseTottusPage(await response.text(), new Date());
-    // Category pages can contain sponsored duplicates beyond the 48 native slots.
-    if (
-      parsed.pagination.currentPage !== source.cursor + 1 ||
-      parsed.pagination.perPage > 48 ||
-      parsed.discovered > 64
-    ) {
-      throw new SourceResponseError("pagination_mismatch");
-    }
+    assertTottusPageBounds(parsed, source.cursor + 1);
     if (
       parsed.pagination.count > source.cursor * parsed.pagination.perPage &&
       parsed.discovered === 0
