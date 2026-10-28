@@ -15,6 +15,8 @@ import {
   searchPublicProducts,
 } from "./generic-offers.ts";
 import { evaluateCurrentShoppingList } from "./shopping-list.ts";
+import { shoppingSnapshotRows } from "./shopping-snapshot-transport.ts";
+import { evaluateCurrentShoppingList as previousShopping } from "./testing/transfer/legacy-shopping-list.ts";
 import { ownedTestDatabase } from "./testing/database.ts";
 import { closeLocalTestConnections } from "./testing/test-query-client.ts";
 import { catalogBenchmarkObserver } from "./testing/catalog-benchmark-observer.ts";
@@ -42,8 +44,9 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("offer transport projection equi
   const current = catalogBenchmarkObserver(harness);
   const projection = new PgDialect().sqlToQuery(genericOfferProjection).sql;
   // Recreate the former SELECT * only at the two transport boundaries. Both
-  // clients execute real SQL in the same owned fixture; no production test flag
-  // or second implementation of filtering, ranking or basket rules is needed.
+  // clients execute real SQL in the same owned fixture. Search uses its original
+  // object envelope; the frozen shopping reader preserves the object reference.
+  // Only shopping snapshot tuples need reconstruction for raw comparisons.
   const referenceClient = new Proxy(harness.scoped, {
     get(target, property, receiver) {
       if (property !== "query") return Reflect.get(target, property, receiver);
@@ -279,7 +282,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("offer transport projection equi
         true,
       );
       const previous = await reference.observe(
-        () => evaluateCurrentShoppingList(reference.db, list, mode, now),
+        () => previousShopping(reference.db, list, mode, now),
         true,
       );
       const { timings: actualTimings, ...actualResult } = actual.result;
@@ -302,7 +305,27 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("offer transport projection equi
       const snapshots = z.array(
         z.object({ snapshot: z.object({ listings: rawRows }).passthrough() }),
       );
-      const rows = snapshots.parse(await harness.scoped.query(statement.query, statement.params));
+      const compactSnapshots = z.array(
+        z.object({
+          snapshot: z
+            .object({
+              listings: z.array(z.unknown()),
+              historyRows: z.unknown(),
+              weekdayRows: z.unknown(),
+            })
+            .passthrough(),
+        }),
+      );
+      const rows = compactSnapshots
+        .parse(await harness.scoped.query(statement.query, statement.params))
+        .map(({ snapshot }) => ({
+          snapshot: {
+            ...snapshot,
+            listings: shoppingSnapshotRows("offer", snapshot.listings),
+            historyRows: shoppingSnapshotRows("history", snapshot.historyRows),
+            weekdayRows: shoppingSnapshotRows("weekday", snapshot.weekdayRows),
+          },
+        }));
       const fullRows = snapshots.parse(
         await harness.scoped.query(previousStatement.query, previousStatement.params),
       );

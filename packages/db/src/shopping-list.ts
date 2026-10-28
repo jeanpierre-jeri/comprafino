@@ -38,6 +38,7 @@ import {
 
 import { shoppingHistoryRows, historyRowsSchema } from "./shopping-price-history.ts";
 import { shoppingWeekdayRows, weekdayRowsSchema } from "./weekday-recommendation.ts";
+import { shoppingSnapshotRow, shoppingSnapshotRows } from "./shopping-snapshot-transport.ts";
 
 /** Read-only current market boundary. Exact eligibility and generic quantity
  * evidence come from existing public queries; no list data is persisted. */
@@ -201,8 +202,8 @@ export async function evaluateCurrentShoppingList(
       ${currentGenericOfferRows(now, null, "snapshot")}
     ) select jsonb_build_object(
       'currentCount',(select count(*)::int from current_listings),
-      'weekdayRows', (${shoppingWeekdayRows(ids, now, listingIds)}),
-      'historyRows', (${shoppingHistoryRows(ids, listingIds, now)}),
+      'weekdayRows', (${shoppingWeekdayRows(ids, now, listingIds, true)}),
+      'historyRows', (${shoppingHistoryRows(ids, listingIds, now, true)}),
       'products', coalesce((select jsonb_agg(jsonb_build_object('id',id,'title',"displayName"))
         from products where ${
           ids.length
@@ -212,7 +213,7 @@ export async function evaluateCurrentShoppingList(
               )})`
             : sql`false`
         }), '[]'::jsonb),
-      'listings', coalesce((select jsonb_agg(row_to_json(bounded)) from
+      'listings', coalesce((select jsonb_agg(jsonb_build_array(${genericOfferProjection})) from
         (select ${genericOfferProjection} from current_listings where ${exactPredicate} or ${alternativePredicate} or ${listingPredicate}
           or "canonicalId" in (select "canonicalId" from current_listings where ${listingPredicate})
           order by listing_id::text limit ${catalogPolicy.overflowSentinel}) bounded), '[]'::jsonb)
@@ -244,7 +245,7 @@ export async function evaluateCurrentShoppingList(
     }
 
     candidates = snapshot.listings
-      .map((raw) => genericProductOffer(raw, now, mode))
+      .map((raw) => genericProductOffer(shoppingSnapshotRow("offer", raw), now, mode))
       .filter((offer) => offer !== null)
       .map(shoppingCandidate);
   }
@@ -269,13 +270,13 @@ export async function evaluateCurrentShoppingList(
     weekdayRecommendations: shoppingWeekdays(
       list,
       candidates,
-      weekdayRowsSchema.parse(weekdayRows),
+      weekdayRowsSchema.parse(shoppingSnapshotRows("weekday", weekdayRows)),
       now,
     ),
     priceHistories: shoppingPriceHistories(
       list,
       fulfillments.map((f) => f.evaluation),
-      historyRowsSchema.parse(historyRows),
+      historyRowsSchema.parse(shoppingSnapshotRows("history", historyRows)),
       now,
     ),
     baskets: optimizeBasket(

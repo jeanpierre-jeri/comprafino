@@ -4,6 +4,62 @@ Milestone 19B adds `packages/core/src/shopping-list-sync.test.ts`, `packages/db/
 
 ## Disposable database and required checks
 
+The [partial release candidate](history/partial-transfer-release-2026-10-28.md)
+keeps health/list transfer optimizations and restores the original search reader.
+The search experiment and its performance runners live in the separately preserved
+worktree. The frozen `testing/search-transfer/legacy-generic-offers.ts` and workload
+cases remain here as the original-search regression oracle. The combined
+`testing/transfer/benchmark-cli.ts` measures search as an unchanged control; it
+must not be described as a compact-search benchmark.
+
+The three suites below create minimal tables in owned random local schemas and
+never run migrations or read application `DATABASE_URL`:
+
+```sh
+pnpm test:db:up
+DATABASE_URL= TEST_DATABASE_URL=postgresql://comprafino_test@127.0.0.1:55432/comprafino_test COMPRAFINO_TEST_DATABASE_MODE=local pnpm --filter @comprafino/db exec vitest run src/catalog-health-transfer.integration.test.ts src/shopping-transfer.integration.test.ts src/search-original.integration.test.ts
+pnpm test:db:down
+```
+
+The general integration/E2E harness applies migrations; do not run it under a
+no-migrations restriction. Its existing SQL consumers are adapted to the shopping
+snapshot representation, but search always retains the original object envelope.
+
+### Catalog health transfer comparison without migrations
+
+The local-only health fixture creates five minimal, typed tables in a random owned
+schema. It never reads application `DATABASE_URL`, runs migration files, or contacts
+Neon/retailers. Both readers use exactly the same fixture tables; this is a reader
+equivalence check, not validation of the application migrations. The existing
+general integration harness still applies migrations and is a separate command.
+
+```sh
+pnpm test:db:up
+TEST_DATABASE_URL=postgresql://comprafino_test@127.0.0.1:55432/comprafino_test COMPRAFINO_TEST_DATABASE_MODE=local pnpm --filter @comprafino/db exec vitest run src/catalog-health-transfer.integration.test.ts src/catalog-health-read.test.ts
+TEST_DATABASE_URL=postgresql://comprafino_test@127.0.0.1:55432/comprafino_test COMPRAFINO_TEST_DATABASE_MODE=local pnpm --filter @comprafino/db exec node --experimental-strip-types src/testing/health/benchmark-cli.ts --samples=20 --output=.artifacts/health-transfer/comparison.json
+```
+
+Use a new output path for each run; existing reports are never overwritten.
+Optional `--sizes=1000,10000,50000` controls fixture volumes. `--baseline` measures
+only the current reader; the recorded baseline was collected before changing the
+production query. Normal comparison runs execute the frozen `e83e843` reader and
+the current reader in alternating order on the same data and fixed observation
+time, with one excluded warmup per reader/size. Reports include fixture digests,
+source hashes, raw samples, complete report equality, decoded result rows, UTF-8
+JSON bytes, client calls, SQL statement counts, and schema cleanup confirmation.
+At least 20 samples are required to report p95. Run benchmarks without concurrent
+builds/test suites; these local timings are not a production latency SLA.
+
+Bytes are `Buffer.byteLength(JSON.stringify(result.rows))` before Drizzle mapping
+and domain validation. Operations may use array-mode rows; candidate pages use
+object rows. These are logical decoded result bytes, **not Neon wire or billed
+transfer**. Calls exclude fixture preparation and the local transport's
+`BEGIN`/`COMMIT`/`search_path` overhead. The snapshot contains no user data; all
+products, URLs and run IDs are synthetic. Setup failures and normal completion
+remove only the schema created by that fixture; forced termination can leave it
+behind. Stop the disposable container with `pnpm test:db:down` when no other local
+test work needs it.
+
 Docker Compose provides PostgreSQL 17 with `pg_trgm`, loopback port 55432 and temporary storage:
 
 ```sh
@@ -17,7 +73,7 @@ pnpm test:db:down
 
 The dedicated `comprafino_test` database uses local trust authentication. Recreating/stopping the container discards its contents. This configuration is for tests only.
 
-The wrappers explicitly set `TEST_DATABASE_URL=postgresql://comprafino_test@127.0.0.1:55432/comprafino_test` and `COMPRAFINO_TEST_DATABASE_MODE=local`, without reading `.env` or falling back to application `DATABASE_URL`. Each integration/fixture run applies checked-in journaled migrations inside its own random schema and drops that schema on completion/failure. Tests skip extension creation to avoid changing shared public objects. An interrupted process can leave its owned schema for inspection; do not drop arbitrary schemas.
+These general integration/fixture wrappers explicitly set `TEST_DATABASE_URL=postgresql://comprafino_test@127.0.0.1:55432/comprafino_test` and `COMPRAFINO_TEST_DATABASE_MODE=local`, without reading `.env` or falling back to application `DATABASE_URL`. They apply checked-in journaled migrations inside their own random schemas and drop those schemas on completion/failure. The dedicated health transfer commands above use minimal tables instead. Tests skip extension creation to avoid changing shared public objects. An interrupted process can leave its owned schema for inspection; do not drop arbitrary schemas.
 
 The shopping snapshot overflow regression fills the actual retained capacity (50,000 listings) by cloning one listing admitted and normalized through the real writers, using bulk SQL only inside its owned schema. Clones change IDs while retaining fingerprint inputs and positive ordinary quotes. It then injects one extra row and verifies reader rejection, plus recovery below the current-offer bound. This tests reader behavior at capacity; fixture preparation is not an ingestion-throughput benchmark.
 

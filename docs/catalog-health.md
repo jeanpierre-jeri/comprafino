@@ -35,3 +35,5 @@ Each Actions execution prints safe JSON, adds fixed annotations and writes a Mar
 ## Verification
 
 Core tests cover the existing delayed threshold, failed attempts versus previous successes, zero current coverage, capacity warnings/skips/overflow and inconsistent/future snapshots. Log tests reject missing, corrupt, duplicate and oversized observations. Isolated PostgreSQL tests use an explicit owned random schema to prove actual freshness/stock gates, safe output and read-only behavior. See [local testing](local-testing.md).
+
+Health reconstructs four constant offer fields locally before the unchanged shared validator, reducing each candidate result from fourteen columns to ten. The [October 28 transfer comparison](history/catalog-health-transfer-2026-10-28.md) records the field inventory, frozen-reader equivalence, local PostgreSQL benchmark and measurement limits. This dedicated fixture requires no migration runner; decoded JSON bytes are not Neon billed transfer.

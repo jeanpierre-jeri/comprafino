@@ -17,6 +17,7 @@ import {
   getCanonicalProductComparison,
 } from "./public-products.ts";
 import { evaluateCurrentShoppingList } from "./shopping-list.ts";
+import { shoppingSnapshotRows } from "./shopping-snapshot-transport.ts";
 import { ownedTestDatabase } from "./testing/database.ts";
 import { closeLocalTestConnections } from "./testing/test-query-client.ts";
 import { catalogBenchmarkObserver } from "./testing/catalog-benchmark-observer.ts";
@@ -341,12 +342,15 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("canonical eligibility SQL equiv
           .array(
             z.object({
               snapshot: z.object({
-                weekdayRows: z.array(
-                  z.object({
-                    listingId: z.uuid(),
-                    date: z.string(),
-                    priceCents: z.number().nullable(),
-                  }),
+                weekdayRows: z.preprocess(
+                  (raw) => shoppingSnapshotRows("weekday", raw),
+                  z.array(
+                    z.object({
+                      listingId: z.uuid(),
+                      date: z.string(),
+                      priceCents: z.number().nullable(),
+                    }),
+                  ),
                 ),
                 currentCount: z.number(),
                 products: z.array(z.object({ id: z.uuid(), title: z.string() })),

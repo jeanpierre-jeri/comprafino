@@ -45,6 +45,12 @@ These reports and the full [original roadmap](engineering-notes-2026-10-05.md#or
 
 ## New reports
 
+- [Versión parcial health/listas, 28 de octubre](partial-transfer-release-2026-10-28.md): búsqueda original, conservación del experimento, verificaciones y pasos pendientes de Preview protegido.
+
+- [Transferencia de listas y análisis de búsqueda, 28 de octubre](search-shopping-transfer-2026-10-28.md): snapshot compacto, candidatos, historia y pruebas de concurrencia.
+
+- [Transferencia de health:catalog, 28 de octubre](catalog-health-transfer-2026-10-28.md): cuatro constantes reconstruidas localmente, equivalencia contra `e83e843`, benchmark PostgreSQL sin migraciones y límites de los bytes lógicos.
+
 - [Recuperación de importaciones pendientes 07](shopping-import-recovery-2026-10-17.md): copia JSON local, retorno a la cuenta original, descarte confirmado y protección ante cambios de sesión/pestaña; pruebas aisladas y límites.
 - [Exportación de lista de cuenta 11A](account-list-export-2026-10-17.md): JSON de la lista sincronizada, guardas de sesión, cancelación y pruebas aisladas; implementación local sin publicación.
 - [Eliminación de cuenta propia 11B](account-deletion-2026-10-17.md): confirmación por cuenta/sesión, frescura y Origin, cascadas verificadas, respuestas inciertas y copia anónima conservada; implementación local sin publicación.

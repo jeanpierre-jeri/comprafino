@@ -58,11 +58,10 @@ async function inspectHealthCounts(
         db.execute(sql`select jsonb_build_object('id',l.id,'retailerId',l.retailer_id,'title',l.title,
       'priceUnit',h.price_unit,'packageText',l.package_text,'sourceBrand',l.source_brand,
       'sourceUnitMultiplier',l.source_unit_multiplier::float8) as listing,
-      l.category as "sourceCategory",r.name as "retailerName",l.url,null::text as "imageUrl",
+      l.category as "sourceCategory",r.name as "retailerName",l.url,
       h.current_price_cents as "currentPriceCents",h.regular_price_cents as "regularPriceCents",
-      '[]'::jsonb as "conditionalOffers",l.last_seen_at as "observedAt",l.available,
-      n.input_fingerprint as fingerprint,n.normalization_version as version,
-      null::uuid as "canonicalId",0 as "retailerCount"
+      l.last_seen_at as "observedAt",l.available,
+      n.input_fingerprint as fingerprint,n.normalization_version as version
       from retailer_listings l join retailers r on r.id=l.retailer_id
       join listing_normalizations n on n.listing_id=l.id
       join price_history h on h.listing_id=l.id and h.valid_until is null
@@ -78,7 +77,12 @@ async function inspectHealthCounts(
       throw new Error("Catalog audit exceeds retained capacity");
     }
     for (const row of page.rows) {
-      const offer = genericProductOffer(row, now);
+      // These were SQL literals, never source evidence. Reconstruct exactly the
+      // same boundary input without transferring four constants for every row.
+      const offer = genericProductOffer(
+        { ...row, imageUrl: null, conditionalOffers: [], canonicalId: null, retailerCount: 0 },
+        now,
+      );
       if (offer) retailers[offer.retailerId]!.publicGeneric++;
     }
     if (page.rows.length < catalogPolicy.batchSize) break;

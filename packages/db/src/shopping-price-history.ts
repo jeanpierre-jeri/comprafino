@@ -18,6 +18,7 @@ export function shoppingHistoryRows(
   ids: readonly string[],
   listingIds: readonly string[],
   now: Date,
+  compact = false,
 ) {
   const canonicalScope = ids.length
     ? sql`c."canonicalId" in (${sql.join(
@@ -33,7 +34,12 @@ export function shoppingHistoryRows(
     : sql`false`;
   const end = observationDay(now);
   const start = shiftObservationDay(end, -89);
-  return sql`select coalesce(jsonb_agg(row_to_json(daily)), '[]'::jsonb) from (
+  // Keep the same samples/order and every value; omit repeated JSON field names
+  // only for the shopping snapshot, which reconstructs the original objects.
+  const row = compact
+    ? sql`jsonb_build_array(daily."listingId",daily.date,daily."priceCents",daily."observedAt")`
+    : sql`row_to_json(daily)`;
+  return sql`select coalesce(jsonb_agg(${row}), '[]'::jsonb) from (
     select distinct on (d.listing_id, d.observation_date)
       d.listing_id as "listingId", d.observation_date as date,
       h.current_price_cents as "priceCents", sample.observed_at as "observedAt"

@@ -13,6 +13,7 @@ import {
 import { closeLocalTestConnections } from "./testing/test-query-client.ts";
 import { seedShoppingListFixtures } from "./shopping-list-e2e-fixtures.ts";
 import { evaluateCurrentShoppingList, evaluateCurrentShoppingItem } from "./shopping-list.ts";
+import { shoppingSnapshotRows } from "./shopping-snapshot-transport.ts";
 import { persistListings } from "./ingestion.ts";
 import { persistCatalogNormalizations } from "./catalog.ts";
 
@@ -320,7 +321,10 @@ describe.skipIf(!url)("batched current shopping snapshot", () => {
               z.object({
                 snapshot: z.object({
                   currentCount: z.number().int(),
-                  listings: z.array(z.object({ listing: z.object({ title: z.string() }) })),
+                  listings: z.preprocess(
+                    (value) => shoppingSnapshotRows("offer", value),
+                    z.array(z.object({ listing: z.object({ title: z.string() }) })),
+                  ),
                 }),
               }),
             ),

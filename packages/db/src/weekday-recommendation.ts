@@ -10,6 +10,7 @@ export function shoppingWeekdayRows(
   ids: readonly string[],
   now: Date,
   listingIds: readonly string[] = [],
+  compact = false,
 ): SQL {
   const { start, end } = weekdayEvidenceWindow(now);
   const scope = ids.length
@@ -26,9 +27,7 @@ export function shoppingWeekdayRows(
       )})`
     : sql`false`;
 
-  return sql`select coalesce(jsonb_agg(jsonb_build_object(
-    'listingId',d.listing_id,'date',d.observation_date,'priceCents',
-    case when h.current_price_cents>0 and h.currency='PEN' and h.price_unit='UN'
+  const price = sql`case when h.current_price_cents>0 and h.currency='PEN' and h.price_unit='UN'
       and exists(select 1 from price_history first_state where first_state.listing_id=d.listing_id
         and first_state.valid_from<=d.first_observed_at
         and (first_state.valid_until>d.first_observed_at or first_state.valid_until is null))
@@ -39,7 +38,11 @@ export function shoppingWeekdayRows(
       and not exists(select 1 from price_history x where x.listing_id=d.listing_id
         and x.valid_from<=d.last_observed_at and (x.valid_until>d.first_observed_at or x.valid_until is null)
         and (x.current_price_cents<>h.current_price_cents or x.currency<>'PEN' or x.price_unit<>'UN'))
-      then h.current_price_cents else null end)), '[]'::jsonb)
+      then h.current_price_cents else null end`;
+  const row = compact
+    ? sql`jsonb_build_array(d.listing_id,d.observation_date,${price})`
+    : sql`jsonb_build_object('listingId',d.listing_id,'date',d.observation_date,'priceCents',${price})`;
+  return sql`select coalesce(jsonb_agg(${row}), '[]'::jsonb)
     from current_listings c
     left join canonical_product_listings a on a.listing_id=c.listing_id
     join listing_observation_days d on d.listing_id=c.listing_id
