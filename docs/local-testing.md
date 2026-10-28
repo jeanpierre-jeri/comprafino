@@ -17,7 +17,7 @@ never run migrations or read application `DATABASE_URL`:
 
 ```sh
 pnpm test:db:up
-DATABASE_URL= TEST_DATABASE_URL=postgresql://comprafino_test@127.0.0.1:55432/comprafino_test COMPRAFINO_TEST_DATABASE_MODE=local pnpm --filter @comprafino/db exec vitest run src/catalog-health-transfer.integration.test.ts src/shopping-transfer.integration.test.ts src/search-original.integration.test.ts
+DATABASE_URL= TEST_DATABASE_URL=postgresql://comprafino_test@127.0.0.1:55432/comprafino_test COMPRAFINO_TEST_DATABASE_MODE=local pnpm --filter @comprafino/db exec vitest run src/catalog-health-transfer.integration.test.ts src/shopping-transfer.integration.test.ts src/search-original.integration.test.ts --no-file-parallelism
 pnpm test:db:down
 ```
 
@@ -202,12 +202,20 @@ Milestone 19A adds credential-free auth configuration/schema/session tests in `a
 
 DB integration domains are ingestion/state persistence, normalization, matching/identity, public search/detail/shopping query eligibility, history/benefits/coverage, availability, catalog capacity, discovery, shopping/basket snapshots, and the fixture HTTP transport. Every file owns one schema. Catalog cases truncate mutable fixture data together before each case, preserving retailer seeds/FKs; shopping cases reseed their catalog before each case. There are no cross-case fixture dependencies. Fixture constructors live in `packages/db/src/testing/catalog-fixtures.ts`; lifecycle and migration mechanics live in `testing/database.ts`. The browser harness and benchmark use the same lifecycle. Browser price mutations and basket restriction helpers attach through `testing/fixture-client.ts`, which requires the explicit test URL and validated parent schema and never uses application `DATABASE_URL`.
 
-Cases run sequentially within a suite; race tests explicitly create contention inside the case. Independent files use Vitest's existing file concurrency after serial and shuffled verification. To check order independence:
+DB integration files run sequentially (`--no-file-parallelism` in the DB package
+script). Their random schemas isolate data, but all workers share one PostgreSQL
+server and runner resources. Serializing files prevents the full-capacity health,
+search and shopping fixtures from competing with each other. Vitest's per-file
+isolation remains enabled; explicit `Promise.all` requests and writer/read races
+inside a case still run concurrently. Unit-test parallelism, fixture sizes,
+50,000/50,001 guards, assertions and timeouts are unchanged. Web integration runs
+after DB integration and already uses one Playwright worker.
+
+To check DB file-order independence explicitly (without forwarding Vitest flags
+to the separate Playwright command):
 
 ```sh
-pnpm test:integration:local --sequence.shuffle --sequence.seed=1052026
-# Diagnostic serial execution if needed:
-pnpm test:integration:local --no-file-parallelism
+DATABASE_URL= TEST_DATABASE_URL=postgresql://comprafino_test@127.0.0.1:55432/comprafino_test COMPRAFINO_TEST_DATABASE_MODE=local pnpm --filter @comprafino/db test:integration --sequence.shuffle --sequence.seed=1052026
 ```
 
 The transport integration case spawns a production-client subprocess with the explicit preload and verifies schema scoping, result parsing, rollback and target ownership. Successful/failed normal runs remove only their owned schemas and close local pools in `finally`; forced process termination can still leave a schema. Inspect rather than broadly deleting leftovers:
