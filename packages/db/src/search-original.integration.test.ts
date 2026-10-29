@@ -327,6 +327,8 @@ describe.skipIf(
     }
   });
 
+  // Two full catalog seeds and six full-scope reads share this test's budget.
+  // Allow for measured CI overhead while retaining every row and comparison.
   it("retains all 50,000 candidates and the overflow error before invalid-data validation", async () => {
     await fixture.seed(50_000);
     const first = await compare();
@@ -343,5 +345,5 @@ describe.skipIf(
       "error.message",
       "Generic search candidate bound exceeded",
     );
-  }, 90_000);
+  }, 180_000);
 });

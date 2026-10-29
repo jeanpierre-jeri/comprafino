@@ -37,6 +37,8 @@ REMOVE: none. Migration metadata and canonical/source test fixtures stay in thei
 
 ## Validation reports
 
+- [Timeout de búsqueda a capacidad, 29 de octubre](ci-search-timeout-2026-10-29.md): seguimiento del fallo remoto de 90 segundos, mediciones y presupuesto específico.
+
 - [Milestone 11 acceptance](milestone-11-validation.md)
 - [Milestone 14 observation coverage](milestone-14-validation.md)
 - [Milestone 17 listing detail](milestone-17-validation.md)

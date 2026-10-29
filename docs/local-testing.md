@@ -216,6 +216,11 @@ it includes two full catalog seeds, paired snapshot comparisons and three full-s
 searches. Other test and hook timeouts remain unchanged. See the
 [phase measurements and CI budget](history/ci-shopping-timeout-2026-10-29.md).
 
+The original-search capacity/overflow case has a separate 180-second timeout for
+two full catalog seeds and six independent reads, including deep row comparisons.
+Its 50,000/50,001 assertions and error precedence are unchanged. See the
+[search timeout follow-up](history/ci-search-timeout-2026-10-29.md).
+
 To check DB file-order independence explicitly (without forwarding Vitest flags
 to the separate Playwright command):
 
