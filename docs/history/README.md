@@ -45,6 +45,8 @@ These reports and the full [original roadmap](engineering-notes-2026-10-05.md#or
 
 ## New reports
 
+- [Timeout de capacidad y paginación de listas, 29 de octubre](ci-shopping-timeout-2026-10-29.md): ajuste exclusivo del caso restante, medición de fases y presupuesto remoto de 20 minutos.
+
 - [Timeouts de integración PostgreSQL, 28 de octubre](ci-integration-timeouts-2026-10-28.md): medición de siembra y lecturas, serialización entre archivos y límites de la reproducción local del CI.
 
 - [Versión parcial health/listas, 28 de octubre](partial-transfer-release-2026-10-28.md): búsqueda original, conservación del experimento, verificaciones y pasos pendientes de Preview protegido.

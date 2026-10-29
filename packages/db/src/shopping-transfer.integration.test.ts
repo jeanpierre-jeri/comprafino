@@ -350,6 +350,8 @@ describe.skipIf(
     }
   }, 60_000);
 
+  // Two full catalog seeds, paired snapshots and three full-scope searches share
+  // this test's budget. Allow for the measured slower CI runner without dropping work.
   it("retains the full current catalog bound and unchanged full-scope search pagination", async () => {
     await fixture.seed(50_000);
     const { after } = await compare(transferList("generic", 5));
@@ -387,5 +389,5 @@ describe.skipIf(
     await expect(
       searchGroupedPublicProducts(fixture.db, "benchcatalogo", "relevance", transferNow),
     ).rejects.toThrow("Generic search candidate bound exceeded");
-  }, 60_000);
+  }, 120_000);
 });

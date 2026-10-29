@@ -211,6 +211,11 @@ inside a case still run concurrently. Unit-test parallelism, fixture sizes,
 50,000/50,001 guards, assertions and timeouts are unchanged. Web integration runs
 after DB integration and already uses one Playwright worker.
 
+The shopping transfer capacity/pagination case has a dedicated 120-second timeout:
+it includes two full catalog seeds, paired snapshot comparisons and three full-scope
+searches. Other test and hook timeouts remain unchanged. See the
+[phase measurements and CI budget](history/ci-shopping-timeout-2026-10-29.md).
+
 To check DB file-order independence explicitly (without forwarding Vitest flags
 to the separate Playwright command):
 
