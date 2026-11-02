@@ -8,6 +8,57 @@ const observed = new Date("2026-10-03T14:00:00Z");
 const html = (data: unknown) =>
   `<html><script id="__NEXT_DATA__" type="application/json">${JSON.stringify(data)}</script></html>`;
 
+it.each([
+  ["2,699", 269900],
+  ["1,234.50", 123450],
+  ["12,345.6", 1234560],
+  ["1,234,567.89", 123456789],
+])("parses Tottus grouped ordinary prices exactly: %s", (price, cents) => {
+  const data = structuredClone(fixture);
+  data.props.pageProps.results[0]!.prices = [
+    { label: "", icons: "", type: "internetPrice", symbol: "S/", crossed: false, price: [price] },
+  ];
+
+  const listing = parseTottusPage(html(data), observed).listings[0]!;
+
+  expect(listing.currentPriceCents).toBe(cents);
+  expect(listing.available).toBeUndefined();
+});
+
+it("keeps grouped reference and CMR prices separate from the ordinary price", () => {
+  const data = structuredClone(fixture);
+  data.props.pageProps.results[0]!.prices = [
+    { label: "", icons: "", type: "internetPrice", symbol: "S/", crossed: false, price: ["2,699"] },
+    { label: "", icons: "", type: "normalPrice", symbol: "S/", crossed: true, price: ["3,099"] },
+    {
+      label: "",
+      type: "cmrPrice",
+      symbol: "S/",
+      crossed: false,
+      icons: "cmr-icon",
+      price: ["2,499"],
+    },
+  ];
+
+  expect(parseTottusPage(html(data), observed).listings[0]).toMatchObject({
+    currentPriceCents: 269900,
+    regularPriceCents: 309900,
+    conditionalOffers: [{ priceCents: 249900, programKey: "cmr" }],
+  });
+});
+
+it.each(["2,69", "2,699,", "1,23,456", "0,999", "2.699,50", "2,699.999", "-2,699", "21,474,837"])(
+  "rejects malformed or overflowing Tottus grouped prices: %s",
+  (price) => {
+    const data = structuredClone(fixture);
+    data.props.pageProps.results[0]!.prices = [
+      { label: "", icons: "", type: "internetPrice", symbol: "S/", crossed: false, price: [price] },
+    ];
+
+    expect(() => parseTottusPage(html(data), observed)).toThrow(/PEN/u);
+  },
+);
+
 it("discovers a single search result through one public product redirect with ordinary-price validation", async () => {
   const url = "https://www.tottus.com.pe/tottus-pe/articulo/113706602/aceite-primor/113706603";
   const fetchPage = vi

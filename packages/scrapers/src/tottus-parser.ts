@@ -94,6 +94,14 @@ export function assertTottusPageBounds(
   }
 }
 
+/** Tottus display prices can use comma thousands groups, including whole soles. */
+function parseTottusPriceCents(value: string | number): number {
+  const text = typeof value === "string" ? value.trim() : String(value);
+  const grouped = /^[1-9]\d{0,2}(?:,\d{3})+(?:\.\d{1,2})?$/u.test(text);
+
+  return parsePenCents(grouped ? text.replaceAll(",", "") : value);
+}
+
 /** Shared price/unit mapping for category, search and an exact PDP variant. */
 export function normalizeTottusProduct(input: unknown, observedAt: Date) {
   const product = sourceProduct.parse(input);
@@ -128,8 +136,8 @@ export function normalizeTottusProduct(input: unknown, observedAt: Date) {
 
   url.search = "";
   url.hash = "";
-  const currentPriceCents = parsePenCents(current[0]!.price[0]!);
-  const normalPriceCents = regular[0] ? parsePenCents(regular[0].price[0]!) : undefined;
+  const currentPriceCents = parseTottusPriceCents(current[0]!.price[0]!);
+  const normalPriceCents = regular[0] ? parseTottusPriceCents(regular[0].price[0]!) : undefined;
   const cmr = product.prices.filter((price) => price.type === "cmrPrice");
   const conditionalOffers = [];
 
@@ -140,7 +148,7 @@ export function normalizeTottusProduct(input: unknown, observedAt: Date) {
     cmr[0]!.symbol.trim() === "S/"
   ) {
     try {
-      const priceCents = parsePenCents(cmr[0]!.price[0]!);
+      const priceCents = parseTottusPriceCents(cmr[0]!.price[0]!);
 
       if (priceCents > 0 && priceCents < currentPriceCents) {
         conditionalOffers.push({

@@ -5,6 +5,8 @@ import { processDiscoveryQuery } from "./discovery.ts";
 import type { SearchRetailerAdapter } from "./adapter.ts";
 import type { DiscoveryTasks } from "./discovery.ts";
 import { CatalogAccessRestriction } from "./public-access.ts";
+import { createTottusAdapter } from "./tottus.ts";
+import fallback from "./fixtures/tottus-search-fallback.json";
 
 const claim = {
   id: "00000000-0000-4000-8000-000000000001",
@@ -65,6 +67,26 @@ function setup(failures: RetailerId[] = [], empty = false) {
 
   return tasks;
 }
+
+it("treats unrelated Tottus suggestions with grouped prices as successful empty discovery", async () => {
+  // Sanitized public zzzxqv response, 2026-11-02: two of 48 suggested rows.
+  const fetchPage = vi.fn<typeof fetch>(
+    async () => new Response(`<script id="__NEXT_DATA__">${JSON.stringify(fallback)}</script>`),
+  );
+  const tasks = setup([], true);
+  const result = await processDiscoveryQuery(
+    { ...claim, query: "zzzxqv" },
+    { ...tasks, adapters: [createTottusAdapter(fetchPage), ...tasks.adapters.slice(1)] },
+  );
+
+  expect(result.status).toBe("no_results");
+  expect(result.resultCount).toBe(0);
+  expect(result.retailers[0]).toMatchObject({ status: "success", sourceProducts: 2, listings: 0 });
+  expect(fetchPage).toHaveBeenCalledOnce();
+  expect(tasks.persist).not.toHaveBeenCalled();
+  expect(tasks.normalize).not.toHaveBeenCalled();
+  expect(tasks.match).not.toHaveBeenCalled();
+});
 
 describe("bounded discovery processing", () => {
   it("completes forty results through the real outcome boundary", async () => {
