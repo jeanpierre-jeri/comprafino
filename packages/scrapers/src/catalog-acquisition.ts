@@ -1,4 +1,4 @@
-import { listingSchema, safeDiagnostic } from "@comprafino/core";
+import { listingSchema, safeDiagnostic, SourceResponseError } from "@comprafino/core";
 import type { SafeDiagnostic } from "@comprafino/core";
 import type { CatalogSourceClaim, NormalizedRetailerListing } from "@comprafino/core";
 import { CatalogAccessRestriction } from "./catalog-sources.ts";
@@ -6,10 +6,12 @@ import type { ReportProgress } from "../../../scripts/cli-progress.ts";
 
 export interface CatalogAcquisitionTasks {
   claim(): Promise<CatalogSourceClaim | null>;
+  start?(): Promise<void>;
   fetchPage(claim: CatalogSourceClaim): Promise<{
     listings: NormalizedRetailerListing[];
     discovered: number;
     nextCursor: number | null;
+    coverageLimited?: boolean;
   }>;
   persist(
     claim: CatalogSourceClaim,
@@ -21,8 +23,9 @@ export interface CatalogAcquisitionTasks {
     discovered: number,
     externalIds: readonly string[],
     capacitySkips: number,
+    coverageLimited?: boolean,
   ): Promise<void>;
-  fail(claim: CatalogSourceClaim, reason?: "redirect_to_home"): Promise<void>;
+  fail(claim: CatalogSourceClaim, reason?: "redirect_to_home" | "pagination_limit"): Promise<void>;
   pause(): Promise<void>;
 }
 
@@ -37,14 +40,20 @@ export async function acquireCatalogPages(
     changed = 0,
     completedPages = 0,
     failedPages = 0,
-    skippedByCapacity = 0;
+    skippedByCapacity = 0,
+    paginationLimitedPages = 0,
+    consecutiveHomepageRedirects = 0;
   let restricted = false;
-  const failures: { sourceKey: string; diagnostic: SafeDiagnostic }[] = [];
+  let stoppedAfterRedirects = false;
+  const failures: { sourceKey: string; cursor: number; diagnostic: SafeDiagnostic }[] = [];
   for (let page = 0; page < pages; page++) {
     const claim = await tasks.claim();
     if (!claim) {
       progress?.("Adquisición sin más categorías elegibles", page, pages);
       break;
+    }
+    if (page === 0) {
+      await tasks.start?.();
     }
     if (page > 0) {
       await tasks.pause();
@@ -58,6 +67,7 @@ export async function acquireCatalogPages(
     );
     try {
       const result = await tasks.fetchPage(claim);
+      consecutiveHomepageRedirects = 0;
       const listings = result.listings.map((listing) => listingSchema.parse(listing));
       if (listings.some((listing) => listing.retailer !== claim.retailer)) {
         throw new Error("Mixed retailers in catalog page");
@@ -79,8 +89,22 @@ export async function acquireCatalogPages(
         result.discovered,
         listings.map((listing) => listing.externalId),
         saved.skippedByCapacity,
+        result.coverageLimited,
       );
       completedPages++;
+      if (result.coverageLimited) {
+        paginationLimitedPages++;
+        failures.push({
+          sourceKey: claim.key,
+          cursor: claim.cursor,
+          diagnostic: safeDiagnostic(new SourceResponseError("pagination_limit"), {
+            stage: "source",
+            operation: "ingestion",
+            retailer: claim.retailer,
+            reason: "source_request_failed",
+          }),
+        });
+      }
       progress?.(
         `${claim.retailer}: páginas de esta corrida`,
         page + 1,
@@ -90,6 +114,7 @@ export async function acquireCatalogPages(
     } catch (error) {
       const failure = {
         sourceKey: claim.key,
+        cursor: claim.cursor,
         diagnostic: safeDiagnostic(error, {
           stage,
           operation: "ingestion",
@@ -100,7 +125,12 @@ export async function acquireCatalogPages(
       failures.push(failure);
       if (failure.diagnostic.sourceResponseCode === "redirect_to_home") {
         await tasks.fail(claim, "redirect_to_home");
+        consecutiveHomepageRedirects++;
+      } else if (failure.diagnostic.sourceResponseCode === "pagination_limit") {
+        consecutiveHomepageRedirects = 0;
+        await tasks.fail(claim, "pagination_limit");
       } else {
+        consecutiveHomepageRedirects = 0;
         await tasks.fail(claim);
       }
       failedPages++;
@@ -114,6 +144,10 @@ export async function acquireCatalogPages(
         restricted = true;
         break;
       }
+      if (claim.retailer === "tottus" && consecutiveHomepageRedirects >= 3) {
+        stoppedAfterRedirects = true;
+        break;
+      }
     }
   }
   return {
@@ -124,6 +158,8 @@ export async function acquireCatalogPages(
     failedPages,
     skippedByCapacity,
     restricted,
+    stoppedAfterRedirects,
+    paginationLimitedPages,
     failures,
   };
 }

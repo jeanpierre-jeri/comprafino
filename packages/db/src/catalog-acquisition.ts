@@ -6,6 +6,7 @@ import {
   retailerIdSchema,
   normalizationVersion,
   matchingVersion,
+  vtexMaximumFrom,
 } from "@comprafino/core";
 import type { CatalogSource, CatalogSourceClaim, RetailerId } from "@comprafino/core";
 import type { createDatabase } from "./client.ts";
@@ -61,11 +62,22 @@ export async function completeCatalogPage(
   discovered: number,
   externalIds: readonly string[],
   capacitySkips = 0,
+  coverageLimited = false,
 ) {
   const claim = catalogSourceClaimSchema.parse(rawClaim);
   z.number().int().nonnegative().nullable().parse(nextCursor);
   z.number().int().nonnegative().parse(discovered);
   z.number().int().nonnegative().parse(capacitySkips);
+  z.boolean().parse(coverageLimited);
+  if (coverageLimited && (claim.retailer === "tottus" || nextCursor !== null)) {
+    throw new Error("Invalid pagination-limited catalog page");
+  }
+  if (
+    claim.retailer !== "tottus" &&
+    (claim.cursor > vtexMaximumFrom || (nextCursor !== null && nextCursor > vtexMaximumFrom))
+  ) {
+    throw new Error("Catalog cursor exceeds public pagination limit");
+  }
   if (nextCursor !== null && nextCursor <= claim.cursor) {
     throw new Error("Catalog cursor did not advance");
   }
@@ -76,13 +88,14 @@ export async function completeCatalogPage(
         and l.external_id in(select jsonb_array_elements_text(${JSON.stringify(externalIds)}::jsonb))
         and exists(select 1 from catalog_sources where id=${claim.id} and lease_token=${claim.token}::uuid)
       on conflict do nothing`),
-    db.execute(sql`update catalog_sources set cursor=${nextCursor ?? 0},lease_token=null,lease_until=null,error=null,
+    db.execute(sql`update catalog_sources set cursor=${nextCursor ?? 0},lease_token=null,lease_until=null,
+      error=${coverageLimited ? sql`'pagination_limit'` : sql`case when ${nextCursor !== null} and error='pagination_limit' then error else null end`},
       pages_observed=pages_observed+1,products_observed=products_observed+${discovered},
       cycle_products=${nextCursor === null ? sql`0` : sql`cycle_products+${discovered}`},
-      last_cycle_products=${nextCursor === null ? sql`cycle_products+${discovered}` : sql`last_cycle_products`},
-      last_cycle_capacity_skips=${nextCursor === null ? sql`cycle_capacity_skips+${capacitySkips}` : sql`last_cycle_capacity_skips`},
+      last_cycle_products=${nextCursor === null && !coverageLimited ? sql`cycle_products+${discovered}` : sql`last_cycle_products`},
+      last_cycle_capacity_skips=${nextCursor === null && !coverageLimited ? sql`cycle_capacity_skips+${capacitySkips}` : sql`last_cycle_capacity_skips`},
       cycle_capacity_skips=${nextCursor === null ? sql`0` : sql`cycle_capacity_skips+${capacitySkips}`},
-      last_completed_at=${nextCursor === null ? sql`statement_timestamp()` : sql`last_completed_at`},
+      last_completed_at=${nextCursor === null && !coverageLimited ? sql`statement_timestamp()` : sql`last_completed_at`},
       next_eligible_at=statement_timestamp()+${nextCursor === null ? sql`case when requested_at>statement_timestamp()-interval '1 day' then interval '4 hours' else interval '20 hours' end` : sql`interval '0 seconds'`}
       where id=${claim.id} and lease_token=${claim.token}::uuid returning id`),
   ]);
@@ -94,12 +107,21 @@ export async function completeCatalogPage(
 export async function failCatalogPage(
   db: Database,
   rawClaim: CatalogSourceClaim,
-  reason?: "redirect_to_home",
+  reason?: "redirect_to_home" | "pagination_limit",
 ) {
   const claim = catalogSourceClaimSchema.parse(rawClaim);
-  z.literal("redirect_to_home").optional().parse(reason);
+  z.enum(["redirect_to_home", "pagination_limit"]).optional().parse(reason);
+  if (
+    reason === "pagination_limit" &&
+    (claim.retailer === "tottus" || claim.cursor <= vtexMaximumFrom)
+  ) {
+    throw new Error("Invalid pagination-limited catalog cursor");
+  }
   await db.execute(sql`update catalog_sources set lease_token=null,lease_until=null,
-    next_eligible_at=statement_timestamp()+${reason === "redirect_to_home" ? sql`interval '7 days'` : sql`interval '6 hours'`},error=${reason ?? "source_or_persistence_failed"}
+    cursor=${reason === "pagination_limit" ? sql`0` : sql`cursor`},
+    cycle_products=${reason === "pagination_limit" ? sql`0` : sql`cycle_products`},
+    cycle_capacity_skips=${reason === "pagination_limit" ? sql`0` : sql`cycle_capacity_skips`},
+    next_eligible_at=statement_timestamp()+interval '6 hours',error=${reason ?? "source_or_persistence_failed"}
     where id=${claim.id} and lease_token=${claim.token}::uuid`);
 }
 
@@ -120,6 +142,7 @@ export async function inspectCatalogAcquisition(db: Database) {
     count(*) filter(where next_eligible_at<=statement_timestamp())::int as due,
     count(*) filter(where error is not null)::int as failed,
     count(*) filter(where error='redirect_to_home' and next_eligible_at>statement_timestamp())::int as paused_homepage_redirects,
+    count(*) filter(where error='pagination_limit')::int as pagination_limited,
     count(*) filter(where cycle_capacity_skips>0 or last_cycle_capacity_skips>0)::int as capacity_limited,
     min(last_completed_at) as oldest_cycle,max(last_completed_at) as latest_cycle,
     sum(pages_observed)::bigint::text as pages,sum(products_observed)::bigint::text as products
@@ -134,6 +157,8 @@ export async function inspectCatalogAcquisition(db: Database) {
         never_completed: z.number().int().nonnegative(),
         due: z.number().int().nonnegative(),
         failed: z.number().int().nonnegative(),
+        paused_homepage_redirects: z.number().int().nonnegative(),
+        pagination_limited: z.number().int().nonnegative(),
         capacity_limited: z.number().int().nonnegative(),
         oldest_cycle: z.coerce.date().nullable(),
         latest_cycle: z.coerce.date().nullable(),

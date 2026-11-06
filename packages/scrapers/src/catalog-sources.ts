@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { catalogSourceSchema, SourceResponseError } from "@comprafino/core";
+import { catalogSourceSchema, SourceResponseError, vtexMaximumFrom } from "@comprafino/core";
 import type { CatalogSource, CatalogSourceClaim, RetailerId } from "@comprafino/core";
 import { assertTottusPageBounds, parseTottusPage } from "./tottus-parser.ts";
 import { parseTottusCatalogProduct } from "./targeted.ts";
@@ -280,6 +280,9 @@ export async function fetchCatalogPage(
           : source.cursor + 1,
     };
   }
+  if (source.cursor > vtexMaximumFrom) {
+    throw new SourceResponseError("pagination_limit");
+  }
   url.searchParams.set("_from", String(source.cursor));
   url.searchParams.set("_to", String(source.cursor + 19));
   const { response } = await publicResponse(url, fetchPage);
@@ -310,9 +313,11 @@ export async function fetchCatalogPage(
   } else {
     parsed = parsePlazaVeaPage(products, new Date());
   }
+  const coverageLimited = end + 1 < total && end + 1 > vtexMaximumFrom;
   return {
     listings: [...new Map(parsed.listings.map((row) => [row.externalId, row])).values()],
     discovered: parsed.discovered,
-    nextCursor: end + 1 >= total ? null : end + 1,
+    nextCursor: end + 1 >= total || coverageLimited ? null : end + 1,
+    coverageLimited,
   };
 }

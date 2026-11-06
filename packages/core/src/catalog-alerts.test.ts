@@ -22,6 +22,7 @@ it("warns for useful source failures, but keeps zero useful work, access and wri
 });
 
 it("classifies only exact run markers and never trusts historical arbitrary text", () => {
+  expect(catalogRunFailureKind("catalog_source_failed")).toBe("source_failed");
   expect(catalogRunFailureKind("catalog_partial_source")).toBe("partial_source");
   expect(catalogRunFailureKind("catalog_access_restricted")).toBe("access_restricted");
   expect(catalogRunFailureKind("catalog_persistence_failed")).toBe("persistence_failed");

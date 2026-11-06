@@ -15,7 +15,13 @@ export const operationalRunSchema = z.object({
   listingsPersisted: z.number().int().nonnegative(),
   listingsChanged: z.number().int().nonnegative(),
   failureKind: z
-    .enum(["partial_source", "access_restricted", "persistence_failed", "capacity_skips"])
+    .enum([
+      "source_failed",
+      "partial_source",
+      "access_restricted",
+      "persistence_failed",
+      "capacity_skips",
+    ])
     .optional(),
 });
 

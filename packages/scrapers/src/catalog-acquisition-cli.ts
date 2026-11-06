@@ -63,7 +63,6 @@ try {
       let run: string | undefined;
       let stage: "admission" | "source" | "persistence" = "admission";
       try {
-        run = await store.start(retailer);
         stage = "source";
         progress(
           `Tienda ${index + 1}/${retailers.length}: ${retailer}; leyendo categorías públicas`,
@@ -76,11 +75,14 @@ try {
         const result = await acquireCatalogPages(
           {
             claim: () => claimCatalogSource(db, retailer),
+            async start() {
+              run = await store.start(retailer);
+            },
             fetchPage: fetchCatalogPage,
             persist: (claim, listings) =>
               persistListingsDetailed(db, claim.retailer, listings, { source: "category" }),
-            complete: (claim, cursor, discovered, ids, skips) =>
-              completeCatalogPage(db, claim, cursor, discovered, ids, skips),
+            complete: (claim, cursor, discovered, ids, skips, limited) =>
+              completeCatalogPage(db, claim, cursor, discovered, ids, skips, limited),
             fail: (claim, reason) => failCatalogPage(db, claim, reason),
             pause: () => new Promise((resolve) => setTimeout(resolve, 1000)),
           },
@@ -97,16 +99,25 @@ try {
           errorCode = "catalog_capacity_skips";
         } else if (persistenceFailure) {
           errorCode = "catalog_persistence_failed";
-        } else if (result.failedPages) {
+        } else if (result.failedPages || result.paginationLimitedPages) {
           errorCode = result.persisted > 0 ? "catalog_partial_source" : "catalog_source_failed";
         }
-        await store.finish(run, {
-          status: result.failedPages || result.skippedByCapacity ? "failed" : "success",
-          fetched: result.fetched,
-          persisted: result.persisted,
-          changed: result.changed,
-          ...(errorCode ? { error: errorCode } : {}),
-        });
+        if (run) {
+          await store.finish(run, {
+            status:
+              result.failedPages || result.paginationLimitedPages || result.skippedByCapacity
+                ? "failed"
+                : "success",
+            fetched: result.fetched,
+            persisted: result.persisted,
+            changed: result.changed,
+            ...(errorCode ? { error: errorCode } : {}),
+          });
+        } else {
+          console.log(
+            JSON.stringify({ operation: "acquisition_idle", retailer, status: "no_work" }),
+          );
+        }
         run = undefined;
         skippedByCapacity += result.skippedByCapacity;
         if (result.restricted) {
@@ -117,7 +128,7 @@ try {
           const severity = catalogFailureSeverity(failure.diagnostic, result.persisted > 0);
           reportCatalogAlert(
             severity,
-            `${retailer} category ${failure.sourceKey}: ${failure.diagnostic.sourceResponseCode ?? failure.diagnostic.reason}; progress retained`,
+            `${retailer} category ${failure.sourceKey}, cursor ${failure.cursor}: ${failure.diagnostic.sourceResponseCode ?? failure.diagnostic.reason}; progress retained`,
           );
           if (severity === "error") {
             process.exitCode = 1;
@@ -129,6 +140,11 @@ try {
       } catch (error) {
         if (error instanceof CatalogAccessRestriction) {
           restrictedRetailers.add(retailer);
+        }
+        // Discovery/registration failures still need an operational attempt. An
+        // idle invocation, however, must never renew successful freshness.
+        if (!run) {
+          run = await store.start(retailer);
         }
         if (run) {
           let errorCode = "catalog_source_failed";

@@ -10,8 +10,10 @@ import {
 import fixture from "./fixtures/tottus.json";
 import productFixture from "./fixtures/tottus-product.json";
 import metro from "./fixtures/metro.json";
+import { parseMetroPage } from "./metro.ts";
 import type { CatalogSourceClaim } from "@comprafino/core";
 import type { ReportProgress } from "../../../scripts/cli-progress.ts";
+import { SourceResponseError } from "@comprafino/core";
 
 const claim: CatalogSourceClaim = {
   id: "00000000-0000-4000-8000-000000000001",
@@ -152,6 +154,7 @@ it("classifies homepage redirects without treating them as empty completed categ
 
 function tasks() {
   return {
+    start: vi.fn<NonNullable<CatalogAcquisitionTasks["start"]>>().mockResolvedValue(undefined),
     claim: vi
       .fn<CatalogAcquisitionTasks["claim"]>()
       .mockResolvedValueOnce(claim)
@@ -176,8 +179,94 @@ it("advances an empty usable page without confusing zero seller offers with end 
     failedPages: 0,
   });
   expect(work.persist).not.toHaveBeenCalled();
-  expect(work.complete).toHaveBeenCalledWith(claim, 40, 20, [], 0);
+  expect(work.complete).toHaveBeenCalledWith(claim, 40, 20, [], 0, undefined);
 });
+
+it("does not start an operational run or request products when no source is eligible", async () => {
+  const work = tasks();
+  work.claim.mockReset().mockResolvedValue(null);
+  const result = await acquireCatalogPages(work, 100);
+  expect(result).toMatchObject({ completedPages: 0, failedPages: 0 });
+  expect(work.start).not.toHaveBeenCalled();
+  expect(work.fetchPage).not.toHaveBeenCalled();
+});
+
+it("stops Tottus after three consecutive homepage redirects without claiming remaining sources", async () => {
+  const work = tasks();
+  work.claim.mockReset().mockResolvedValue(tottusClaim);
+  work.fetchPage.mockRejectedValue(new SourceResponseError("redirect_to_home", 302));
+  const result = await acquireCatalogPages(work, 100);
+  expect(result).toMatchObject({ failedPages: 3, restricted: false, stoppedAfterRedirects: true });
+  expect(work.claim).toHaveBeenCalledTimes(3);
+  expect(work.start).toHaveBeenCalledOnce();
+  expect(work.complete).not.toHaveBeenCalled();
+  expect(result.failures[0]).toMatchObject({ sourceKey: tottusClaim.key, cursor: 0 });
+});
+
+it("resets the redirect streak after a valid page", async () => {
+  const work = tasks();
+  work.claim.mockReset().mockResolvedValue(tottusClaim);
+  const redirect = new SourceResponseError("redirect_to_home", 302);
+  work.fetchPage
+    .mockRejectedValueOnce(redirect)
+    .mockRejectedValueOnce(redirect)
+    .mockResolvedValueOnce({ listings: [], discovered: 0, nextCursor: null })
+    .mockRejectedValue(redirect);
+  const result = await acquireCatalogPages(work, 6);
+  expect(result).toMatchObject({ completedPages: 1, failedPages: 5, stoppedAfterRedirects: true });
+  expect(work.claim).toHaveBeenCalledTimes(6);
+});
+
+it("retains accepted boundary observations while reporting incomplete coverage", async () => {
+  const work = tasks();
+  const listing = parseMetroPage(metro, new Date()).listings[0]!;
+  work.fetchPage.mockResolvedValue({
+    listings: [listing],
+    discovered: 20,
+    nextCursor: null,
+    coverageLimited: true,
+  });
+  const result = await acquireCatalogPages(work, 1);
+  expect(result).toMatchObject({
+    completedPages: 1,
+    persisted: 1,
+    paginationLimitedPages: 1,
+    failedPages: 0,
+  });
+  expect(result.failures[0]?.diagnostic.sourceResponseCode).toBe("pagination_limit");
+  expect(work.complete).toHaveBeenCalledWith(claim, null, 20, [listing.externalId], 0, true);
+  expect(work.fail).not.toHaveBeenCalled();
+});
+
+it("recovers a legacy VTEX cursor above the limit without issuing another HTTP request", async () => {
+  const work = tasks();
+  const legacy = { ...claim, cursor: 2520 };
+  const fetchPage = vi.fn<typeof fetch>();
+  work.claim.mockReset().mockResolvedValueOnce(legacy).mockResolvedValue(null);
+  work.fetchPage.mockImplementation((source) => fetchCatalogPage(source, fetchPage));
+  const result = await acquireCatalogPages(work, 1);
+  expect(result.failedPages).toBe(1);
+  expect(work.fail).toHaveBeenCalledWith(legacy, "pagination_limit");
+  expect(fetchPage).not.toHaveBeenCalled();
+});
+
+it.each([2520, 3000])(
+  "stops advancing after the last accepted VTEX page when total=%i",
+  async (total) => {
+    const product = metro[0]!;
+    const products = Array.from({ length: 20 }, () => product);
+    const request = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(
+        new Response(JSON.stringify(products), { headers: { resources: `2500-2519/${total}` } }),
+      );
+    const result = await fetchCatalogPage({ ...claim, cursor: 2500 }, request);
+    expect(result.nextCursor).toBeNull();
+    expect(result.coverageLimited).toBe(total > 2520);
+    expect(result.discovered).toBe(20);
+    expect(request).toHaveBeenCalledOnce();
+  },
+);
 
 it("reports real page progress and early exhaustion without claiming the whole budget completed", async () => {
   const work = tasks();

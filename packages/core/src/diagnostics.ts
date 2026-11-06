@@ -105,6 +105,7 @@ export interface SafeDiagnostic extends DiagnosticContext {
     | "redirect_to_home"
     | "untrusted_redirect"
     | "pagination_mismatch"
+    | "pagination_limit"
     | "unexpected_empty_page";
   httpStatus?: number;
 }
@@ -121,6 +122,7 @@ export class SourceResponseError extends Error {
       redirect_to_home: "Catalog category redirects to homepage",
       untrusted_redirect: "Untrusted catalog redirect",
       pagination_mismatch: "Public catalog pagination range mismatch",
+      pagination_limit: "Public catalog pagination limit reached",
       unexpected_empty_page: "Public catalog unexpectedly empty page",
     } as const;
     const validated = z
@@ -130,6 +132,7 @@ export class SourceResponseError extends Error {
         "redirect_to_home",
         "untrusted_redirect",
         "pagination_mismatch",
+        "pagination_limit",
         "unexpected_empty_page",
       ])
       .parse(code);

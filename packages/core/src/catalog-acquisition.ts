@@ -2,6 +2,9 @@ import { z } from "zod";
 import { retailerIdSchema } from "./listing.ts";
 import { catalogPolicy } from "./catalog-policy.ts";
 
+// Public VTEX search accepts _from=2500, but rejects the following 20-row page.
+export const vtexMaximumFrom = 2500;
+
 const origins = {
   tottus: "https://www.tottus.com.pe",
   "plaza-vea": "https://www.plazavea.com.pe",

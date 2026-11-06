@@ -57,7 +57,7 @@ describe("catalog health monitoring", () => {
     });
   });
 
-  it.each(["access_restricted", "persistence_failed", "capacity_skips"] as const)(
+  it.each(["source_failed", "access_restricted", "persistence_failed", "capacity_skips"] as const)(
     "keeps %s fatal even with fresh offers and useful prior writes",
     (failureKind) => {
       const input = snapshot();

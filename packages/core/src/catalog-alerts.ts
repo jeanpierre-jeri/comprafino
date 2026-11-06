@@ -17,6 +17,8 @@ export function catalogFailureSeverity(diagnostic: SafeDiagnostic, useful: boole
 
 export function catalogRunFailureKind(error: string | null | undefined) {
   switch (error) {
+    case "catalog_source_failed":
+      return "source_failed" as const;
     case "catalog_partial_source":
       return "partial_source" as const;
     case "catalog_access_restricted":

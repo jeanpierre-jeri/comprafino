@@ -13,7 +13,7 @@
 
 Individual stale offers and partial coverage remain reported by the detailed audits; this first monitor does not invent a percentage threshold or persist multi-run state. Zero current offers reflects the existing freshness window, rather than an instantaneous source request failure. Health timestamps and offer queries are separate reads; an acquisition in progress can be visible between them.
 
-The CLI exits 1 for `attention` or an unavailable/invalid report and 0 for `healthy` or `warning`. Useful explicitly marked partial source progress and overdue complete cycles with current offers can warn; access, persistence and capacity failures remain errors. See [warning policy](catalog-expansion.md#operational-warning-policy) for conditions and historical unclassified runs. A DB outage, corrupt boundary or exceeded catalog bound cannot become healthy. Failure diagnostics remain fixed and safe.
+The CLI exits 1 for `attention` or an unavailable/invalid report and 0 for `healthy` or `warning`. Useful explicitly marked partial source progress and overdue successful attempts with current offers can warn; access, persistence and capacity failures remain errors. See [warning policy](catalog-expansion.md#operational-warning-policy) for conditions and historical unclassified runs. A DB outage, corrupt boundary or exceeded catalog bound cannot become healthy. Failure diagnostics remain fixed and safe.
 
 ## Capacity evidence
 
@@ -37,3 +37,5 @@ Each Actions execution prints safe JSON, adds fixed annotations and writes a Mar
 Core tests cover the existing delayed threshold, failed attempts versus previous successes, zero current coverage, capacity warnings/skips/overflow and inconsistent/future snapshots. Log tests reject missing, corrupt, duplicate and oversized observations. Isolated PostgreSQL tests use an explicit owned random schema to prove actual freshness/stock gates, safe output and read-only behavior. See [local testing](local-testing.md).
 
 Health reconstructs four constant offer fields locally before the unchanged shared validator, reducing each candidate result from fourteen columns to ten. The [October 28 transfer comparison](history/catalog-health-transfer-2026-10-28.md) records the field inventory, frozen-reader equivalence, local PostgreSQL benchmark and measurement limits. This dedicated fixture requires no migration runner; decoded JSON bytes are not Neon billed transfer.
+
+Acquisition now emits `acquisition_idle` / `no_work` without creating a successful run when no category is eligible. Source failures display the explicit `source_failed` kind. Acquisition category summaries include `paused_homepage_redirects` and `pagination_limited`; partial provider coverage does not become a completed category. See [provider limits and incident recovery](catalog-expansion.md#provider-limits-and-incident-recovery) for VTEX cursor recovery and the deployment-only adjustment of old Tottus pauses.

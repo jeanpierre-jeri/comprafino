@@ -7,6 +7,7 @@ import {
   completeCatalogPage,
   requestCatalogRefresh,
   failCatalogPage,
+  inspectCatalogAcquisition,
 } from "./catalog-acquisition.ts";
 import { normalizeChangedCatalog } from "./catalog.ts";
 import { matchChangedCatalog } from "./matching.ts";
@@ -79,7 +80,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)(
       expect(claims[0]?.requestedRetailers).toEqual(["tottus"]);
     });
 
-    it("pauses homepage redirects for seven days without losing listings or allowing demand to bypass the pause", async () => {
+    it("pauses homepage redirects for six hours without losing listings or allowing demand to bypass the pause", async () => {
       const source = {
         retailer: "tottus" as const,
         key: "CATG16682",
@@ -104,9 +105,10 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)(
       expect(await claimCatalogSource(db, "tottus")).toBeNull();
       expect(
         await scoped.query(
-          "select cursor,error,next_eligible_at>now()+interval '6 days' as paused from catalog_sources",
+          "select cursor,error,next_eligible_at between now()+interval '5 hours' and now()+interval '6 hours' as paused from catalog_sources",
         ),
       ).toEqual([{ cursor: 1, error: "redirect_to_home", paused: true }]);
+      expect((await inspectCatalogAcquisition(db))[0]?.paused_homepage_redirects).toBe(1);
       expect(
         await scoped.query(
           "select count(*)::int as count from retailer_listings where external_id='paused-paper'",
@@ -121,6 +123,66 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)(
         { ...source, url: "https://www.tottus.com.pe/tottus-pe/lista/CATG16682/Nuevo-Papel" },
       ]);
       expect((await claimCatalogSource(db, "tottus"))?.cursor).toBe(0);
+    });
+
+    it("retains limited-page observations without claiming a complete category and recovers legacy cursors", async () => {
+      const source = {
+        retailer: "metro" as const,
+        key: "1001303",
+        name: "Vinagres",
+        url: "https://www.metro.pe/api/catalog_system/pub/products/search?fq=C%3A%2F1700%2F1001294%2F1001303%2F&sc=1",
+      };
+      await registerCatalogSources(db, "metro", [source]);
+      await persistListingsDetailed(db, "metro", [
+        { ...observation("limited", 1), retailer: "metro", url: "https://www.metro.pe/limited/p" },
+      ]);
+      await scoped.query(
+        "update catalog_sources set cursor=2500,cycle_products=2500,last_completed_at='2026-01-01T00:00:00Z'",
+      );
+      const claim = await claimCatalogSource(db, "metro");
+      if (!claim) throw new Error("Missing boundary claim");
+      await completeCatalogPage(db, claim, null, 20, ["limited"], 0, true);
+      expect(
+        await scoped.query(
+          "select cursor,error,cycle_products,pages_observed,products_observed,last_completed_at='2026-01-01T00:00:00Z'::timestamptz as unchanged,next_eligible_at>now()+interval '19 hours' as paused from catalog_sources",
+        ),
+      ).toEqual([
+        {
+          cursor: 0,
+          error: "pagination_limit",
+          cycle_products: 0,
+          pages_observed: 1,
+          products_observed: 20,
+          unchanged: true,
+          paused: true,
+        },
+      ]);
+      expect((await inspectCatalogAcquisition(db))[0]?.pagination_limited).toBe(1);
+      expect(
+        await scoped.query("select count(*)::int as count from catalog_source_listings"),
+      ).toEqual([{ count: 1 }]);
+      await expect(completeCatalogPage(db, claim, null, 20, [], 0, true)).rejects.toThrow(/lease/u);
+
+      await scoped.query(
+        "update catalog_sources set cursor=2520,next_eligible_at=now()-interval '1 second'",
+      );
+      const legacy = await claimCatalogSource(db, "metro");
+      if (!legacy) throw new Error("Missing legacy claim");
+      await failCatalogPage(db, legacy, "pagination_limit");
+      expect(
+        await scoped.query(
+          "select cursor,error,last_completed_at='2026-01-01T00:00:00Z'::timestamptz as unchanged from catalog_sources",
+        ),
+      ).toEqual([{ cursor: 0, error: "pagination_limit", unchanged: true }]);
+      await scoped.query("update catalog_sources set next_eligible_at=now()-interval '1 second'");
+      const resumed = await claimCatalogSource(db, "metro");
+      if (!resumed) throw new Error("Missing resumed claim");
+      await completeCatalogPage(db, resumed, 20, 20, []);
+      expect((await inspectCatalogAcquisition(db))[0]?.pagination_limited).toBe(1);
+      const end = await claimCatalogSource(db, "metro");
+      if (!end) throw new Error("Missing end claim");
+      await completeCatalogPage(db, end, null, 8, []);
+      expect((await inspectCatalogAcquisition(db))[0]?.pagination_limited).toBe(0);
     });
 
     it("paginates current offers without losing results or changing numeric-unit search semantics", async () => {
